@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { navLinks } from "@/lib/content";
 
 export default function Header() {
@@ -21,9 +22,16 @@ export default function Header() {
     >
       <div className="flex justify-between items-center w-full max-w-[1440px] mx-auto px-8 h-full">
         {/* Logo */}
-        <div className="font-display-lg text-headline-sm tracking-tighter text-on-surface uppercase shrink-0">
-          ZEWA FEEDS
-        </div>
+        <a href="/" className="shrink-0">
+          <Image
+            src="/logo.png"
+            alt="Zewa Feeds"
+            width={100}
+            height={52}
+            className="h-11 w-auto invert brightness-200"
+            priority
+          />
+        </a>
 
         {/* Nav */}
         <nav className="hidden md:flex gap-8 items-center">

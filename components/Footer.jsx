@@ -46,6 +46,8 @@ function ColLink({ label, href, accent, muted, highlight }) {
   );
 }
 
+import Image from "next/image";
+
 export default function Footer() {
   return (
     <footer className="w-full bg-[#070c18] border-t border-white/5">
@@ -55,12 +57,15 @@ export default function Footer() {
 
           {/* Brand column */}
           <div className="flex flex-col gap-6">
-            {/* Logo mark */}
+            {/* Logo */}
             <div>
-              <div className="w-10 h-10 rounded-full border border-primary/40 flex items-center justify-center mb-3">
-                <span className="text-primary text-[10px] font-bold tracking-wider leading-none text-center">Z<br/>F</span>
-              </div>
-              <div className="font-label-caps text-[10px] text-on-surface/30 tracking-[0.15em]">ZEWA FEEDS</div>
+              <Image
+                src="/logo.png"
+                alt="Zewa Feeds"
+                width={120}
+                height={62}
+                className="h-14 w-auto invert brightness-200 opacity-90"
+              />
             </div>
 
             <p className="font-body-md text-[13px] text-on-surface/40 leading-relaxed italic max-w-[220px]">
