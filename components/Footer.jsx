@@ -60,11 +60,11 @@ export default function Footer() {
             {/* Logo */}
             <div>
               <Image
-                src="/logo-blue.jpg"
+                src="/logo-transparent.png"
                 alt="Zewa Feeds"
-                width={80}
-                height={80}
-                className="h-20 w-20 object-contain rounded-lg"
+                width={150}
+                height={150}
+                className="h-24 w-auto object-contain brightness-0 invert opacity-90"
               />
             </div>
 

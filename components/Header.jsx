@@ -24,11 +24,11 @@ export default function Header() {
         {/* Logo */}
         <a href="/" className="shrink-0">
           <Image
-            src="/logo-blue.jpg"
+            src="/logo-transparent.png"
             alt="Zewa Feeds"
-            width={52}
-            height={52}
-            className="h-12 w-12 object-contain rounded"
+            width={130}
+            height={130}
+            className="h-12 w-auto object-contain brightness-0 invert"
             priority
           />
         </a>
