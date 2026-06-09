@@ -261,21 +261,21 @@ export default function Hero() {
         {current === 2 && <TileVideo onVideoEnd={handleVideoEnd} />}
       </div>
 
-      {/* Peek gradient — bleeds into the white section below */}
+      {/* Peek strip — thin shadow line hinting content below, not a milky wash */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none z-10"
-        style={{ background: "linear-gradient(to bottom, transparent, rgba(248,250,249,0.55) 70%, rgba(248,250,249,0.9))" }}
+        className="absolute bottom-0 left-0 right-0 h-14 pointer-events-none z-10"
+        style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(8,14,28,0.18) 60%, rgba(8,14,28,0.38) 100%)" }}
       />
 
       {/* Left arrow */}
       <button
         onClick={prev}
         aria-label="Previous slide"
-        className="group absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
+        className="group absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
       >
-        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:bg-primary/10 group-hover:-translate-x-0.5">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-white/60 group-hover:text-primary transition-colors duration-300">
-            <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <div className="w-8 h-8 rounded-full border border-white/18 bg-black/20 backdrop-blur-md flex items-center justify-center transition-all duration-250 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:scale-110">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/50 group-hover:text-primary transition-colors duration-250 -translate-x-px">
+            <path d="M7.5 2L3.5 6L7.5 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
       </button>
@@ -284,11 +284,11 @@ export default function Hero() {
       <button
         onClick={next}
         aria-label="Next slide"
-        className="group absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
+        className="group absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
       >
-        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:bg-primary/10 group-hover:translate-x-0.5">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-white/60 group-hover:text-primary transition-colors duration-300">
-            <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <div className="w-8 h-8 rounded-full border border-white/18 bg-black/20 backdrop-blur-md flex items-center justify-center transition-all duration-250 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:scale-110">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/50 group-hover:text-primary transition-colors duration-250 translate-x-px">
+            <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
       </button>
