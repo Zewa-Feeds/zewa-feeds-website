@@ -293,21 +293,10 @@ export default function Hero() {
         </div>
       </button>
 
-      {/* Scroll-down cue */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5">
-        <span className="font-label-caps text-[9px] tracking-[0.2em] text-white/30 uppercase">scroll</span>
-        <div className="flex flex-col items-center gap-0.5" style={{ animation: "scrollBounce 2s ease-in-out infinite" }}>
-          <svg width="12" height="7" viewBox="0 0 12 7" fill="none" className="text-white/25">
-            <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <svg width="12" height="7" viewBox="0 0 12 7" fill="none" className="text-primary/40">
-            <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-      </div>
-
-      {/* Slide indicators */}
-      <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+      {/* Slide indicators + scroll cue — stacked in one centred column */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3">
+        {/* Pills */}
+        <div className="flex items-center gap-2">
         {[0, 1, 2].map((i) => {
           const isActive = i === current;
           const isDone = i < current;
@@ -350,6 +339,17 @@ export default function Hero() {
             </button>
           );
         })}
+        </div>
+
+        {/* Scroll cue */}
+        <div className="flex flex-col items-center gap-1" style={{ animation: "scrollBounce 2s ease-in-out infinite" }}>
+          <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="text-white/30">
+            <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="text-primary/35">
+            <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
       </div>
 
       <style>{`
