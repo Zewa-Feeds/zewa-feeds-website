@@ -271,39 +271,73 @@ export default function Hero() {
         <span className="material-symbols-outlined text-[20px]">chevron_right</span>
       </button>
 
-      {/* Dot navigation + progress bar */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3">
-        <div className="flex gap-3 items-center">
-          {TILES.map((_, i) => (
+      {/* Slide indicators */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+        {[
+          { label: "THE PROBLEM" },
+          { label: "THE PROOF" },
+          { label: "THE BRAND" },
+        ].map(({ label }, i) => {
+          const isActive = i === current;
+          const isDone = i < current;
+          const isVideo = i === 2;
+
+          return (
             <button
               key={i}
               onClick={() => goTo(i)}
               aria-label={`Go to slide ${i + 1}`}
-              className="relative h-[3px] rounded-full overflow-hidden transition-all duration-300"
-              style={{ width: i === current ? 32 : 16, background: "rgba(221,226,246,0.2)" }}
+              className="group flex flex-col items-start gap-1.5 focus:outline-none"
             >
-              {i === current && current !== 2 && (
-                <span
-                  className="absolute inset-y-0 left-0 bg-primary rounded-full"
-                  style={{
-                    animation: `progress ${SLIDE_DURATION}ms linear forwards`,
-                  }}
-                />
-              )}
-              {i === current && (
-                <span className="absolute inset-0 bg-primary rounded-full opacity-100" />
-              )}
+              {/* Label — visible on active, fades for others */}
+              <span
+                className="font-label-caps text-[9px] tracking-[0.18em] transition-all duration-300 block"
+                style={{
+                  color: isActive ? "rgba(221,226,246,0.7)" : "rgba(221,226,246,0.25)",
+                  transform: isActive ? "translateY(0)" : "translateY(3px)",
+                }}
+              >
+                {label}
+              </span>
+
+              {/* Track */}
+              <div
+                className="relative overflow-hidden transition-all duration-300"
+                style={{
+                  width: isActive ? 72 : 24,
+                  height: 3,
+                  borderRadius: 99,
+                  background: isDone
+                    ? "rgba(68,229,194,0.35)"
+                    : "rgba(221,226,246,0.12)",
+                }}
+              >
+                {/* Animated fill — key forces animation restart on each slide change */}
+                {isActive && !isVideo && (
+                  <span
+                    key={`fill-${current}`}
+                    className="absolute inset-y-0 left-0 rounded-full bg-primary"
+                    style={{
+                      animation: `slideProgress ${SLIDE_DURATION}ms linear forwards`,
+                    }}
+                  />
+                )}
+                {/* Video tile: static full fill (duration unknown) */}
+                {isActive && isVideo && (
+                  <span className="absolute inset-0 rounded-full bg-primary/50" />
+                )}
+                {/* Completed tiles: static full teal fill */}
+                {isDone && (
+                  <span className="absolute inset-0 rounded-full bg-primary/40" />
+                )}
+              </div>
             </button>
-          ))}
-        </div>
-        <span className="font-label-caps text-[10px] text-on-surface/30 tracking-[0.2em]">
-          {current === 0 ? "THE PROBLEM" : current === 1 ? "THE PROOF" : "THE BRAND"}
-        </span>
+          );
+        })}
       </div>
 
-      {/* Progress animation keyframe */}
       <style>{`
-        @keyframes progress {
+        @keyframes slideProgress {
           from { width: 0% }
           to   { width: 100% }
         }
