@@ -44,7 +44,7 @@ const doubled = [...testimonials, ...testimonials];
 
 export default function Testimonials() {
   return (
-    <section className="bg-[#080e1c] py-20 sm:py-28 overflow-hidden">
+    <section className="bg-[#f8faf9] py-20 sm:py-28 overflow-hidden">
       {/* Header */}
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 mb-14">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
@@ -55,7 +55,7 @@ export default function Testimonials() {
                 WHAT KEEPERS SAY
               </span>
             </div>
-            <h2 className="font-display-lg text-[28px] sm:text-[36px] text-white leading-tight">
+            <h2 className="font-display-lg text-[28px] sm:text-[36px] text-gray-900 leading-tight">
               Trusted by serious aquarists.
             </h2>
           </div>
@@ -63,7 +63,7 @@ export default function Testimonials() {
             {[...Array(5)].map((_, i) => (
               <span key={i} className="text-primary text-lg">★</span>
             ))}
-            <span className="font-body-md text-[13px] text-white/40 ml-2">
+            <span className="font-body-md text-[13px] text-gray-400 ml-2">
               4.9 / 5 across 200+ reviews
             </span>
           </div>
@@ -82,28 +82,28 @@ export default function Testimonials() {
         {doubled.map((t, i) => (
           <div
             key={i}
-            className="w-[340px] sm:w-[380px] shrink-0 bg-white/4 border border-white/8 hover:border-primary/30 transition-all duration-300 p-7 flex flex-col justify-between gap-6"
+            className="w-[340px] sm:w-[380px] shrink-0 bg-white border border-gray-100 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 p-7 flex flex-col justify-between gap-6"
           >
             {/* Quote mark */}
             <div>
-              <div className="text-primary text-[40px] font-display-lg leading-none mb-4 opacity-60">"</div>
-              <p className="font-body-md text-[14px] sm:text-[15px] text-white/70 leading-relaxed">
+              <div className="text-primary text-[40px] font-display-lg leading-none mb-4 opacity-50">"</div>
+              <p className="font-body-md text-[14px] sm:text-[15px] text-gray-600 leading-relaxed">
                 {t.quote}
               </p>
             </div>
 
             {/* Author */}
-            <div className="flex items-center gap-4 pt-5 border-t border-white/8">
-              <div className="w-10 h-10 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-4 pt-5 border-t border-gray-100">
+              <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
                 <span className="font-label-caps text-[11px] text-primary font-bold">
                   {t.initials}
                 </span>
               </div>
               <div>
-                <div className="font-button text-[13px] text-white tracking-wide">
+                <div className="font-button text-[13px] text-gray-800 tracking-wide">
                   {t.name}
                 </div>
-                <div className="font-body-md text-[11px] text-white/35 mt-0.5">
+                <div className="font-body-md text-[11px] text-gray-400 mt-0.5">
                   {t.role}
                 </div>
               </div>

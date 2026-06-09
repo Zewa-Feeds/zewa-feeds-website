@@ -4,7 +4,7 @@ import { articles } from "@/lib/content";
 
 export default function KnowledgeHub() {
   return (
-    <Reveal id="knowledge" className="bg-white">
+    <Reveal id="knowledge" className="bg-[#080e1c]">
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 py-20 sm:py-28">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14">
@@ -15,7 +15,7 @@ export default function KnowledgeHub() {
                 KNOWLEDGE HUB
               </span>
             </div>
-            <h2 className="font-display-lg text-[28px] sm:text-[36px] text-gray-900 leading-tight">
+            <h2 className="font-display-lg text-[28px] sm:text-[36px] text-white leading-tight">
               Laboratory Insights.
             </h2>
           </div>
@@ -32,7 +32,7 @@ export default function KnowledgeHub() {
           {articles.map((article) => (
             <article
               key={article.title}
-              className="group cursor-pointer border border-gray-100 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/5"
+              className="group cursor-pointer bg-white/4 border border-white/8 hover:border-primary/30 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
             >
               {/* Image */}
               <div className="aspect-[16/10] overflow-hidden relative w-full">
@@ -50,10 +50,10 @@ export default function KnowledgeHub() {
                 <span className="font-label-caps text-label-caps text-primary tracking-widest mb-3 block">
                   {article.tag}
                 </span>
-                <h3 className="font-headline-sm text-[17px] text-gray-900 mb-3 leading-snug group-hover:text-primary transition-colors duration-200">
+                <h3 className="font-headline-sm text-[17px] text-white mb-3 leading-snug group-hover:text-primary transition-colors duration-200">
                   {article.title}
                 </h3>
-                <p className="font-body-md text-[13px] text-gray-500 leading-relaxed mb-5">
+                <p className="font-body-md text-[13px] text-white/45 leading-relaxed mb-5">
                   {article.excerpt}
                 </p>
                 <span className="font-button text-[11px] text-primary tracking-wider uppercase border-b border-primary/30 pb-0.5 group-hover:border-primary transition-colors duration-200">
