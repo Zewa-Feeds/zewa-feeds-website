@@ -250,16 +250,48 @@ export default function Hero() {
   }, [goTo]);
 
   return (
-    <section className="relative w-full overflow-hidden pt-20" style={{ height: "100dvh", minHeight: "680px" }}>
+    <section className="relative w-full pt-20" style={{ height: "90dvh", minHeight: "620px" }}>
       {/* Slides */}
       <div
-        className="absolute inset-0 transition-opacity duration-[400ms]"
+        className="absolute inset-0 overflow-hidden transition-opacity duration-[400ms]"
         style={{ opacity: animating ? 0 : 1 }}
       >
         {current === 0 && <TileWhy />}
         {current === 1 && <TileProof />}
         {current === 2 && <TileVideo onVideoEnd={handleVideoEnd} />}
       </div>
+
+      {/* Peek gradient — bleeds into the white section below */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-20 pointer-events-none z-10"
+        style={{ background: "linear-gradient(to bottom, transparent, rgba(248,250,249,0.55) 70%, rgba(248,250,249,0.9))" }}
+      />
+
+      {/* Left arrow */}
+      <button
+        onClick={prev}
+        aria-label="Previous slide"
+        className="group absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
+      >
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:bg-primary/10 group-hover:-translate-x-0.5">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-white/60 group-hover:text-primary transition-colors duration-300">
+            <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      </button>
+
+      {/* Right arrow */}
+      <button
+        onClick={next}
+        aria-label="Next slide"
+        className="group absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
+      >
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm flex items-center justify-center transition-all duration-300 group-hover:border-primary/60 group-hover:bg-primary/10 group-hover:translate-x-0.5">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-white/60 group-hover:text-primary transition-colors duration-300">
+            <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      </button>
 
       {/* Slide indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
@@ -275,7 +307,6 @@ export default function Hero() {
               aria-label={`Go to slide ${i + 1}`}
               className="group focus:outline-none"
             >
-              {/* Track */}
               <div
                 className="relative overflow-hidden transition-all duration-300"
                 style={{
@@ -287,7 +318,6 @@ export default function Hero() {
                     : "rgba(221,226,246,0.12)",
                 }}
               >
-                {/* Animated fill — key forces animation restart on each slide change */}
                 {isActive && !isVideo && (
                   <span
                     key={`fill-${current}`}
@@ -297,11 +327,9 @@ export default function Hero() {
                     }}
                   />
                 )}
-                {/* Video tile: static full fill (duration unknown) */}
                 {isActive && isVideo && (
                   <span className="absolute inset-0 rounded-full bg-primary/50" />
                 )}
-                {/* Completed tiles: static full teal fill */}
                 {isDone && (
                   <span className="absolute inset-0 rounded-full bg-primary/40" />
                 )}
