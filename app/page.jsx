@@ -4,7 +4,7 @@ import ClinicalProof from "@/components/ClinicalProof";
 import ProductShowcase from "@/components/ProductShowcase";
 import Science from "@/components/Science";
 import KnowledgeHub from "@/components/KnowledgeHub";
-import DealerCTA from "@/components/DealerCTA";
+import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
 
 const sections = [
@@ -13,7 +13,7 @@ const sections = [
   ProductShowcase,
   Science,
   KnowledgeHub,
-  DealerCTA,
+  Testimonials,
 ];
 
 export default function Home() {
