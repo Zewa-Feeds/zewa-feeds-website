@@ -3,7 +3,7 @@ import { proofStats } from "@/lib/content";
 
 export default function ClinicalProof() {
   return (
-    <Reveal as="section" className="bg-white">
+    <Reveal as="section" className="bg-[#080e1c]">
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 py-20 sm:py-28">
         {/* Header row */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-14">
@@ -14,11 +14,11 @@ export default function ClinicalProof() {
                 NABL VERIFIED DATA
               </span>
             </div>
-            <h2 className="font-display-lg text-[28px] sm:text-[36px] text-gray-900 leading-tight">
+            <h2 className="font-display-lg text-[28px] sm:text-[36px] text-white leading-tight">
               Science doesn't lie. The numbers do.
             </h2>
           </div>
-          <p className="font-body-md text-[14px] text-gray-500 max-w-xs leading-relaxed">
+          <p className="font-body-md text-[14px] text-white/40 max-w-xs leading-relaxed">
             Every claim backed by independent lab testing and controlled feeding trials.
           </p>
         </div>
@@ -31,7 +31,7 @@ export default function ClinicalProof() {
               className={`p-7 sm:p-8 flex flex-col justify-between border transition-shadow duration-300 hover:shadow-lg ${
                 i === 0
                   ? "bg-primary border-primary"
-                  : "bg-white border-gray-100 hover:border-primary/30"
+                  : "bg-white/5 border-white/8 hover:border-primary/40"
               }`}
             >
               <span
@@ -51,7 +51,7 @@ export default function ClinicalProof() {
                 </div>
                 <div
                   className={`font-body-md text-[13px] leading-snug ${
-                    i === 0 ? "text-on-primary/80" : "text-gray-500"
+                    i === 0 ? "text-on-primary/80" : "text-white/40"
                   }`}
                 >
                   {stat.caption}
@@ -62,7 +62,7 @@ export default function ClinicalProof() {
         </div>
 
         {/* Bottom note */}
-        <p className="mt-8 font-body-md text-[12px] text-gray-400 text-center tracking-wide">
+        <p className="mt-8 font-body-md text-[12px] text-white/25 text-center tracking-wide">
           Results from 8-week controlled feeding trial vs leading premium brand. NABL lab certified.
         </p>
       </div>
