@@ -273,11 +273,7 @@ export default function Hero() {
 
       {/* Slide indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
-        {[
-          { label: "THE PROBLEM" },
-          { label: "THE PROOF" },
-          { label: "THE BRAND" },
-        ].map(({ label }, i) => {
+        {[0, 1, 2].map((i) => {
           const isActive = i === current;
           const isDone = i < current;
           const isVideo = i === 2;
@@ -287,19 +283,8 @@ export default function Hero() {
               key={i}
               onClick={() => goTo(i)}
               aria-label={`Go to slide ${i + 1}`}
-              className="group flex flex-col items-start gap-1.5 focus:outline-none"
+              className="group focus:outline-none"
             >
-              {/* Label — visible on active, fades for others */}
-              <span
-                className="font-label-caps text-[9px] tracking-[0.18em] transition-all duration-300 block"
-                style={{
-                  color: isActive ? "rgba(221,226,246,0.7)" : "rgba(221,226,246,0.25)",
-                  transform: isActive ? "translateY(0)" : "translateY(3px)",
-                }}
-              >
-                {label}
-              </span>
-
               {/* Track */}
               <div
                 className="relative overflow-hidden transition-all duration-300"
