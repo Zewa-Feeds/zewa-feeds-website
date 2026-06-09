@@ -51,29 +51,20 @@ export default function Header() {
         </nav>
 
         {/* CTA pair */}
-        <div className="hidden md:flex items-center gap-0 shrink-0">
-          {/* Buy Now — primary filled */}
-          <button className="bg-primary text-on-primary px-6 py-[11px] font-button text-button active:scale-95 transition-transform uppercase tracking-wider">
+        <div className="hidden md:flex items-center gap-2.5 shrink-0">
+          {/* Buy Now — outlined teal, fills on hover */}
+          <button className="border border-primary text-primary px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200">
             Buy Now
           </button>
 
-          {/* Divider pill with "or" */}
-          <div className="flex items-center self-stretch px-0">
-            <div className="w-px h-5 bg-on-surface/15" />
-            <span className="text-[10px] font-bold text-on-surface/40 tracking-[0.12em] uppercase px-2.5 leading-none select-none">
-              or
-            </span>
-            <div className="w-px h-5 bg-on-surface/15" />
-          </div>
-
-          {/* Find Dealer — ghost, clearly readable */}
-          <button className="border border-on-surface/20 text-on-surface/70 px-6 py-[11px] font-button text-button hover:text-on-surface hover:border-on-surface/50 hover:bg-on-surface/5 active:scale-95 transition-all duration-200 uppercase tracking-wider">
-            Find Dealer
+          {/* Find a Dealer — dimmer teal outline, subtler hover */}
+          <button className="border border-primary/40 text-primary/60 px-4 py-2 font-button text-[11px] tracking-wider uppercase hover:border-primary hover:text-primary active:scale-95 transition-all duration-200">
+            Find a Dealer
           </button>
         </div>
 
         {/* Mobile: Buy Now only */}
-        <button className="md:hidden bg-primary text-on-primary px-5 py-2.5 font-button text-button uppercase tracking-wider">
+        <button className="md:hidden border border-primary text-primary px-4 py-2 font-button text-[12px] uppercase tracking-wider hover:bg-primary hover:text-on-primary transition-all duration-200">
           Buy Now
         </button>
       </div>
