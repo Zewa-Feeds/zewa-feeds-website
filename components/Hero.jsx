@@ -181,35 +181,27 @@ function TileVideo({ onVideoEnd }) {
   }, [onVideoEnd]);
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-[#080e1c]">
-      {/* Mobile: padded framed video. Desktop: full-bleed */}
-      <div className="
-        relative overflow-hidden
-        w-full h-full
-        sm:w-full sm:h-full
-        md:absolute md:inset-0
-        px-4 py-6 sm:px-8 sm:py-10 md:p-0
-      ">
-        <video
-          ref={videoRef}
-          muted
-          playsInline
-          poster="/videos/brand_poster.jpg"
-          className="
-            w-full h-full object-cover
-            rounded-xl sm:rounded-2xl md:rounded-none
-          "
-        >
-          <source src="/videos/brand_video.webm" type="video/webm" />
-          <source src="/videos/brand_video.mp4" type="video/mp4" />
-        </video>
+    <div className="absolute inset-0 bg-[#080e1c]">
+      {/* Mobile: padded framed video with breathing room around it */}
+      <div className="absolute inset-0 flex items-center justify-center p-5 sm:p-8 md:p-0">
+        <div className="relative w-full h-full overflow-hidden rounded-2xl md:rounded-none">
+          <video
+            ref={videoRef}
+            muted
+            playsInline
+            poster="/videos/brand_poster.jpg"
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="/videos/brand_video.webm" type="video/webm" />
+            <source src="/videos/brand_video.mp4" type="video/mp4" />
+          </video>
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/50 via-transparent to-transparent pointer-events-none" />
+        </div>
       </div>
 
-      {/* Gradient — desktop only */}
-      <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#080e1c]/50 via-transparent to-transparent pointer-events-none" />
-
       {/* Label */}
-      <div className="absolute top-10 left-8 sm:left-12 flex items-center gap-3 z-10">
+      <div className="absolute top-24 left-8 sm:left-12 flex items-center gap-3 z-10">
         <div className="w-8 h-px bg-primary" />
         <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
           BRAND FILM
