@@ -14,23 +14,23 @@ function TileWhy() {
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[55%] h-[80%] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
       <div className="absolute right-[10%] top-[20%] w-[30%] h-[50%] rounded-full bg-primary/8 blur-[80px] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-8 sm:px-12">
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 py-6 sm:py-0">
         <div className="max-w-2xl">
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-5 sm:mb-8">
             <div className="w-8 h-px bg-primary" />
             <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
               BIOLOGICAL SUPREMACY
             </span>
           </div>
 
-          <h1 className="font-display-lg text-display-lg-mobile md:text-display-lg mb-6 leading-[1.08] text-on-surface">
+          <h1 className="font-display-lg text-[32px] sm:text-display-lg-mobile md:text-display-lg mb-4 sm:mb-6 leading-[1.08] text-on-surface">
             Your fish is built to{" "}
             <span className="text-primary italic">digest insects.</span>
             <br />
             Most fish food feeds it soy.
           </h1>
 
-          <p className="font-body-lg text-body-lg text-on-surface/70 mb-12 max-w-lg leading-relaxed">
+          <p className="font-body-lg text-[15px] sm:text-body-lg text-on-surface/70 mb-8 sm:mb-12 max-w-lg leading-relaxed">
             For millions of years, aquatic species evolved on insect protein.
             Modern fish food replaced that with cheap soy — and your fish pays
             the price.
@@ -96,30 +96,30 @@ function TileProof() {
       <div className="absolute inset-0 bg-gradient-to-br from-[#080e1c] via-[#0a1520] to-[#080e1c]" />
       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[40%] h-[60%] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-8 sm:px-12 py-8">
-        <div className="flex items-center gap-3 mb-10">
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 py-4 sm:py-8 overflow-y-auto">
+        <div className="flex items-center gap-3 mb-5 sm:mb-8">
           <div className="w-8 h-px bg-primary" />
           <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
             CLINICAL PROOF
           </span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 lg:gap-16 items-start">
           {/* Stats grid */}
           <div>
-            <h2 className="font-display-lg text-[32px] md:text-[40px] leading-tight mb-8 text-on-surface">
+            <h2 className="font-display-lg text-[22px] sm:text-[32px] md:text-[40px] leading-tight mb-5 sm:mb-8 text-on-surface">
               The numbers that matter.
             </h2>
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5">
               {stats.map((s) => (
-                <div key={s.label} className="bg-surface-container/60 backdrop-blur-sm p-5 border border-on-surface/5">
-                  <div className="text-[40px] md:text-[48px] font-display-lg text-primary leading-none mb-2">
+                <div key={s.label} className="bg-surface-container/60 backdrop-blur-sm p-3 sm:p-5 border border-on-surface/5">
+                  <div className="text-[28px] sm:text-[40px] md:text-[48px] font-display-lg text-primary leading-none mb-1 sm:mb-2">
                     {s.value}
                   </div>
-                  <div className="font-label-caps text-label-caps text-on-surface/80 tracking-widest mb-1">
+                  <div className="font-label-caps text-[9px] sm:text-label-caps text-on-surface/80 tracking-widest mb-0.5 sm:mb-1">
                     {s.label}
                   </div>
-                  <div className="font-body-md text-[12px] text-on-surface/40 leading-snug">
+                  <div className="font-body-md text-[10px] sm:text-[12px] text-on-surface/40 leading-snug hidden sm:block">
                     {s.caption}
                   </div>
                 </div>
@@ -127,8 +127,8 @@ function TileProof() {
             </div>
           </div>
 
-          {/* Animated bar chart */}
-          <div className="bg-surface-container/40 backdrop-blur-sm p-8 border border-on-surface/5">
+          {/* Animated bar chart — hidden on mobile to save space */}
+          <div className="hidden sm:block bg-surface-container/40 backdrop-blur-sm p-8 border border-on-surface/5">
             <div className="flex justify-between items-end mb-8">
               <div className="font-headline-sm text-[18px] text-on-surface">Digestion Efficiency</div>
               <div className="font-label-caps text-label-caps text-on-surface/30 text-[10px]">NABL LAB DATA</div>
@@ -181,21 +181,35 @@ function TileVideo({ onVideoEnd }) {
   }, [onVideoEnd]);
 
   return (
-    <div className="relative w-full h-full">
-      <video
-        ref={videoRef}
-        muted
-        playsInline
-        poster="/videos/brand_poster.jpg"
-        className="absolute inset-0 w-full h-full object-cover"
-      >
-        <source src="/videos/brand_video.webm" type="video/webm" />
-        <source src="/videos/brand_video.mp4" type="video/mp4" />
-      </video>
-      {/* Subtle bottom gradient so dots are visible */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/50 via-transparent to-transparent pointer-events-none" />
-      {/* Small label */}
-      <div className="absolute top-8 left-8 sm:left-12 flex items-center gap-3 z-10">
+    <div className="relative w-full h-full flex items-center justify-center bg-[#080e1c]">
+      {/* Mobile: padded framed video. Desktop: full-bleed */}
+      <div className="
+        relative overflow-hidden
+        w-full h-full
+        sm:w-full sm:h-full
+        md:absolute md:inset-0
+        px-4 py-6 sm:px-8 sm:py-10 md:p-0
+      ">
+        <video
+          ref={videoRef}
+          muted
+          playsInline
+          poster="/videos/brand_poster.jpg"
+          className="
+            w-full h-full object-cover
+            rounded-xl sm:rounded-2xl md:rounded-none
+          "
+        >
+          <source src="/videos/brand_video.webm" type="video/webm" />
+          <source src="/videos/brand_video.mp4" type="video/mp4" />
+        </video>
+      </div>
+
+      {/* Gradient — desktop only */}
+      <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-[#080e1c]/50 via-transparent to-transparent pointer-events-none" />
+
+      {/* Label */}
+      <div className="absolute top-10 left-8 sm:left-12 flex items-center gap-3 z-10">
         <div className="w-8 h-px bg-primary" />
         <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
           BRAND FILM
@@ -244,7 +258,7 @@ export default function Hero() {
   }, [goTo]);
 
   return (
-    <section className="relative w-full h-screen min-h-[600px] overflow-hidden pt-20">
+    <section className="relative w-full overflow-hidden pt-20" style={{ height: "100dvh", minHeight: "680px" }}>
       {/* Slides */}
       <div
         className="absolute inset-0 transition-opacity duration-[400ms]"
