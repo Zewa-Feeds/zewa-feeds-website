@@ -293,6 +293,19 @@ export default function Hero() {
         </div>
       </button>
 
+      {/* Scroll-down cue */}
+      <div className="absolute bottom-5 right-6 z-20 flex flex-col items-center gap-1.5">
+        <span className="font-label-caps text-[9px] tracking-[0.2em] text-white/30 uppercase">scroll</span>
+        <div className="flex flex-col items-center gap-0.5" style={{ animation: "scrollBounce 2s ease-in-out infinite" }}>
+          <svg width="12" height="7" viewBox="0 0 12 7" fill="none" className="text-white/25">
+            <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <svg width="12" height="7" viewBox="0 0 12 7" fill="none" className="text-primary/40">
+            <path d="M1 1L6 6L11 1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+      </div>
+
       {/* Slide indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
         {[0, 1, 2].map((i) => {
@@ -343,6 +356,10 @@ export default function Hero() {
         @keyframes slideProgress {
           from { width: 0% }
           to   { width: 100% }
+        }
+        @keyframes scrollBounce {
+          0%, 100% { transform: translateY(0); opacity: 1; }
+          50%       { transform: translateY(4px); opacity: 0.5; }
         }
       `}</style>
     </section>
