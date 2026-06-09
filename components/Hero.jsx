@@ -255,22 +255,6 @@ export default function Hero() {
         {current === 2 && <TileVideo onVideoEnd={handleVideoEnd} />}
       </div>
 
-      {/* Arrow controls */}
-      <button
-        onClick={prev}
-        aria-label="Previous slide"
-        className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full border border-on-surface/20 bg-surface-container/40 backdrop-blur-sm flex items-center justify-center text-on-surface/60 hover:border-primary hover:text-primary transition-all duration-200"
-      >
-        <span className="material-symbols-outlined text-[20px]">chevron_left</span>
-      </button>
-      <button
-        onClick={next}
-        aria-label="Next slide"
-        className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full border border-on-surface/20 bg-surface-container/40 backdrop-blur-sm flex items-center justify-center text-on-surface/60 hover:border-primary hover:text-primary transition-all duration-200"
-      >
-        <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-      </button>
-
       {/* Slide indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
         {[0, 1, 2].map((i) => {

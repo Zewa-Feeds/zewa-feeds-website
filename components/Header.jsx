@@ -51,14 +51,19 @@ export default function Header() {
         </nav>
 
         {/* CTA pair */}
-        <div className="hidden md:flex items-center gap-2.5 shrink-0">
-          {/* Buy Now — outlined teal, fills on hover */}
+        <div className="hidden md:flex items-center shrink-0">
+          {/* Buy Now */}
           <button className="border border-primary text-primary px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200">
             Buy Now
           </button>
 
-          {/* Find a Dealer — dimmer teal outline, subtler hover */}
-          <button className="border border-primary/40 text-primary/60 px-4 py-2 font-button text-[11px] tracking-wider uppercase hover:border-primary hover:text-primary active:scale-95 transition-all duration-200">
+          {/* or divider */}
+          <span className="text-[10px] font-bold text-on-surface/30 tracking-[0.12em] uppercase px-3 select-none">
+            or
+          </span>
+
+          {/* Find a Dealer */}
+          <button className="border border-primary/35 text-primary/55 px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:border-primary hover:text-primary hover:bg-primary/8 active:scale-95 transition-all duration-200">
             Find a Dealer
           </button>
         </div>
