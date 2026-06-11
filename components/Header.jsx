@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { navLinks } from "@/lib/content";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -13,6 +15,11 @@ export default function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const isActive = (href) => {
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href.split("#")[0]) && href.split("#")[0] !== "/";
+  };
 
   return (
     <header
@@ -40,7 +47,7 @@ export default function Header() {
               key={link.label}
               href={link.href}
               className={
-                link.active
+                isActive(link.href)
                   ? "text-primary font-bold border-b-2 border-primary pb-1 font-button text-button"
                   : "text-on-surface-variant hover:text-on-surface transition-colors font-button text-button"
               }
@@ -52,26 +59,21 @@ export default function Header() {
 
         {/* CTA pair */}
         <div className="hidden md:flex items-center shrink-0">
-          {/* Buy Now */}
-          <button className="border border-primary text-primary px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200">
+          <a href="/products" className="border border-primary text-primary px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200">
             Buy Now
-          </button>
-
-          {/* or divider */}
+          </a>
           <span className="text-[10px] font-bold text-on-surface/30 tracking-[0.12em] uppercase px-3 select-none">
             or
           </span>
-
-          {/* Find a Dealer */}
           <button className="border border-primary/35 text-primary/55 px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:border-primary hover:text-primary hover:bg-primary/8 active:scale-95 transition-all duration-200">
             Find a Dealer
           </button>
         </div>
 
         {/* Mobile: Buy Now only */}
-        <button className="md:hidden border border-primary text-primary px-4 py-2 font-button text-[12px] uppercase tracking-wider hover:bg-primary hover:text-on-primary transition-all duration-200">
+        <a href="/products" className="md:hidden border border-primary text-primary px-4 py-2 font-button text-[12px] uppercase tracking-wider hover:bg-primary hover:text-on-primary transition-all duration-200">
           Buy Now
-        </button>
+        </a>
       </div>
     </header>
   );
