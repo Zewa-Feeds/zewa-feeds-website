@@ -5,7 +5,7 @@ import { articles } from "@/lib/content";
 export default function KnowledgeHub() {
   return (
     <Reveal id="knowledge" className="bg-[#080e1c]">
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 py-20 sm:py-28">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 pt-10 sm:pt-14 pb-20 sm:pb-28">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14">
           <div>

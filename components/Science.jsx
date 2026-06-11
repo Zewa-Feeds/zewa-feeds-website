@@ -6,7 +6,7 @@ export default function Science() {
       id="science"
       className="bg-[#080e1c]"
     >
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 py-20 sm:py-28">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 pt-20 sm:pt-28 pb-10 sm:pb-14">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
 
           {/* Left — copy */}
