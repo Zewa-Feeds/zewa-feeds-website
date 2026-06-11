@@ -273,8 +273,8 @@ export default function Hero() {
         aria-label="Previous slide"
         className="group absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
       >
-        <div className="w-8 h-8 rounded-full border border-white/18 bg-black/20 backdrop-blur-md flex items-center justify-center transition-all duration-250 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:scale-110">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/50 group-hover:text-primary transition-colors duration-250 -translate-x-px">
+        <div className="w-8 h-8 flex items-center justify-center transition-all duration-250 group-hover:scale-110">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/35 group-hover:text-primary transition-colors duration-250">
             <path d="M7.5 2L3.5 6L7.5 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
@@ -286,8 +286,8 @@ export default function Hero() {
         aria-label="Next slide"
         className="group absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
       >
-        <div className="w-8 h-8 rounded-full border border-white/18 bg-black/20 backdrop-blur-md flex items-center justify-center transition-all duration-250 group-hover:border-primary/50 group-hover:bg-primary/12 group-hover:scale-110">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/50 group-hover:text-primary transition-colors duration-250 translate-x-px">
+        <div className="w-8 h-8 flex items-center justify-center transition-all duration-250 group-hover:scale-110">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/35 group-hover:text-primary transition-colors duration-250">
             <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
