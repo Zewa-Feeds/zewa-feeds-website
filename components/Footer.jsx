@@ -101,53 +101,48 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-[#070c18] border-t border-white/5">
-      {/* Main grid */}
-      <div className="max-w-[1440px] mx-auto px-8 pt-12 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-[180px_160px_160px_200px] lg:grid-cols-[200px_180px_180px_220px] gap-8 md:gap-x-12 lg:gap-x-16 items-start">
+    <footer className="w-full bg-[#070c18]">
 
-          {/* Brand column */}
-          <div className="flex flex-col gap-5">
+      {/* Top brand bar */}
+      <div className="border-b border-white/6">
+        <div className="max-w-[1440px] mx-auto px-8 sm:px-12 py-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          {/* Logo + tagline */}
+          <div className="flex items-center gap-5">
             <Image
               src="/logo-transparent.png"
               alt="Zewa Feeds"
-              width={120}
-              height={120}
-              className="h-12 w-auto object-contain brightness-0 invert opacity-90"
+              width={100}
+              height={100}
+              className="h-10 w-auto object-contain brightness-0 invert opacity-85"
             />
-
-            <p className="font-body-md text-[12px] text-on-surface/40 leading-relaxed italic">
-              Advancing pet nutrition through insect protein science and functional ingredients.
+            <div className="w-px h-8 bg-white/10" />
+            <p className="font-body-md text-[12px] text-on-surface/35 italic max-w-[280px] leading-relaxed">
+              Advancing pet nutrition through insect protein science.
             </p>
-
-            <div className="space-y-1">
-              <p className="font-body-md text-[12px] text-on-surface/30 leading-relaxed">
-                17/31A TR Nair Road<br />Kuttanellur PO, Thrissur<br />Kerala — 680014
-              </p>
-              <a href="https://zewafeeds.com" className="font-body-md text-[12px] text-primary/70 hover:text-primary transition-colors block">
-                zewafeeds.com
-              </a>
-            </div>
-
-            {/* Social icons */}
-            <div>
-              <p className="font-label-caps text-[10px] text-on-surface/25 tracking-[0.15em] mb-2.5">FOLLOW US</p>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {socialLinks.map((s) => (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={s.label}
-                    className={`w-7 h-7 rounded-full bg-white/5 border border-white/8 flex items-center justify-center text-on-surface/40 ${s.color} hover:bg-white/10 hover:border-white/20 transition-all duration-200`}
-                  >
-                    {s.icon}
-                  </a>
-                ))}
-              </div>
-            </div>
           </div>
+
+          {/* Social icons */}
+          <div className="flex items-center gap-2">
+            <span className="font-label-caps text-[10px] text-on-surface/25 tracking-[0.15em] mr-1">FOLLOW</span>
+            {socialLinks.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                className={`w-8 h-8 rounded-full bg-white/5 border border-white/8 flex items-center justify-center text-on-surface/35 ${s.color} hover:bg-white/10 hover:border-white/15 transition-all duration-200`}
+              >
+                {s.icon}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main link grid */}
+      <div className="max-w-[1440px] mx-auto px-8 sm:px-12 py-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-10">
 
           {/* Products */}
           <div>
@@ -167,7 +162,7 @@ export default function Footer() {
                 <ColLink key={item.label} {...item} />
               ))}
               <div className="mt-3 pt-3 border-t border-white/5">
-                <span className="font-body-md text-[13px] text-[#d4793a]">
+                <span className="font-body-md text-[13px] text-[#d4793a] font-normal">
                   Zewa Pet — Coming Soon
                 </span>
               </div>
@@ -181,40 +176,51 @@ export default function Footer() {
               {footerData.connect.map((item) => (
                 <ColLink key={item.label} {...item} />
               ))}
-              <div className="mt-3 pt-3 border-t border-white/5 flex flex-col gap-3">
-                <a href="mailto:info@zewafeeds.com" className="font-body-md text-[13px] text-on-surface/45 hover:text-primary transition-colors duration-200 flex items-center gap-2">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 shrink-0 opacity-60">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0l-9.75 6.75L2.25 6.75" />
-                  </svg>
-                  info@zewafeeds.com
-                </a>
-                <a href="tel:+919496642259" className="font-body-md text-[13px] text-on-surface/45 hover:text-primary transition-colors duration-200 flex items-center gap-2">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 shrink-0 opacity-60">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-                  </svg>
-                  +91 94966 42259
-                </a>
-              </div>
             </div>
           </div>
+
+          {/* Contact */}
+          <div>
+            <ColHeading>Contact</ColHeading>
+            <div className="flex flex-col gap-3">
+              <p className="font-body-md text-[13px] text-on-surface/30 leading-relaxed font-normal">
+                17/31A TR Nair Road<br />Kuttanellur PO, Thrissur<br />Kerala — 680014
+              </p>
+              <a href="mailto:info@zewafeeds.com" className="font-body-md text-[13px] text-on-surface/50 hover:text-primary transition-colors duration-200 flex items-center gap-2 font-normal no-underline">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 shrink-0 opacity-50">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0l-9.75 6.75L2.25 6.75" />
+                </svg>
+                info@zewafeeds.com
+              </a>
+              <a href="tel:+919496642259" className="font-body-md text-[13px] text-on-surface/50 hover:text-primary transition-colors duration-200 flex items-center gap-2 font-normal no-underline">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-3.5 h-3.5 shrink-0 opacity-50">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                </svg>
+                +91 94966 42259
+              </a>
+              <a href="https://zewafeeds.com" className="font-body-md text-[13px] text-primary/60 hover:text-primary transition-colors font-normal no-underline">
+                zewafeeds.com
+              </a>
+            </div>
+          </div>
+
         </div>
       </div>
 
       {/* Bottom bar */}
-      <div className="max-w-[1440px] mx-auto px-8 py-5 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-3">
-        <p className="font-label-caps text-[11px] text-on-surface/25 tracking-widest">
-          © 2026 Zewa Ecosystems Pvt Ltd · All rights reserved
-        </p>
-        <div className="flex gap-6">
-          <a href="#" className="font-label-caps text-[11px] text-on-surface/25 hover:text-on-surface/50 tracking-widest transition-colors">
-            Privacy Policy
-          </a>
-          <span className="text-on-surface/15 text-[11px]">·</span>
-          <a href="#" className="font-label-caps text-[11px] text-on-surface/25 hover:text-on-surface/50 tracking-widest transition-colors">
-            Terms of Use
-          </a>
+      <div className="border-t border-white/5">
+        <div className="max-w-[1440px] mx-auto px-8 sm:px-12 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <p className="font-label-caps text-[11px] text-on-surface/20 tracking-widest">
+            © 2026 Zewa Ecosystems Pvt Ltd · All rights reserved
+          </p>
+          <div className="flex items-center gap-5">
+            <a href="#" className="font-label-caps text-[11px] text-on-surface/20 hover:text-on-surface/45 tracking-widest transition-colors">Privacy Policy</a>
+            <span className="text-on-surface/10 text-[11px]">·</span>
+            <a href="#" className="font-label-caps text-[11px] text-on-surface/20 hover:text-on-surface/45 tracking-widest transition-colors">Terms of Use</a>
+          </div>
         </div>
       </div>
+
     </footer>
   );
 }
