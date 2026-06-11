@@ -61,7 +61,7 @@ export default function Testimonials() {
           </div>
           <div className="flex items-center gap-2">
             {[...Array(5)].map((_, i) => (
-              <span key={i} className="text-primary text-lg">★</span>
+              <span key={`header-star-${i}`} className="text-primary text-lg">★</span>
             ))}
             <span className="font-body-md text-[13px] text-gray-400 ml-2">
               4.9 / 5 across 200+ reviews
@@ -110,7 +110,7 @@ export default function Testimonials() {
               {/* Stars */}
               <div className="ml-auto flex gap-0.5">
                 {[...Array(5)].map((_, s) => (
-                  <span key={s} className="text-primary text-[12px]">★</span>
+                  <span key={`card-star-${i}-${s}`} className="text-primary text-[12px]">★</span>
                 ))}
               </div>
             </div>
