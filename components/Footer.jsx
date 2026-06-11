@@ -84,7 +84,7 @@ function ColHeading({ children }) {
 }
 
 function ColLink({ label, href, accent, muted, highlight }) {
-  const base = "font-body-md text-[13px] leading-none block transition-colors duration-200";
+  const base = "font-body-md text-[13px] leading-none block transition-colors duration-200 font-normal no-underline";
   let color = "text-on-surface/55 hover:text-on-surface";
   if (accent) color = "text-on-surface/40 hover:text-primary";
   if (muted) color = "text-on-surface/35 hover:text-on-surface/70";
@@ -104,7 +104,7 @@ export default function Footer() {
     <footer className="w-full bg-[#070c18] border-t border-white/5">
       {/* Main grid */}
       <div className="max-w-[1440px] mx-auto px-8 pt-12 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr_1fr_1fr] gap-12 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-[220px_1fr_1fr_1fr] gap-10 md:gap-8 items-start">
 
           {/* Brand column */}
           <div className="flex flex-col gap-4">
