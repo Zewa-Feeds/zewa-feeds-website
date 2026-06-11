@@ -25,7 +25,7 @@ export default function ProductShowcase() {
       </div>
 
       {/* Responsive grid — 1 col → 2 col → 3 col */}
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 pb-20 sm:pb-28">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 pb-10 sm:pb-14">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
           {products.map((product) => (
             <div

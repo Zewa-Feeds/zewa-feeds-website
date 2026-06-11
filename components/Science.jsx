@@ -12,8 +12,8 @@ export default function Science() {
           {/* Left — copy */}
           <div className="w-full lg:w-5/12">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-6 h-px bg-primary" />
-              <span className="font-label-caps text-label-caps text-primary tracking-[0.18em]">
+              <div className="w-6 h-px bg-gray-400" />
+              <span className="font-label-caps text-label-caps text-gray-500 tracking-[0.18em]">
                 RESEARCH &amp; DEVELOPMENT
               </span>
             </div>
