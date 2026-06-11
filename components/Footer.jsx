@@ -103,11 +103,11 @@ export default function Footer() {
   return (
     <footer className="w-full bg-[#070c18] border-t border-white/5">
       {/* Main grid */}
-      <div className="max-w-[1440px] mx-auto px-8 pt-16 pb-12">
+      <div className="max-w-[1440px] mx-auto px-8 pt-12 pb-10">
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr_1fr_1fr] gap-12 md:gap-8">
 
           {/* Brand column */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
             {/* Logo */}
             <div>
               <Image
@@ -115,7 +115,7 @@ export default function Footer() {
                 alt="Zewa Feeds"
                 width={150}
                 height={150}
-                className="h-24 w-auto object-contain brightness-0 invert opacity-90"
+                className="h-16 w-auto object-contain brightness-0 invert opacity-90"
               />
             </div>
 
@@ -123,24 +123,11 @@ export default function Footer() {
               Advancing pet nutrition through insect protein science and functional ingredients.
             </p>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <p className="font-body-md text-[13px] text-on-surface/35 leading-relaxed">
-                17/31A TR Nair Road<br />
-                Kuttanellur PO, Thrissur<br />
-                Kerala, IN – 680014
+                17/31A TR Nair Road, Kuttanellur PO<br />
+                Thrissur, Kerala — 680014
               </p>
-              <a
-                href="mailto:info@zewafeeds.com"
-                className="font-body-md text-[13px] text-on-surface/45 hover:text-primary transition-colors block"
-              >
-                info@zewafeeds.com
-              </a>
-              <a
-                href="tel:+919496642259"
-                className="font-body-md text-[13px] text-on-surface/45 hover:text-primary transition-colors block"
-              >
-                +91 94966 42259
-              </a>
               <a
                 href="https://zewafeeds.com"
                 className="font-body-md text-[13px] text-primary/70 hover:text-primary transition-colors block"
