@@ -133,7 +133,7 @@ export default function Footer() {
                   rel="noopener noreferrer"
                   aria-label={s.label}
                   style={{ "--hover-color": s.hoverColor }}
-                  className="w-9 h-9 rounded-lg bg-white/4 border border-white/8 flex items-center justify-center text-white/30 hover:text-[--hover-color] hover:border-white/15 hover:bg-white/8 transition-all duration-200"
+                  className="w-9 h-9 rounded-full bg-white/4 border border-white/8 flex items-center justify-center text-white/30 hover:text-[--hover-color] hover:border-white/15 hover:bg-white/8 transition-all duration-200"
                 >
                   {s.icon}
                 </a>
