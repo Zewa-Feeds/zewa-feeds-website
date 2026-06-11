@@ -1,11 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const CATEGORIES = ["All", "Betta", "Cichlid", "Hatchery", "Others"];
+const CATEGORIES = ["All", "Betta", "Cichlid", "Hatchery"];
+
+const SPOTLIGHT = [
+  {
+    name: "Betta Bites F3",
+    slug: "betta-bites-f3",
+    category: "Betta",
+    tagline: "100% natural insect-protein formula for vibrant, healthy bettas",
+    price: "₹249",
+    mrp: "₹310",
+    packs: ["45g", "1kg"],
+    badge: "BESTSELLER",
+    protein: "46%",
+    stat: "Highest protein in the range",
+    image: "/Bottles/Betta/Betta F3_Front.png",
+    accent: "rgba(68,229,194,0.22)",
+    accentStrong: "rgba(68,229,194,0.45)",
+  },
+  {
+    name: "Cichlid Bites C4",
+    slug: null,
+    category: "Cichlid",
+    tagline: "High-energy insect protein for aggressive cichlid species",
+    price: "₹279",
+    mrp: "₹349",
+    packs: ["100g", "1kg"],
+    badge: "NEW",
+    protein: "44%",
+    stat: "Supports jaw muscle development",
+    image: "/Bottles/Cichild/Cichild C4_Front.png",
+    accent: "rgba(56,189,248,0.20)",
+    accentStrong: "rgba(56,189,248,0.45)",
+  },
+  {
+    name: "DBSFL 25g",
+    slug: null,
+    category: "Hatchery",
+    tagline: "Whole dried larvae — maximum insect nutrition per gram",
+    price: "₹199",
+    mrp: "₹249",
+    packs: ["25g"],
+    badge: "PRO",
+    protein: "50%",
+    stat: "Whole larvae — maximum nutrition",
+    image: "/Bottles/DBSFL/DBSFL 25G.png",
+    accent: "rgba(167,139,250,0.20)",
+    accentStrong: "rgba(167,139,250,0.45)",
+  },
+];
 
 const PRODUCTS = [
   {
@@ -113,10 +161,30 @@ const PRODUCTS = [
 
 export default function ProductsPage() {
   const [active, setActive] = useState("All");
+  const [slide, setSlide] = useState(0);
+  const [fading, setFading] = useState(false);
+
+  // Auto-rotate spotlight every 4s
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFading(true);
+      setTimeout(() => {
+        setSlide((s) => (s + 1) % SPOTLIGHT.length);
+        setFading(false);
+      }, 350);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const goTo = (i) => {
+    if (i === slide) return;
+    setFading(true);
+    setTimeout(() => { setSlide(i); setFading(false); }, 350);
+  };
+
+  const sp = SPOTLIGHT[slide];
 
   const filtered = active === "All" ? PRODUCTS : PRODUCTS.filter((p) => p.category === active);
-  const featured = filtered.find((p) => p.featured);
-  const rest = filtered.filter((p) => !p.featured);
 
   return (
     <>
@@ -187,86 +255,111 @@ export default function ProductsPage() {
         {/* ── Grid ─────────────────────────────────────────────────────── */}
         <section className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-12 sm:py-16">
 
-          {/* Featured card — full-width horizontal */}
-          {featured && (
-            <a
-              href={`/products/${featured.slug}`}
-              className="group relative flex flex-col sm:flex-row overflow-hidden rounded-3xl mb-8 cursor-pointer"
-              style={{ background: "linear-gradient(135deg, #0d1a2e 0%, #091a18 100%)" }}
-            >
-              {/* Glow blob */}
-              <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 50% 80% at 30% 50%, ${featured.accentColor}, transparent)` }} />
+          {/* ── Spotlight rotator ── */}
+          <div
+            className="relative overflow-hidden rounded-3xl mb-8"
+            style={{ background: "linear-gradient(135deg, #0d1a2e 0%, #091a18 100%)" }}
+          >
+            {/* Animated background glow */}
+            <div
+              className="absolute inset-0 pointer-events-none transition-all duration-700"
+              style={{ background: `radial-gradient(ellipse 55% 90% at 28% 50%, ${sp.accent}, transparent 70%)` }}
+            />
 
-              {/* Image side */}
-              <div className="relative w-full sm:w-[42%] aspect-square sm:aspect-auto shrink-0 flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 60%, ${featured.accentColor}, transparent 70%)` }} />
+            <div
+              className="relative flex flex-col sm:flex-row items-center gap-8 sm:gap-0"
+              style={{ opacity: fading ? 0 : 1, transform: fading ? "translateY(8px)" : "translateY(0)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
+            >
+              {/* Bottle */}
+              <div className="relative w-full sm:w-[38%] flex items-center justify-center py-10 px-8 shrink-0">
+                <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 55%, ${sp.accent}, transparent 65%)` }} />
                 <Image
-                  src={featured.image}
-                  alt={featured.name}
-                  width={420}
-                  height={420}
-                  className="relative z-10 object-contain w-[75%] sm:w-[80%] max-h-[360px] transition-transform duration-700 group-hover:scale-105"
+                  src={sp.image}
+                  alt={sp.name}
+                  width={320}
+                  height={320}
+                  className="relative z-10 object-contain max-h-[280px] w-auto"
+                  style={{ filter: "drop-shadow(0 20px 48px rgba(0,0,0,0.65))" }}
                 />
               </div>
 
-              {/* Content side */}
-              <div className="relative flex flex-col justify-center p-8 sm:p-12 gap-5 flex-1">
-                <div className="flex items-center gap-3">
-                  <span className="text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] bg-primary text-[#00382d]">
-                    BESTSELLER
+              {/* Content */}
+              <div className="flex flex-col justify-center gap-4 flex-1 px-8 sm:px-12 pb-10 sm:py-12 text-center sm:text-left">
+                <div className="flex items-center gap-2.5 justify-center sm:justify-start">
+                  <span className="text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] bg-primary/15 text-primary border border-primary/30">
+                    {sp.badge}
                   </span>
-                  <span className="text-[10px] text-primary/60 font-bold tracking-[0.18em] font-[Montserrat] uppercase">{featured.category}</span>
+                  <span className="text-[10px] text-white/30 font-[Montserrat] tracking-[0.15em] uppercase">{sp.category}</span>
                 </div>
 
-                <div>
-                  <h2 className="font-[Playfair_Display] text-[34px] sm:text-[42px] text-white leading-tight mb-2">{featured.name}</h2>
-                  <p className="text-[14px] text-white/45 font-[Montserrat] leading-relaxed max-w-sm">{featured.tagline}</p>
-                </div>
+                <h2 className="font-[Playfair_Display] text-[30px] sm:text-[40px] text-white leading-tight">{sp.name}</h2>
+                <p className="text-[13px] text-white/40 font-[Montserrat] leading-relaxed max-w-sm mx-auto sm:mx-0">{sp.tagline}</p>
 
-                <div className="flex items-center gap-4">
-                  <div className="flex flex-col">
-                    <span className="font-[Playfair_Display] text-[32px] text-primary leading-none">{featured.price}</span>
-                    <span className="text-[12px] text-white/25 line-through font-[Montserrat] mt-0.5">{featured.mrp}</span>
+                <div className="flex items-center gap-5 justify-center sm:justify-start">
+                  <div>
+                    <span className="font-[Playfair_Display] text-[30px] text-primary leading-none">{sp.price}</span>
+                    <span className="text-[11px] text-white/20 line-through font-[Montserrat] ml-2">{sp.mrp}</span>
                   </div>
-                  <div className="w-px h-10 bg-white/10" />
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[22px] font-bold text-primary font-[Montserrat] leading-none">{featured.protein}</span>
-                    <span className="text-[10px] text-white/30 font-[Montserrat] tracking-wide">insect protein</span>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div>
+                    <span className="text-[20px] font-bold text-primary font-[Montserrat] leading-none">{sp.protein}</span>
+                    <span className="text-[10px] text-white/30 font-[Montserrat] ml-1.5">protein</span>
                   </div>
                 </div>
 
-                <div className="flex gap-2 flex-wrap">
-                  {featured.packs.map((pack) => (
-                    <span key={pack} className="text-[10px] px-3 py-1 rounded-full bg-white/6 text-white/50 font-[Montserrat] border border-white/8">{pack}</span>
+                <div className="flex gap-2 justify-center sm:justify-start">
+                  {sp.packs.map((p) => (
+                    <span key={p} className="text-[10px] px-3 py-1 rounded-full border border-white/10 text-white/35 font-[Montserrat]">{p}</span>
                   ))}
                 </div>
 
-                <div className="flex items-center gap-2 mt-2 text-primary font-[Montserrat] text-[12px] font-bold tracking-widest uppercase">
-                  <span>Explore Product</span>
-                  <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1">
-                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
+                {sp.slug && (
+                  <a
+                    href={`/products/${sp.slug}`}
+                    className="self-center sm:self-start inline-flex items-center gap-2 text-[11px] font-bold text-primary tracking-widest uppercase font-[Montserrat] hover:gap-3 transition-all duration-200"
+                  >
+                    Explore Product
+                    <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                )}
               </div>
-            </a>
-          )}
 
-          {/* Rest of products — 3 col grid */}
+              {/* Dot controls */}
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 sm:static sm:translate-x-0 flex sm:flex-col items-center gap-2.5 sm:pr-10">
+                {SPOTLIGHT.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => goTo(i)}
+                    aria-label={`Go to slide ${i + 1}`}
+                  >
+                    <span
+                      className={`block rounded-full transition-all duration-300 ${
+                        i === slide
+                          ? "w-5 h-1.5 sm:w-1.5 sm:h-5 bg-primary"
+                          : "w-1.5 h-1.5 bg-white/20 hover:bg-white/45"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Product grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {rest.map((p, i) => (
+            {filtered.map((p, i) => (
               <a
                 key={`${p.name}-${i}`}
                 href={p.slug ? `/products/${p.slug}` : undefined}
                 className={`group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-400 ${p.slug ? "cursor-pointer" : "cursor-default"}`}
                 style={{ background: "linear-gradient(160deg, #0d1726 0%, #0a1219 100%)" }}
               >
-                {/* Per-card glow */}
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                   style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor || "rgba(68,229,194,0.12)"}, transparent)` }}
                 />
-
-                {/* Image zone */}
                 <div className="relative flex items-center justify-center pt-8 pb-4 px-6 overflow-hidden" style={{ minHeight: "220px" }}>
                   <div
                     className="absolute inset-0 pointer-events-none"
@@ -277,7 +370,7 @@ export default function ProductsPage() {
                     alt={p.name}
                     width={220}
                     height={220}
-                    className="relative z-10 object-contain max-h-[200px] w-auto transition-transform duration-500 group-hover:scale-108 group-hover:-translate-y-1"
+                    className="relative z-10 object-contain max-h-[200px] w-auto transition-transform duration-500 group-hover:scale-105 group-hover:-translate-y-1"
                     style={{ filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.5))" }}
                   />
                   {p.badge && (
@@ -286,8 +379,6 @@ export default function ProductsPage() {
                     </span>
                   )}
                 </div>
-
-                {/* Info zone */}
                 <div className="flex flex-col flex-1 px-5 pb-5 pt-1 gap-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[9px] font-bold text-primary/50 tracking-[0.2em] font-[Montserrat] uppercase">{p.category}</span>
@@ -295,15 +386,10 @@ export default function ProductsPage() {
                       <span className="text-[11px] font-bold text-primary font-[Montserrat]">{p.protein} <span className="text-white/25 font-normal text-[10px]">protein</span></span>
                     )}
                   </div>
-
                   <h3 className="font-[Playfair_Display] text-[19px] text-white leading-snug group-hover:text-primary transition-colors duration-200">
                     {p.name}
                   </h3>
-                  <p className="text-[12px] text-white/35 font-[Montserrat] leading-relaxed line-clamp-2">
-                    {p.tagline}
-                  </p>
-
-                  {/* Divider */}
+                  <p className="text-[12px] text-white/35 font-[Montserrat] leading-relaxed line-clamp-2">{p.tagline}</p>
                   <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
                     {p.price ? (
                       <div className="flex items-baseline gap-2">
@@ -313,22 +399,18 @@ export default function ProductsPage() {
                     ) : (
                       <span className="text-[12px] text-white/25 font-[Montserrat] italic">Multiple packs</span>
                     )}
-
                     <div className="flex gap-1.5">
                       {p.packs.slice(0, 2).map((pack) => (
                         <span key={pack} className="text-[9px] px-2 py-1 rounded-full bg-white/5 text-white/30 font-[Montserrat]">{pack}</span>
                       ))}
                     </div>
                   </div>
-
                   {!p.slug && (
                     <div className="mt-1 text-[10px] text-white/20 font-[Montserrat] tracking-widest uppercase text-center py-1.5 rounded-lg bg-white/3">
                       Coming Soon
                     </div>
                   )}
                 </div>
-
-                {/* Bottom teal line on hover */}
                 {p.slug && (
                   <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left" style={{ background: "linear-gradient(to right, rgba(68,229,194,0.6), transparent)" }} />
                 )}

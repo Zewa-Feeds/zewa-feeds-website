@@ -35,7 +35,7 @@ export default function Header() {
             alt="Zewa Feeds"
             width={130}
             height={130}
-            className="h-12 w-auto object-contain brightness-0 invert"
+            className="h-[72px] w-auto object-contain brightness-0 invert"
             priority
           />
         </a>
