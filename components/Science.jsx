@@ -67,7 +67,7 @@ export default function Science() {
 
             <div className="mt-10 pt-8 border-t border-gray-100 grid grid-cols-2 gap-8">
               <div>
-                <div className="text-[32px] font-display-lg text-primary leading-none mb-2">4.2x</div>
+                <div className="text-[32px] font-display-lg text-gray-900 leading-none mb-2">4.2x</div>
                 <p className="text-[12px] text-gray-400 leading-snug">
                   More efficient amino acid chain conversion vs soy alternatives.
                 </p>

@@ -84,7 +84,24 @@ export default function ProductShowcase() {
             </span>
           </a>
         </div>
+
+        {/* Scroll cue */}
+        <div className="flex flex-col items-center gap-1 mt-10 sm:mt-12" style={{ animation: "scrollBounce 2s ease-in-out infinite" }}>
+          <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="text-gray-300">
+            <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="text-primary/40">
+            <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
       </div>
+
+      <style>{`
+        @keyframes scrollBounce {
+          0%, 100% { transform: translateY(0); opacity: 1; }
+          50%       { transform: translateY(4px); opacity: 0.5; }
+        }
+      `}</style>
     </Reveal>
   );
 }
