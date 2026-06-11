@@ -94,9 +94,9 @@ export default function Footer() {
               <Image
                 src="/logo-transparent.png"
                 alt="Zewa Feeds"
-                width={110}
-                height={110}
-                className="h-11 w-auto object-contain brightness-0 invert opacity-90"
+                width={160}
+                height={160}
+                className="h-16 w-auto object-contain brightness-0 invert opacity-95"
               />
               <p className="mt-4 text-[13px] text-white/40 leading-[1.7] max-w-[240px]">
                 Premium insect-protein nutrition for aquatic species — backed by lab-verified science.
