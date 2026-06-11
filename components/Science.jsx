@@ -73,7 +73,7 @@ export default function Science() {
                 </p>
               </div>
               <div>
-                <div className="text-[32px] font-display-lg text-primary leading-none mb-2">0%</div>
+                <div className="text-[32px] font-display-lg text-gray-900 leading-none mb-2">0%</div>
                 <p className="text-[12px] text-gray-400 leading-snug">
                   Anti-nutritional factors (ANFs) vs common agricultural fillers.
                 </p>
