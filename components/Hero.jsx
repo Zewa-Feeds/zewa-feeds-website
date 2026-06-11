@@ -261,11 +261,13 @@ export default function Hero() {
         {current === 2 && <TileVideo onVideoEnd={handleVideoEnd} />}
       </div>
 
-      {/* Peek strip — thin shadow line hinting content below, not a milky wash */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-14 pointer-events-none z-10"
-        style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(8,14,28,0.18) 60%, rgba(8,14,28,0.38) 100%)" }}
-      />
+      {/* Bottom fade + teal accent line separator */}
+      <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10">
+        {/* Dark vignette */}
+        <div className="h-16" style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(8,14,28,0.25) 60%, rgba(8,14,28,0.5) 100%)" }} />
+        {/* Teal accent line */}
+        <div className="h-px w-full" style={{ background: "linear-gradient(to right, transparent 0%, rgba(68,229,194,0.25) 20%, rgba(68,229,194,0.5) 50%, rgba(68,229,194,0.25) 80%, transparent 100%)" }} />
+      </div>
 
       {/* Left arrow */}
       <button

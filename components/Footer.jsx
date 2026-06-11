@@ -104,7 +104,7 @@ export default function Footer() {
     <footer className="w-full bg-[#070c18] border-t border-white/5">
       {/* Main grid */}
       <div className="max-w-[1440px] mx-auto px-8 pt-12 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-[200px_1fr_1fr_1fr] gap-10 md:gap-10 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[180px_160px_160px_200px] lg:grid-cols-[200px_180px_180px_220px] gap-8 md:gap-x-12 lg:gap-x-16 items-start">
 
           {/* Brand column */}
           <div className="flex flex-col gap-5">
