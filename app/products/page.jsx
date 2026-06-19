@@ -374,7 +374,7 @@ export default function ProductsPage() {
                     style={{ filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.5))" }}
                   />
                   {p.badge && (
-                    <span className={`absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] ${p.badgeColor}`}>
+                    <span className={`absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] ${p.badgeColor || "bg-primary text-[#00382d]"}`}>
                       {p.badge}
                     </span>
                   )}
