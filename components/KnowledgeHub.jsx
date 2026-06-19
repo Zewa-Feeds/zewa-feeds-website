@@ -23,7 +23,7 @@ const ARTICLES = [
     readTime: "5 min",
     title: "The role of carotenoids in natural color enhancement.",
     excerpt: "Science-backed methods for achieving stage-ready vibrancy without synthetic dyes.",
-    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBSgIye9Yh0nQgRwf4QaNSGRsnvb-RcyO_FqFLVh8phEUsmplOMky5xWS9_gZlgKpDGxiRrTWtApT7JsYtlUISTVY3e0DPLJsZ4hd3N4whAcOzatvlS2EwABa7gWtsFeTpOPj9VDhmrH1PeQT9qFLDWkLaRTkSrf8-O_OuNJwFte-dpNkHAalHmqofooAV_NZgwCdJBfloB0qgmF1MAtmpJ09uDa2vICxBUfJREejpfA7av-tD3mCe0OPgdEjKlKnnCdN3o7POwCInL",
+    image: "/Bottles/Betta/Betta 01.png",
     tagColor: "text-orange-400 border-orange-400/30 bg-orange-400/8",
   },
 ];

@@ -42,8 +42,7 @@ const ARTICLES = [
     title: "The role of carotenoids in natural color enhancement.",
     excerpt:
       "Science-backed methods for achieving stage-ready vibrancy without synthetic dyes. Natural pigments metabolised at 3× the efficiency of astaxanthin.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBSgIye9Yh0nQgRwf4QaNSGRsnvb-RcyO_FqFLVh8phEUsmplOMky5xWS9_gZlgKpDGxiRrTWtApT7JsYtlUISTVY3e0DPLJsZ4hd3N4whAcOzatvlS2EwABa7gWtsFeTpOPj9VDhmrH1PeQT9qFLDWkLaRTkSrf8-O_OuNJwFte-dpNkHAalHmqofooAV_NZgwCdJBfloB0qgmF1MAtmpJ09uDa2vICxBUfJREejpfA7av-tD3mCe0OPgdEjKlKnnCdN3o7POwCInL",
+    image: "/Bottles/Betta/Betta 01.png",
     alt: "Exotic fish scales reflecting teal and orange",
     stat: "3×",
     statLabel: "Richer Pigment",
