@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useCart } from "@/lib/cartContext";
 
 const CATEGORIES = [
   "All",
@@ -160,11 +161,16 @@ const PRODUCTS = [
   },
 ];
 
-function QtyButton({ price }) {
-  const [qty, setQty] = useState(0);
-  const [flash, setFlash] = useState(null); // "inc" | "dec"
+function QtyButton({ product }) {
+  const { price, name, slug, image, accentColor } = product;
+  const [flash, setFlash] = useState(null);
+  const { items, addToCart, setQty, removeFromCart } = useCart();
 
   if (!price) return null;
+
+  const sku = slug || name.toLowerCase().replace(/\s+/g, "-");
+  const cartItem = items.find((i) => i.sku === sku);
+  const qty = cartItem?.qty ?? 0;
 
   const trigger = (dir, fn) => (e) => {
     e.preventDefault();
@@ -173,11 +179,23 @@ function QtyButton({ price }) {
     fn();
   };
 
+  const handleAdd = (e) => {
+    e.preventDefault();
+    addToCart({ sku, name, pack: "45g", price, image, accentBg: "#1a2235" });
+  };
+
+  const handleDec = trigger("dec", () => {
+    if (qty <= 1) removeFromCart(sku);
+    else setQty(sku, qty - 1);
+  });
+
+  const handleInc = trigger("inc", () => setQty(sku, qty + 1));
+
   return (
     <div className="mt-4 pt-3 border-t border-white/5">
       {qty === 0 ? (
         <button
-          onClick={(e) => { e.preventDefault(); setQty(1); }}
+          onClick={handleAdd}
           className="w-full h-9 rounded-lg bg-primary text-[#00382d] text-[11px] font-bold tracking-[0.12em] uppercase font-[Montserrat] hover:bg-primary/85 active:scale-[0.97] transition-all duration-150 shadow-[0_0_16px_rgba(68,229,194,0.25)]"
         >
           + Add
@@ -185,23 +203,15 @@ function QtyButton({ price }) {
       ) : (
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center rounded-lg border border-primary/30 overflow-hidden h-9">
-            <button
-              onClick={trigger("dec", () => setQty((q) => Math.max(0, q - 1)))}
-              className={`w-9 h-9 flex items-center justify-center text-[20px] leading-none select-none font-light transition-all duration-150 ${
-                flash === "dec" ? "bg-primary text-[#00382d]" : "bg-primary/8 text-primary hover:bg-primary/20"
-              }`}
-            >
+            <button onClick={handleDec}
+              className={`w-9 h-9 flex items-center justify-center text-[20px] leading-none select-none font-light transition-all duration-150 ${flash === "dec" ? "bg-primary text-[#00382d]" : "bg-primary/8 text-primary hover:bg-primary/20"}`}>
               −
             </button>
             <span className="w-9 text-center text-white text-[13px] font-bold font-[Montserrat] tabular-nums select-none border-x border-primary/20">
               {qty}
             </span>
-            <button
-              onClick={trigger("inc", () => setQty((q) => q + 1))}
-              className={`w-9 h-9 flex items-center justify-center text-[20px] leading-none select-none font-light transition-all duration-150 ${
-                flash === "inc" ? "bg-primary text-[#00382d]" : "bg-primary/8 text-primary hover:bg-primary/20"
-              }`}
-            >
+            <button onClick={handleInc}
+              className={`w-9 h-9 flex items-center justify-center text-[20px] leading-none select-none font-light transition-all duration-150 ${flash === "inc" ? "bg-primary text-[#00382d]" : "bg-primary/8 text-primary hover:bg-primary/20"}`}>
               +
             </button>
           </div>
@@ -455,7 +465,7 @@ export default function ProductsPage() {
                         <span className="font-[Playfair_Display] text-[24px] text-white">₹{p.price.toLocaleString("en-IN")}</span>
                         <span className="text-[11px] text-white/20 line-through font-[Montserrat]">{p.mrp}</span>
                       </div>
-                      <QtyButton price={p.price} />
+                      <QtyButton product={p} />
                     </>
                   ) : (
                     <div className="mt-3 pt-4 border-t border-white/5">

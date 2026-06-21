@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Reveal from "./Reveal";
+import { useCart } from "@/lib/cartContext";
 
 const PRODUCTS = [
   {
@@ -121,6 +122,8 @@ export default function ProductShowcase() {
   const scroll = (dir) =>
     scrollToIdx(Math.max(0, Math.min(maxIdx, activeIdx + dir)));
 
+  const { addToCart, items, setQty: setCartQty, removeFromCart } = useCart();
+
   return (
     <Reveal id="products" className="relative bg-white overflow-hidden">
 
@@ -177,58 +180,89 @@ export default function ProductShowcase() {
             className="flex gap-6 overflow-x-auto pb-4 no-scrollbar"
             style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
           >
-            {PRODUCTS.map((p, i) => (
-              <a
-                key={i}
-                ref={(el) => (cardRefs.current[i] = el)}
-                href={p.slug ? `/products/${p.slug}` : "/products"}
-                style={{ scrollSnapAlign: "start", minWidth: "300px", maxWidth: "300px" }}
-                className="group shrink-0 flex flex-col rounded-2xl overflow-hidden border border-gray-100 hover:border-transparent transition-all duration-300 hover:shadow-2xl hover:shadow-black/10 cursor-pointer bg-white"
-                onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-6px)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
-              >
-                {/* Image zone */}
-                <div className="relative overflow-hidden" style={{ background: p.accentBg, aspectRatio: "4/3" }}>
-                  <div className="absolute inset-0 pointer-events-none"
-                    style={{ background: `radial-gradient(ellipse 70% 60% at 50% 80%, ${p.accentDot}28, transparent 70%)` }} />
-                  <Image
-                    src={p.image}
-                    alt={p.name}
-                    fill
-                    sizes="300px"
-                    className="object-contain p-8 transition-transform duration-500 group-hover:scale-105"
-                    style={{ filter: "drop-shadow(0 16px 32px rgba(0,0,0,0.13))" }}
-                  />
-                  {p.badge && (
-                    <span className="absolute top-4 left-4 text-[10px] font-bold px-3 py-1.5 rounded-full tracking-widest font-[Montserrat] text-white"
-                      style={{ background: p.accentDot }}>
-                      {p.badge}
-                    </span>
-                  )}
-                </div>
+            {PRODUCTS.map((p, i) => {
+              const sku = p.slug || p.name.toLowerCase().replace(/\s+/g, "-");
+              const cartItem = items.find((ci) => ci.sku === sku);
+              const qty = cartItem?.qty ?? 0;
 
-                {/* Content */}
-                <div className="flex flex-col flex-1 p-5 gap-2 bg-white">
-                  <h3 className="font-[Playfair_Display] text-[20px] text-[#0a1a14] leading-snug group-hover:text-[#00a882] transition-colors duration-200">
-                    {p.name}
-                  </h3>
-                  <p className="text-[12px] text-gray-400 font-[Montserrat] leading-relaxed flex-1">{p.blurb}</p>
-
-                  <div className="flex items-center justify-between mt-3 pt-4 border-t border-gray-100">
-                    <div>
-                      <span className="font-[Playfair_Display] text-[24px] leading-none" style={{ color: "#00a882" }}>{p.price}</span>
-                      <span className="text-[11px] text-gray-300 line-through font-[Montserrat] ml-2">{p.mrp}</span>
+              return (
+                <div
+                  key={i}
+                  ref={(el) => (cardRefs.current[i] = el)}
+                  style={{ scrollSnapAlign: "start", minWidth: "300px", maxWidth: "300px" }}
+                  className="group shrink-0 flex flex-col rounded-2xl overflow-hidden border border-gray-100 hover:border-transparent transition-all duration-300 hover:shadow-2xl hover:shadow-black/10 bg-white"
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-6px)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
+                >
+                  {/* Clickable image zone → product page */}
+                  <a href={p.slug ? `/products/${p.slug}` : "/products"} className="block">
+                    <div className="relative overflow-hidden" style={{ background: p.accentBg, aspectRatio: "4/3" }}>
+                      <div className="absolute inset-0 pointer-events-none"
+                        style={{ background: `radial-gradient(ellipse 70% 60% at 50% 80%, ${p.accentDot}28, transparent 70%)` }} />
+                      <Image
+                        src={p.image}
+                        alt={p.name}
+                        fill
+                        sizes="300px"
+                        className="object-contain p-8 transition-transform duration-500 group-hover:scale-105"
+                        style={{ filter: "drop-shadow(0 16px 32px rgba(0,0,0,0.13))" }}
+                      />
+                      {p.badge && (
+                        <span className="absolute top-4 left-4 text-[10px] font-bold px-3 py-1.5 rounded-full tracking-widest font-[Montserrat] text-white"
+                          style={{ background: p.accentDot }}>
+                          {p.badge}
+                        </span>
+                      )}
                     </div>
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center transition-transform duration-200 group-hover:scale-110 shrink-0"
-                      style={{ background: "#44e5c2" }}>
-                      <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
-                        <path d="M8 3v10M3 8h10" stroke="#00382d" strokeWidth="2.2" strokeLinecap="round" />
-                      </svg>
+                  </a>
+
+                  {/* Content */}
+                  <div className="flex flex-col flex-1 p-5 gap-2 bg-white">
+                    <a href={p.slug ? `/products/${p.slug}` : "/products"}>
+                      <h3 className="font-[Playfair_Display] text-[20px] text-[#0a1a14] leading-snug group-hover:text-[#00a882] transition-colors duration-200">
+                        {p.name}
+                      </h3>
+                    </a>
+                    <p className="text-[12px] text-gray-400 font-[Montserrat] leading-relaxed flex-1">{p.blurb}</p>
+
+                    <div className="flex items-center justify-between mt-3 pt-4 border-t border-gray-100">
+                      <div>
+                        <span className="font-[Playfair_Display] text-[24px] leading-none" style={{ color: "#00a882" }}>{p.price}</span>
+                        <span className="text-[11px] text-gray-300 line-through font-[Montserrat] ml-2">{p.mrp}</span>
+                      </div>
+
+                      {/* Add / qty control */}
+                      {qty === 0 ? (
+                        <button
+                          onClick={() => addToCart({ sku, name: p.name, pack: "45g", price: parseInt(p.price.replace(/[^\d]/g, "")), image: p.image, accentBg: p.accentBg })}
+                          className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 group-hover:scale-110 shrink-0 hover:scale-105 active:scale-95"
+                          style={{ background: "#44e5c2" }}
+                          title="Add to cart"
+                        >
+                          <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                            <path d="M8 3v10M3 8h10" stroke="#00382d" strokeWidth="2.2" strokeLinecap="round" />
+                          </svg>
+                        </button>
+                      ) : (
+                        <div className="flex items-center rounded-lg border overflow-hidden shrink-0" style={{ borderColor: "#44e5c2" }}>
+                          <button
+                            onClick={() => qty <= 1 ? removeFromCart(sku) : setCartQty(sku, qty - 1)}
+                            className="w-8 h-8 flex items-center justify-center text-[16px] transition-colors duration-100 select-none"
+                            style={{ color: "#00a882" }}
+                          >−</button>
+                          <span className="w-7 text-center text-[13px] font-bold font-[Montserrat] border-x" style={{ borderColor: "#44e5c2", color: "#0a1a14" }}>{qty}</span>
+                          <button
+                            onClick={() => setCartQty(sku, qty + 1)}
+                            className="w-8 h-8 flex items-center justify-center text-[16px] transition-colors duration-100 select-none"
+                            style={{ color: "#00a882" }}
+                          >+</button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-              </a>
-            ))}
+              );
+            })}
 
             {/* View all */}
             <a href="/products"

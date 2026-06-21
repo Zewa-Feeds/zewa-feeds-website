@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useCart } from "@/lib/cartContext";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -112,9 +113,31 @@ export default function BettaBitesF3() {
   const [activePack, setActivePack] = useState(0);
   const [activeImage, setActiveImage] = useState(0);
   const [activeTab, setActiveTab] = useState("Overview");
+  const [qty, setQty] = useState(1);
+  const [added, setAdded] = useState(false);
+  const { addToCart } = useCart();
 
   const pack = PACKS[activePack];
   const activeSlide = GALLERY[activeImage];
+
+  const handleAddToCart = () => {
+    addToCart({
+      sku: pack.sku,
+      name: "Betta Bites F3",
+      pack: pack.size,
+      price: parseInt(pack.price.replace(/[^\d]/g, "")),
+      image: "/Bottles/Betta/Betta F3_Front.png",
+      accentBg: "#d4f5ed",
+      qty,
+    });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    handleAddToCart();
+    window.location.href = "/checkout";
+  };
 
   return (
     <>
@@ -266,14 +289,44 @@ export default function BettaBitesF3() {
                 </span>
               </div>
 
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button className="flex-1 bg-primary text-[#00382d] py-4 px-6 font-bold text-[13px] tracking-widest uppercase font-[Montserrat] hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 rounded-sm">
-                  Add to Cart
-                </button>
-                <button className="flex-1 border border-primary text-primary py-4 px-6 font-bold text-[13px] tracking-widest uppercase font-[Montserrat] hover:bg-primary hover:text-[#00382d] active:scale-[0.98] transition-all duration-200 rounded-sm">
-                  Buy Now
-                </button>
+              {/* Qty + CTAs */}
+              <div className="flex flex-col gap-3">
+                {/* Qty stepper */}
+                <div className="flex items-center gap-4">
+                  <span className="text-[11px] text-white/35 tracking-[0.12em] uppercase font-[Montserrat]">Qty</span>
+                  <div className="flex items-center rounded-xl border border-white/12 overflow-hidden">
+                    <button onClick={() => setQty((q) => Math.max(1, q - 1))}
+                      className="w-10 h-10 flex items-center justify-center text-white/50 text-[18px] hover:bg-white/8 hover:text-white transition-all duration-100 select-none">−</button>
+                    <span className="w-10 h-10 flex items-center justify-center text-white text-[14px] font-bold font-[Montserrat] border-x border-white/10">{qty}</span>
+                    <button onClick={() => setQty((q) => q + 1)}
+                      className="w-10 h-10 flex items-center justify-center text-primary text-[18px] hover:bg-primary/15 transition-all duration-100 select-none">+</button>
+                  </div>
+                  <span className="text-[12px] text-white/25 font-[Montserrat]">
+                    = ₹{(parseInt(pack.price.replace(/[^\d]/g, "")) * qty).toLocaleString("en-IN")}
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={handleAddToCart}
+                    className={`flex-1 py-4 px-6 font-bold text-[13px] tracking-widest uppercase font-[Montserrat] active:scale-[0.98] transition-all duration-200 rounded-sm flex items-center justify-center gap-2 ${
+                      added ? "bg-emerald-500 text-white" : "bg-primary text-[#00382d] hover:bg-primary/90"
+                    }`}
+                  >
+                    {added ? (
+                      <>
+                        <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4"><path d="M2 8l4 4 8-8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                        Added!
+                      </>
+                    ) : "Add to Cart"}
+                  </button>
+                  <button
+                    onClick={handleBuyNow}
+                    className="flex-1 border border-primary text-primary py-4 px-6 font-bold text-[13px] tracking-widest uppercase font-[Montserrat] hover:bg-primary hover:text-[#00382d] active:scale-[0.98] transition-all duration-200 rounded-sm"
+                  >
+                    Buy Now
+                  </button>
+                </div>
               </div>
 
               {/* Trust badges */}
@@ -505,7 +558,7 @@ export default function BettaBitesF3() {
                     <span className="text-[14px] font-semibold text-white font-[Montserrat]">{p.size}</span>
                     <span className="text-[14px] text-white/60 font-[Montserrat]">{p.mrp}</span>
                     <span className="text-[14px] text-primary font-semibold font-[Montserrat]">{p.price}</span>
-                    <span className="text-[12px] text-white/35 font-[Montserrat] font-mono">{p.sku}</span>
+                    <span className="text-[12px] text-white/35 font-mono">{p.sku}</span>
                   </div>
                 ))}
               </div>

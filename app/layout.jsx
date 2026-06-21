@@ -1,5 +1,7 @@
 import { Montserrat, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { CartProvider } from "@/lib/cartContext";
+import CartDrawer from "@/components/CartDrawer";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -36,7 +38,12 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0&display=swap"
         />
       </head>
-      <body className="font-body-md text-on-surface">{children}</body>
+      <body className="font-body-md text-on-surface">
+        <CartProvider>
+          <CartDrawer />
+          {children}
+        </CartProvider>
+      </body>
     </html>
   );
 }
