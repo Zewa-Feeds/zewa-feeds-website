@@ -21,8 +21,8 @@ export default function Home() {
     <>
       <Header />
       <main>
-        {sections.map((Section) => (
-          <Section key={Section.name} />
+        {sections.map((Section, i) => (
+          <Section key={i} />
         ))}
       </main>
       <Footer />

@@ -5,7 +5,15 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-const CATEGORIES = ["All", "Betta", "Cichlid", "Hatchery"];
+const CATEGORIES = [
+  "All",
+  "Dried",
+  "BSF Larvae",
+  "Slow Sinking Pellets",
+  "Floating Pellets",
+  "1kg Packs",
+  "Hatchery",
+];
 
 const SPOTLIGHT = [
   {
@@ -59,9 +67,9 @@ const PRODUCTS = [
   {
     name: "Betta Bites F3",
     slug: "betta-bites-f3",
-    category: "Betta",
+    tags: ["Slow Sinking Pellets", "1kg Packs"],
     tagline: "100% natural insect-protein formula for vibrant, healthy bettas",
-    price: "₹249",
+    price: 249,
     mrp: "₹310",
     packs: ["45g", "1kg"],
     badge: "BESTSELLER",
@@ -69,14 +77,13 @@ const PRODUCTS = [
     protein: "46%",
     image: "/Bottles/Betta/Betta F3_Front.png",
     accentColor: "rgba(68,229,194,0.18)",
-    featured: true,
   },
   {
     name: "Cichlid Bites C4",
     slug: null,
-    category: "Cichlid",
+    tags: ["Floating Pellets", "1kg Packs"],
     tagline: "High-energy insect protein for aggressive cichlid species",
-    price: "₹279",
+    price: 279,
     mrp: "₹349",
     packs: ["100g", "1kg"],
     badge: "NEW",
@@ -84,28 +91,26 @@ const PRODUCTS = [
     protein: "44%",
     image: "/Bottles/Cichild/Cichild C4_Front.png",
     accentColor: "rgba(56,189,248,0.15)",
-    featured: false,
   },
   {
     name: "Cichlid Bites C4 — Back",
     slug: null,
-    category: "Cichlid",
+    tags: ["Floating Pellets"],
     tagline: "Full nutritional panel — zero synthetic additives",
-    price: "₹279",
+    price: 279,
     mrp: "₹349",
     packs: ["100g", "1kg"],
     badge: null,
     protein: "44%",
     image: "/Bottles/Cichild/Cichild C4_back.png",
     accentColor: "rgba(56,189,248,0.12)",
-    featured: false,
   },
   {
     name: "DBSFL 25g",
     slug: null,
-    category: "Hatchery",
+    tags: ["Dried", "BSF Larvae", "Hatchery"],
     tagline: "Whole dried larvae — maximum insect nutrition per gram",
-    price: "₹199",
+    price: 199,
     mrp: "₹249",
     packs: ["25g"],
     badge: "PRO",
@@ -113,40 +118,37 @@ const PRODUCTS = [
     protein: "50%",
     image: "/Bottles/DBSFL/DBSFL 25G.png",
     accentColor: "rgba(139,92,246,0.15)",
-    featured: false,
   },
   {
     name: "DBSFL 75g",
     slug: null,
-    category: "Hatchery",
+    tags: ["Dried", "BSF Larvae", "Hatchery", "1kg Packs"],
     tagline: "Large pack for hatchery operators & serious breeders",
-    price: "₹449",
+    price: 449,
     mrp: "₹560",
     packs: ["75g"],
     badge: null,
     protein: "50%",
     image: "/Bottles/DBSFL/DBSFL 75G.png",
     accentColor: "rgba(139,92,246,0.12)",
-    featured: false,
   },
   {
     name: "Guppy Bites G2",
     slug: null,
-    category: "Others",
+    tags: ["Slow Sinking Pellets"],
     tagline: "Precision micro-nutrition for guppies & livebearers",
-    price: "₹199",
+    price: 199,
     mrp: "₹249",
     packs: ["45g", "500g"],
     badge: null,
     protein: "40%",
     image: "/Bottles/45G Bottles.jpg",
     accentColor: "rgba(68,229,194,0.10)",
-    featured: false,
   },
   {
     name: "Full Range",
     slug: null,
-    category: "Others",
+    tags: [],
     tagline: "The complete Zewa insect-protein lineup",
     price: null,
     mrp: null,
@@ -155,16 +157,68 @@ const PRODUCTS = [
     protein: null,
     image: "/Bottles/All products.jpg",
     accentColor: "rgba(68,229,194,0.08)",
-    featured: false,
   },
 ];
+
+function QtyButton({ price }) {
+  const [qty, setQty] = useState(0);
+  const [flash, setFlash] = useState(null); // "inc" | "dec"
+
+  if (!price) return null;
+
+  const trigger = (dir, fn) => (e) => {
+    e.preventDefault();
+    setFlash(dir);
+    setTimeout(() => setFlash(null), 200);
+    fn();
+  };
+
+  return (
+    <div className="mt-4 pt-3 border-t border-white/5">
+      {qty === 0 ? (
+        <button
+          onClick={(e) => { e.preventDefault(); setQty(1); }}
+          className="w-full h-9 rounded-lg bg-primary text-[#00382d] text-[11px] font-bold tracking-[0.12em] uppercase font-[Montserrat] hover:bg-primary/85 active:scale-[0.97] transition-all duration-150 shadow-[0_0_16px_rgba(68,229,194,0.25)]"
+        >
+          + Add
+        </button>
+      ) : (
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center rounded-lg border border-primary/30 overflow-hidden h-9">
+            <button
+              onClick={trigger("dec", () => setQty((q) => Math.max(0, q - 1)))}
+              className={`w-9 h-9 flex items-center justify-center text-[20px] leading-none select-none font-light transition-all duration-150 ${
+                flash === "dec" ? "bg-primary text-[#00382d]" : "bg-primary/8 text-primary hover:bg-primary/20"
+              }`}
+            >
+              −
+            </button>
+            <span className="w-9 text-center text-white text-[13px] font-bold font-[Montserrat] tabular-nums select-none border-x border-primary/20">
+              {qty}
+            </span>
+            <button
+              onClick={trigger("inc", () => setQty((q) => q + 1))}
+              className={`w-9 h-9 flex items-center justify-center text-[20px] leading-none select-none font-light transition-all duration-150 ${
+                flash === "inc" ? "bg-primary text-[#00382d]" : "bg-primary/8 text-primary hover:bg-primary/20"
+              }`}
+            >
+              +
+            </button>
+          </div>
+          <span className="font-[Montserrat] text-[14px] font-bold text-primary tabular-nums">
+            ₹{(price * qty).toLocaleString("en-IN")}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ProductsPage() {
   const [active, setActive] = useState("All");
   const [slide, setSlide] = useState(0);
   const [fading, setFading] = useState(false);
 
-  // Auto-rotate spotlight every 4s
   useEffect(() => {
     const timer = setInterval(() => {
       setFading(true);
@@ -184,7 +238,10 @@ export default function ProductsPage() {
 
   const sp = SPOTLIGHT[slide];
 
-  const filtered = active === "All" ? PRODUCTS : PRODUCTS.filter((p) => p.category === active);
+  const filtered =
+    active === "All"
+      ? PRODUCTS
+      : PRODUCTS.filter((p) => p.tags.includes(active));
 
   return (
     <>
@@ -233,12 +290,12 @@ export default function ProductsPage() {
         {/* ── Filter bar ──────────────────────────────────────────────── */}
         <div className="sticky top-20 z-30 bg-[#06080f]/96 backdrop-blur-md border-b border-white/5">
           <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 flex items-center justify-between gap-4 py-3">
-            <div className="flex gap-1 overflow-x-auto no-scrollbar">
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActive(cat)}
-                  className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-[0.1em] uppercase font-[Montserrat] transition-all duration-200 ${
+                  className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-[0.08em] uppercase font-[Montserrat] transition-all duration-200 ${
                     active === cat
                       ? "bg-primary text-[#00382d]"
                       : "text-white/35 hover:text-white/65 hover:bg-white/5"
@@ -260,7 +317,6 @@ export default function ProductsPage() {
             className="relative overflow-hidden rounded-3xl mb-8"
             style={{ background: "linear-gradient(135deg, #0d1a2e 0%, #091a18 100%)" }}
           >
-            {/* Animated background glow */}
             <div
               className="absolute inset-0 pointer-events-none transition-all duration-700"
               style={{ background: `radial-gradient(ellipse 55% 90% at 28% 50%, ${sp.accent}, transparent 70%)` }}
@@ -270,7 +326,6 @@ export default function ProductsPage() {
               className="relative flex flex-col sm:flex-row items-center gap-8 sm:gap-0"
               style={{ opacity: fading ? 0 : 1, transform: fading ? "translateY(8px)" : "translateY(0)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
             >
-              {/* Bottle */}
               <div className="relative w-full sm:w-[38%] flex items-center justify-center py-10 px-8 shrink-0">
                 <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 55%, ${sp.accent}, transparent 65%)` }} />
                 <Image
@@ -283,7 +338,6 @@ export default function ProductsPage() {
                 />
               </div>
 
-              {/* Content */}
               <div className="flex flex-col justify-center gap-4 flex-1 px-8 sm:px-12 pb-10 sm:py-12 text-center sm:text-left">
                 <div className="flex items-center gap-2.5 justify-center sm:justify-start">
                   <span className="text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] bg-primary/15 text-primary border border-primary/30">
@@ -297,7 +351,7 @@ export default function ProductsPage() {
 
                 <div className="flex items-center gap-5 justify-center sm:justify-start">
                   <div>
-                    <span className="font-[Playfair_Display] text-[30px] text-primary leading-none">{sp.price}</span>
+                    <span className="font-[Playfair_Display] text-[30px] text-primary leading-none">₹{sp.price.replace("₹", "")}</span>
                     <span className="text-[11px] text-white/20 line-through font-[Montserrat] ml-2">{sp.mrp}</span>
                   </div>
                   <div className="w-px h-8 bg-white/10" />
@@ -326,21 +380,12 @@ export default function ProductsPage() {
                 )}
               </div>
 
-              {/* Dot controls */}
               <div className="absolute bottom-5 left-1/2 -translate-x-1/2 sm:static sm:translate-x-0 flex sm:flex-col items-center gap-2.5 sm:pr-10">
                 {SPOTLIGHT.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => goTo(i)}
-                    aria-label={`Go to slide ${i + 1}`}
-                  >
-                    <span
-                      className={`block rounded-full transition-all duration-300 ${
-                        i === slide
-                          ? "w-5 h-1.5 sm:w-1.5 sm:h-5 bg-primary"
-                          : "w-1.5 h-1.5 bg-white/20 hover:bg-white/45"
-                      }`}
-                    />
+                  <button key={i} onClick={() => goTo(i)} aria-label={`Go to slide ${i + 1}`}>
+                    <span className={`block rounded-full transition-all duration-300 ${
+                      i === slide ? "w-5 h-1.5 sm:w-1.5 sm:h-5 bg-primary" : "w-1.5 h-1.5 bg-white/20 hover:bg-white/45"
+                    }`} />
                   </button>
                 ))}
               </div>
@@ -350,71 +395,83 @@ export default function ProductsPage() {
           {/* Product grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map((p, i) => (
-              <a
+              <div
                 key={`${p.name}-${i}`}
-                href={p.slug ? `/products/${p.slug}` : undefined}
-                className={`group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-400 ${p.slug ? "cursor-pointer" : "cursor-default"}`}
+                className={`group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-300 ${p.slug ? "cursor-pointer" : "cursor-default"}`}
                 style={{ background: "linear-gradient(160deg, #0d1726 0%, #0a1219 100%)" }}
               >
+                {/* Hover glow */}
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                   style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor || "rgba(68,229,194,0.12)"}, transparent)` }}
                 />
-                <div className="relative flex items-center justify-center pt-8 pb-4 px-6 overflow-hidden" style={{ minHeight: "220px" }}>
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{ background: `radial-gradient(circle at 50% 60%, ${p.accentColor || "rgba(68,229,194,0.10)"}, transparent 65%)` }}
-                  />
-                  <Image
-                    src={p.image}
-                    alt={p.name}
-                    width={220}
-                    height={220}
-                    className="relative z-10 object-contain max-h-[200px] w-auto transition-transform duration-500 group-hover:scale-105 group-hover:-translate-y-1"
-                    style={{ filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.5))" }}
-                  />
-                  {p.badge && (
-                    <span className={`absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] ${p.badgeColor || "bg-primary text-[#00382d]"}`}>
-                      {p.badge}
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col flex-1 px-5 pb-5 pt-1 gap-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-bold text-primary/50 tracking-[0.2em] font-[Montserrat] uppercase">{p.category}</span>
-                    {p.protein && (
-                      <span className="text-[11px] font-bold text-primary font-[Montserrat]">{p.protein} <span className="text-white/25 font-normal text-[10px]">protein</span></span>
+
+                {/* Clickable image + name area */}
+                <a
+                  href={p.slug ? `/products/${p.slug}` : undefined}
+                  className={`flex flex-col ${p.slug ? "cursor-pointer" : "cursor-default pointer-events-none"}`}
+                >
+                  <div className="relative flex items-center justify-center pt-8 pb-4 px-6 overflow-hidden" style={{ minHeight: "220px" }}>
+                    <div className="absolute inset-0 pointer-events-none"
+                      style={{ background: `radial-gradient(circle at 50% 60%, ${p.accentColor || "rgba(68,229,194,0.10)"}, transparent 65%)` }} />
+                    <Image
+                      src={p.image}
+                      alt={p.name}
+                      width={220}
+                      height={220}
+                      className="relative z-10 object-contain max-h-[200px] w-auto transition-transform duration-500 group-hover:scale-105 group-hover:-translate-y-1"
+                      style={{ filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.5))" }}
+                    />
+                    {p.badge && (
+                      <span className={`absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] ${p.badgeColor || "bg-primary text-[#00382d]"}`}>
+                        {p.badge}
+                      </span>
                     )}
                   </div>
-                  <h3 className="font-[Playfair_Display] text-[19px] text-white leading-snug group-hover:text-primary transition-colors duration-200">
-                    {p.name}
-                  </h3>
-                  <p className="text-[12px] text-white/35 font-[Montserrat] leading-relaxed line-clamp-2">{p.tagline}</p>
-                  <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
-                    {p.price ? (
-                      <div className="flex items-baseline gap-2">
-                        <span className="font-[Playfair_Display] text-[24px] text-white">{p.price}</span>
+
+                  <div className="px-5 pt-1 pb-1 flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-1 flex-wrap">
+                        {p.tags.slice(0, 1).map((t) => (
+                          <span key={t} className="text-[9px] font-bold text-primary/50 tracking-[0.18em] font-[Montserrat] uppercase">{t}</span>
+                        ))}
+                      </div>
+                      {p.protein && (
+                        <span className="text-[11px] font-bold text-primary font-[Montserrat]">{p.protein} <span className="text-white/25 font-normal text-[10px]">protein</span></span>
+                      )}
+                    </div>
+                    <h3 className="font-[Playfair_Display] text-[19px] text-white leading-snug group-hover:text-primary transition-colors duration-200">
+                      {p.name}
+                    </h3>
+                    <p className="text-[12px] text-white/35 font-[Montserrat] leading-relaxed line-clamp-2">{p.tagline}</p>
+                  </div>
+                </a>
+
+                {/* Price + qty controls — not wrapped in <a> */}
+                <div className="px-5 pb-5">
+                  {p.price ? (
+                    <>
+                      <div className="flex items-baseline gap-2 mt-3">
+                        <span className="font-[Playfair_Display] text-[24px] text-white">₹{p.price.toLocaleString("en-IN")}</span>
                         <span className="text-[11px] text-white/20 line-through font-[Montserrat]">{p.mrp}</span>
                       </div>
-                    ) : (
+                      <QtyButton price={p.price} />
+                    </>
+                  ) : (
+                    <div className="mt-3 pt-4 border-t border-white/5">
                       <span className="text-[12px] text-white/25 font-[Montserrat] italic">Multiple packs</span>
-                    )}
-                    <div className="flex gap-1.5">
-                      {p.packs.slice(0, 2).map((pack) => (
-                        <span key={pack} className="text-[9px] px-2 py-1 rounded-full bg-white/5 text-white/30 font-[Montserrat]">{pack}</span>
-                      ))}
-                    </div>
-                  </div>
-                  {!p.slug && (
-                    <div className="mt-1 text-[10px] text-white/20 font-[Montserrat] tracking-widest uppercase text-center py-1.5 rounded-lg bg-white/3">
-                      Coming Soon
                     </div>
                   )}
+                  {!p.slug && p.price && (
+                    <p className="mt-2 text-[9px] text-white/20 font-[Montserrat] tracking-widest uppercase text-center">Coming Soon · Cart unavailable</p>
+                  )}
                 </div>
+
                 {p.slug && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left" style={{ background: "linear-gradient(to right, rgba(68,229,194,0.6), transparent)" }} />
+                  <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left"
+                    style={{ background: "linear-gradient(to right, rgba(68,229,194,0.6), transparent)" }} />
                 )}
-              </a>
+              </div>
             ))}
           </div>
 
