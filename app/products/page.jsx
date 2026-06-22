@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -8,12 +8,12 @@ import { useCart } from "@/lib/cartContext";
 
 const CATEGORIES = [
   "All",
-  "Dried",
-  "BSF Larvae",
+  "Dried BSF Larvae",
   "Slow Sinking Pellets",
   "Floating Pellets",
+  "Bottom Dwellers",
+  "Hatchery Feeds",
   "1kg Packs",
-  "Hatchery",
 ];
 
 const SPOTLIGHT = [
@@ -77,12 +77,19 @@ const PRODUCTS = [
     badgeColor: "bg-primary text-[#00382d]",
     protein: "46%",
     image: "/Bottles/Betta/Betta F3_Front.png",
+    gallery: [
+      "/Bottles/Betta/Betta F3_Front.png",
+      "/Bottles/Betta/Betta F3_Back.png",
+      "/Bottles/Betta/Betta 01.png",
+      "/Bottles/Betta/Betta 02.png",
+      "/Bottles/Betta/Betta 03.png",
+    ],
     accentColor: "rgba(68,229,194,0.18)",
   },
   {
     name: "Cichlid Bites C4",
     slug: null,
-    tags: ["Floating Pellets", "1kg Packs"],
+    tags: ["Floating Pellets", "Bottom Dwellers", "1kg Packs"],
     tagline: "High-energy insect protein for aggressive cichlid species",
     price: 279,
     mrp: "₹349",
@@ -91,12 +98,19 @@ const PRODUCTS = [
     badgeColor: "bg-sky-500 text-white",
     protein: "44%",
     image: "/Bottles/Cichild/Cichild C4_Front.png",
+    gallery: [
+      "/Bottles/Cichild/Cichild C4_Front.png",
+      "/Bottles/Cichild/Cichild C4_back.png",
+      "/Bottles/Cichild/Cichild 01.png",
+      "/Bottles/Cichild/Cichild 02.png",
+      "/Bottles/Cichild/Cichild 03.png",
+    ],
     accentColor: "rgba(56,189,248,0.15)",
   },
   {
     name: "Cichlid Bites C4 — Back",
     slug: null,
-    tags: ["Floating Pellets"],
+    tags: ["Floating Pellets", "Bottom Dwellers"],
     tagline: "Full nutritional panel — zero synthetic additives",
     price: 279,
     mrp: "₹349",
@@ -104,12 +118,16 @@ const PRODUCTS = [
     badge: null,
     protein: "44%",
     image: "/Bottles/Cichild/Cichild C4_back.png",
+    gallery: [
+      "/Bottles/Cichild/Cichild C4_back.png",
+      "/Bottles/Cichild/Cichild C4_Front.png",
+    ],
     accentColor: "rgba(56,189,248,0.12)",
   },
   {
-    name: "DBSFL 25g",
+    name: "Dried BSF Larvae 25g",
     slug: null,
-    tags: ["Dried", "BSF Larvae", "Hatchery"],
+    tags: ["Dried BSF Larvae", "Hatchery Feeds"],
     tagline: "Whole dried larvae — maximum insect nutrition per gram",
     price: 199,
     mrp: "₹249",
@@ -118,12 +136,18 @@ const PRODUCTS = [
     badgeColor: "bg-violet-500 text-white",
     protein: "50%",
     image: "/Bottles/DBSFL/DBSFL 25G.png",
+    gallery: [
+      "/Bottles/DBSFL/DBSFL 25G.png",
+      "/Bottles/DBSFL/DBSFL25_02.png",
+      "/Bottles/DBSFL/India/25/Artboard 1.png",
+      "/Bottles/DBSFL/India/25/Artboard 1 copy.png",
+    ],
     accentColor: "rgba(139,92,246,0.15)",
   },
   {
-    name: "DBSFL 75g",
+    name: "Dried BSF Larvae 75g",
     slug: null,
-    tags: ["Dried", "BSF Larvae", "Hatchery", "1kg Packs"],
+    tags: ["Dried BSF Larvae", "Hatchery Feeds", "1kg Packs"],
     tagline: "Large pack for hatchery operators & serious breeders",
     price: 449,
     mrp: "₹560",
@@ -131,19 +155,32 @@ const PRODUCTS = [
     badge: null,
     protein: "50%",
     image: "/Bottles/DBSFL/DBSFL 75G.png",
+    gallery: [
+      "/Bottles/DBSFL/DBSFL 75G.png",
+      "/Bottles/DBSFL/DBSFL 75G_Front.png",
+      "/Bottles/DBSFL/DBSFL 75G_back.png",
+      "/Bottles/DBSFL/India/75/Artboard 1.png",
+    ],
     accentColor: "rgba(139,92,246,0.12)",
   },
   {
     name: "Guppy Bites G2",
     slug: null,
-    tags: ["Slow Sinking Pellets"],
+    tags: ["Slow Sinking Pellets", "Bottom Dwellers"],
     tagline: "Precision micro-nutrition for guppies & livebearers",
     price: 199,
     mrp: "₹249",
     packs: ["45g", "500g"],
     badge: null,
     protein: "40%",
-    image: "/Bottles/45G Bottles.jpg",
+    image: "/Bottles/Guppy/Guppy G2_Front.png",
+    gallery: [
+      "/Bottles/Guppy/Guppy G2_Front.png",
+      "/Bottles/Guppy/Guppy G2_Back.png",
+      "/Bottles/Guppy/Guppy 01.png",
+      "/Bottles/Guppy/Guppy 02.png",
+      "/Bottles/Guppy/Guppy 03.png",
+    ],
     accentColor: "rgba(68,229,194,0.10)",
   },
   {
@@ -157,9 +194,199 @@ const PRODUCTS = [
     badge: null,
     protein: null,
     image: "/Bottles/All products.jpg",
+    gallery: ["/Bottles/All products.jpg"],
     accentColor: "rgba(68,229,194,0.08)",
   },
 ];
+
+function ProductCard({ p }) {
+  const gallery = p.gallery || [p.image];
+  const [imgIdx, setImgIdx] = useState(0);
+  const [galleryActive, setGalleryActive] = useState(false);
+  const hoverTimerRef = useRef(null);
+  const autoTimerRef = useRef(null);
+  const imgIdxRef = useRef(0);
+
+  // keep ref in sync so setInterval closure always has current value
+  useEffect(() => { imgIdxRef.current = imgIdx; }, [imgIdx]);
+
+  const stopAuto = useCallback(() => {
+    clearInterval(autoTimerRef.current);
+    autoTimerRef.current = null;
+  }, []);
+
+  const startAuto = useCallback(() => {
+    stopAuto();
+    if (gallery.length < 2) return;
+    autoTimerRef.current = setInterval(() => {
+      setImgIdx((prev) => (prev + 1) % gallery.length);
+    }, 2500);
+  }, [gallery.length, stopAuto]);
+
+  const handleMouseEnter = useCallback(() => {
+    if (gallery.length < 2) return;
+    hoverTimerRef.current = setTimeout(() => {
+      setGalleryActive(true);
+      startAuto();
+    }, 3000);
+  }, [gallery.length, startAuto]);
+
+  const handleMouseLeave = useCallback(() => {
+    clearTimeout(hoverTimerRef.current);
+    stopAuto();
+    setGalleryActive(false);
+    setImgIdx(0);
+  }, [stopAuto]);
+
+  const goTo = useCallback((dir, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    stopAuto();
+    setImgIdx((prev) => (prev + dir + gallery.length) % gallery.length);
+  }, [gallery.length, stopAuto]);
+
+  useEffect(() => () => {
+    clearTimeout(hoverTimerRef.current);
+    clearInterval(autoTimerRef.current);
+  }, []);
+
+  return (
+    <div
+      className={`group relative flex flex-col rounded-2xl transition-all duration-300 ${p.slug ? "cursor-pointer" : "cursor-default"}`}
+      style={{ background: "linear-gradient(160deg, #0d1726 0%, #0a1219 100%)", overflow: "hidden" }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Hover glow */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor || "rgba(68,229,194,0.12)"}, transparent)` }} />
+
+      {/* Image zone — NOT inside <a> so arrows work */}
+      <div className="relative flex items-center justify-center pt-8 pb-4 px-6" style={{ minHeight: "220px" }}>
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: `radial-gradient(circle at 50% 60%, ${p.accentColor || "rgba(68,229,194,0.10)"}, transparent 65%)` }} />
+
+        {/* Stack all gallery images, crossfade via opacity */}
+        {gallery.map((src, gi) => (
+          <Image
+            key={src}
+            src={src}
+            alt={`${p.name} ${gi + 1}`}
+            width={220}
+            height={220}
+            className="absolute object-contain max-h-[200px] w-auto"
+            style={{
+              filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.5))",
+              opacity: gi === imgIdx ? 1 : 0,
+              transform: gi === imgIdx ? "scale(1.05) translateY(-4px)" : "scale(1) translateY(0)",
+              transition: "opacity 0.5s ease, transform 0.5s ease",
+              zIndex: gi === imgIdx ? 2 : 1,
+              pointerEvents: "none",
+            }}
+          />
+        ))}
+
+        {/* Badge */}
+        {p.badge && (
+          <span className={`absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] z-10 ${p.badgeColor || "bg-primary text-[#00382d]"}`}>
+            {p.badge}
+          </span>
+        )}
+
+        {/* Gallery arrows — outside <a>, only when active */}
+        {gallery.length > 1 && galleryActive && (
+          <>
+            <button
+              onMouseDown={(e) => goTo(-1, e)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-7 h-7 flex items-center justify-center rounded-full"
+              style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.1)" }}
+            >
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                <path d="M7.5 2L3.5 6L7.5 10" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <button
+              onMouseDown={(e) => goTo(1, e)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-7 h-7 flex items-center justify-center rounded-full"
+              style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.1)" }}
+            >
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                <path d="M4.5 2L8.5 6L4.5 10" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+
+            {/* Dot indicators */}
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 items-center">
+              {gallery.map((_, gi) => (
+                <span key={gi} className="block rounded-full transition-all duration-300"
+                  style={{ width: gi === imgIdx ? "16px" : "4px", height: "4px", background: gi === imgIdx ? "rgba(68,229,194,1)" : "rgba(255,255,255,0.25)" }} />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Pre-activation hint */}
+        {gallery.length > 1 && !galleryActive && (
+          <div className="absolute bottom-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-300 pointer-events-none">
+            <div className="flex items-center gap-1 px-2 py-1 rounded-full" style={{ background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)" }}>
+              <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3" style={{ color: "rgba(255,255,255,0.4)" }}>
+                <rect x="1" y="3" width="14" height="10" rx="1" stroke="currentColor" strokeWidth="1.3" />
+                <path d="M6 6l4 2-4 2V6z" fill="currentColor" />
+              </svg>
+              <span className="text-[9px] font-[Montserrat]" style={{ color: "rgba(255,255,255,0.35)" }}>{gallery.length} photos</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Name + tagline — clickable */}
+      <a
+        href={p.slug ? `/products/${p.slug}` : undefined}
+        className={`px-5 pt-1 pb-1 flex flex-col gap-2 ${!p.slug ? "pointer-events-none" : ""}`}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex gap-1 flex-wrap">
+            {p.tags.slice(0, 1).map((t) => (
+              <span key={t} className="text-[9px] font-bold text-primary/50 tracking-[0.18em] font-[Montserrat] uppercase">{t}</span>
+            ))}
+          </div>
+          {p.protein && (
+            <span className="text-[11px] font-bold text-primary font-[Montserrat]">{p.protein} <span className="text-white/25 font-normal text-[10px]">protein</span></span>
+          )}
+        </div>
+        <h3 className="font-[Playfair_Display] text-[19px] text-white leading-snug group-hover:text-primary transition-colors duration-200">
+          {p.name}
+        </h3>
+        <p className="text-[12px] text-white/35 font-[Montserrat] leading-relaxed line-clamp-2">{p.tagline}</p>
+      </a>
+
+      {/* Price + qty */}
+      <div className="px-5 pb-5">
+        {p.price ? (
+          <>
+            <div className="flex items-baseline gap-2 mt-3">
+              <span className="font-[Playfair_Display] text-[24px] text-white">₹{p.price.toLocaleString("en-IN")}</span>
+              <span className="text-[11px] text-white/20 line-through font-[Montserrat]">{p.mrp}</span>
+            </div>
+            <QtyButton product={p} />
+          </>
+        ) : (
+          <div className="mt-3 pt-4 border-t border-white/5">
+            <span className="text-[12px] text-white/25 font-[Montserrat] italic">Multiple packs</span>
+          </div>
+        )}
+        {!p.slug && p.price && (
+          <p className="mt-2 text-[9px] text-white/20 font-[Montserrat] tracking-widest uppercase text-center">Coming Soon · Cart unavailable</p>
+        )}
+      </div>
+
+      {p.slug && (
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left"
+          style={{ background: "linear-gradient(to right, rgba(68,229,194,0.6), transparent)" }} />
+      )}
+    </div>
+  );
+}
 
 function QtyButton({ product }) {
   const { price, name, slug, image, accentColor } = product;
@@ -405,83 +632,7 @@ export default function ProductsPage() {
           {/* Product grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map((p, i) => (
-              <div
-                key={`${p.name}-${i}`}
-                className={`group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-300 ${p.slug ? "cursor-pointer" : "cursor-default"}`}
-                style={{ background: "linear-gradient(160deg, #0d1726 0%, #0a1219 100%)" }}
-              >
-                {/* Hover glow */}
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                  style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor || "rgba(68,229,194,0.12)"}, transparent)` }}
-                />
-
-                {/* Clickable image + name area */}
-                <a
-                  href={p.slug ? `/products/${p.slug}` : undefined}
-                  className={`flex flex-col ${p.slug ? "cursor-pointer" : "cursor-default pointer-events-none"}`}
-                >
-                  <div className="relative flex items-center justify-center pt-8 pb-4 px-6 overflow-hidden" style={{ minHeight: "220px" }}>
-                    <div className="absolute inset-0 pointer-events-none"
-                      style={{ background: `radial-gradient(circle at 50% 60%, ${p.accentColor || "rgba(68,229,194,0.10)"}, transparent 65%)` }} />
-                    <Image
-                      src={p.image}
-                      alt={p.name}
-                      width={220}
-                      height={220}
-                      className="relative z-10 object-contain max-h-[200px] w-auto transition-transform duration-500 group-hover:scale-105 group-hover:-translate-y-1"
-                      style={{ filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.5))" }}
-                    />
-                    {p.badge && (
-                      <span className={`absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] ${p.badgeColor || "bg-primary text-[#00382d]"}`}>
-                        {p.badge}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="px-5 pt-1 pb-1 flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-1 flex-wrap">
-                        {p.tags.slice(0, 1).map((t) => (
-                          <span key={t} className="text-[9px] font-bold text-primary/50 tracking-[0.18em] font-[Montserrat] uppercase">{t}</span>
-                        ))}
-                      </div>
-                      {p.protein && (
-                        <span className="text-[11px] font-bold text-primary font-[Montserrat]">{p.protein} <span className="text-white/25 font-normal text-[10px]">protein</span></span>
-                      )}
-                    </div>
-                    <h3 className="font-[Playfair_Display] text-[19px] text-white leading-snug group-hover:text-primary transition-colors duration-200">
-                      {p.name}
-                    </h3>
-                    <p className="text-[12px] text-white/35 font-[Montserrat] leading-relaxed line-clamp-2">{p.tagline}</p>
-                  </div>
-                </a>
-
-                {/* Price + qty controls — not wrapped in <a> */}
-                <div className="px-5 pb-5">
-                  {p.price ? (
-                    <>
-                      <div className="flex items-baseline gap-2 mt-3">
-                        <span className="font-[Playfair_Display] text-[24px] text-white">₹{p.price.toLocaleString("en-IN")}</span>
-                        <span className="text-[11px] text-white/20 line-through font-[Montserrat]">{p.mrp}</span>
-                      </div>
-                      <QtyButton product={p} />
-                    </>
-                  ) : (
-                    <div className="mt-3 pt-4 border-t border-white/5">
-                      <span className="text-[12px] text-white/25 font-[Montserrat] italic">Multiple packs</span>
-                    </div>
-                  )}
-                  {!p.slug && p.price && (
-                    <p className="mt-2 text-[9px] text-white/20 font-[Montserrat] tracking-widest uppercase text-center">Coming Soon · Cart unavailable</p>
-                  )}
-                </div>
-
-                {p.slug && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left"
-                    style={{ background: "linear-gradient(to right, rgba(68,229,194,0.6), transparent)" }} />
-                )}
-              </div>
+              <ProductCard key={`${p.name}-${i}`} p={p} />
             ))}
           </div>
 
