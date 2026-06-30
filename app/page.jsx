@@ -10,8 +10,8 @@ import Footer from "@/components/Footer";
 const sections = [
   Hero,
   ClinicalProof,
-  ProductShowcase,
   Science,
+  ProductShowcase,
   KnowledgeHub,
   Testimonials,
 ];

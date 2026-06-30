@@ -64,7 +64,7 @@ const nav = {
     { label: "Pleco Bites P5", href: "#" },
     { label: "Shrimp Grazers S5", href: "#" },
     { label: "Hatch'E H1/H2/H3", href: "#" },
-    { label: "View all products →", href: "/shop", accent: true },
+    { label: "View all products →", href: "/products", accent: true },
   ],
   Learn: [
     { label: "Knowledge Hub", href: "#" },

@@ -43,24 +43,82 @@ const GALLERY = [
   },
 ];
 
+// ─── SVG icon set ─────────────────────────────────────────────────────────────
+const IcoProtein = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+    <circle cx="5" cy="5" r="1.5" fill="currentColor" opacity=".5"/>
+    <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+    <circle cx="15" cy="5" r="1.5" fill="currentColor" opacity=".5"/>
+    <circle cx="5" cy="15" r="1.5" fill="currentColor" opacity=".5"/>
+    <circle cx="15" cy="15" r="1.5" fill="currentColor" opacity=".5"/>
+    <path d="M5 5 Q10 2 15 5M5 5 Q3 10 5 15M15 5 Q17 10 15 15M5 15 Q10 18 15 15" stroke="currentColor" strokeWidth="1" opacity=".4"/>
+    <path d="M5 5 Q10 8 15 5M5 15 Q10 12 15 15" stroke="currentColor" strokeWidth="1.2"/>
+  </svg>
+);
+const IcoLeaf = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+    <path d="M10 17C10 17 3 13 3 7a7 7 0 0 1 14 0c0 6-7 10-7 10z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+    <path d="M10 17V10M10 10C10 10 7 8 7 6M10 10C10 10 13 8 13 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+  </svg>
+);
+const IcoShield = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+    <path d="M10 2L3 5v5c0 4.4 3 7.8 7 9 4-1.2 7-4.6 7-9V5l-7-3z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+    <path d="M7 10l2 2 4-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+const IcoPalette = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+    <circle cx="10" cy="10" r="7" stroke="currentColor" strokeWidth="1.4"/>
+    <circle cx="7" cy="7.5" r="1.2" fill="currentColor"/>
+    <circle cx="13" cy="7.5" r="1.2" fill="currentColor" opacity=".5"/>
+    <circle cx="10" cy="13.5" r="1.2" fill="currentColor" opacity=".7"/>
+    <circle cx="10" cy="10" r="2" stroke="currentColor" strokeWidth="1.2"/>
+  </svg>
+);
+const IcoRuler = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+    <rect x="2" y="7" width="16" height="6" rx="1" stroke="currentColor" strokeWidth="1.4"/>
+    <path d="M5 7v3M8 7v2M11 7v3M14 7v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+  </svg>
+);
+const IcoBolt = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+    <path d="M11 2L4 11h6l-1 7 7-9h-6l1-7z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+  </svg>
+);
+const IcoWave = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+    <path d="M2 10 Q5 5 8 10 Q11 15 14 10 Q17 5 20 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M2 14 Q5 9 8 14" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity=".4"/>
+  </svg>
+);
+const IcoTrophy = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+    <path d="M6 2h8v8a4 4 0 0 1-8 0V2z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+    <path d="M6 6H3a2 2 0 0 0 2 2h1M14 6h3a2 2 0 0 1-2 2h-1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+    <path d="M10 14v3M7 17h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+  </svg>
+);
+
 const HIGHLIGHTS = [
-  { icon: "🧬", title: "46% Insect Protein", sub: "Highest in the Zewa range" },
-  { icon: "🌿", title: "100% Natural Formula", sub: "Zero synthetic additives" },
-  { icon: "🛡️", title: "Spirulina Immunity Boost", sub: "Phycocyanin compounds" },
-  { icon: "🎨", title: "Natural Colour Enhancement", sub: "Paprica & carotenoids" },
-  { icon: "📏", title: "0.6–0.8mm Pellet Size", sub: "Betta mouth anatomy fit" },
-  { icon: "⚡", title: "88% Digestibility", sub: "Low ammonia output" },
+  { icon: <IcoProtein />, title: "46% Insect Protein", sub: "Highest in the Zewa range" },
+  { icon: <IcoLeaf />, title: "100% Natural Formula", sub: "Zero synthetic additives" },
+  { icon: <IcoShield />, title: "Spirulina Immunity Boost", sub: "Phycocyanin compounds" },
+  { icon: <IcoPalette />, title: "Natural Colour Enhancement", sub: "Paprica & carotenoids" },
+  { icon: <IcoRuler />, title: "0.6–0.8mm Pellet Size", sub: "Betta mouth anatomy fit" },
+  { icon: <IcoBolt />, title: "88% Digestibility", sub: "Low ammonia output" },
 ];
 
 const FEATURES = [
-  { icon: "🧬", title: "46% Insect Protein", desc: "Highest protein concentration in the Zewa range — delivers complete amino acid profile." },
-  { icon: "🌿", title: "100% Natural Formula", desc: "No synthetic additives, artificial colours, or chemical binders — clean label guarantee." },
-  { icon: "🛡️", title: "Spirulina Immunity Boost", desc: "Phycocyanin compounds from spirulina actively strengthen the betta's immune response." },
-  { icon: "🎨", title: "Natural Colour Enhancement", desc: "Paprica essence & natural carotenoids intensify vivid reds, blues, and metallic iridescence." },
-  { icon: "📏", title: "0.6–0.8mm Betta-Specific Size", desc: "Precisely calibrated for the upturned terminal mouth anatomy of Betta splendens." },
-  { icon: "⚡", title: "88% Protein Digestibility", desc: "Insect protein is metabolised near-completely, dramatically reducing ammonia output." },
-  { icon: "🌊", title: "Slow-Sinking Surface Action", desc: "Pellet density suits bettas' natural surface and mid-water feeding posture." },
-  { icon: "🏆", title: "Show & Breeding Grade", desc: "Formulated to the nutritional standards required by competitive betta breeders." },
+  { icon: <IcoProtein />, title: "46% Insect Protein", desc: "Highest protein concentration in the Zewa range — delivers complete amino acid profile." },
+  { icon: <IcoLeaf />, title: "100% Natural Formula", desc: "No synthetic additives, artificial colours, or chemical binders — clean label guarantee." },
+  { icon: <IcoShield />, title: "Spirulina Immunity Boost", desc: "Phycocyanin compounds from spirulina actively strengthen the betta's immune response." },
+  { icon: <IcoPalette />, title: "Natural Colour Enhancement", desc: "Paprica essence & natural carotenoids intensify vivid reds, blues, and metallic iridescence." },
+  { icon: <IcoRuler />, title: "0.6–0.8mm Betta-Specific Size", desc: "Precisely calibrated for the upturned terminal mouth anatomy of Betta splendens." },
+  { icon: <IcoBolt />, title: "88% Protein Digestibility", desc: "Insect protein is metabolised near-completely, dramatically reducing ammonia output." },
+  { icon: <IcoWave />, title: "Slow-Sinking Surface Action", desc: "Pellet density suits bettas' natural surface and mid-water feeding posture." },
+  { icon: <IcoTrophy />, title: "Show & Breeding Grade", desc: "Formulated to the nutritional standards required by competitive betta breeders." },
 ];
 
 const INGREDIENTS = [
@@ -93,16 +151,39 @@ const BETTA_VARIETIES = [
 ];
 
 const RELATED = [
-  { name: "Cichlid Bites C4", tagline: "High-energy formula for aggressive cichlids", href: "#", image: "/Bottles/Cichild/Cichild C4_Front.png" },
-  { name: "DBSFL 25g", tagline: "Dried whole larvae — treat & protein supplement", href: "#", image: "/Bottles/DBSFL/DBSFL 25G.png" },
-  { name: "Full Range", tagline: "All Zewa species-specific formulas", href: "/products", image: "/Bottles/All products.jpg" },
+  { name: "Cichlid Bites C4", tagline: "High-energy formula for aggressive cichlids", href: "/products/cichlid-bites-c4", image: "/Bottles/Cichild/Cichild C4_Front.png" },
+  { name: "Dried BSF Larvae 25g", tagline: "Dried whole larvae — treat & protein supplement", href: "/products/dried-bsf-larvae-25g", image: "/Bottles/DBSFL/DBSFL 25G.png" },
+  { name: "Guppy Bites G2", tagline: "Micro-pellet omnivore formula", href: "/products/guppy-bites-g2", image: "/Bottles/Guppy/Guppy G2_Front.png" },
 ];
 
+const IcoMicroscope = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+    <circle cx="8" cy="7" r="3" stroke="currentColor" strokeWidth="1.4"/>
+    <path d="M8 10v6M5 16h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+    <path d="M11 5l2-2 2 2-2 2-2-2z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
+    <path d="M14 9h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+  </svg>
+);
+const IcoMapPin = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+    <path d="M10 2a5 5 0 0 1 5 5c0 3.5-5 11-5 11S5 10.5 5 7a5 5 0 0 1 5-5z" stroke="currentColor" strokeWidth="1.4"/>
+    <circle cx="10" cy="7" r="1.8" fill="currentColor" opacity=".5"/>
+  </svg>
+);
+const IcoLarva = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+    <ellipse cx="10" cy="10" rx="7" ry="4" stroke="currentColor" strokeWidth="1.4"/>
+    <circle cx="4" cy="9" r="1" fill="currentColor" opacity=".5"/>
+    <path d="M6 8.5 Q8 7 10 8.5 Q12 10 14 8.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
+    <circle cx="16.5" cy="9.5" r=".8" fill="currentColor"/>
+  </svg>
+);
+
 const TRUST_BADGES = [
-  { icon: "🔬", label: "NABL Lab Tested" },
-  { icon: "🌿", label: "100% Natural" },
-  { icon: "🇮🇳", label: "Made in India" },
-  { icon: "🪲", label: "Insect Protein" },
+  { icon: <IcoMicroscope />, label: "NABL Lab Tested" },
+  { icon: <IcoLeaf />, label: "100% Natural" },
+  { icon: <IcoMapPin />, label: "Made in India" },
+  { icon: <IcoLarva />, label: "Insect Protein" },
 ];
 
 const TABS = ["Overview", "Description", "Features", "Ingredients", "Suitable For", "Pack Info"];
@@ -333,7 +414,7 @@ export default function BettaBitesF3() {
               <div className="grid grid-cols-4 gap-2 pt-1">
                 {TRUST_BADGES.map((b) => (
                   <div key={b.label} className="flex flex-col items-center gap-1.5 py-3 px-2 bg-white/3 border border-white/6 rounded-xl">
-                    <span className="text-lg">{b.icon}</span>
+                    <span className="text-primary/60">{b.icon}</span>
                     <span className="text-[10px] text-white/45 text-center leading-tight font-[Montserrat] tracking-wide">{b.label}</span>
                   </div>
                 ))}
@@ -387,7 +468,7 @@ export default function BettaBitesF3() {
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                 {HIGHLIGHTS.map((h) => (
                   <div key={h.title} className="bg-white/3 border border-white/6 rounded-2xl p-5 flex flex-col gap-3 hover:border-primary/30 hover:bg-primary/5 transition-all duration-300">
-                    <span className="text-2xl">{h.icon}</span>
+                    <span className="text-primary/70">{h.icon}</span>
                     <div>
                       <p className="text-[13px] font-semibold text-white font-[Montserrat] leading-snug mb-1">{h.title}</p>
                       <p className="text-[11px] text-white/40 font-[Montserrat] leading-snug">{h.sub}</p>
@@ -451,7 +532,7 @@ export default function BettaBitesF3() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {FEATURES.map((f) => (
                   <div key={f.title} className="bg-white/3 border border-white/6 rounded-2xl p-6 hover:border-primary/30 hover:bg-primary/5 transition-all duration-300 group">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 text-lg group-hover:bg-primary/15 transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 text-primary/70 group-hover:bg-primary/15 group-hover:text-primary transition-all">
                       {f.icon}
                     </div>
                     <h3 className="text-[14px] font-semibold text-white font-[Montserrat] mb-2 leading-snug">{f.title}</h3>

@@ -19,7 +19,7 @@ export default function Reveal({ as: Tag = "section", className, id, children })
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.05 }
     );
 
     observer.observe(el);

@@ -4,44 +4,45 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ARTICLES, ArticleCard } from "@/app/blog/page";
+import { ARTICLES } from "@/lib/articles";
+import { ArticleCard } from "@/app/blog/page";
 
 function renderBlock(block, i, tagColor) {
   switch (block.type) {
     case "lead":
       return (
-        <p key={i} className="font-[Playfair_Display] text-[20px] sm:text-[22px] text-white/75 leading-[1.65] mb-10">
+        <p key={i} className="font-[Playfair_Display] text-[17px] sm:text-[19px] text-white/75 leading-[1.6] mb-8">
           {block.text}
         </p>
       );
     case "h2":
       return (
-        <h2 key={i} className="font-[Playfair_Display] text-[28px] sm:text-[34px] text-white leading-snug mt-14 mb-5">
+        <h2 key={i} className="font-[Playfair_Display] text-[22px] sm:text-[26px] text-white leading-snug mt-10 mb-4">
           {block.text}
         </h2>
       );
     case "p":
       return (
-        <p key={i} className="text-[16px] text-white/55 font-[Montserrat] leading-[1.85] mb-6">
+        <p key={i} className="text-[14.5px] text-white/55 font-[Montserrat] leading-[1.75] mb-5">
           {block.text}
         </p>
       );
     case "pullquote":
       return (
-        <blockquote key={i} className="relative my-12 pl-8 border-l-[3px]" style={{ borderColor: tagColor }}>
-          <p className="font-[Playfair_Display] text-[22px] sm:text-[26px] italic text-white/80 leading-snug">
+        <blockquote key={i} className="relative my-9 pl-7 border-l-[3px]" style={{ borderColor: tagColor }}>
+          <p className="font-[Playfair_Display] text-[18px] sm:text-[21px] italic text-white/80 leading-snug">
             {block.text}
           </p>
         </blockquote>
       );
     case "stat-block":
       return (
-        <div key={i} className="my-10 grid grid-cols-3 gap-0 overflow-hidden rounded-2xl border border-white/6"
+        <div key={i} className="my-8 grid grid-cols-3 gap-0 overflow-hidden rounded-2xl border border-white/6"
           style={{ background: "linear-gradient(135deg,#0b1828 0%,#081917 100%)" }}>
           {block.items.map((s, j) => (
-            <div key={j} className={`flex flex-col px-6 py-7 ${j < block.items.length - 1 ? "border-r border-white/6" : ""}`}>
-              <span className="font-[Playfair_Display] leading-none mb-2" style={{ fontSize: "clamp(28px,4vw,42px)", color: tagColor }}>{s.val}</span>
-              <span className="text-[11px] text-white/30 font-[Montserrat] leading-snug">{s.label}</span>
+            <div key={j} className={`flex flex-col px-5 py-5 ${j < block.items.length - 1 ? "border-r border-white/6" : ""}`}>
+              <span className="font-[Playfair_Display] leading-none mb-2" style={{ fontSize: "clamp(22px,3vw,32px)", color: tagColor }}>{s.val}</span>
+              <span className="text-[10.5px] text-white/30 font-[Montserrat] leading-snug">{s.label}</span>
             </div>
           ))}
         </div>
@@ -120,16 +121,16 @@ export default function ArticlePage() {
               <span className="text-[11px] text-white/30 font-[Montserrat]">{article.date}</span>
             </div>
 
-            <h1 className="font-[Playfair_Display] text-white leading-[1.05] mb-6"
-              style={{ fontSize: "clamp(34px, 5.5vw, 68px)" }}>
+            <h1 className="font-[Playfair_Display] text-white leading-[1.1] mb-5"
+              style={{ fontSize: "clamp(28px, 4.5vw, 52px)" }}>
               {article.title}
             </h1>
-            <p className="text-[15px] sm:text-[17px] text-white/42 font-[Montserrat] leading-relaxed max-w-[580px]">
+            <p className="text-[14px] sm:text-[15px] text-white/42 font-[Montserrat] leading-relaxed max-w-[580px]">
               {article.excerpt}
             </p>
 
             {/* Author + stat */}
-            <div className="flex items-center gap-6 mt-10 pt-8 border-t border-white/8 flex-wrap">
+            <div className="flex items-center gap-6 mt-8 pt-6 border-t border-white/8 flex-wrap">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
                   style={{ background: `${article.tagColor}20`, border: `1px solid ${article.tagColor}30` }}>
@@ -163,10 +164,10 @@ export default function ArticlePage() {
           <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-[3px]"
             style={{ background: `linear-gradient(to bottom, ${article.tagColor}50 0%, transparent 100%)`, marginLeft: "calc((100vw - 860px) / 2 - 48px)" }} />
 
-          <div className="max-w-[860px] mx-auto px-6 sm:px-10 py-16 sm:py-24">
+          <div className="max-w-[860px] mx-auto px-6 sm:px-10 py-12 sm:py-16">
 
             {/* Progress indicator line */}
-            <div className="flex items-center gap-4 mb-14 pb-8 border-b border-white/6">
+            <div className="flex items-center gap-4 mb-10 pb-6 border-b border-white/6">
               <div className="h-px flex-1" style={{ background: `linear-gradient(to right, ${article.tagColor}60, transparent)` }} />
               <span className="text-[10px] text-white/20 font-[Montserrat] tracking-widest uppercase shrink-0">Begin Reading</span>
             </div>
@@ -177,13 +178,13 @@ export default function ArticlePage() {
             </article>
 
             {/* End divider */}
-            <div className="flex items-center gap-4 mt-16 pt-10 border-t border-white/6">
+            <div className="flex items-center gap-4 mt-12 pt-8 border-t border-white/6">
               <div className="h-px flex-1" style={{ background: `linear-gradient(to right, ${article.tagColor}40, transparent)` }} />
               <span className="text-[10px] text-white/18 font-[Montserrat] tracking-widest uppercase shrink-0">End of Article</span>
             </div>
 
             {/* Author card */}
-            <div className="mt-10 rounded-2xl p-6 sm:p-8 flex gap-5 items-start"
+            <div className="mt-8 rounded-2xl p-6 sm:p-7 flex gap-5 items-start"
               style={{ background: "linear-gradient(135deg,#0c1828 0%,#091917 100%)", border: `1px solid ${article.tagColor}18` }}>
               <div className="w-12 h-12 rounded-full shrink-0 flex items-center justify-center"
                 style={{ background: `${article.tagColor}18`, border: `1px solid ${article.tagColor}30` }}>

@@ -4,9 +4,9 @@ export default function Science() {
   return (
     <Reveal
       id="science"
-      className="bg-[#080e1c]"
+      className="bg-[#0c1628]"
     >
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 pt-20 sm:pt-28 pb-10 sm:pb-14">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 pt-28 sm:pt-36 pb-16 sm:pb-20">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-20 items-start">
 
           {/* Left — copy */}
