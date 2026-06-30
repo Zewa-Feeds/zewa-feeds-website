@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Shop All Products | Zewa Feeds",
+  title: { absolute: "Shop All Products | Zewa Feeds" },
   description:
     "Browse the full Zewa Feeds range — insect-protein formulas for bettas, cichlids, guppies and more, plus dried BSF larvae treats. NABL lab-certified nutrition.",
   openGraph: {

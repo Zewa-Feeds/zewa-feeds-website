@@ -1,9 +1,9 @@
 export const metadata = {
-  title: "Dried BSF Larvae 25g — Whole Larvae Protein Treat | Zewa Feeds",
+  title: { absolute: "Dried BSF Larvae 25g | Zewa Feeds" },
   description:
     "25g starter pack of dried whole Black Soldier Fly larvae — a natural, high-protein treat and supplement for all freshwater and ornamental species.",
   openGraph: {
-    title: "Dried BSF Larvae 25g — Whole Larvae Protein Treat | Zewa Feeds",
+    title: "Dried BSF Larvae 25g | Zewa Feeds",
     description:
       "25g starter pack of dried whole Black Soldier Fly larvae — a natural, high-protein treat and supplement.",
     type: "website",

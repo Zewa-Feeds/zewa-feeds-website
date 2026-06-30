@@ -6,16 +6,16 @@ export async function generateMetadata({ params }) {
 
   if (!article) {
     return {
-      title: "Article Not Found | Zewa Feeds Knowledge Hub",
+      title: { absolute: "Article Not Found | Zewa Feeds" },
       description: "This article could not be found. Browse the full Zewa Feeds Knowledge Hub for lab-verified aquatic nutrition insights.",
     };
   }
 
   return {
-    title: `${article.title} | Zewa Feeds Knowledge Hub`,
+    title: { absolute: `${article.shortTitle} | Zewa Feeds` },
     description: article.excerpt,
     openGraph: {
-      title: `${article.title} | Zewa Feeds Knowledge Hub`,
+      title: `${article.title} | Zewa Feeds`,
       description: article.excerpt,
       type: "article",
     },
