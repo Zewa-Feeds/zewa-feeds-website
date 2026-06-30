@@ -19,13 +19,13 @@ const playfair = Playfair_Display({
 
 export const metadata = {
   title: {
-    default: "Zewa Feeds — Insect-Protein Fish Food",
+    default: "Zewa Feeds",
     template: "%s | Zewa Feeds",
   },
   description:
     "Your fish is built to digest insects. Most fish food feeds it soy. Premium insect-protein nutrition optimised for aquatic vitality, backed by lab-verified science.",
   openGraph: {
-    title: "Zewa Feeds — Insect-Protein Fish Food",
+    title: "Zewa Feeds",
     description:
       "Premium insect-protein nutrition optimised for aquatic vitality, backed by lab-verified science.",
     type: "website",
