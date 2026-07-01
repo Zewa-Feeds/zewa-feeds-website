@@ -8,46 +8,13 @@ import { useCart } from "@/lib/cartContext";
 
 // ── Dropdown data ─────────────────────────────────────────────────────────────
 
-const SPECIES = [
-  {
-    label: "Betta Fish",
-    sub: "Slow-sinking micro pellets",
-    href: "/products?filter=Slow+Sinking+Pellets",
-    image: "/Bottles/Betta/Betta F3_Front.png",
-    accent: "#44e5c2",
-    glow: "rgba(68,229,194,0.15)",
-  },
-  {
-    label: "Cichlids",
-    sub: "Floating high-energy pellets",
-    href: "/products?filter=Floating+Pellets",
-    image: "/Bottles/Cichild/Cichild C4_Front.png",
-    accent: "#38bdf8",
-    glow: "rgba(56,189,248,0.15)",
-  },
-  {
-    label: "Guppies",
-    sub: "Bottom-dwelling micro feeds",
-    href: "/products?filter=Bottom+Dwellers",
-    image: "/Bottles/Guppy/Guppy G2_Front.png",
-    accent: "#44e5c2",
-    glow: "rgba(68,229,194,0.12)",
-  },
-  {
-    label: "Hatchery",
-    sub: "Fry starters & larvae feeds",
-    href: "/products?filter=Hatchery+Feeds",
-    image: "/Bottles/DBSFL/DBSFL 25G.png",
-    accent: "#a78bfa",
-    glow: "rgba(167,139,250,0.15)",
-  },
-];
-
-const FORMATS = [
-  { label: "Dried BSF Larvae",     sub: "Whole insect protein",  href: "/products?filter=Dried+BSF+Larvae",      dot: "#a78bfa" },
-  { label: "Slow Sinking Pellets", sub: "Mid-water feeders",     href: "/products?filter=Slow+Sinking+Pellets",  dot: "#44e5c2" },
-  { label: "Floating Pellets",     sub: "Surface feeders",       href: "/products?filter=Floating+Pellets",      dot: "#38bdf8" },
-  { label: "1 kg Value Packs",     sub: "Breeders & hatcheries", href: "/products?filter=1kg+Packs",             dot: "#fb923c" },
+const PRODUCT_LINKS = [
+  { label: "Betta Bites F3",        href: "/products/betta-bites-f3" },
+  { label: "Cichlid Bites C4",      href: "/products/cichlid-bites-c4" },
+  { label: "Guppy Bites G2",        href: "/products/guppy-bites-g2" },
+  { label: "Dried BSF Larvae 25g",  href: "/products/dried-bsf-larvae-25g" },
+  { label: "Dried BSF Larvae 75g",  href: "/products/dried-bsf-larvae-75g" },
+  { label: "View all products →",   href: "/products", accent: true },
 ];
 
 const LEARN_MENU = [
@@ -113,169 +80,38 @@ function Chevron({ open }) {
   );
 }
 
-// ── Products mega menu ────────────────────────────────────────────────────────
+// ── Products dropdown ─────────────────────────────────────────────────────────
 
-function ProductsMega({ visible }) {
-  const [hovered, setHovered] = useState(null);
-  const active = hovered !== null ? SPECIES[hovered] : null;
-
+function ProductsDropdown({ visible }) {
   return (
     <div
       className="absolute top-full left-1/2 z-[200]"
       style={{
-        width: "780px",
-        maxWidth: "96vw",
-        transform: `translateX(-50%) translateY(${visible ? "0px" : "-8px"})`,
+        width: "220px",
+        transform: `translateX(-50%) translateY(${visible ? "0px" : "-6px"})`,
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? "auto" : "none",
-        transition: "opacity 0.2s ease, transform 0.2s ease",
+        transition: "opacity 0.15s ease, transform 0.15s ease",
       }}
     >
       <div className="h-3 w-full" />
-      <div className="rounded-2xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
-        style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(8,14,26,0.97)", backdropFilter: "blur(32px)" }}>
-
-        {/* Top accent line */}
-        <div className="h-[1px] w-full" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.5) 40%, rgba(68,229,194,0.5) 60%, transparent)" }} />
-
-        <div className="grid grid-cols-[1fr_1px_200px_1px_220px]">
-
-          {/* ── Left: species + format ── */}
-          <div className="p-6">
-
-            {/* By Species */}
-            <p className="text-[9px] font-bold tracking-[0.25em] font-[Montserrat] uppercase mb-4"
-              style={{ color: "rgba(68,229,194,0.5)" }}>Shop by Species</p>
-            <div className="grid grid-cols-2 gap-1 mb-6">
-              {SPECIES.map((s, i) => (
-                <a key={s.label} href={s.href}
-                  onMouseEnter={() => setHovered(i)}
-                  onMouseLeave={() => setHovered(null)}
-                  className="group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 overflow-hidden"
-                  style={{ background: hovered === i ? `${s.glow}` : "transparent" }}>
-                  {/* left accent bar on hover */}
-                  <div className="absolute left-0 top-2 bottom-2 w-[2px] rounded-full transition-all duration-150"
-                    style={{ background: s.accent, opacity: hovered === i ? 1 : 0 }} />
-                  <div className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center overflow-hidden"
-                    style={{ background: hovered === i ? `${s.glow}` : "rgba(255,255,255,0.04)", border: `1px solid ${hovered === i ? s.accent + "50" : "rgba(255,255,255,0.06)"}`, transition: "all 0.15s" }}>
-                    <Image src={s.image} alt={s.label} width={28} height={28}
-                      className="object-contain w-full h-full p-0.5"
-                      style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))" }} />
-                  </div>
-                  <div>
-                    <p className="text-[12px] font-semibold font-[Montserrat] leading-none mb-0.5 transition-colors duration-150"
-                      style={{ color: hovered === i ? s.accent : "rgba(255,255,255,0.8)" }}>{s.label}</p>
-                    <p className="text-[10px] font-[Montserrat]" style={{ color: "rgba(255,255,255,0.28)" }}>{s.sub}</p>
-                  </div>
-                </a>
-              ))}
-            </div>
-
-            {/* Divider */}
-            <div className="h-px mb-5" style={{ background: "rgba(255,255,255,0.06)" }} />
-
-            {/* By Format */}
-            <p className="text-[9px] font-bold tracking-[0.25em] font-[Montserrat] uppercase mb-3"
-              style={{ color: "rgba(68,229,194,0.5)" }}>Shop by Format</p>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-              {FORMATS.map((f) => (
-                <a key={f.label} href={f.href}
-                  className="group flex items-center gap-2 py-1.5 transition-colors duration-150">
-                  <span className="w-1.5 h-1.5 rounded-full shrink-0 transition-all duration-150 group-hover:scale-125"
-                    style={{ background: f.dot }} />
-                  <span className="text-[11px] font-[Montserrat] font-medium transition-colors duration-150"
-                    style={{ color: "rgba(255,255,255,0.55)" }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = f.dot}
-                    onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.55)"}>
-                    {f.label}
-                  </span>
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Divider col */}
-          <div style={{ background: "rgba(255,255,255,0.06)" }} />
-
-          {/* ── Middle: preview on hover, stat block at rest ── */}
-          <div className="relative flex flex-col items-center justify-center p-5 overflow-hidden">
-            {/* Ambient glow that shifts with hovered species */}
-            <div className="absolute inset-0 transition-all duration-500 pointer-events-none"
-              style={{ background: active ? `radial-gradient(ellipse at 50% 60%, ${active.glow}, transparent 70%)` : "radial-gradient(ellipse at 50% 60%, rgba(68,229,194,0.06), transparent 70%)" }} />
-
-            {active ? (
-              <>
-                <Image src={active.image} alt={active.label} width={120} height={120}
-                  className="relative z-10 object-contain max-h-[110px] w-auto transition-all duration-300"
-                  style={{ filter: `drop-shadow(0 8px 24px ${active.accent}55)` }} />
-                <p className="relative z-10 mt-3 text-[11px] font-semibold font-[Montserrat] text-center"
-                  style={{ color: active.accent }}>{active.label}</p>
-                <p className="relative z-10 text-[10px] font-[Montserrat] text-center mt-0.5"
-                  style={{ color: "rgba(255,255,255,0.3)" }}>{active.sub}</p>
-              </>
-            ) : (
-              <div className="relative z-10 flex flex-col items-center gap-3 text-center">
-                <div className="grid grid-cols-2 gap-2 w-full">
-                  {[{ val: "46%", label: "Max Protein" }, { val: "88%", label: "Digestibility" }, { val: "0%", label: "Soy Fillers" }, { val: "4.2×", label: "vs Fishmeal" }].map((s) => (
-                    <div key={s.label} className="flex flex-col items-center px-2 py-2.5 rounded-xl"
-                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(68,229,194,0.1)" }}>
-                      <span className="font-[Playfair_Display] text-[18px] leading-none text-primary">{s.val}</span>
-                      <span className="text-[9px] font-[Montserrat] mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>{s.label}</span>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-[10px] font-[Montserrat] italic" style={{ color: "rgba(255,255,255,0.2)" }}>
-                  Hover a species to preview
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Divider col */}
-          <div style={{ background: "rgba(255,255,255,0.06)" }} />
-
-          {/* ── Right: featured CTA ── */}
-          <div className="flex flex-col">
-            <a href="/products/betta-bites-f3" className="group flex flex-col flex-1 relative overflow-hidden">
-              {/* Dark image bg */}
-              <div className="relative flex items-center justify-center flex-1 min-h-[160px]"
-                style={{ background: "linear-gradient(160deg, #0d1f2e 0%, #091914 100%)" }}>
-                <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 65%, rgba(68,229,194,0.18), transparent 65%)" }} />
-                <Image src="/Bottles/Betta/Betta F3_Front.png" alt="Betta Bites F3" width={130} height={130}
-                  className="relative z-10 object-contain max-h-[130px] w-auto transition-transform duration-500 group-hover:scale-108 group-hover:-translate-y-1"
-                  style={{ filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.6))" }} />
-                <span className="absolute top-3 left-3 text-[8px] font-bold px-2 py-1 rounded-full tracking-[0.18em] font-[Montserrat] bg-primary text-[#00382d]">
-                  BESTSELLER
-                </span>
-              </div>
-
-              {/* Text */}
-              <div className="px-5 py-4 border-t border-white/6 flex flex-col gap-1.5">
-                <p className="text-[9px] font-bold tracking-[0.2em] font-[Montserrat] uppercase" style={{ color: "rgba(68,229,194,0.5)" }}>Featured Formula</p>
-                <p className="font-[Playfair_Display] text-[15px] text-white leading-snug group-hover:text-primary transition-colors duration-200">Betta Bites F3</p>
-                <p className="text-[10px] font-[Montserrat] leading-snug" style={{ color: "rgba(255,255,255,0.28)" }}>46% insect protein · zero soy fillers</p>
-                <span className="mt-1 inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.15em] uppercase font-[Montserrat] text-primary">
-                  Explore
-                  <svg viewBox="0 0 12 12" fill="none" className="w-2.5 h-2.5 transition-transform duration-200 group-hover:translate-x-0.5">
-                    <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-              </div>
+      <div className="rounded-xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
+        style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(8,14,26,0.97)", backdropFilter: "blur(24px)" }}>
+        <div className="py-1.5">
+          {PRODUCT_LINKS.map((item, i) => (
+            <a
+              key={item.label}
+              href={item.href}
+              className="block px-5 py-2.5 text-[13px] font-[Montserrat] transition-colors duration-100 hover:bg-white/5"
+              style={{
+                color: item.accent ? "rgba(68,229,194,0.75)" : "rgba(255,255,255,0.65)",
+                borderTop: item.accent ? "1px solid rgba(255,255,255,0.07)" : undefined,
+                marginTop: item.accent ? "4px" : undefined,
+              }}
+            >
+              {item.label}
             </a>
-
-            {/* View all strip */}
-            <a href="/products"
-              className="group flex items-center justify-center gap-2 py-3 border-t border-white/6 text-[10px] font-bold tracking-[0.18em] uppercase font-[Montserrat] transition-all duration-200 hover:bg-primary/8"
-              style={{ color: "rgba(68,229,194,0.6)" }}
-              onMouseEnter={(e) => e.currentTarget.style.color = "#44e5c2"}
-              onMouseLeave={(e) => e.currentTarget.style.color = "rgba(68,229,194,0.6)"}>
-              View All Formulas
-              <svg viewBox="0 0 12 12" fill="none" className="w-2.5 h-2.5 transition-transform duration-200 group-hover:translate-x-0.5">
-                <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
-          </div>
-
+          ))}
         </div>
       </div>
     </div>
@@ -441,7 +277,7 @@ export default function Header() {
                     {link.label} <Chevron open={activeMenu === "products"} />
                   </button>
                   <div onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
-                    <ProductsMega visible={activeMenu === "products"} />
+                    <ProductsDropdown visible={activeMenu === "products"} />
                   </div>
                 </div>
               );
