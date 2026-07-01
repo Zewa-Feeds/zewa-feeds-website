@@ -230,7 +230,7 @@ export default function Header() {
   useEffect(() => () => clearTimeout(closeTimer.current), []);
 
   const openMenu = (name) => { clearTimeout(closeTimer.current); setActiveMenu(name); };
-  const scheduleClose = () => { closeTimer.current = setTimeout(() => setActiveMenu(null), 120); };
+  const scheduleClose = () => { closeTimer.current = setTimeout(() => setActiveMenu(null), 300); };
   const cancelClose = () => clearTimeout(closeTimer.current);
 
   const isActive = (href) => {
@@ -267,7 +267,7 @@ export default function Header() {
             // Products — replace plain link with mega menu trigger
             if (link.label === "Products") {
               return (
-                <div key="Products" className="relative"
+                <div key="Products" className="relative pb-3 -mb-3"
                   onMouseEnter={() => openMenu("products")}
                   onMouseLeave={scheduleClose}>
                   <button
@@ -276,9 +276,7 @@ export default function Header() {
                     }`}>
                     {link.label} <Chevron open={activeMenu === "products"} />
                   </button>
-                  <div onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
-                    <ProductsDropdown visible={activeMenu === "products"} />
-                  </div>
+                  <ProductsDropdown visible={activeMenu === "products"} />
                 </div>
               );
             }
@@ -286,7 +284,7 @@ export default function Header() {
             // Knowledge Hub — replace with Learn dropdown trigger
             if (link.label === "Knowledge Hub") {
               return (
-                <div key="Knowledge Hub" className="relative"
+                <div key="Knowledge Hub" className="relative pb-3 -mb-3"
                   onMouseEnter={() => openMenu("learn")}
                   onMouseLeave={scheduleClose}>
                   <button
@@ -295,9 +293,7 @@ export default function Header() {
                     }`}>
                     {link.label} <Chevron open={activeMenu === "learn"} />
                   </button>
-                  <div onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
-                    <LearnDropdown visible={activeMenu === "learn"} />
-                  </div>
+                  <LearnDropdown visible={activeMenu === "learn"} />
                 </div>
               );
             }
