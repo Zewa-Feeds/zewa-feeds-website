@@ -18,54 +18,11 @@ const PRODUCT_LINKS = [
 ];
 
 const LEARN_MENU = [
-  {
-    label: "Knowledge Hub",
-    sub: "Research-backed articles on aquatic nutrition",
-    href: "/blog",
-    accent: "#44e5c2",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-        <path d="M4 4h16v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-        <path d="M9 9h6M9 13h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-      </svg>
-    ),
-  },
-  {
-    label: "Our Science",
-    sub: "Bio-availability data & digestion benchmarks",
-    href: "/#science",
-    accent: "#38bdf8",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-        <path d="M9 3v8l-4 6h14l-4-6V3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M9 3h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-        <circle cx="12" cy="17" r="1" fill="currentColor"/>
-      </svg>
-    ),
-  },
-  {
-    label: "Sustainability",
-    sub: "How BSF farming reduces aquaculture's footprint",
-    href: "/blog/reducing-ammonia-output",
-    accent: "#4ade80",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-        <path d="M12 3C8 3 5 7 5 11c0 3 2 5.5 5 6.5V20h4v-2.5c3-1 5-3.5 5-6.5 0-4-3-8-7-8z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-      </svg>
-    ),
-  },
-  {
-    label: "About Zewa",
-    sub: "Our mission, team & manufacturing process",
-    href: "/#about",
-    accent: "#fb923c",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-        <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.4"/>
-        <path d="M5 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-      </svg>
-    ),
-  },
+  { label: "Knowledge Hub",  href: "/blog" },
+  { label: "Our Science",    href: "/#science" },
+  { label: "Sustainability", href: "/blog/ammonia-reduction-high-absorption-diets" },
+  { label: "About Zewa",    href: "/#about" },
+  { label: "Browse all articles →", href: "/blog", accent: true },
 ];
 
 // ── Chevron ───────────────────────────────────────────────────────────────────
@@ -125,64 +82,31 @@ function LearnDropdown({ visible }) {
     <div
       className="absolute top-full left-1/2 z-[200]"
       style={{
-        width: "320px",
-        transform: `translateX(-50%) translateY(${visible ? "0px" : "-8px"})`,
+        width: "220px",
+        transform: `translateX(-50%) translateY(${visible ? "0px" : "-6px"})`,
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? "auto" : "none",
-        transition: "opacity 0.2s ease, transform 0.2s ease",
+        transition: "opacity 0.15s ease, transform 0.15s ease",
       }}
     >
       <div className="h-3 w-full" />
-      <div className="rounded-2xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.7)]"
-        style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(8,14,26,0.97)", backdropFilter: "blur(32px)" }}>
-
-        {/* Top accent line */}
-        <div className="h-[1px] w-full" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.4) 50%, transparent)" }} />
-
-        <div className="p-2">
+      <div className="rounded-xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
+        style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(8,14,26,0.97)", backdropFilter: "blur(24px)" }}>
+        <div className="py-1.5">
           {LEARN_MENU.map((item) => (
-            <a key={item.label} href={item.href}
-              className="group flex items-start gap-4 px-4 py-3.5 rounded-xl transition-all duration-150 relative overflow-hidden"
-              style={{ "--accent": item.accent }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = `${item.accent}10`; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            <a
+              key={item.label}
+              href={item.href}
+              className="block px-5 py-2.5 text-[13px] font-[Montserrat] transition-colors duration-100 hover:bg-white/5"
+              style={{
+                color: item.accent ? "rgba(68,229,194,0.75)" : "rgba(255,255,255,0.65)",
+                borderTop: item.accent ? "1px solid rgba(255,255,255,0.07)" : undefined,
+                marginTop: item.accent ? "4px" : undefined,
+              }}
             >
-              {/* Icon box */}
-              <div className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200"
-                style={{ background: `${item.accent}15`, border: `1px solid ${item.accent}25`, color: item.accent }}>
-                {item.icon}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold font-[Montserrat] leading-none mb-1 transition-colors duration-150"
-                  style={{ color: "rgba(255,255,255,0.85)" }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = item.accent}
-                  onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.85)"}>
-                  {item.label}
-                </p>
-                <p className="text-[11px] font-[Montserrat] leading-snug" style={{ color: "rgba(255,255,255,0.28)" }}>
-                  {item.sub}
-                </p>
-              </div>
-              <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3 shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-all duration-150 group-hover:translate-x-0.5"
-                style={{ color: item.accent }}>
-                <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              {item.label}
             </a>
           ))}
-        </div>
-
-        {/* Bottom CTA */}
-        <div className="mx-4 mb-3 mt-1">
-          <a href="/blog"
-            className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-bold tracking-[0.18em] uppercase font-[Montserrat] transition-all duration-200"
-            style={{ background: "rgba(68,229,194,0.08)", border: "1px solid rgba(68,229,194,0.15)", color: "rgba(68,229,194,0.7)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(68,229,194,0.14)"; e.currentTarget.style.color = "#44e5c2"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(68,229,194,0.08)"; e.currentTarget.style.color = "rgba(68,229,194,0.7)"; }}>
-            Browse All Articles
-            <svg viewBox="0 0 12 12" fill="none" className="w-2.5 h-2.5">
-              <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
         </div>
       </div>
     </div>
