@@ -947,23 +947,6 @@ export default function ProductsPage() {
                   Every formula is NABL lab-tested, insect-protein based, and calibrated for a specific species and life stage.
                 </p>
 
-                <button
-                  onClick={() => setQuizOpen(true)}
-                  className="group inline-flex items-center gap-3 px-6 py-3.5 rounded-full transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
-                  style={{ background: "linear-gradient(135deg, rgba(68,229,194,0.15) 0%, rgba(56,189,248,0.1) 100%)", border: "1px solid rgba(68,229,194,0.35)" }}
-                >
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(68,229,194,0.18)" }}>
-                    <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 text-primary">
-                      <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.4"/>
-                      <path d="M6 6.5C6 5.67 6.895 5 8 5s2 .67 2 1.5c0 .664-.45 1.24-1.1 1.43L8 8.2V9.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-                      <circle cx="8" cy="11" r=".6" fill="currentColor"/>
-                    </svg>
-                  </div>
-                  <span className="text-[12px] font-bold tracking-[0.15em] uppercase font-[Montserrat] text-primary">Find My Feed</span>
-                  <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3 text-primary/60 group-hover:translate-x-0.5 group-hover:text-primary transition-all duration-200">
-                    <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
               </div>
 
               <div className="flex gap-10 lg:gap-14 shrink-0">
@@ -1020,6 +1003,17 @@ export default function ProductsPage() {
                   {cat}
                 </button>
               ))}
+              <button
+                onClick={() => setQuizOpen(true)}
+                className="shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-[0.08em] uppercase font-[Montserrat] transition-all duration-200 border border-primary/35 text-primary hover:bg-primary/10"
+              >
+                <svg viewBox="0 0 14 14" fill="none" className="w-3 h-3">
+                  <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.4"/>
+                  <path d="M5.5 5.5C5.5 4.67 6.172 4 7 4s1.5.67 1.5 1.5c0 .6-.36 1.1-.875 1.35L7 7.2V8.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                  <circle cx="7" cy="10" r=".5" fill="currentColor"/>
+                </svg>
+                Find My Feed
+              </button>
             </div>
             <span className="shrink-0 text-[11px] text-white/20 font-[Montserrat]">{filtered.length} products</span>
           </div>
