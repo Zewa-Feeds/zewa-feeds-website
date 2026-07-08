@@ -112,7 +112,7 @@ export default function DriedBSFLarvae25g() {
 
   const pack = PACKS[activePack];
   const activeSlide = GALLERY[activeImage];
-  const accent = "#a78bfa";
+  const accent = "#44e5c2";
 
   const handleAddToCart = () => {
     addToCart({
@@ -192,7 +192,7 @@ export default function DriedBSFLarvae25g() {
               </div>
 
               <div>
-                <div className="inline-block mb-3 px-3 py-1 rounded-full text-[9px] font-bold tracking-widest font-[Montserrat] text-white bg-violet-500">PRO</div>
+                <div className="inline-block mb-3 px-3 py-1 rounded-full text-[9px] font-bold tracking-widest font-[Montserrat] text-[#00382d]" style={{ background: accent }}>PRO</div>
                 <h1 className="font-[Playfair_Display] text-[36px] sm:text-[44px] leading-[1.1] text-white mb-3">
                   Dried BSF Larvae 25g
                 </h1>

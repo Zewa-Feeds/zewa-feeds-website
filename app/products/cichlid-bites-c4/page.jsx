@@ -139,7 +139,7 @@ export default function CichlidBitesC4() {
     window.location.href = "/checkout";
   };
 
-  const accent = "#38bdf8";
+  const accent = "#44e5c2";
 
   return (
     <>
@@ -207,7 +207,7 @@ export default function CichlidBitesC4() {
               </div>
 
               <div>
-                <div className="inline-block mb-3 px-3 py-1 rounded-full text-[9px] font-bold tracking-widest font-[Montserrat] bg-sky-500 text-white">NEW</div>
+                <div className="inline-block mb-3 px-3 py-1 rounded-full text-[9px] font-bold tracking-widest font-[Montserrat] text-[#00382d]" style={{ background: accent }}>NEW</div>
                 <h1 className="font-[Playfair_Display] text-[36px] sm:text-[44px] leading-[1.1] text-white mb-3">
                   Cichlid Bites C4
                 </h1>
@@ -228,8 +228,8 @@ export default function CichlidBitesC4() {
                 <div className="flex gap-3">
                   {PACKS.map((pk, i) => (
                     <button key={pk.size} onClick={() => setActivePack(i)}
-                      className={`relative flex-1 py-3 px-4 rounded-xl border text-[13px] font-semibold font-[Montserrat] transition-all duration-200 ${activePack === i ? "bg-sky-500/10 text-sky-400" : "border-white/12 bg-white/3 text-white/50 hover:border-white/25"}`}
-                      style={{ borderColor: activePack === i ? accent : undefined }}>
+                      className={`relative flex-1 py-3 px-4 rounded-xl border text-[13px] font-semibold font-[Montserrat] transition-all duration-200 ${activePack === i ? "border-white/0" : "border-white/12 bg-white/3 text-white/50 hover:border-white/25"}`}
+                      style={{ borderColor: activePack === i ? accent : undefined, backgroundColor: activePack === i ? `${accent}18` : undefined, color: activePack === i ? accent : undefined }}>
                       {pk.size}
                       {pk.badge && (
                         <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-white text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide whitespace-nowrap"
@@ -301,8 +301,8 @@ export default function CichlidBitesC4() {
             <div className="flex gap-0 overflow-x-auto no-scrollbar">
               {TABS.map((tab) => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
-                  className={`shrink-0 px-5 py-4 text-[12px] font-semibold tracking-[0.1em] uppercase font-[Montserrat] border-b-2 transition-all duration-200 ${activeTab === tab ? "text-sky-400" : "border-transparent text-white/35 hover:text-white/60"}`}
-                  style={{ borderColor: activeTab === tab ? accent : "transparent" }}>
+                  className={`shrink-0 px-5 py-4 text-[12px] font-semibold tracking-[0.1em] uppercase font-[Montserrat] border-b-2 transition-all duration-200 ${activeTab === tab ? "" : "border-transparent text-white/35 hover:text-white/60"}`}
+                  style={{ color: activeTab === tab ? accent : undefined, borderColor: activeTab === tab ? accent : "transparent" }}>
                   {tab}
                 </button>
               ))}

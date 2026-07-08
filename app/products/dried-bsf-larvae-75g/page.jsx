@@ -98,7 +98,7 @@ const RELATED = [
 
 const TABS = ["Overview", "Features", "Ingredients", "Suitable For", "Pack Info"];
 
-const accent = "#a78bfa";
+const accent = "#44e5c2";
 
 export default function DriedBSFLarvae75g() {
   const [activeImage, setActiveImage] = useState(0);
