@@ -81,8 +81,8 @@ const SPOTLIGHT = [
     protein: "44%",
     stat: "Supports jaw muscle development",
     image: "/Bottles/Cichild/Cichild C4_Front.png",
-    accent: "rgba(56,189,248,0.20)",
-    accentStrong: "rgba(56,189,248,0.45)",
+    accent: "rgba(68,229,194,0.20)",
+    accentStrong: "rgba(68,229,194,0.45)",
   },
   {
     name: "DBSFL 25g",
@@ -96,8 +96,8 @@ const SPOTLIGHT = [
     protein: "50%",
     stat: "Whole larvae — maximum nutrition",
     image: "/Bottles/DBSFL/DBSFL 25G.png",
-    accent: "rgba(167,139,250,0.20)",
-    accentStrong: "rgba(167,139,250,0.45)",
+    accent: "rgba(68,229,194,0.20)",
+    accentStrong: "rgba(68,229,194,0.45)",
   },
 ];
 
@@ -133,7 +133,7 @@ const PRODUCTS = [
     mrp: "₹349",
     packs: ["100g", "1kg"],
     badge: "NEW",
-    badgeColor: "bg-sky-500 text-white",
+    badgeColor: "bg-primary text-[#00382d]",
     protein: "44%",
     image: "/Bottles/Cichild/Cichild C4_Front.png",
     video: "/videos/brand_video.mp4",
@@ -144,7 +144,7 @@ const PRODUCTS = [
       "/Bottles/Cichild/Cichild 02.png",
       "/Bottles/Cichild/Cichild 03.png",
     ],
-    accentColor: "rgba(56,189,248,0.15)",
+    accentColor: "rgba(68,229,194,0.15)",
   },
   {
     name: "Dried BSF Larvae 25g",
@@ -155,7 +155,7 @@ const PRODUCTS = [
     mrp: "₹249",
     packs: ["25g"],
     badge: "PRO",
-    badgeColor: "bg-violet-500 text-white",
+    badgeColor: "bg-primary text-[#00382d]",
     protein: "50%",
     image: "/Bottles/DBSFL/DBSFL 25G.png",
     video: "/videos/brand_video.mp4",
@@ -165,7 +165,7 @@ const PRODUCTS = [
       "/Bottles/DBSFL/India/25/Artboard 1.png",
       "/Bottles/DBSFL/India/25/Artboard 1 copy.png",
     ],
-    accentColor: "rgba(139,92,246,0.15)",
+    accentColor: "rgba(68,229,194,0.15)",
   },
   {
     name: "Dried BSF Larvae 75g",
@@ -185,7 +185,7 @@ const PRODUCTS = [
       "/Bottles/DBSFL/DBSFL 75G_back.png",
       "/Bottles/DBSFL/India/75/Artboard 1.png",
     ],
-    accentColor: "rgba(139,92,246,0.12)",
+    accentColor: "rgba(68,229,194,0.12)",
   },
   {
     name: "Guppy Bites G2",
