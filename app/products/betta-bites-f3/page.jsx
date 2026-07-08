@@ -414,7 +414,7 @@ export default function BettaBitesF3() {
               <div className="grid grid-cols-4 gap-2 pt-1">
                 {TRUST_BADGES.map((b) => (
                   <div key={b.label} className="flex flex-col items-center gap-1.5 py-3 px-2 bg-white/3 border border-white/6 rounded-xl">
-                    <span className="text-primary/60">{b.icon}</span>
+                    <span className="text-primary/60 [&>svg]:w-7 [&>svg]:h-7">{b.icon}</span>
                     <span className="text-[10px] text-white/45 text-center leading-tight font-[Montserrat] tracking-wide">{b.label}</span>
                   </div>
                 ))}
