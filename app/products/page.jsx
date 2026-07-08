@@ -71,7 +71,7 @@ const SPOTLIGHT = [
   },
   {
     name: "Cichlid Bites C4",
-    slug: null,
+    slug: "cichlid-bites-c4",
     category: "Cichlid",
     tagline: "High-energy insect protein for aggressive cichlid species",
     price: "₹279",
@@ -86,7 +86,7 @@ const SPOTLIGHT = [
   },
   {
     name: "DBSFL 25g",
-    slug: null,
+    slug: "dried-bsf-larvae-25g",
     category: "Hatchery",
     tagline: "Whole dried larvae — maximum insect nutrition per gram",
     price: "₹199",
@@ -1023,8 +1023,9 @@ export default function ProductsPage() {
         <section className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-12 sm:py-16">
 
           {/* ── Spotlight rotator ── */}
-          <div
-            className="relative overflow-hidden rounded-3xl mb-8"
+          <a
+            href={`/products/${sp.slug}`}
+            className="block relative overflow-hidden rounded-3xl mb-8 cursor-pointer group"
             style={{ background: "linear-gradient(135deg, #0d1a2e 0%, #091a18 100%)" }}
           >
             <div
@@ -1077,22 +1078,17 @@ export default function ProductsPage() {
                   ))}
                 </div>
 
-                {sp.slug && (
-                  <a
-                    href={`/products/${sp.slug}`}
-                    className="self-center sm:self-start inline-flex items-center gap-2 text-[11px] font-bold text-primary tracking-widest uppercase font-[Montserrat] hover:gap-3 transition-all duration-200"
-                  >
-                    Explore Product
-                    <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
-                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </a>
-                )}
+                <div className="self-center sm:self-start inline-flex items-center gap-2 text-[11px] font-bold text-primary tracking-widest uppercase font-[Montserrat] group-hover:gap-3 transition-all duration-200">
+                  Explore Product
+                  <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
               </div>
 
               <div className="absolute bottom-5 left-1/2 -translate-x-1/2 sm:static sm:translate-x-0 flex sm:flex-col items-center gap-2.5 sm:pr-10">
                 {SPOTLIGHT.map((_, i) => (
-                  <button key={i} onClick={() => goTo(i)} aria-label={`Go to slide ${i + 1}`}>
+                  <button key={i} onClick={(e) => { e.preventDefault(); goTo(i); }} aria-label={`Go to slide ${i + 1}`}>
                     <span className={`block rounded-full transition-all duration-300 ${
                       i === slide ? "w-5 h-1.5 sm:w-1.5 sm:h-5 bg-primary" : "w-1.5 h-1.5 bg-white/20 hover:bg-white/45"
                     }`} />
@@ -1100,7 +1096,7 @@ export default function ProductsPage() {
                 ))}
               </div>
             </div>
-          </div>
+          </a>
 
           {/* Product grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
