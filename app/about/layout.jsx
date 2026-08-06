@@ -55,6 +55,19 @@ const SCHEMA = {
     postalCode: "680014",
     addressCountry: "IN",
   },
+  /*
+   * E.164 format — Google expects the country code and no separators here,
+   * even though the footer displays it grouped for readability. Keep both in
+   * step: this is the number search results and the business panel show.
+   */
+  telephone: "+91-95004-39828",
+  contactPoint: {
+    "@type": "ContactPoint",
+    telephone: "+91-95004-39828",
+    contactType: "customer service",
+    areaServed: "IN",
+    availableLanguage: ["en", "ml"],
+  },
   memberOf: [
     { "@type": "Organization", name: "Kerala Startup Mission" },
     { "@type": "Organization", name: "Startup India" },

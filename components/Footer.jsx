@@ -73,16 +73,24 @@ const nav = {
     { label: "Hatchery Feeds", href: "/products?category=Hatchery+Feeds" },
     { label: "View all products →", href: "/products", accent: true },
   ],
+  /*
+   * `soon: true` marks a destination that does not exist yet.
+   *
+   * Those entries render as plain text with a "Soon" tag instead of as links:
+   * an <a href="#"> looks clickable, does nothing, and reads as a broken site.
+   * Saying the page is coming is honest and costs nothing. Remove the flag and
+   * set a real href as each one ships.
+   */
   Learn: [
-    { label: "Knowledge Hub", href: "#" },
-    { label: "Feeding Guides", href: "#" },
-    { label: "Hatchery Resources", href: "#" },
-    { label: "Our Science", href: "#" },
+    { label: "Knowledge Hub", href: "/blog" },
+    { label: "Feeding Guides", href: "#", soon: true },
+    { label: "Hatchery Resources", href: "#", soon: true },
+    { label: "Our Science", href: "#", soon: true },
   ],
   Company: [
-    { label: "Find Nearest Dealer", href: "#" },
-    { label: "Become a Distributor", href: "#" },
-    { label: "Download Catalogue", href: "#" },
+    { label: "Find Nearest Dealer", href: "#", soon: true },
+    { label: "Become a Distributor", href: "#", soon: true },
+    { label: "Download Catalogue", href: "#", soon: true },
     { label: "About Us", href: "/about" },
   ],
 };
@@ -155,20 +163,38 @@ export default function Footer() {
                 {heading}
               </h4>
               <ul className="flex flex-col gap-3.5">
-                {links.map((link) => (
-                  <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className={`text-[13.5px] leading-none transition-colors duration-150 font-normal no-underline ${
-                        link.accent
-                          ? "text-primary/70 hover:text-primary"
-                          : "text-white/45 hover:text-white"
-                      }`}
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
+                {links.map((link) =>
+                  link.soon ? (
+                    /*
+                      Not a link — the page does not exist yet.
+
+                      Rendered as text so it cannot be clicked or focused, with
+                      the badge carrying the explanation. Styling it like the
+                      live links but inert would be worse than either option.
+                    */
+                    <li key={link.label} className="flex items-center gap-2">
+                      <span className="text-[13.5px] leading-none font-normal text-white/25">
+                        {link.label}
+                      </span>
+                      <span className="rounded-full border border-[#d4793a]/30 bg-[#d4793a]/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#d4793a]">
+                        Soon
+                      </span>
+                    </li>
+                  ) : (
+                    <li key={link.label}>
+                      <a
+                        href={link.href}
+                        className={`text-[13.5px] leading-none transition-colors duration-150 font-normal no-underline ${
+                          link.accent
+                            ? "text-primary/70 hover:text-primary"
+                            : "text-white/45 hover:text-white"
+                        }`}
+                      >
+                        {link.label}
+                      </a>
+                    </li>
+                  ),
+                )}
                 {heading === "Learn" && (
                   <li className="mt-1 pt-4 border-t border-white/6">
                     <span className="text-[13px] text-[#d4793a]">Zewa Pet — Coming Soon</span>
