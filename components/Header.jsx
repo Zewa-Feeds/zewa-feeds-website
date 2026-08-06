@@ -243,8 +243,18 @@ export default function Header() {
     >
       <div className="flex justify-between items-center w-full max-w-[1440px] mx-auto px-8 h-full">
 
-        {/* Logo */}
-        <a href="/" className="shrink-0">
+        {/*
+          Logo + beta flag.
+
+          The badge sits beside the wordmark rather than in a strip above the
+          header: the header is a fixed 80px bar the hero is sized against, so
+          a full-width band would push every page down and need offsets changed
+          in several places. Here it costs no vertical space and appears on
+          every page.
+
+          `title` carries the explanation the badge itself has no room for.
+        */}
+        <a href="/" className="flex shrink-0 items-center gap-2.5">
           <Image
             src="/logo-transparent.png"
             alt="Zewa Feeds"
@@ -253,6 +263,12 @@ export default function Header() {
             className="h-[72px] w-auto object-contain brightness-0 invert"
             priority
           />
+          <span
+            title="This site is still being tested. Orders are live, but you may hit rough edges."
+            className="rounded-full border border-[#d4793a]/40 bg-[#d4793a]/12 px-2 py-[3px] text-[9px] font-bold uppercase tracking-[0.14em] text-[#d4793a]"
+          >
+            Beta
+          </span>
         </a>
 
         {/* Nav */}
