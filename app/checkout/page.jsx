@@ -43,8 +43,16 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState("");
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
-  const [step, setStep] = useState("form"); // form | paying | success
+  const [step, setStep] = useState("form"); // form | paying | success | failed
   const [placed, setPlaced] = useState(null);
+  /**
+   * Why the payment did not go through, for the failure screen.
+   *
+   * `{ orderNo, reason }` — the order still exists and is payable, so the
+   * screen offers a retry rather than sending the customer back to re-enter an
+   * address they already filled in.
+   */
+  const [failure, setFailure] = useState(null);
   const [statusText, setStatusText] = useState("");
   const [pincodeLoading, setPincodeLoading] = useState(false);
   const [autoDetectedBadge, setAutoDetectedBadge] = useState("");
@@ -432,10 +440,8 @@ export default function CheckoutPage() {
        * money) is worth waiting on, because the webhook may still settle it.
        */
       if (outcome === "failed" || outcome === "unavailable") {
-        setErrors({
-          _root: `${message} Your order ${result.orderNo} is saved — you can try paying again.`,
-        });
-        setStep("form");
+        setFailure({ orderNo: result.orderNo, reason: message });
+        setStep("failed");
         return;
       }
 
@@ -446,10 +452,12 @@ export default function CheckoutPage() {
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         setStep("success");
       } else {
-        setErrors({
-          _root: `Payment was not completed. Order ${result.orderNo} is saved — pay within 30 minutes or it will be cancelled.`,
+        setFailure({
+          orderNo: result.orderNo,
+          reason:
+            "We didn't receive confirmation of your payment. If money left your account it will be confirmed shortly — please check before paying again.",
         });
-        setStep("form");
+        setStep("failed");
       }
     } catch (err) {
       setErrors(err.fields ?? { _root: err.message });
@@ -497,6 +505,77 @@ export default function CheckoutPage() {
                 Explore Products
               </a>
             </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  /* ---- PAYMENT FAILED SCREEN -------------------------------------------------
+   *
+   * A decline deserves its own page, not a red bar above a form the customer
+   * has already filled in. Dropping them back there looked like the checkout
+   * had reset and lost their details.
+   *
+   * The order still exists and is payable, so the primary action is "Try
+   * payment again" — which re-opens Razorpay with the SAME order rather than
+   * creating a duplicate. The cart is deliberately NOT cleared.
+   */
+  if (step === "failed" && failure) {
+    return (
+      <>
+        <Header />
+        <main className="flex min-h-screen items-center justify-center bg-[#060913] px-6 pb-20 pt-28">
+          <div className="flex w-full max-w-lg flex-col items-center gap-7 text-center rounded-3xl border border-white/10 bg-[#090f1d] p-8 sm:p-12 shadow-[0_16px_48px_rgba(0,0,0,0.5)]">
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-red-500/40 bg-red-500/10">
+              <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12 text-red-400" aria-hidden="true">
+                <path d="M12 8v5m0 3.5h.01" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+              </svg>
+            </div>
+
+            <div>
+              <span className="mb-3 inline-block rounded-full border border-red-500/30 bg-red-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-red-300 font-[Montserrat]">
+                Payment Failed
+              </span>
+              <h1 className="font-[Playfair_Display] text-[32px] sm:text-[38px] font-bold leading-tight text-white">
+                Your payment didn&apos;t go through
+              </h1>
+              <p className="mt-3 text-[14px] leading-relaxed text-white/60 font-[Montserrat]">
+                {failure.reason}
+              </p>
+              <p className="mt-4 text-[13px] leading-relaxed text-white/45 font-[Montserrat]">
+                Order <span className="font-mono font-semibold text-white/70">{failure.orderNo}</span> is
+                saved and nothing has been charged. Your cart and details are still here — pay within
+                30 minutes or the order is released automatically.
+              </p>
+            </div>
+
+            <div className="flex w-full flex-col gap-3.5 pt-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => {
+                  setFailure(null);
+                  setErrors({});
+                  setStep("form");
+                }}
+                className="flex-1 rounded-2xl bg-primary py-4 text-center text-[12px] font-bold uppercase tracking-[0.18em] text-[#00382d] font-[Montserrat] shadow-[0_4px_20px_rgba(68,229,194,0.3)] transition-all duration-200 hover:bg-primary/90"
+              >
+                Try Payment Again
+              </button>
+              <a
+                href={`/orders/track?orderNo=${failure.orderNo}&email=${encodeURIComponent(form.email)}`}
+                className="flex-1 rounded-2xl border border-white/15 bg-white/5 py-4 text-center text-[12px] font-bold uppercase tracking-[0.18em] text-white/70 font-[Montserrat] transition-all duration-200 hover:border-white/30 hover:bg-white/10 hover:text-white"
+              >
+                Check Order Status
+              </a>
+            </div>
+
+            <p className="text-[11.5px] leading-relaxed text-white/35 font-[Montserrat]">
+              Money debited but no confirmation? It is usually returned by your bank within 5–7
+              working days. Contact us with your order number and we will trace it.
+            </p>
           </div>
         </main>
         <Footer />
@@ -1054,6 +1133,19 @@ async function openRazorpay(result, form, onSuccess) {
      */
     rzp.on("payment.failed", (event) => {
       const e = event?.error ?? {};
+      /*
+       * Close the modal ourselves.
+       *
+       * Razorpay keeps its own "Payment could not be completed / Retry" screen
+       * open after a decline. Without this the customer sees that overlay on
+       * top of our own failure state — two competing versions of the same news,
+       * with our page visibly reset behind theirs.
+       */
+      try {
+        rzp.close();
+      } catch {
+        /* already closed */
+      }
       finish({
         outcome: "failed",
         message: e.description || e.reason || "Your bank declined the payment.",
