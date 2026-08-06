@@ -76,7 +76,7 @@ const nav = {
     { label: "Find Nearest Dealer", href: "#" },
     { label: "Become a Distributor", href: "#" },
     { label: "Download Catalogue", href: "#" },
-    { label: "About Us", href: "#" },
+    { label: "About Us", href: "/about" },
   ],
 };
 

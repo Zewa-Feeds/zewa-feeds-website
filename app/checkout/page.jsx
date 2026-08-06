@@ -1,10 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
+import { checkout as checkoutApi, settings as settingsApi, formatInr } from "@/lib/api";
+import { pincodeMatchesState, likelyStateForPincode } from "@/lib/pincode";
+
+import CheckoutBreadcrumbs from "@/components/checkout/CheckoutBreadcrumbs";
+import { FloatingInput, FloatingSelect } from "@/components/checkout/FloatingInput";
+import PaymentMethodSelector from "@/components/checkout/PaymentMethodSelector";
+import OrderSummaryCard from "@/components/checkout/OrderSummaryCard";
+import { CARD, CARD_PAD, CARD_HEADER, STEP_CHIP, SECTION_TITLE, EASE, FOCUS_RING } from "@/components/checkout/tokens";
 
 const STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
@@ -15,98 +22,435 @@ const STATES = [
   "Delhi", "Jammu & Kashmir", "Ladakh", "Chandigarh", "Puducherry",
 ];
 
-function Field({ label, required, error, children }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[11px] font-bold text-white/40 tracking-[0.12em] uppercase font-[Montserrat]">
-        {label}{required && <span className="text-primary ml-1">*</span>}
-      </label>
-      {children}
-      {error && <p className="text-[11px] text-red-400 font-[Montserrat]">{error}</p>}
-    </div>
-  );
-}
-
-function Input({ value, onChange, placeholder, type = "text", className = "" }) {
-  return (
-    <input
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      className={`w-full px-4 py-3 rounded-xl bg-[#0e1828] border border-white/8 text-[#b8c4d4] text-[14px] font-[Montserrat] placeholder-white/15 focus:outline-none focus:border-primary/40 focus:bg-[#101e30] transition-all duration-200 ${className}`}
-    />
-  );
-}
+const STORAGE_FORM_KEY = "zewa_checkout_form_v1";
 
 export default function CheckoutPage() {
-  const { items, subtotal, clearCart } = useCart();
-  const shipping = subtotal >= 499 ? 0 : 49;
-  const total = subtotal + shipping;
+  const {
+    items, subtotalPaise, discountPaise, shippingPaise, totalPaise,
+    amountToFreeShippingPaise, coupon, issues, fulfillable, validating,
+    validate, applyCoupon, clearCart, setQty, removeFromCart,
+  } = useCart();
 
+  const [config, setConfig] = useState(null);
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
-    address: "", city: "", state: "", pincode: "",
-    notes: "",
+    address: "", city: "", state: "", pincode: "", notes: "",
   });
+
+  // Strict Online Payment (Razorpay) — No COD
+  const [paymentMethod, setPaymentMethod] = useState("RAZORPAY");
+  const [couponInput, setCouponInput] = useState("");
+  const [couponError, setCouponError] = useState("");
   const [errors, setErrors] = useState({});
-  const [step, setStep] = useState("form"); // "form" | "success"
-  const [loading, setLoading] = useState(false);
+  const [touched, setTouched] = useState({});
+  const [step, setStep] = useState("form"); // form | paying | success
+  const [placed, setPlaced] = useState(null);
+  const [statusText, setStatusText] = useState("");
+  const [pincodeLoading, setPincodeLoading] = useState(false);
+  const [autoDetectedBadge, setAutoDetectedBadge] = useState("");
 
-  const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  const idempotencyKey = useRef(
+    `chk-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+  );
 
-  const validate = () => {
+  /*
+   * Current form values, readable from async callbacks.
+   *
+   * The pincode lookup resolves a few hundred ms after it is fired, by which
+   * time the closure that started it holds stale values. Reading through a ref
+   * avoids both that and re-creating the callback on every keystroke.
+   */
+  const formRef = useRef(form);
+  formRef.current = form;
+
+  /*
+   * The city value the pincode lookup last wrote.
+   *
+   * Lets a corrected pincode replace a city we filled in, while leaving a
+   * hand-typed city alone. Null once the customer edits the field themselves.
+   */
+  const autofilledCityRef = useRef(null);
+
+  // Restore saved form state on mount
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(STORAGE_FORM_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setForm((prev) => ({ ...prev, ...parsed }));
+      }
+    } catch {
+      /* ignore storage errors */
+    }
+  }, []);
+
+  // Save form updates to sessionStorage
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(STORAGE_FORM_KEY, JSON.stringify(form));
+    } catch {
+      /* ignore */
+    }
+  }, [form]);
+
+  // Fetch payment config on mount
+  useEffect(() => {
+    settingsApi
+      .public()
+      .then((s) => {
+        setConfig(s);
+        setPaymentMethod("RAZORPAY");
+      })
+      .catch(() => {
+        setConfig({ paymentMethods: { cod: false, razorpay: true } });
+        setPaymentMethod("RAZORPAY");
+      });
+  }, []);
+
+  // Re-price when state or email changes for GST tax calculation
+  useEffect(() => {
+    if (form.state) void validate({ state: form.state, email: form.email || undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.state]);
+
+  // Auto-detect City and State from 6-digit Pincode
+  const handlePincodeLookup = useCallback(async (pin) => {
+    if (pin.length !== 6) return;
+    
+    const localState = likelyStateForPincode(pin);
+    if (localState && !formRef.current.state) {
+      setForm((f) => ({ ...f, state: localState }));
+      setAutoDetectedBadge(`Auto-detected: ${localState}`);
+    }
+
+    setPincodeLoading(true);
+    try {
+      const res = await fetch(`https://api.postalpincode.in/pincode/${pin}`);
+      const data = await res.json();
+      if (data && data[0] && data[0].Status === "Success" && data[0].PostOffice?.length > 0) {
+        const po = data[0].PostOffice[0];
+        const apiDistrict = po.District;
+        const apiState = po.State;
+
+        /*
+         * Overwrite a city WE filled in; never one the customer typed.
+         *
+         * `f.city || apiDistrict` was right when city was a dropdown, but now
+         * that the pincode is the primary way the field gets populated, it left
+         * a stale district behind whenever someone corrected their pincode
+         * after the first lookup. Tracking what we autofilled lets a corrected
+         * pincode fix the city while still protecting manual edits.
+         */
+        const cityNow = formRef.current.city;
+        const cityWasAutofilled = !cityNow || cityNow === autofilledCityRef.current;
+        const nextCity = cityWasAutofilled && apiDistrict ? apiDistrict : cityNow;
+        autofilledCityRef.current = cityWasAutofilled ? nextCity : null;
+
+        setForm((f) => ({
+          ...f,
+          city: nextCity || "",
+          state: f.state || apiState || localState || "",
+        }));
+
+        setAutoDetectedBadge(`Auto-detected: ${apiDistrict || ""}, ${apiState || localState || ""}`);
+
+        /*
+         * Clear only what this response actually resolved.
+         *
+         * Blanket-clearing errors.pincode here used to wipe the PIN/state
+         * mismatch error a few hundred ms after the local check raised it: the
+         * customer saw a clean form, then an unexplained rejection at submit,
+         * because the server enforces the same rule (checkout.service.ts §3b).
+         * A successful lookup does not clear a mismatch — it CONFIRMS it, so
+         * re-check against the state the customer will actually submit.
+         */
+        const current = formRef.current;
+        const effectiveState = current.state || apiState || localState || "";
+        const stillMismatched =
+          Boolean(effectiveState) && !pincodeMatchesState(pin, effectiveState);
+
+        setErrors((prev) => ({
+          ...prev,
+          ...(stillMismatched
+            ? {
+                pincode: `Pincode ${pin} belongs to ${
+                  likelyStateForPincode(pin) || apiState
+                }`,
+              }
+            : { pincode: undefined, state: undefined }),
+          ...(current.city || apiDistrict ? { city: undefined } : {}),
+        }));
+      }
+    } catch {
+      /* fallback stays */
+    } finally {
+      setPincodeLoading(false);
+    }
+  }, []);
+
+  const handleChange = (field) => (e) => {
+    let val = e.target.value;
+
+    if (field === "phone") {
+      val = val.replace(/\D/g, "").slice(0, 10);
+    } else if (field === "pincode") {
+      val = val.replace(/\D/g, "").slice(0, 6);
+      if (val.length === 6) {
+        void handlePincodeLookup(val);
+      } else {
+        setAutoDetectedBadge("");
+      }
+    } else if (field === "firstName" || field === "lastName") {
+      val = val.replace(/[^a-zA-Z\s'-]/g, "").slice(0, 50);
+    } else if (field === "city") {
+      val = val.replace(/[^a-zA-Z\s'.-]/g, "").slice(0, 50);
+      // Hand-edited from here on — the pincode lookup must stop overwriting it.
+      autofilledCityRef.current = null;
+    } else if (field === "address") {
+      val = val.slice(0, 200);
+    } else if (field === "email") {
+      val = val.trim().slice(0, 100);
+    } else if (field === "notes") {
+      val = val.slice(0, 1000);
+    }
+
+    setForm((f) => ({ ...f, [field]: val }));
+
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const handleBlur = (field) => () => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const fieldErr = validateSingleField(field, form[field]);
+    if (fieldErr) {
+      setErrors((prev) => ({ ...prev, [field]: fieldErr }));
+    }
+  };
+
+  const validateSingleField = (field, val) => {
+    const trimmed = String(val || "").trim();
+
+    if (field === "firstName") {
+      if (!trimmed) return "First name is required";
+      if (trimmed.length < 2) return "Must be at least 2 letters";
+    }
+    if (field === "lastName") {
+      if (!trimmed) return "Last name is required";
+    }
+    if (field === "email") {
+      if (!trimmed) return "Email is required";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return "Enter a valid email address (e.g. name@example.com)";
+    }
+    if (field === "phone") {
+      if (!trimmed) return "Mobile number is required";
+      if (trimmed.length !== 10) return "Mobile number must be exactly 10 digits";
+      if (!/^[6-9]\d{9}$/.test(trimmed)) return "Enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9";
+    }
+    if (field === "address") {
+      if (!trimmed) return "Address is required";
+      if (trimmed.length < 5) return "Please enter complete street address & house number";
+    }
+    if (field === "city") {
+      if (!trimmed) return "City is required";
+    }
+    if (field === "state") {
+      if (!trimmed) return "State selection is required";
+      if (form.pincode && form.pincode.length === 6 && !pincodeMatchesState(form.pincode, trimmed)) {
+        const expected = likelyStateForPincode(form.pincode);
+        return expected ? `Pincode ${form.pincode} belongs to ${expected}` : "Selected state does not match pincode";
+      }
+    }
+    if (field === "pincode") {
+      if (!trimmed) return "Pincode is required";
+      if (trimmed.length !== 6) return "Pincode must be exactly 6 digits";
+      if (!/^\d{6}$/.test(trimmed)) return "Must be a valid 6-digit postal pincode";
+      if (form.state && !pincodeMatchesState(trimmed, form.state)) {
+        const expected = likelyStateForPincode(trimmed);
+        return expected ? `Pincode belongs to ${expected}` : "Pincode does not match selected state";
+      }
+    }
+    return null;
+  };
+
+  const validateForm = () => {
     const e = {};
-    if (!form.firstName.trim()) e.firstName = "Required";
-    if (!form.lastName.trim()) e.lastName = "Required";
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Valid email required";
-    if (!form.phone.trim() || !/^\d{10}$/.test(form.phone.replace(/\s/g, ""))) e.phone = "10-digit mobile number required";
-    if (!form.address.trim()) e.address = "Required";
-    if (!form.city.trim()) e.city = "Required";
-    if (!form.state) e.state = "Required";
-    if (!form.pincode.trim() || !/^\d{6}$/.test(form.pincode)) e.pincode = "Valid 6-digit pincode required";
+    Object.keys(form).forEach((key) => {
+      if (key !== "notes") {
+        const err = validateSingleField(key, form[key]);
+        if (err) e[key] = err;
+      }
+    });
     return e;
   };
 
-  const handleSubmit = (e) => {
+  const submitCoupon = async (e) => {
     e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
-    setLoading(true);
-    // Simulate order placement
-    setTimeout(() => {
-      clearCart();
-      setStep("success");
-      setLoading(false);
-    }, 1200);
+    setCouponError("");
+    const result = await applyCoupon(couponInput.trim().toUpperCase());
+    const problem = result?.issues?.find((i) => i.sku === "__coupon__");
+    if (problem) setCouponError(problem.message);
   };
 
-  if (step === "success") {
+  const pollUntilPaid = async (orderNo, email, timeoutMs = 90_000) => {
+    const started = Date.now();
+    while (Date.now() - started < timeoutMs) {
+      await new Promise((r) => setTimeout(r, 3000));
+      try {
+        const status = await checkoutApi.status(orderNo, email);
+        if (status.paymentStatus === "PAID") return true;
+        if (status.status === "CANCELLED") return false;
+      } catch {
+        /* transient */
+      }
+      setStatusText(`Confirming payment with bank… ${Math.round((Date.now() - started) / 1000)}s`);
+    }
+    return false;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const errs = validateForm();
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      const allTouched = {};
+      Object.keys(form).forEach((k) => (allTouched[k] = true));
+      setTouched(allTouched);
+
+      const firstErrorKey = Object.keys(errs)[0];
+      const element = document.getElementById(firstErrorKey);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.focus();
+      }
+      return;
+    }
+
+    setErrors({});
+    setStep("paying");
+    setStatusText("Securing & placing your order…");
+
+    try {
+      const fresh = await validate({ state: form.state, email: form.email });
+      const blocking = (fresh?.issues ?? []).filter((i) => i.sku !== "__coupon__");
+      if (blocking.length > 0) {
+        setErrors({ _root: blocking[0].message });
+        setStep("form");
+        return;
+      }
+
+      const result = await checkoutApi.place(
+        {
+          lines: items.map((i) => ({ sku: i.sku, qty: i.qty })),
+          email: form.email.trim(),
+          phone: form.phone.replace(/\s/g, ""),
+          shippingAddress: {
+            name: `${form.firstName.trim()} ${form.lastName.trim()}`,
+            phone: form.phone.replace(/\s/g, ""),
+            line1: form.address.trim(),
+            city: form.city.trim(),
+            state: form.state,
+            pincode: form.pincode.trim(),
+          },
+          paymentMethod: "RAZORPAY",
+          couponCode: coupon?.code ?? undefined,
+          customerNote: form.notes.trim() || undefined,
+        },
+        idempotencyKey.current,
+      );
+
+      setPlaced(result);
+
+      if (!result.payment.required) {
+        clearCart();
+        sessionStorage.removeItem(STORAGE_FORM_KEY);
+        setStep("success");
+        return;
+      }
+
+      if (result.payment.simulated) {
+        setStatusText(
+          `Test mode — payment confirms automatically in ${result.payment.autoConfirmInSeconds ?? 30}s…`,
+        );
+        const paid = await pollUntilPaid(result.orderNo, form.email.trim());
+        if (paid) {
+          clearCart();
+          sessionStorage.removeItem(STORAGE_FORM_KEY);
+          setStep("success");
+        } else {
+          setErrors({ _root: "Payment was not confirmed in time. Please contact support." });
+          setStep("form");
+        }
+        return;
+      }
+
+      const completed = await openRazorpay(result, form, async (payload) => {
+        await checkoutApi.confirm(result.orderNo, payload);
+      });
+
+      if (completed) {
+        clearCart();
+        sessionStorage.removeItem(STORAGE_FORM_KEY);
+        setStep("success");
+      } else {
+        setStatusText("Waiting for payment confirmation…");
+        const paid = await pollUntilPaid(result.orderNo, form.email.trim(), 120_000);
+        if (paid) {
+          clearCart();
+          sessionStorage.removeItem(STORAGE_FORM_KEY);
+          setStep("success");
+        } else {
+          setErrors({
+            _root: `Payment was not completed. Order ${result.orderNo} is saved — pay within 30 minutes or it will be cancelled.`,
+          });
+          setStep("form");
+        }
+      }
+    } catch (err) {
+      setErrors(err.fields ?? { _root: err.message });
+      setStep("form");
+    }
+  };
+
+  // ---- SUCCESS SCREEN --------------------------------------------------------
+  if (step === "success" && placed) {
     return (
       <>
         <Header />
-        <main className="bg-[#06080f] min-h-screen flex items-center justify-center px-6 pt-20 pb-20">
-          <div className="max-w-md w-full text-center flex flex-col items-center gap-6">
-            <div className="w-20 h-20 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
-              <svg viewBox="0 0 24 24" fill="none" className="w-10 h-10 text-primary">
-                <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <main className="flex min-h-screen items-center justify-center bg-[#060913] px-6 pb-20 pt-28">
+          <div className="flex w-full max-w-lg flex-col items-center gap-7 text-center rounded-3xl border border-white/10 bg-[#090f1d] p-8 sm:p-12 shadow-[0_16px_48px_rgba(0,0,0,0.5)]">
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary/40 bg-primary/10 shadow-[0_0_32px_rgba(68,229,194,0.25)]">
+              <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12 text-primary animate-bounce">
+                <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
+
             <div>
-              <h1 className="font-[Playfair_Display] text-[36px] text-white mb-3">Order Placed!</h1>
-              <p className="text-[14px] text-white/45 font-[Montserrat] leading-relaxed">
-                Thank you, {form.firstName}! We'll send a confirmation to <span className="text-primary">{form.email}</span>.
-                Your order will be dispatched within 1–2 business days.
+              <span className="inline-block rounded-full bg-primary/15 border border-primary/30 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary font-[Montserrat] mb-3">
+                Order Confirmed
+              </span>
+              <h1 className="font-[Playfair_Display] text-[36px] sm:text-[42px] font-bold leading-tight text-white">
+                Thank you for your order!
+              </h1>
+              <p className="mt-3 text-[14px] leading-relaxed text-white/60 font-[Montserrat]">
+                Order <span className="font-mono font-semibold text-primary">{placed.orderNo}</span> has been received.
+                Payment is verified and your package is being prepared for express dispatch.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
-              <a href="/products"
-                className="flex-1 py-3.5 rounded-full bg-primary text-[#00382d] text-center text-[11px] font-bold tracking-[0.18em] uppercase font-[Montserrat] hover:bg-primary/85 transition-all duration-200">
-                Continue Shopping
+
+            <div className="flex w-full flex-col gap-3.5 sm:flex-row pt-2">
+              <a
+                href={`/orders/track?orderNo=${placed.orderNo}&email=${encodeURIComponent(form.email)}`}
+                className="flex-1 rounded-2xl bg-primary py-4 text-center text-[12px] font-bold uppercase tracking-[0.18em] text-[#00382d] font-[Montserrat] transition-all duration-200 hover:bg-primary/90 shadow-[0_4px_20px_rgba(68,229,194,0.3)]"
+              >
+                Track Order Status
               </a>
-              <a href="/"
-                className="flex-1 py-3.5 rounded-full border border-white/15 text-white/50 text-center text-[11px] font-bold tracking-[0.18em] uppercase font-[Montserrat] hover:border-white/30 hover:text-white/70 transition-all duration-200">
-                Go Home
+              <a
+                href="/products"
+                className="flex-1 rounded-2xl border border-white/15 bg-white/5 py-4 text-center text-[12px] font-bold uppercase tracking-[0.18em] text-white/70 font-[Montserrat] transition-all duration-200 hover:border-white/30 hover:text-white hover:bg-white/10"
+              >
+                Explore Products
               </a>
             </div>
           </div>
@@ -116,16 +460,56 @@ export default function CheckoutPage() {
     );
   }
 
+  // ---- PAYING / PROCESSING SCREEN --------------------------------------------
+  if (step === "paying") {
+    return (
+      <>
+        <Header />
+        <main className="flex min-h-screen items-center justify-center bg-[#060913] px-6 pt-28">
+          <div className="flex flex-col items-center gap-6 text-center rounded-3xl border border-white/10 bg-[#090f1d] p-10 sm:p-14 shadow-[0_16px_48px_rgba(0,0,0,0.5)] max-w-md w-full">
+            <div className="relative flex items-center justify-center">
+              <div className="h-16 w-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+              <div className="absolute h-8 w-8 rounded-full bg-primary/20 animate-ping" />
+            </div>
+            <h3 className="font-[Playfair_Display] text-[24px] font-bold text-white">Processing Checkout</h3>
+            <p className="text-[14px] text-white/60 font-[Montserrat] leading-relaxed">{statusText}</p>
+            {placed?.payment?.simulated && (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5">
+                <p className="text-[11px] text-amber-300 font-[Montserrat]">
+                  Development Test Mode — payment confirms automatically.
+                </p>
+              </div>
+            )}
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  // ---- EMPTY CART SCREEN ----------------------------------------------------
   if (items.length === 0) {
     return (
       <>
         <Header />
-        <main className="bg-[#06080f] min-h-screen flex items-center justify-center px-6 pt-20">
-          <div className="text-center flex flex-col items-center gap-5">
-            <p className="font-[Playfair_Display] text-[28px] text-white/50">Your cart is empty</p>
-            <a href="/products"
-              className="px-8 py-3.5 rounded-full bg-primary text-[#00382d] text-[11px] font-bold tracking-[0.18em] uppercase font-[Montserrat] hover:bg-primary/85 transition-all duration-200">
-              Shop Products
+        <main className="flex min-h-screen items-center justify-center bg-[#060913] px-6 pt-20">
+          <div className="flex flex-col items-center gap-6 text-center max-w-md">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/30">
+              <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="font-[Playfair_Display] text-[32px] font-bold text-white">Your cart is empty</h2>
+              <p className="mt-2 text-[14px] text-white/50 font-[Montserrat]">
+                Explore our scientifically formulated insect-protein fish feed options.
+              </p>
+            </div>
+            <a
+              href="/products"
+              className="rounded-2xl bg-primary px-8 py-4 text-[12px] font-bold uppercase tracking-[0.18em] text-[#00382d] font-[Montserrat] transition-all duration-200 hover:bg-primary/90 shadow-[0_4px_20px_rgba(68,229,194,0.3)]"
+            >
+              Shop Aqua Feeds
             </a>
           </div>
         </main>
@@ -137,200 +521,435 @@ export default function CheckoutPage() {
   return (
     <>
       <Header />
-      <main className="bg-[#06080f] min-h-screen text-[#dde2f6] pt-28 pb-20">
-        <div className="max-w-[1100px] mx-auto px-6 sm:px-10">
+      <main className="min-h-screen bg-[#060913] pb-24 pt-24 sm:pt-28 text-[#dde2f6]">
+        <div className="mx-auto max-w-[1240px] px-4 sm:px-8">
+          {/* Top Breadcrumbs Nav */}
+          <div className="mb-6 sm:mb-8">
+            <CheckoutBreadcrumbs currentStep={step} />
+          </div>
 
-          {/* Header */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-5 h-px bg-primary" />
-              <span className="text-[10px] font-bold text-primary tracking-[0.28em] font-[Montserrat] uppercase">Secure Checkout</span>
-            </div>
-            <h1 className="font-[Playfair_Display] text-[36px] sm:text-[48px] text-white leading-tight">
-              Complete your order
+          {/* Page Title Header */}
+          <div className="mb-8 border-b border-white/8 pb-6">
+            <h1 className="font-[Playfair_Display] text-[32px] sm:text-[44px] font-bold leading-tight text-white">
+              Complete Your Order
             </h1>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 items-start">
+          {/* Global Root Errors */}
+          {errors._root && (
+            <div className="mb-8 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-[13px] text-red-300 font-[Montserrat] flex items-center gap-3">
+              <svg className="w-5 h-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{errors._root}</span>
+            </div>
+          )}
 
-            {/* Form — 3 cols */}
-            <form onSubmit={handleSubmit} className="lg:col-span-3 flex flex-col gap-8">
-
-              {/* Contact */}
-              <div className="rounded-2xl bg-white/3 border border-white/6 p-6 flex flex-col gap-5">
-                <h2 className="font-[Playfair_Display] text-[20px] text-white">Contact Information</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field label="First Name" required error={errors.firstName}>
-                    <Input value={form.firstName} onChange={set("firstName")} placeholder="Ravi" />
-                  </Field>
-                  <Field label="Last Name" required error={errors.lastName}>
-                    <Input value={form.lastName} onChange={set("lastName")} placeholder="Kumar" />
-                  </Field>
-                  <Field label="Email" required error={errors.email}>
-                    <Input type="email" value={form.email} onChange={set("email")} placeholder="ravi@example.com" />
-                  </Field>
-                  <Field label="Mobile Number" required error={errors.phone}>
-                    <Input type="tel" value={form.phone} onChange={set("phone")} placeholder="98765 43210" />
-                  </Field>
-                </div>
-              </div>
-
-              {/* Shipping address */}
-              <div className="rounded-2xl bg-white/3 border border-white/6 p-6 flex flex-col gap-5">
-                <h2 className="font-[Playfair_Display] text-[20px] text-white">Shipping Address</h2>
-                <div className="flex flex-col gap-4">
-                  <Field label="Address" required error={errors.address}>
-                    <Input value={form.address} onChange={set("address")} placeholder="House / Flat no., Street, Area" />
-                  </Field>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="City" required error={errors.city}>
-                      <Input value={form.city} onChange={set("city")} placeholder="Thrissur" />
-                    </Field>
-                    <Field label="Pincode" required error={errors.pincode}>
-                      <Input value={form.pincode} onChange={set("pincode")} placeholder="680001" />
-                    </Field>
+          {/* 2-COLUMN GRID LAYOUT (Left: 7 cols, Right: 5 cols) */}
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
+            {/* LEFT COLUMN: Contact, Shipping, Payment */}
+            <form onSubmit={handleSubmit} className="flex flex-col gap-8 lg:col-span-7">
+              {/* SECTION 1: CONTACT INFORMATION */}
+              <div className={`flex flex-col gap-5 ${CARD} ${CARD_PAD}`}>
+                <div className={CARD_HEADER}>
+                  <div className="flex items-center gap-3">
+                    <div className={STEP_CHIP}>
+                      1
+                    </div>
+                    <h2 className={SECTION_TITLE}>
+                      Contact Information
+                    </h2>
                   </div>
-                  <Field label="State" required error={errors.state}>
-                    <select
-                      value={form.state}
-                      onChange={set("state")}
-                      className="w-full px-4 py-3 rounded-xl bg-[#0e1828] border border-white/8 text-[14px] font-[Montserrat] focus:outline-none focus:border-primary/40 focus:bg-[#101e30] transition-all duration-200 appearance-none"
-                      style={{ color: form.state ? "#b8c4d4" : "rgba(255,255,255,0.15)" }}
-                    >
-                      <option value="" disabled>Select state</option>
-                      {STATES.map((s) => (
-                        <option key={s} value={s} style={{ background: "#0e1828", color: "#b8c4d4" }}>{s}</option>
-                      ))}
-                    </select>
-                  </Field>
+                </div>
+
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <FloatingInput
+                    id="firstName"
+                    name="firstName"
+                    label="First Name"
+                    required
+                    value={form.firstName}
+                    onChange={handleChange("firstName")}
+                    onBlur={handleBlur("firstName")}
+                    error={touched.firstName ? errors.firstName : undefined}
+                    isValid={touched.firstName && !errors.firstName && form.firstName.length >= 2}
+                    autoComplete="given-name"
+                    maxLength={50}
+                    placeholder="Ravi"
+                  />
+
+                  <FloatingInput
+                    id="lastName"
+                    name="lastName"
+                    label="Last Name"
+                    required
+                    value={form.lastName}
+                    onChange={handleChange("lastName")}
+                    onBlur={handleBlur("lastName")}
+                    error={touched.lastName ? errors.lastName : undefined}
+                    isValid={touched.lastName && !errors.lastName && form.lastName.length >= 1}
+                    autoComplete="family-name"
+                    maxLength={50}
+                    placeholder="Kumar"
+                  />
+
+                  <FloatingInput
+                    id="email"
+                    name="email"
+                    type="email"
+                    label="Email Address"
+                    required
+                    value={form.email}
+                    onChange={handleChange("email")}
+                    onBlur={handleBlur("email")}
+                    error={touched.email ? errors.email : undefined}
+                    isValid={touched.email && !errors.email && form.email.length > 3}
+                    autoComplete="email"
+                    maxLength={100}
+                    placeholder="ravi.kumar@example.com"
+                  />
+
+                  <FloatingInput
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    inputMode="numeric"
+                    label="Mobile Number"
+                    required
+                    value={form.phone}
+                    onChange={handleChange("phone")}
+                    onBlur={handleBlur("phone")}
+                    error={touched.phone ? errors.phone : undefined}
+                    isValid={touched.phone && !errors.phone && form.phone.length === 10}
+                    hint="10-digit Indian mobile number for delivery updates"
+                    autoComplete="tel"
+                    maxLength={10}
+                    placeholder="9876543210"
+                  />
                 </div>
               </div>
 
-              {/* Order notes */}
-              <div className="rounded-2xl bg-white/3 border border-white/6 p-6 flex flex-col gap-4">
-                <h2 className="font-[Playfair_Display] text-[20px] text-white">Order Notes <span className="text-[14px] text-white/25 font-[Montserrat] font-normal">(optional)</span></h2>
-                <textarea
-                  value={form.notes}
-                  onChange={set("notes")}
-                  placeholder="Any special instructions for your order…"
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-xl bg-[#0e1828] border border-white/8 text-[#b8c4d4] text-[14px] font-[Montserrat] placeholder-white/15 focus:outline-none focus:border-primary/40 focus:bg-[#101e30] transition-all duration-200 resize-none"
+              {/* SECTION 2: SHIPPING ADDRESS */}
+              <div className={`flex flex-col gap-5 ${CARD} ${CARD_PAD}`}>
+                <div className={CARD_HEADER}>
+                  <div className="flex items-center gap-3">
+                    <div className={STEP_CHIP}>
+                      2
+                    </div>
+                    <h2 className={SECTION_TITLE}>
+                      Delivery Address
+                    </h2>
+                  </div>
+                  {autoDetectedBadge && (
+                    <span className="text-[10px] bg-primary/15 border border-primary/30 text-primary px-2.5 py-1 rounded-full font-semibold font-[Montserrat]">
+                      {autoDetectedBadge}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-5">
+                  <FloatingInput
+                    id="address"
+                    name="address"
+                    label="Street Address / House / Flat No."
+                    required
+                    value={form.address}
+                    onChange={handleChange("address")}
+                    onBlur={handleBlur("address")}
+                    error={touched.address ? errors.address : undefined}
+                    isValid={touched.address && !errors.address && form.address.length >= 5}
+                    autoComplete="street-address"
+                    maxLength={200}
+                    placeholder="Flat 4B, Blue Ridge Apts, MG Road"
+                  />
+
+                  {/*
+                    State stays a dropdown, unlike city: it drives the GST
+                    split on the invoice (CGST+SGST vs IGST), so it has to be
+                    one of 33 exact values rather than free text.
+                  */}
+                  <FloatingSelect
+                    id="state"
+                    name="state"
+                    label="State / Region"
+                    required
+                    value={form.state}
+                    onChange={handleChange("state")}
+                    onBlur={handleBlur("state")}
+                    error={touched.state ? errors.state : undefined}
+                    options={STATES}
+                    hint="Also determines GST on your invoice"
+                  />
+
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    {/*
+                      City is a plain text field, autofilled from the pincode.
+
+                      It used to be a dropdown backed by a hardcoded ~18-cities
+                      -per-state list, which could not represent most of India's
+                      ~750 districts — and the backend accepts city as free text
+                      anyway (2–80 chars, printed on the address label; couriers
+                      route on the pincode). The dropdown constrained customers
+                      for no downstream benefit, and silently blanked itself
+                      whenever the postal lookup returned a district outside the
+                      list. Typing, with the pincode filling it in, is both
+                      simpler and correct everywhere.
+                    */}
+                    <FloatingInput
+                      id="city"
+                      name="city"
+                      label="City / District"
+                      required
+                      value={form.city}
+                      onChange={handleChange("city")}
+                      onBlur={handleBlur("city")}
+                      error={touched.city ? errors.city : undefined}
+                      isValid={touched.city && !errors.city && form.city.length >= 2}
+                      loading={pincodeLoading}
+                      hint="Filled in from your pincode — edit if needed"
+                      autoComplete="address-level2"
+                      maxLength={50}
+                      placeholder="Ratnagiri"
+                    />
+
+
+                    <FloatingInput
+                      id="pincode"
+                      name="pincode"
+                      type="text"
+                      inputMode="numeric"
+                      label="Pincode"
+                      required
+                      value={form.pincode}
+                      onChange={handleChange("pincode")}
+                      onBlur={handleBlur("pincode")}
+                      error={touched.pincode ? errors.pincode : undefined}
+                      isValid={touched.pincode && !errors.pincode && form.pincode.length === 6}
+                      loading={pincodeLoading}
+                      hint="6-digit postal pincode"
+                      autoComplete="postal-code"
+                      maxLength={6}
+                      placeholder="680001"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION 3: PAYMENT METHOD */}
+              <div className={`flex flex-col gap-5 ${CARD} ${CARD_PAD}`}>
+                <div className={CARD_HEADER}>
+                  <div className="flex items-center gap-3">
+                    <div className={STEP_CHIP}>
+                      3
+                    </div>
+                    <h2 className={SECTION_TITLE}>
+                      Payment Method
+                    </h2>
+                  </div>
+                </div>
+
+                <PaymentMethodSelector
+                  selectedMethod={paymentMethod}
+                  onSelectMethod={(m) => setPaymentMethod(m)}
                 />
               </div>
 
-              {/* Payment note */}
-              <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-white/3 border border-white/6">
-                <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-primary shrink-0 mt-0.5">
-                  <rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M1 10h22" stroke="currentColor" strokeWidth="1.5" />
-                </svg>
-                <p className="text-[12px] text-white/40 font-[Montserrat] leading-relaxed">
-                  Payment is collected on delivery (COD). Our team will call to confirm your order before dispatch.
-                </p>
+              {/* SECTION 4: ORDER NOTES (OPTIONAL) */}
+              <div className={`flex flex-col gap-3 ${CARD} ${CARD_PAD}`}>
+                <h3 className="font-[Playfair_Display] text-[18px] font-bold text-white flex items-center justify-between">
+                  <span>Order Notes</span>
+                  <span className="text-[12px] font-normal text-white/30 font-[Montserrat]">(optional)</span>
+                </h3>
+                <textarea
+                  value={form.notes}
+                  onChange={handleChange("notes")}
+                  rows={2}
+                  maxLength={1000}
+                  placeholder="Delivery instructions, gate code, call before arrival..."
+                  className="w-full resize-none rounded-2xl border border-white/10 bg-[#090f1d] px-4 py-3 text-[14px] text-white placeholder-white/20 font-[Montserrat] transition-all duration-200 focus:border-primary/50 focus:bg-[#0f192b] focus:outline-none"
+                />
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-4 rounded-full bg-primary text-[#00382d] text-[12px] font-bold tracking-[0.2em] uppercase font-[Montserrat] hover:bg-primary/85 active:scale-[0.98] transition-all duration-200 disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity="0.25" />
-                      <path d="M12 2a10 10 0 0110 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              {/* MAIN DESKTOP SUBMIT CTA BUTTON */}
+              <div className="flex flex-col gap-3">
+                <button
+                  type="submit"
+                  disabled={validating || !fulfillable}
+                  aria-busy={validating}
+                  className={`group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-primary py-4 text-[13px] font-bold uppercase tracking-[0.2em] text-[#00382d] font-[Montserrat] shadow-[0_4px_28px_rgba(68,229,194,0.35)] sm:py-5 ${EASE} hover:bg-primary/90 hover:shadow-[0_6px_34px_rgba(68,229,194,0.45)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:bg-primary ${FOCUS_RING}`}
+                >
+                  {/*
+                   * Sheen sweep on hover. Purely decorative, so it is hidden
+                   * from assistive tech and suppressed under reduced-motion.
+                   */}
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden"
+                  />
+
+                  {validating ? (
+                    <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                      <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />
                     </svg>
-                    Placing order…
-                  </>
-                ) : `Place Order · ₹${total.toLocaleString("en-IN")}`}
-              </button>
+                  ) : (
+                    <svg
+                      className={`h-5 w-5 ${EASE} group-hover:scale-110`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  )}
+
+                  <span className="relative">
+                    {validating
+                      ? "Validating prices..."
+                      : !fulfillable
+                      ? "Fix cart issues to continue"
+                      : `Pay Online · ${formatInr(totalPaise)}`}
+                  </span>
+                </button>
+
+              </div>
             </form>
 
-            {/* Order summary — 2 cols */}
-            <div className="lg:col-span-2 lg:sticky lg:top-28 flex flex-col gap-4">
-              <div className="rounded-2xl bg-white/3 border border-white/6 p-6 flex flex-col gap-5">
-                <h2 className="font-[Playfair_Display] text-[20px] text-white">Order Summary</h2>
-
-                {/* Items */}
-                <div className="flex flex-col gap-3">
-                  {items.map((item) => (
-                    <div key={item.sku} className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
-                      {/* Image + qty badge */}
-                      <div className="relative shrink-0 w-11 h-11 rounded-lg overflow-visible">
-                        <div className="w-11 h-11 rounded-lg overflow-hidden flex items-center justify-center"
-                          style={{ background: item.accentBg || "#1a2235" }}>
-                          <Image src={item.image} alt={item.name} width={36} height={36}
-                            className="object-contain w-full h-full p-1.5"
-                            style={{ filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.35))" }} />
-                        </div>
-                        <span className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] rounded-full bg-primary text-[#00382d] text-[9px] font-bold font-[Montserrat] flex items-center justify-center shadow-md z-10">
-                          {item.qty}
-                        </span>
-                      </div>
-
-                      {/* Name + pack */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-[Playfair_Display] text-white/85 leading-snug truncate">{item.name}</p>
-                        <p className="text-[10px] text-white/30 font-[Montserrat] mt-0.5">{item.pack}</p>
-                      </div>
-
-                      {/* Price */}
-                      <span className="text-[13px] font-bold text-white/80 font-[Montserrat] shrink-0 tabular-nums">
-                        ₹{(item.price * item.qty).toLocaleString("en-IN")}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="h-px bg-white/6" />
-
-                {/* Totals */}
-                <div className="flex flex-col gap-3 text-[13px] font-[Montserrat]">
-                  <div className="flex justify-between">
-                    <span className="text-white/40">Subtotal</span>
-                    <span className="text-white">₹{subtotal.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/40">Shipping</span>
-                    <span className={shipping === 0 ? "text-primary" : "text-white"}>
-                      {shipping === 0 ? "FREE" : `₹${shipping}`}
-                    </span>
-                  </div>
-                  <div className="h-px bg-white/6" />
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-white/70 font-semibold">Total (COD)</span>
-                    <span className="font-[Playfair_Display] text-[24px] text-white">₹{total.toLocaleString("en-IN")}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trust */}
-              <div className="rounded-2xl bg-white/2 border border-white/5 p-5 flex flex-col gap-3">
-                {[
-                  {
-                    text: shipping === 0 ? "Free shipping on this order" : "Free shipping above ₹499",
-                    svg: <path d="M1 3h15v11H1zM16 8h4l3 3v3h-7V8zM5.5 17a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 17a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />,
-                  },
-                  {
-                    text: "Easy returns within 7 days",
-                    svg: <path d="M9 14L5 10l4-4M5 10h8a4 4 0 010 8h-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />,
-                  },
-                  {
-                    text: "Order confirmed via call before dispatch",
-                    svg: <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />,
-                  },
-                ].map((t, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-primary/50 shrink-0">{t.svg}</svg>
-                    <span className="text-[11px] text-white/30 font-[Montserrat]">{t.text}</span>
-                  </div>
-                ))}
-              </div>
+            {/* RIGHT COLUMN: STICKY ORDER SUMMARY */}
+            <div className="lg:sticky lg:top-28 lg:col-span-5 flex flex-col gap-6">
+              <OrderSummaryCard
+                items={items}
+                issues={issues}
+                subtotalPaise={subtotalPaise}
+                discountPaise={discountPaise}
+                shippingPaise={shippingPaise}
+                totalPaise={totalPaise}
+                amountToFreeShippingPaise={amountToFreeShippingPaise}
+                coupon={coupon}
+                couponInput={couponInput}
+                onCouponInputChange={setCouponInput}
+                couponError={couponError}
+                onSubmitCoupon={submitCoupon}
+                paymentMethod={paymentMethod}
+                config={config}
+                validating={validating}
+                setQty={setQty}
+                removeFromCart={removeFromCart}
+              />
             </div>
           </div>
         </div>
+
+        {/*
+          STICKY BOTTOM BAR — MOBILE ONLY
+
+          `pb-[env(safe-area-inset-bottom)]` keeps the button clear of the home
+          indicator on notched iPhones, where a plain fixed bar would sit
+          underneath it and become hard to tap. The `pb-24` on <main> reserves
+          the space this bar occupies so it never covers the last section.
+        */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 flex lg:hidden items-center justify-between gap-4 border-t border-white/10 bg-[#090f1d]/95 px-5 py-3.5 pb-[calc(0.875rem+env(safe-area-inset-bottom))] shadow-[0_-8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+          <div className="flex min-w-0 flex-col">
+            <span className="text-[10px] uppercase tracking-wider text-white/40 font-[Montserrat]">
+              Total Amount
+            </span>
+            <span className="truncate font-[Playfair_Display] text-[20px] font-bold tabular-nums text-white">
+              {formatInr(totalPaise)}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={validating || !fulfillable}
+            aria-busy={validating}
+            className={`flex shrink-0 items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-[#00382d] font-[Montserrat] ${EASE} hover:bg-primary/90 active:scale-[0.98] disabled:opacity-40 ${FOCUS_RING}`}
+          >
+            <span>{validating ? "Checking..." : !fulfillable ? "Fix cart" : "Pay Online"}</span>
+            {validating ? (
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />
+              </svg>
+            ) : (
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            )}
+          </button>
+        </div>
       </main>
-      <Footer />
+
+      {/*
+        No site Footer on the active checkout form.
+
+        The footer is a browse-oriented nav block, and offering a dozen ways to
+        leave the page is the opposite of what checkout is for. The two links
+        that genuinely belong at the point of payment — Privacy and Terms — are
+        kept inline below instead. The terminal states (success, empty cart,
+        error) DO keep the full footer, because browsing is the right next step
+        there.
+      */}
+      <div className="border-t border-white/6 bg-[#060913] px-6 pb-28 pt-6 lg:pb-8">
+        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] text-white/30 font-[Montserrat]">
+          <span>© {new Date().getFullYear()} Zewa Feeds</span>
+          {/*
+            Placeholder hrefs, matching components/Footer.jsx — the Privacy and
+            Terms pages do not exist yet. Point these at the real routes when
+            they ship; a payment page is exactly where people look for them.
+          */}
+          <a href="#" className="transition-colors hover:text-white/60">
+            Privacy Policy
+          </a>
+          <a href="#" className="transition-colors hover:text-white/60">
+            Terms of Use
+          </a>
+        </div>
+      </div>
     </>
   );
+}
+
+// Razorpay SDK popup handler (Production path)
+async function openRazorpay(result, form, onSuccess) {
+  const loaded = await new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+
+  if (!loaded || !result.payment.publicKey) return false;
+
+  return new Promise((resolve) => {
+    const rzp = new window.Razorpay({
+      key: result.payment.publicKey,
+      amount: result.payment.amountPaise,
+      currency: "INR",
+      name: "Zewa Feeds",
+      order_id: result.payment.gatewayOrderId,
+      prefill: {
+        name: `${form.firstName} ${form.lastName}`.trim(),
+        email: form.email,
+        contact: form.phone,
+      },
+      theme: { color: "#44e5c2" },
+      handler: async (response) => {
+        try {
+          await onSuccess({
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          });
+          resolve(true);
+        } catch {
+          resolve(false);
+        }
+      },
+      modal: { ondismiss: () => resolve(false) },
+    });
+    rzp.open();
+  });
 }

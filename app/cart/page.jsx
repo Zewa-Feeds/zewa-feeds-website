@@ -4,12 +4,18 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
+import { formatInr } from "@/lib/api";
 
 export default function CartPage() {
-  const { items, subtotal, totalItems, removeFromCart, setQty, clearCart } = useCart();
+  const {
+    items, subtotalPaise, discountPaise, shippingPaise, totalPaise,
+    amountToFreeShippingPaise, totalItems, removeFromCart, setQty, clearCart,
+  } = useCart();
 
-  const shipping = subtotal >= 499 ? 0 : 49;
-  const total = subtotal + shipping;
+  // Shipping and totals are the server's — the free-shipping threshold lives in
+  // CMS settings (§13), so hardcoding it here would drift.
+  const shipping = shippingPaise;
+  const total = totalPaise;
 
   return (
     <>
@@ -56,13 +62,13 @@ export default function CartPage() {
               {/* Items list */}
               <div className="lg:col-span-2 flex flex-col gap-4">
                 {/* Free shipping notice */}
-                {subtotal < 499 && (
+                {amountToFreeShippingPaise > 0 && (
                   <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/8 border border-primary/20">
                     <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 text-primary shrink-0">
                       <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                     <p className="text-[12px] text-primary font-[Montserrat]">
-                      Add <strong>₹{(499 - subtotal).toLocaleString("en-IN")}</strong> more for free shipping
+                      Add <strong>{formatInr(amountToFreeShippingPaise)}</strong> more for free shipping
                     </p>
                   </div>
                 )}
@@ -106,12 +112,18 @@ export default function CartPage() {
                             {item.qty}
                           </span>
                           <button onClick={() => setQty(item.sku, item.qty + 1)}
+                        disabled={item.qty >= (item.maxQty ?? 10)}
+                        title={
+                          item.qty >= (item.maxQty ?? 10)
+                            ? `Maximum ${item.maxQty ?? 10} per order`
+                            : "Increase quantity"
+                        }
                             className="w-9 h-9 flex items-center justify-center text-primary text-[18px] hover:bg-primary/15 transition-all duration-100 select-none">+</button>
                         </div>
 
                         <div className="text-right">
-                          <p className="font-[Playfair_Display] text-[20px] text-primary">₹{(item.price * item.qty).toLocaleString("en-IN")}</p>
-                          <p className="text-[10px] text-white/20 font-[Montserrat]">₹{item.price.toLocaleString("en-IN")} each</p>
+                          <p className="font-[Playfair_Display] text-[20px] text-primary">{formatInr((item.pricePaise ?? 0) * item.qty)}</p>
+                          <p className="text-[10px] text-white/20 font-[Montserrat]">{formatInr(item.pricePaise ?? 0)} each</p>
                         </div>
                       </div>
                     </div>
@@ -131,18 +143,18 @@ export default function CartPage() {
                 <div className="flex flex-col gap-3 text-[13px] font-[Montserrat]">
                   <div className="flex justify-between">
                     <span className="text-white/40">Subtotal ({totalItems} items)</span>
-                    <span className="text-white">₹{subtotal.toLocaleString("en-IN")}</span>
+                    <span className="text-white">{formatInr(subtotalPaise)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/40">Shipping</span>
                     <span className={shipping === 0 ? "text-primary" : "text-white"}>
-                      {shipping === 0 ? "FREE" : `₹${shipping}`}
+                      {shipping === 0 ? "FREE" : formatInr(shipping)}
                     </span>
                   </div>
                   <div className="h-px bg-white/6" />
                   <div className="flex justify-between items-baseline">
                     <span className="text-white/60 font-semibold">Total</span>
-                    <span className="font-[Playfair_Display] text-[26px] text-white">₹{total.toLocaleString("en-IN")}</span>
+                    <span className="font-[Playfair_Display] text-[26px] text-white">{formatInr(total)}</span>
                   </div>
                 </div>
 

@@ -1,27 +1,105 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useCart } from "@/lib/cartContext";
+import { formatInr, catalog } from "@/lib/api";
+
+const SUGGESTED_FALLBACKS = [
+  {
+    sku: "ZEWA-INSECTA-PRO-250G",
+    name: "Insecta Pro XL",
+    pack: "250g Pack",
+    pricePaise: 42000,
+    mrpPaise: 48000,
+    image: "/Bottles/Betta/Betta 01.png",
+    accentBg: "#121b2d",
+    maxQty: 10,
+  },
+  {
+    sku: "ZEWA-MARINE-VITALITY-100G",
+    name: "Marine Vitality",
+    pack: "100g Pack",
+    pricePaise: 35000,
+    mrpPaise: 40000,
+    image: "/Bottles/Flowerhorn/FH 01.png",
+    accentBg: "#152033",
+    maxQty: 10,
+  },
+];
 
 export default function CartDrawer() {
-  const { items, subtotal, totalItems, drawerOpen, setDrawerOpen, removeFromCart, setQty } = useCart();
+  const {
+    items,
+    subtotalPaise,
+    totalItems,
+    amountToFreeShippingPaise,
+    drawerOpen,
+    setDrawerOpen,
+    removeFromCart,
+    setQty,
+    addToCart,
+  } = useCart();
+
   const pathname = usePathname();
   const isShopPage = pathname === "/products" || pathname.startsWith("/products/");
+  const [removingSku, setRemovingSku] = useState(null);
+  const [upsellItems, setUpsellItems] = useState(SUGGESTED_FALLBACKS);
 
-  // Lock body scroll when open
+  // Fetch catalog spotlights for suggested products upsell
+  useEffect(() => {
+    catalog
+      .spotlights()
+      .then((data) => {
+        if (data && data.length > 0) {
+          const mapped = data.map((p) => ({
+            sku: p.sku || p.slug || p.id,
+            name: p.name,
+            pack: p.pack || p.variant || "Standard Pack",
+            pricePaise: p.pricePaise || 42000,
+            mrpPaise: p.mrpPaise,
+            image: p.imageUrl || p.image || "/Bottles/Betta/Betta 01.png",
+            accentBg: "#121b2d",
+            maxQty: p.availableStock || 10,
+          }));
+          setUpsellItems(mapped);
+        }
+      })
+      .catch(() => {
+        /* fallback stays */
+      });
+  }, []);
+
+  // Lock body scroll when drawer is open
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [drawerOpen]);
 
-  // Close on Escape
+  // Close on Escape key press
   useEffect(() => {
-    const handler = (e) => { if (e.key === "Escape") setDrawerOpen(false); };
+    const handler = (e) => {
+      if (e.key === "Escape") setDrawerOpen(false);
+    };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [setDrawerOpen]);
+
+  const handleRemove = (sku) => {
+    setRemovingSku(sku);
+    setTimeout(() => {
+      removeFromCart(sku);
+      setRemovingSku(null);
+    }, 200);
+  };
+
+  // Filter upsell items to exclude products already in cart
+  const filteredUpsell = upsellItems.filter(
+    (upsell) => !items.some((cartItem) => cartItem.sku === upsell.sku),
+  );
 
   return (
     <>
@@ -30,158 +108,280 @@ export default function CartDrawer() {
         onClick={() => setDrawerOpen(false)}
         className="fixed inset-0 z-[60] transition-all duration-300"
         style={{
-          background: "rgba(0,0,0,0.55)",
-          backdropFilter: "blur(2px)",
+          background: "rgba(3, 6, 14, 0.75)",
+          backdropFilter: "blur(4px)",
           opacity: drawerOpen ? 1 : 0,
           pointerEvents: drawerOpen ? "auto" : "none",
         }}
+        aria-hidden="true"
       />
 
-      {/* Drawer panel */}
-      <div
-        className="fixed top-0 right-0 h-full z-[70] flex flex-col bg-[#06080f] border-l border-white/8 shadow-2xl"
+      {/* Drawer Panel */}
+      <aside
+        className="fixed top-0 right-0 h-full z-[70] flex flex-col bg-[#060913] border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] transition-transform duration-300 ease-out"
         style={{
-          width: "min(440px, 100vw)",
+          width: "min(460px, 100vw)",
           transform: drawerOpen ? "translateX(0)" : "translateX(100%)",
-          transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
         }}
+        aria-label="Shopping Cart Drawer"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/6">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/8 bg-[#080d1a]/80 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <span className="font-[Playfair_Display] text-[20px] text-white">Your Cart</span>
-            {totalItems > 0 && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/15 text-primary font-[Montserrat] tracking-widest">
-                {totalItems} {totalItems === 1 ? "item" : "items"}
-              </span>
-            )}
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shadow-sm">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.75"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
+              </svg>
+            </div>
+
+            <div className="flex items-baseline gap-2">
+              <h2 className="font-[Playfair_Display] text-[22px] font-bold text-white tracking-wide">
+                Your Cart
+              </h2>
+              {totalItems > 0 && (
+                <span className="rounded-full bg-primary/15 border border-primary/30 px-2.5 py-0.5 text-[10px] font-bold tracking-wider text-primary font-[Montserrat]">
+                  {totalItems} {totalItems === 1 ? "item" : "items"}
+                </span>
+              )}
+            </div>
           </div>
+
           <button
+            type="button"
             onClick={() => setDrawerOpen(false)}
-            className="w-8 h-8 flex items-center justify-center rounded-full border border-white/10 text-white/40 hover:text-white hover:border-white/30 transition-all duration-200"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/50 hover:bg-white/12 hover:text-white hover:border-white/20 transition-all duration-200 group"
+            aria-label="Close cart drawer"
           >
-            <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
-              <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              className="w-4 h-4 transition-transform duration-200 group-hover:rotate-90"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        {/* Items */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        {/* Free Shipping Progress Indicator (if items in cart) */}
+        {items.length > 0 && amountToFreeShippingPaise !== null && amountToFreeShippingPaise !== undefined && (
+          <div className="bg-[#091122] px-6 py-3 border-b border-white/6 flex items-center gap-3">
+            <svg className="w-4 h-4 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <p className="text-[11px] text-white/80 font-[Montserrat] leading-snug">
+              {amountToFreeShippingPaise > 0 ? (
+                <>
+                  Add <strong className="text-primary font-bold">{formatInr(amountToFreeShippingPaise)}</strong> more to unlock <strong className="text-primary font-bold">FREE Express Delivery</strong>
+                </>
+              ) : (
+                <span className="text-primary font-semibold">Unlocked FREE Express Delivery across India!</span>
+              )}
+            </p>
+          </div>
+        )}
+
+        {/* Scrollable Items Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4 custom-scrollbar">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full gap-5 text-center">
-              <div className="w-16 h-16 rounded-full bg-white/4 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8 text-white/20">
-                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            /* EMPTY CART STATE */
+            <div className="flex flex-col items-center justify-center h-full py-12 text-center my-auto">
+              <div className="relative mb-6 flex h-24 w-24 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary shadow-[0_0_32px_rgba(68,229,194,0.15)]">
+                <svg viewBox="0 0 24 24" fill="none" className="w-12 h-12 text-primary">
+                  <path
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </div>
-              <div>
-                <p className="font-[Playfair_Display] text-[18px] text-white/60">Your cart is empty</p>
-                <p className="text-[12px] text-white/25 font-[Montserrat] mt-1">Add a product to get started</p>
+
+              <h3 className="font-[Playfair_Display] text-[24px] font-bold text-white">
+                Your cart is empty
+              </h3>
+              <p className="mt-2 max-w-xs text-[13px] text-white/45 font-[Montserrat] leading-relaxed">
+                Explore our scientifically formulated insect-protein feeds for optimal aquatic health.
+              </p>
+
+              <div className="mt-8">
+                {isShopPage ? (
+                  <button
+                    type="button"
+                    onClick={() => setDrawerOpen(false)}
+                    className="rounded-2xl bg-primary px-8 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#00382d] font-[Montserrat] transition-all duration-200 hover:bg-primary/90 shadow-[0_4px_20px_rgba(68,229,194,0.3)]"
+                  >
+                    Continue Shopping
+                  </button>
+                ) : (
+                  <a
+                    href="/products"
+                    onClick={() => setDrawerOpen(false)}
+                    className="rounded-2xl bg-primary px-8 py-3.5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#00382d] font-[Montserrat] transition-all duration-200 hover:bg-primary/90 shadow-[0_4px_20px_rgba(68,229,194,0.3)] inline-block"
+                  >
+                    Explore Products
+                  </a>
+                )}
               </div>
-              {isShopPage ? (
-                <button
-                  onClick={() => setDrawerOpen(false)}
-                  className="px-6 py-2.5 rounded-full bg-primary text-[#00382d] text-[11px] font-bold tracking-widest uppercase font-[Montserrat] hover:bg-primary/85 transition-all duration-200"
-                >
-                  Continue Shopping
-                </button>
-              ) : (
-                <a
-                  href="/products"
-                  onClick={() => setDrawerOpen(false)}
-                  className="px-6 py-2.5 rounded-full bg-primary text-[#00382d] text-[11px] font-bold tracking-widest uppercase font-[Montserrat] hover:bg-primary/85 transition-all duration-200"
-                >
-                  Shop Now
-                </a>
-              )}
             </div>
           ) : (
-            items.map((item) => (
-              <div key={item.sku} className="flex gap-4 p-4 rounded-2xl bg-white/3 border border-white/5">
-                {/* Image */}
-                <div className="w-16 h-16 shrink-0 rounded-xl overflow-hidden flex items-center justify-center"
-                  style={{ background: item.accentBg || "#1a2235" }}>
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    width={56}
-                    height={56}
-                    className="object-contain w-full h-full p-1"
-                    style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.3))" }}
-                  />
-                </div>
+            /* CART PRODUCT CARDS LIST */
+            <div className="flex flex-col gap-4">
+              {items.map((item) => (
+                <div
+                  key={item.sku}
+                  className={`group relative flex gap-4 rounded-2xl border border-white/10 bg-[#090f1d]/90 p-4 transition-all duration-300 hover:border-white/20 hover:bg-[#0c1527] shadow-[0_4px_20px_rgba(0,0,0,0.3)] ${
+                    removingSku === item.sku ? "opacity-0 scale-95" : "opacity-100 scale-100"
+                  }`}
+                >
+                  {/* Product Image */}
+                  <div
+                    className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-white/10 p-1.5 flex items-center justify-center shadow-inner"
+                    style={{ background: item.accentBg || "#0d1627" }}
+                  >
+                    {item.image ? (
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        width={72}
+                        height={72}
+                        className="h-full w-full object-contain p-1 drop-shadow-md"
+                      />
+                    ) : (
+                      <div className="text-[10px] text-white/20">No image</div>
+                    )}
+                  </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-[Playfair_Display] text-[15px] text-white leading-snug truncate">{item.name}</p>
-                  <p className="text-[10px] text-white/30 font-[Montserrat] mt-0.5">{item.pack}</p>
+                  {/* Info Column */}
+                  <div className="flex min-w-0 flex-1 flex-col justify-between">
+                    <div>
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="truncate font-[Playfair_Display] text-[15px] font-semibold text-white/95 leading-snug">
+                          {item.name}
+                        </h4>
 
-                  <div className="flex items-center justify-between mt-3">
-                    {/* Qty stepper */}
-                    <div className="flex items-center rounded-lg border border-white/10 overflow-hidden">
-                      <button
-                        onClick={() => setQty(item.sku, item.qty - 1)}
-                        className="w-7 h-7 flex items-center justify-center text-white/50 text-[16px] hover:bg-white/8 hover:text-white transition-all duration-100 select-none"
-                      >−</button>
-                      <span className="w-7 text-center text-white text-[12px] font-bold font-[Montserrat] border-x border-white/10 h-7 flex items-center justify-center">
-                        {item.qty}
-                      </span>
-                      <button
-                        onClick={() => setQty(item.sku, item.qty + 1)}
-                        className="w-7 h-7 flex items-center justify-center text-primary text-[16px] hover:bg-primary/15 transition-all duration-100 select-none"
-                      >+</button>
+                        {/* Delete Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleRemove(item.sku)}
+                          className="shrink-0 p-1 rounded-lg text-white/25 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200"
+                          aria-label={`Remove ${item.name}`}
+                          title="Remove item"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      <div className="mt-0.5 flex items-center gap-2">
+                        <span className="text-[11px] text-white/40 font-[Montserrat]">{item.pack}</span>
+                        <span className="h-1 w-1 rounded-full bg-white/20" />
+                        <span className="text-[10px] text-emerald-400 font-semibold font-[Montserrat]">In Stock</span>
+                      </div>
                     </div>
 
-                    <div className="text-right">
-                      <p className="font-[Playfair_Display] text-[16px] text-primary">₹{(item.price * item.qty).toLocaleString("en-IN")}</p>
-                      <p className="text-[10px] text-white/20 font-[Montserrat]">₹{item.price.toLocaleString("en-IN")} each</p>
+                    {/* Bottom row: Stepper + Price */}
+                    <div className="mt-3 flex items-center justify-between">
+                      {/* Segmented Pill Quantity Stepper */}
+                      <div className="flex items-center rounded-xl border border-white/10 bg-[#0c1424] p-0.5 shadow-inner">
+                        <button
+                          type="button"
+                          onClick={() => setQty(item.sku, item.qty - 1)}
+                          className="flex h-7 w-7 items-center justify-center rounded-lg text-white/60 text-[15px] font-semibold hover:bg-white/10 hover:text-white transition-all select-none"
+                          aria-label="Decrease quantity"
+                        >
+                          −
+                        </button>
+
+                        <span className="w-7 text-center text-[12px] font-bold text-white font-[Montserrat] tabular-nums">
+                          {item.qty}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => setQty(item.sku, item.qty + 1)}
+                          disabled={item.qty >= (item.maxQty ?? 10)}
+                          title={
+                            item.qty >= (item.maxQty ?? 10)
+                              ? `Maximum ${item.maxQty ?? 10} per order`
+                              : "Increase quantity"
+                          }
+                          className="flex h-7 w-7 items-center justify-center rounded-lg text-primary text-[15px] font-semibold hover:bg-primary/20 transition-all disabled:opacity-30 disabled:cursor-not-allowed select-none"
+                          aria-label="Increase quantity"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      {/* Item Total Price */}
+                      <div className="text-right">
+                        <span className="block font-[Playfair_Display] text-[17px] font-bold text-primary tabular-nums">
+                          {formatInr((item.pricePaise ?? 0) * item.qty)}
+                        </span>
+                        <span className="block text-[10px] text-white/30 font-[Montserrat]">
+                          {formatInr(item.pricePaise ?? 0)} each
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Remove */}
-                <button
-                  onClick={() => removeFromCart(item.sku)}
-                  className="shrink-0 self-start mt-0.5 text-white/15 hover:text-red-400 transition-colors duration-200"
-                >
-                  <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
-                    <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                  </svg>
-                </button>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Footer */}
+        {/* STICKY ACTION FOOTER */}
         {items.length > 0 && (
-          <div className="border-t border-white/6 px-6 py-5 space-y-4">
-            {/* Subtotal */}
-            <div className="flex items-center justify-between">
-              <span className="text-[12px] text-white/40 font-[Montserrat]">Subtotal</span>
-              <span className="font-[Playfair_Display] text-[22px] text-white">₹{subtotal.toLocaleString("en-IN")}</span>
+          <div className="border-t border-white/10 bg-[#080d1a]/95 backdrop-blur-xl px-6 py-5 space-y-4 shadow-[0_-8px_32px_rgba(0,0,0,0.4)]">
+            {/* Price Summary Breakdown */}
+            <div className="flex flex-col gap-1.5 text-[13px] font-[Montserrat]">
+              <div className="flex items-baseline justify-between">
+                <span className="text-white/50 text-[13px]">Subtotal</span>
+                <span className="font-[Playfair_Display] text-[24px] font-bold text-white tabular-nums">
+                  {formatInr(subtotalPaise)}
+                </span>
+              </div>
+              <p className="text-[10px] text-white/30 font-normal">
+                Taxes and shipping calculated at checkout
+              </p>
             </div>
-            <p className="text-[10px] text-white/20 font-[Montserrat] -mt-2">Shipping & taxes calculated at checkout</p>
 
-            {/* CTA buttons */}
-            <a
-              href="/checkout"
-              onClick={() => setDrawerOpen(false)}
-              className="block w-full py-3.5 rounded-full bg-primary text-[#00382d] text-center text-[11px] font-bold tracking-[0.18em] uppercase font-[Montserrat] hover:bg-primary/85 active:scale-[0.98] transition-all duration-200"
-            >
-              Checkout → ₹{subtotal.toLocaleString("en-IN")}
-            </a>
-            <a
-              href="/cart"
-              onClick={() => setDrawerOpen(false)}
-              className="block w-full py-3 rounded-full border border-white/10 text-white/40 text-center text-[11px] font-bold tracking-[0.15em] uppercase font-[Montserrat] hover:border-white/25 hover:text-white/70 transition-all duration-200"
-            >
-              View Full Cart
-            </a>
+            {/* CTA Buttons */}
+            <div className="flex flex-col gap-2.5">
+              <a
+                href="/checkout"
+                onClick={() => setDrawerOpen(false)}
+                className="group relative flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-center text-[12px] font-bold uppercase tracking-[0.18em] text-[#00382d] font-[Montserrat] transition-all duration-300 hover:bg-primary/90 active:scale-[0.99] shadow-[0_4px_24px_rgba(68,229,194,0.35)]"
+              >
+                <span>Checkout · {formatInr(subtotalPaise)}</span>
+                <svg
+                  className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+
+              <a
+                href="/cart"
+                onClick={() => setDrawerOpen(false)}
+                className="block w-full rounded-2xl border border-white/12 py-3 text-center text-[11px] font-bold uppercase tracking-[0.15em] text-white/60 font-[Montserrat] transition-all duration-200 hover:border-white/30 hover:text-white hover:bg-white/5"
+              >
+                View Full Cart
+              </a>
+            </div>
           </div>
         )}
-      </div>
+      </aside>
     </>
   );
 }

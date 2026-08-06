@@ -10,3 +10,6 @@ next-env.d.ts
 
 # Source assets folder (originals) — not needed in deploy
 /assets/
+
+# Internal spec documents — not part of the storefront.
+*.docx

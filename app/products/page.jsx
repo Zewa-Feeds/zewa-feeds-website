@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
+import { catalog, formatInr } from "@/lib/api";
 
 // ─── SVG icons ────────────────────────────────────────────────────────────────
 const IcoMicroscope = () => (
@@ -53,7 +54,7 @@ const CATEGORIES = [
   "1kg Packs",
 ];
 
-const SPOTLIGHT = [
+const FALLBACK_SPOTLIGHT = [
   {
     name: "Betta Bites F3",
     slug: "betta-bites-f3",
@@ -101,7 +102,7 @@ const SPOTLIGHT = [
   },
 ];
 
-const PRODUCTS = [
+const FALLBACK_PRODUCTS = [
   {
     name: "Betta Bites F3",
     slug: "betta-bites-f3",
@@ -245,15 +246,23 @@ function ProductCard({ p }) {
   }, [gallery.length]);
 
   const handleMouseEnter = useCallback(() => {
-    // Immediately start cycling images on hover
-    startImageCycle();
-    // After 3s switch to video if available
+    /*
+     * VIDEO IS THE SECOND THING SEEN, matching the PDP gallery order
+     * (photo, video, photo…). It used to cycle images every second and only cut
+     * to video after 3s, so the film was the fourth slide — by which point the
+     * cursor has usually moved on.
+     *
+     * With a video: hold the hero for 1.2s, play the video, and do not cycle
+     * stills underneath it. Without one: fall back to cycling images.
+     */
     if (p.video) {
       videoTimerRef.current = setTimeout(() => {
         setShowVideo(true);
         if (videoRef.current) videoRef.current.play().catch(() => {});
-      }, 3000);
+      }, 1200);
+      return;
     }
+    startImageCycle();
   }, [startImageCycle, p.video]);
 
   const handleMouseLeave = useCallback(() => {
@@ -271,6 +280,17 @@ function ProductCard({ p }) {
     e.preventDefault();
     e.stopPropagation();
     stopAuto();
+    /*
+     * Stepping the gallery cancels the video. The arrows are now available while
+     * it plays, and without this the still underneath would change invisibly
+     * behind the video — the click would appear to do nothing.
+     */
+    clearTimeout(videoTimerRef.current);
+    setShowVideo(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
     setImgIdx((prev) => (prev + dir + gallery.length) % gallery.length);
   }, [gallery.length, stopAuto]);
 
@@ -333,15 +353,6 @@ function ProductCard({ p }) {
           />
         )}
 
-        {/* Video playing badge */}
-        {showVideo && (
-          <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2 py-1 rounded-full"
-            style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.12)" }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-            <span className="text-[9px] font-bold tracking-widest font-[Montserrat] text-white/60">VIDEO</span>
-          </div>
-        )}
-
         {/* Badge */}
         {p.badge && (
           <span className={`absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] z-10 ${p.badgeColor || "bg-primary text-[#00382d]"}`}>
@@ -349,25 +360,33 @@ function ProductCard({ p }) {
           </span>
         )}
 
-        {/* Prev / Next arrows — shown while hovering (images only) */}
-        {gallery.length > 1 && !showVideo && (
+        {/*
+          Prev / Next. Available DURING the video too — it used to be gated on
+          !showVideo, so once the film started there was no way back to the
+          photos without leaving the card. Stepping the gallery also cancels the
+          video, since the shopper has clearly asked to browse stills instead.
+
+          Borderless on purpose: a bordered pill over product photography reads
+          as chrome. Just the chevron with a soft shadow for legibility.
+        */}
+        {gallery.length > 1 && (
           <>
             <button
+              aria-label="Previous image"
               onMouseDown={(e) => goTo(-1, e)}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.1)" }}
+              className="absolute left-1 top-1/2 -translate-y-1/2 z-30 flex h-6 w-6 items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-white/10"
             >
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                <path d="M7.5 2L3.5 6L7.5 10" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" }}>
+                <path d="M7.5 2L3.5 6L7.5 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
             <button
+              aria-label="Next image"
               onMouseDown={(e) => goTo(1, e)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-7 h-7 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              style={{ background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)", border: "1px solid rgba(255,255,255,0.1)" }}
+              className="absolute right-1 top-1/2 -translate-y-1/2 z-30 flex h-6 w-6 items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-white/10"
             >
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                <path d="M4.5 2L8.5 6L4.5 10" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" }}>
+                <path d="M4.5 2L8.5 6L4.5 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
@@ -831,13 +850,19 @@ function FindMyFeedQuiz({ onClose }) {
 }
 
 function QtyButton({ product }) {
-  const { price, name, slug, image, accentColor } = product;
+  const { name, slug, image, pricePaise, mrpPaise, packLabel, inStock } = product;
   const [flash, setFlash] = useState(null);
   const { items, addToCart, setQty, removeFromCart } = useCart();
 
-  if (!price) return null;
+  /**
+   * The REAL variant SKU, not a slug.
+   *
+   * Checkout is keyed on SKU, so a synthesised id here would fail validation
+   * server-side. A product with no purchasable variant renders no button.
+   */
+  const sku = product.sku;
+  if (!sku || !pricePaise) return null;
 
-  const sku = slug || name.toLowerCase().replace(/\s+/g, "-");
   const cartItem = items.find((i) => i.sku === sku);
   const qty = cartItem?.qty ?? 0;
 
@@ -850,7 +875,16 @@ function QtyButton({ product }) {
 
   const handleAdd = (e) => {
     e.preventDefault();
-    addToCart({ sku, name, pack: "45g", price, image, accentBg: "#1a2235" });
+    addToCart({
+      sku,
+      name,
+      slug,
+      pack: packLabel,
+      pricePaise,
+      mrpPaise,
+      image,
+      accentBg: "#1a2235",
+    });
   };
 
   const handleDec = trigger("dec", () => {
@@ -865,9 +899,10 @@ function QtyButton({ product }) {
       {qty === 0 ? (
         <button
           onClick={handleAdd}
-          className="w-full h-9 rounded-lg bg-primary text-[#00382d] text-[11px] font-bold tracking-[0.12em] uppercase font-[Montserrat] hover:bg-primary/85 active:scale-[0.97] transition-all duration-150 shadow-[0_0_16px_rgba(68,229,194,0.25)]"
+          disabled={inStock === false}
+          className="w-full h-9 rounded-lg bg-primary text-[#00382d] text-[11px] font-bold tracking-[0.12em] uppercase font-[Montserrat] hover:bg-primary/85 active:scale-[0.97] transition-all duration-150 shadow-[0_0_16px_rgba(68,229,194,0.25)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
         >
-          + Add
+          {inStock === false ? "Sold out" : "+ Add"}
         </button>
       ) : (
         <div className="flex items-center justify-between gap-3">
@@ -885,7 +920,7 @@ function QtyButton({ product }) {
             </button>
           </div>
           <span className="font-[Montserrat] text-[14px] font-bold text-primary tabular-nums">
-            ₹{(price * qty).toLocaleString("en-IN")}
+            {formatInr(pricePaise * qty)}
           </span>
         </div>
       )}
@@ -893,13 +928,152 @@ function QtyButton({ product }) {
   );
 }
 
+/**
+ * Adapt the API's product shape to what this page's cards already render.
+ *
+ * The design is unchanged — only the data source is. Prices arrive as paise and
+ * are formatted here; `tags` come from the CMS category plus pack sizes so the
+ * existing filter chips keep working.
+ */
+function adaptProduct(api) {
+  const first = api.packs?.[0];
+  const packSizes = (api.packs ?? []).map((v) => v.pack.replace(/\s+/g, ""));
+
+  /*
+   * CARD GALLERY = THE BASE PACK ONLY, plus shared assets.
+   *
+   * This used to be `api.images.map(...)` — every image of every pack. A product
+   * with a 45g bottle, a 200g pouch and a 1kg pouch put ~20 slides in one card,
+   * including back-of-pack label shots, so hovering cycled through the whole
+   * photo library instead of showing the product.
+   *
+   * `api.media` carries a `sku` per asset (null = shared), so the card can show
+   * just the first pack — which is what the card's price and Add-to-Cart refer
+   * to — and the product video.
+   */
+  const media = api.media ?? [];
+  const baseSku = first?.sku ?? null;
+
+  const cardImages = media
+    .filter((m) => m.type !== "VIDEO" && (!m.sku || m.sku === baseSku))
+    .map((m) => m.url);
+
+  const video = media.find((m) => m.type === "VIDEO")?.url ?? null;
+
+  return {
+    name: api.name,
+    slug: api.slug,
+    // Filter chips match on category and pack size.
+    tags: [api.category, ...packSizes],
+    tagline: api.shortDesc,
+    price: first ? first.pricePaise / 100 : 0,
+    mrp: first && first.mrpPaise > first.pricePaise ? formatInr(first.mrpPaise) : null,
+    packs: packSizes,
+    badge: api.badge ?? null,
+    badgeColor: "bg-primary text-[#00382d]",
+    protein: api.proteinPct ? `${api.proteinPct}%` : null,
+    image: cardImages[0] ?? api.images?.[0]?.url ?? FALLBACK_PRODUCTS[0].image,
+    // Cap at 4: a card is a glance, not a gallery. The PDP has the full set.
+    gallery: (cardImages.length ? cardImages : (api.images ?? []).map((i) => i.url)).slice(0, 4),
+    /** The card cycles to this after ~3s of hover. Null hides that behaviour. */
+    video,
+    accentColor: api.presentation?.accent ?? "rgba(68,229,194,0.18)",
+    inStock: api.inStock,
+    // Real SKU, so Add to Cart sends what the backend expects.
+    sku: first?.sku ?? null,
+    packLabel: first?.pack ?? null,
+    pricePaise: first?.pricePaise ?? 0,
+    mrpPaise: first?.mrpPaise ?? 0,
+  };
+}
+
+/**
+ * Spotlight banner shape.
+ *
+ * Note this differs from adaptProduct: the banner renders `price` as a preformatted
+ * STRING ("₹249") while the product cards use a NUMBER. That asymmetry is in the
+ * original hand-written data, and both shapes must be reproduced exactly or the
+ * render breaks — the banner does string work on `price`, the cards do maths.
+ */
+function adaptSpotlight(api) {
+  return {
+    name: api.name,
+    slug: api.slug,
+    tagline: api.tagline,
+    sub: api.subText,
+    // String, with the symbol, to match FALLBACK_SPOTLIGHT.
+    price: api.pricePaise ? formatInr(api.pricePaise) : "",
+    mrp: api.mrpPaise && api.mrpPaise > api.pricePaise ? formatInr(api.mrpPaise) : null,
+    packs: api.packs ?? [],
+    badge: api.badge ?? null,
+    protein: api.proteinPct ? `${api.proteinPct}%` : null,
+    image: api.imageUrl ?? FALLBACK_SPOTLIGHT[0].image,
+    category: api.category ?? api.name,
+    accent: "rgba(68,229,194,0.22)",
+    accentStrong: "rgba(68,229,194,0.45)",
+    stat: api.subText ?? "",
+  };
+}
+
 export default function ProductsPage() {
   const [active, setActive] = useState("All");
   const [slide, setSlide] = useState(0);
   const [fading, setFading] = useState(false);
+
+  /**
+   * Live catalogue.
+   *
+   * Falls back to the bundled arrays if the API is unreachable, so a backend
+   * outage degrades to a stale catalogue rather than an empty page.
+   */
+  const [apiProducts, setApiProducts] = useState(null);
+  const [apiSpotlights, setApiSpotlights] = useState(null);
+  /**
+   * "loading" | "ready" | "failed".
+   *
+   * The fallback arrays must only appear when the fetch has actually FAILED.
+   * Previously `apiProducts ?? FALLBACK_PRODUCTS` rendered the bundled catalogue
+   * during the very first paint, so a hard refresh flashed six hardcoded
+   * products before the real ones replaced them.
+   */
+  const [loadState, setLoadState] = useState("loading");
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([catalog.products(), catalog.spotlights()])
+      .then(([products, spotlights]) => {
+        if (cancelled) return;
+        setApiProducts(products.map(adaptProduct));
+        if (spotlights.length > 0) setApiSpotlights(spotlights.map(adaptSpotlight));
+        setLoadState("ready");
+      })
+      .catch(() => {
+        // Genuine outage — now the stale catalogue is better than an empty page.
+        if (!cancelled) setLoadState("failed");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const loading = loadState === "loading";
+  // Empty while loading, so nothing wrong is ever shown; fallback only on failure.
+  const PRODUCTS = apiProducts ?? (loadState === "failed" ? FALLBACK_PRODUCTS : []);
+  /*
+   * NO FALLBACK FOR THE SPOTLIGHT.
+   *
+   * The bundled array advertises products by slugs that no longer exist
+   * ("betta-bites-f3"), so it rendered a banner linking to a 404 — and because
+   * the API legitimately returns zero spotlights when none are configured, it
+   * showed PERMANENTLY, not just during load. An absent banner is correct here;
+   * a wrong one is not.
+   */
+  const SPOTLIGHT = apiSpotlights ?? [];
   const [quizOpen, setQuizOpen] = useState(false);
 
   useEffect(() => {
+    // Nothing to rotate while loading (or with a single slide) — and `% 0` is NaN.
+    if (SPOTLIGHT.length < 2) return;
     const timer = setInterval(() => {
       setFading(true);
       setTimeout(() => {
@@ -908,7 +1082,8 @@ export default function ProductsPage() {
       }, 350);
     }, 4000);
     return () => clearInterval(timer);
-  }, []);
+    // Re-created when the spotlight set arrives, so the modulo stays in range.
+  }, [SPOTLIGHT.length]);
 
   const goTo = (i) => {
     if (i === slide) return;
@@ -916,7 +1091,7 @@ export default function ProductsPage() {
     setTimeout(() => { setSlide(i); setFading(false); }, 350);
   };
 
-  const sp = SPOTLIGHT[slide];
+  const sp = SPOTLIGHT.length ? (SPOTLIGHT[slide % SPOTLIGHT.length] ?? SPOTLIGHT[0]) : null;
 
   const filtered =
     active === "All"
@@ -1023,6 +1198,8 @@ export default function ProductsPage() {
         <section className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-12 sm:py-16">
 
           {/* ── Spotlight rotator ── */}
+          {/* `sp` is null until the catalogue loads, so gate the whole banner. */}
+          {sp && (
           <a
             href={`/products/${sp.slug}`}
             className="block relative overflow-hidden rounded-3xl mb-8 cursor-pointer group"
@@ -1062,7 +1239,9 @@ export default function ProductsPage() {
 
                 <div className="flex items-center gap-5 justify-center sm:justify-start">
                   <div>
-                    <span className="font-[Playfair_Display] text-[30px] text-primary leading-none">₹{sp.price.replace("₹", "")}</span>
+                    {/* String(...) guards against a number slipping through —
+                        a price mismatch should not white-screen the page. */}
+                    <span className="font-[Playfair_Display] text-[30px] text-primary leading-none">₹{String(sp.price ?? "").replace("₹", "")}</span>
                     <span className="text-[11px] text-white/20 line-through font-[Montserrat] ml-2">{sp.mrp}</span>
                   </div>
                   <div className="w-px h-8 bg-white/10" />
@@ -1097,12 +1276,33 @@ export default function ProductsPage() {
               </div>
             </div>
           </a>
+          )}
 
-          {/* Product grid */}
+          {/*
+            Product grid.
+
+            Skeletons while loading, so a hard refresh shows placeholders in the
+            right shape instead of flashing the bundled fallback catalogue and
+            then swapping it out.
+          */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filtered.map((p, i) => (
-              <ProductCard key={`${p.name}-${i}`} p={p} />
-            ))}
+            {loading
+              ? Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={`skeleton-${i}`}
+                    className="animate-pulse overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02]"
+                  >
+                    <div className="aspect-square bg-white/[0.04]" />
+                    <div className="space-y-2.5 p-5">
+                      <div className="h-2 w-24 rounded bg-white/[0.06]" />
+                      <div className="h-4 w-3/4 rounded bg-white/[0.07]" />
+                      <div className="h-2 w-full rounded bg-white/[0.04]" />
+                      <div className="h-2 w-2/3 rounded bg-white/[0.04]" />
+                      <div className="mt-4 h-9 rounded-full bg-white/[0.05]" />
+                    </div>
+                  </div>
+                ))
+              : filtered.map((p, i) => <ProductCard key={`${p.name}-${i}`} p={p} />)}
           </div>
 
         </section>

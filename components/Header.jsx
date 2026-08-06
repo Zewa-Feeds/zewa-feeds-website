@@ -5,23 +5,25 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { navLinks } from "@/lib/content";
 import { useCart } from "@/lib/cartContext";
+import { catalog } from "@/lib/api";
 
 // ── Dropdown data ─────────────────────────────────────────────────────────────
 
-const PRODUCT_LINKS = [
-  { label: "Betta Bites F3",        href: "/products/betta-bites-f3" },
-  { label: "Cichlid Bites C4",      href: "/products/cichlid-bites-c4" },
-  { label: "Guppy Bites G2",        href: "/products/guppy-bites-g2" },
-  { label: "Dried BSF Larvae 25g",  href: "/products/dried-bsf-larvae-25g" },
-  { label: "Dried BSF Larvae 75g",  href: "/products/dried-bsf-larvae-75g" },
-  { label: "View all products →",   href: "/products", accent: true },
-];
+/**
+ * The products dropdown is loaded from the catalogue API.
+ *
+ * It used to be a hardcoded list, and every entry had gone stale — the slugs
+ * ("betta-bites-f3", "guppy-bites-g2") no longer exist, so all five links
+ * returned 404 from the site's main navigation. Only "View all products" is
+ * fixed, because that route always exists.
+ */
+const VIEW_ALL = { label: "View all products →", href: "/products", accent: true };
 
 const LEARN_MENU = [
   { label: "Knowledge Hub",  href: "/blog" },
   { label: "Our Science",    href: "/#science" },
   { label: "Sustainability", href: "/blog/ammonia-reduction-high-absorption-diets" },
-  { label: "About Zewa",    href: "/#about" },
+  { label: "About Zewa",    href: "/about" },
   { label: "Browse all articles →", href: "/blog", accent: true },
 ];
 
@@ -39,7 +41,7 @@ function Chevron({ open }) {
 
 // ── Products dropdown ─────────────────────────────────────────────────────────
 
-function ProductsDropdown({ visible }) {
+function ProductsDropdown({ visible, items }) {
   return (
     <div
       className="absolute top-full left-1/2 z-[200]"
@@ -55,7 +57,7 @@ function ProductsDropdown({ visible }) {
       <div className="rounded-xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.6)]"
         style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(8,14,26,0.97)", backdropFilter: "blur(24px)" }}>
         <div className="py-1.5">
-          {PRODUCT_LINKS.map((item, i) => (
+          {[...items, VIEW_ALL].map((item, i) => (
             <a
               key={item.label}
               href={item.href}
@@ -140,9 +142,35 @@ function CartIcon({ onClick, totalItems }) {
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null); // "products" | "learn" | null
+  /**
+   * Products in the dropdown, from the catalogue API.
+   *
+   * Starts empty so the menu never shows a link to a product that does not
+   * exist; a failed fetch simply leaves "View all products" on its own, which is
+   * always valid.
+   */
+  const [productLinks, setProductLinks] = useState([]);
   const pathname = usePathname();
   const { totalItems, setDrawerOpen } = useCart();
   const closeTimer = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    catalog
+      .products()
+      .then((list) => {
+        if (cancelled) return;
+        setProductLinks(
+          list.slice(0, 6).map((p) => ({ label: p.name, href: `/products/${p.slug}` })),
+        );
+      })
+      .catch(() => {
+        /* menu falls back to "View all products" alone */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -153,9 +181,51 @@ export default function Header() {
 
   useEffect(() => () => clearTimeout(closeTimer.current), []);
 
-  const openMenu = (name) => { clearTimeout(closeTimer.current); setActiveMenu(name); };
-  const scheduleClose = () => { closeTimer.current = setTimeout(() => setActiveMenu(null), 300); };
-  const cancelClose = () => clearTimeout(closeTimer.current);
+  /**
+   * Dropdowns open on INTENT, not on the first pixel of hover.
+   *
+   * Passing over "Products" on the way to "About" used to flash the mega menu
+   * open. A 2s dwell means the menu only appears when someone actually pauses on
+   * it — and the label itself stays a link, so a click navigates immediately
+   * without waiting for the menu.
+   */
+  const HOVER_OPEN_DELAY_MS = 2000;
+  const CLOSE_DELAY_MS = 300;
+
+  const openTimer = useRef(null);
+
+  /** Start the dwell timer. */
+  const scheduleOpen = (name) => {
+    clearTimeout(closeTimer.current);
+    clearTimeout(openTimer.current);
+    if (activeMenu === name) return;
+    openTimer.current = setTimeout(() => setActiveMenu(name), HOVER_OPEN_DELAY_MS);
+  };
+
+  /** Cancel a pending open and close after a short grace period. */
+  const scheduleClose = () => {
+    clearTimeout(openTimer.current);
+    closeTimer.current = setTimeout(() => setActiveMenu(null), CLOSE_DELAY_MS);
+  };
+
+  /** Once the menu is open, moving into it must not close it. */
+  const cancelClose = () => {
+    clearTimeout(closeTimer.current);
+    clearTimeout(openTimer.current);
+  };
+
+  /** Clicking the label navigates, so any pending menu should not appear. */
+  const cancelOpen = () => {
+    clearTimeout(openTimer.current);
+    setActiveMenu(null);
+  };
+
+  /** Keyboard and touch users get an immediate toggle — no dwell. */
+  const toggleMenu = (name) => {
+    clearTimeout(openTimer.current);
+    clearTimeout(closeTimer.current);
+    setActiveMenu((current) => (current === name ? null : name));
+  };
 
   const isActive = (href) => {
     if (href === "/") return pathname === "/";
@@ -192,15 +262,17 @@ export default function Header() {
             if (link.label === "Products") {
               return (
                 <div key="Products" className="relative pb-3 -mb-3"
-                  onMouseEnter={() => openMenu("products")}
+                  onMouseEnter={() => scheduleOpen("products")}
                   onMouseLeave={scheduleClose}>
-                  <button
+                  <a
+                    href={link.href}
+                    onClick={cancelOpen}
                     className={`flex items-center gap-1.5 font-button text-button transition-colors ${
                       isActive(link.href) ? "text-primary font-bold border-b-2 border-primary pb-1" : "text-on-surface-variant hover:text-on-surface"
                     }`}>
                     {link.label} <Chevron open={activeMenu === "products"} />
-                  </button>
-                  <ProductsDropdown visible={activeMenu === "products"} />
+                  </a>
+                  <ProductsDropdown visible={activeMenu === "products"} items={productLinks} />
                 </div>
               );
             }
@@ -209,14 +281,16 @@ export default function Header() {
             if (link.label === "Knowledge Hub") {
               return (
                 <div key="Knowledge Hub" className="relative pb-3 -mb-3"
-                  onMouseEnter={() => openMenu("learn")}
+                  onMouseEnter={() => scheduleOpen("learn")}
                   onMouseLeave={scheduleClose}>
-                  <button
+                  <a
+                    href={link.href}
+                    onClick={cancelOpen}
                     className={`flex items-center gap-1.5 font-button text-button transition-colors ${
                       isActive(link.href) ? "text-primary font-bold border-b-2 border-primary pb-1" : "text-on-surface-variant hover:text-on-surface"
                     }`}>
                     {link.label} <Chevron open={activeMenu === "learn"} />
-                  </button>
+                  </a>
                   <LearnDropdown visible={activeMenu === "learn"} />
                 </div>
               );

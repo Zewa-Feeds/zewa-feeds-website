@@ -6,6 +6,16 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ARTICLES } from "@/lib/articles";
 import { ArticleCard } from "@/app/blog/page";
+import {
+  Callout,
+  ComparisonTable,
+  DidYouKnow,
+  Faq,
+  ProsCons,
+  References,
+  Takeaways,
+} from "@/components/blog/ArticleBlocks";
+import { ReadingProgress, TableOfContents } from "@/components/blog/ArticleNav";
 
 function renderBlock(block, i, tagColor) {
   switch (block.type) {
@@ -17,7 +27,13 @@ function renderBlock(block, i, tagColor) {
       );
     case "h2":
       return (
-        <h2 key={i} className="font-[Playfair_Display] text-[22px] sm:text-[26px] text-white leading-snug mt-10 mb-4">
+        <h2
+          key={i}
+          id={block.id}
+          // Offset so an anchor jump clears the fixed header instead of hiding
+          // the heading underneath it.
+          className="font-[Playfair_Display] text-[22px] sm:text-[26px] text-white leading-snug mt-14 mb-4 scroll-mt-28"
+        >
           {block.text}
         </h2>
       );
@@ -47,6 +63,20 @@ function renderBlock(block, i, tagColor) {
           ))}
         </div>
       );
+    case "table":
+      return <ComparisonTable key={i} block={block} accent={tagColor} />;
+    case "callout":
+      return <Callout key={i} block={block} accent={tagColor} />;
+    case "didyouknow":
+      return <DidYouKnow key={i} block={block} accent={tagColor} />;
+    case "proscons":
+      return <ProsCons key={i} block={block} accent={tagColor} />;
+    case "takeaways":
+      return <Takeaways key={i} block={block} accent={tagColor} />;
+    case "faq":
+      return <Faq key={i} block={block} accent={tagColor} />;
+    case "references":
+      return <References key={i} block={block} accent={tagColor} />;
     default:
       return null;
   }
@@ -72,9 +102,13 @@ export default function ArticlePage() {
   }
 
   const related = ARTICLES.filter((a) => a.slug !== slug).slice(0, 2);
+  const hasToc = article.toc?.length > 0;
 
   return (
     <>
+      {article.toc?.length > 0 && (
+        <ReadingProgress targetId="article-body" accent={article.tagColor} />
+      )}
       <Header />
       <main className="bg-[#05070d] text-[#dde2f6] min-h-screen">
 
@@ -160,11 +194,26 @@ export default function ArticlePage() {
 
         {/* ── ARTICLE BODY ─────────────────────────────────────────── */}
         <div className="relative">
-          {/* Left accent bar */}
-          <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-[3px]"
-            style={{ background: `linear-gradient(to bottom, ${article.tagColor}50 0%, transparent 100%)`, marginLeft: "calc((100vw - 860px) / 2 - 48px)" }} />
+          {/* Left accent bar — only where the prose is centred. */}
+          {!hasToc && (
+            <div className="hidden lg:block absolute left-0 top-0 bottom-0 w-[3px]"
+              style={{ background: `linear-gradient(to bottom, ${article.tagColor}50 0%, transparent 100%)`, marginLeft: "calc((100vw - 860px) / 2 - 48px)" }} />
+          )}
 
-          <div className="max-w-[860px] mx-auto px-6 sm:px-10 py-12 sm:py-16">
+          <div
+            className={
+              hasToc
+                ? "mx-auto grid max-w-[1180px] gap-12 px-6 py-12 sm:px-10 sm:py-16 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-16"
+                : "max-w-[860px] mx-auto px-6 sm:px-10 py-12 sm:py-16"
+            }
+          >
+            {hasToc && (
+              <aside className="hidden lg:block">
+                <TableOfContents items={article.toc} accent={article.tagColor} />
+              </aside>
+            )}
+
+            <div className="min-w-0">
 
             {/* Progress indicator line */}
             <div className="flex items-center gap-4 mb-10 pb-6 border-b border-white/6">
@@ -173,7 +222,7 @@ export default function ArticlePage() {
             </div>
 
             {/* Content blocks */}
-            <article>
+            <article id="article-body">
               {article.content.map((block, i) => renderBlock(block, i, article.tagColor))}
             </article>
 
@@ -209,6 +258,7 @@ export default function ArticlePage() {
                   {t}
                 </span>
               ))}
+            </div>
             </div>
           </div>
         </div>
