@@ -218,8 +218,19 @@ function ProductCard({ p }) {
         {gallery.length > 1 && (
           <>
             <button
+              type="button"
               aria-label="Previous image"
+              /*
+               * onMouseDown alone was not enough: suppressing mousedown does
+               * not stop the click that follows, so the card's wrapping <a>
+               * still navigated to the product page. The gallery arrows must
+               * swallow the click too.
+               */
               onMouseDown={(e) => goTo(-1, e)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               className="absolute left-1 top-1/2 -translate-y-1/2 z-30 flex h-6 w-6 items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-white/10"
             >
               <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" }}>
@@ -227,8 +238,19 @@ function ProductCard({ p }) {
               </svg>
             </button>
             <button
+              type="button"
               aria-label="Next image"
+              /*
+               * onMouseDown alone was not enough: suppressing mousedown does
+               * not stop the click that follows, so the card's wrapping <a>
+               * still navigated to the product page. The gallery arrows must
+               * swallow the click too.
+               */
               onMouseDown={(e) => goTo(1, e)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
               className="absolute right-1 top-1/2 -translate-y-1/2 z-30 flex h-6 w-6 items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-white/10"
             >
               <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" }}>

@@ -39,7 +39,20 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
   const { addToCart } = useCart();
 
   const packs = product.packs ?? [];
-  const [activePack, setActivePack] = useState(0);
+  /*
+   * Open on the first PURCHASABLE pack, not simply the first one.
+   *
+   * Hardcoding 0 meant Koi Bites opened on its sold-out 500g pouch showing
+   * "OUT OF STOCK", while the listing card for the same product offered the
+   * in-stock 1kg — the two pages appeared to disagree about whether it could
+   * be bought. Falling back to 0 keeps the page sensible when every pack is
+   * gone, since the button correctly reads out of stock then anyway.
+   */
+  const firstAvailable = Math.max(
+    0,
+    packs.findIndex((p) => p.inStock !== false),
+  );
+  const [activePack, setActivePack] = useState(firstAvailable);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   const [tab, setTab] = useState("description");
