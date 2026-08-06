@@ -733,6 +733,11 @@ function QtyButton({ product }) {
 
   const handleAdd = (e) => {
     e.preventDefault();
+    /*
+     * Guard the ACTION, not just the button — `disabled` is presentation only.
+     * Matches the same guard on the product detail page.
+     */
+    if (inStock === false || !sku) return;
     addToCart({
       sku,
       name,
@@ -794,7 +799,18 @@ function QtyButton({ product }) {
  * existing filter chips keep working.
  */
 function adaptProduct(api) {
-  const first = api.packs?.[0];
+  /*
+   * The pack this card actually sells.
+   *
+   * Prefer the first IN-STOCK pack, not simply the first one. A product is
+   * `inStock` when ANY pack is available, so a product whose first pack is sold
+   * out — Koi Bites K7-500G — showed an enabled "+ Add" that put an
+   * unpurchasable SKU in the cart, while its own detail page correctly refused.
+   * Falling back to packs[0] keeps price and imagery sensible when every pack
+   * is gone; `cardInStock` below then disables the button.
+   */
+  const packs = api.packs ?? [];
+  const first = packs.find((p) => p.inStock !== false) ?? packs[0];
   const packSizes = (api.packs ?? []).map((v) => v.pack.replace(/\s+/g, ""));
 
   /*
@@ -836,7 +852,14 @@ function adaptProduct(api) {
     /** The card cycles to this after ~3s of hover. Null hides that behaviour. */
     video,
     accentColor: api.presentation?.accent ?? "rgba(68,229,194,0.18)",
-    inStock: api.inStock,
+    /*
+     * Stock of the pack this card sells — NOT api.inStock.
+     *
+     * api.inStock is true when any pack is available, so using it here let the
+     * card offer a sold-out SKU. The button must reflect the exact thing it
+     * adds to the cart.
+     */
+    inStock: Boolean(first?.sku) && api.inStock !== false && first?.inStock !== false,
     // Real SKU, so Add to Cart sends what the backend expects.
     sku: first?.sku ?? null,
     packLabel: first?.pack ?? null,
