@@ -79,16 +79,21 @@ function AnimatedBar({ pct, color, delay }) {
 
 function TileProof() {
   const stats = [
-    { value: "88%", label: "Bio-Digestibility", caption: "Absorbed nutrient profile vs 72% soy" },
+    { value: "88%", label: "Bio-Digestibility", caption: "Absorbed nutrient profile vs 70% soy meal" },
     { value: "15%", label: "Faster Growth", caption: "8-week controlled trial vs leading brand" },
     { value: "10%", label: "Less Mortality", caption: "Controlled feeding study result" },
     { value: "Rich", label: "Colour Vibrancy", caption: "Natural carotenoids, zero synthetic dyes" },
   ];
 
+  /*
+   * Fish meal is deliberately absent: its digestibility spans roughly 85–95%
+   * by grade and processing, so pinning it to a single figure is not
+   * defensible. Insect protein against soy meal is the honest comparison, and
+   * still the decisive one.
+   */
   const bars = [
-    { label: "ZEWA INSECT PROTEIN", pct: 94, value: "94%", color: "#44e5c2", delay: 200 },
-    { label: "FISH MEAL", pct: 78, value: "78%", color: "#bacac3", delay: 400 },
-    { label: "SOY FILLER", pct: 41, value: "41%", color: "#3c4a45", delay: 600 },
+    { label: "ZEWA INSECT PROTEIN", pct: 88, value: "88%", color: "#44e5c2", delay: 200 },
+    { label: "SOY MEAL", pct: 70, value: "70%", color: "#3c4a45", delay: 400 },
   ];
 
   return (

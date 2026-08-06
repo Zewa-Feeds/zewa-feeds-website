@@ -80,10 +80,18 @@ export default function Science() {
               </div>
             </div>
             <div className="space-y-8">
+              {/*
+                Fish meal is deliberately absent.
+
+                Its digestibility spans roughly 85–95% depending on grade and
+                processing, so pinning it to a single figure is not defensible
+                — and a comparison that overstates the gap undermines the claim
+                it is meant to support. Insect protein against soy meal is the
+                honest comparison, and still the decisive one.
+              */}
               {[
-                { label: "ZEWA INSECT PROTEIN", pct: 94, value: "94%", color: BAR, strong: true },
-                { label: "FISH MEAL", pct: 78, value: "78%", color: "rgba(11,18,32,0.32)" },
-                { label: "TRADITIONAL SOY FILLER", pct: 41, value: "41%", color: "rgba(11,18,32,0.18)" },
+                { label: "ZEWA INSECT PROTEIN", pct: 88, value: "88%", color: BAR, strong: true },
+                { label: "SOY MEAL", pct: 70, value: "70%", color: "rgba(11,18,32,0.28)" },
               ].map((bar) => (
                 <div key={bar.label}>
                   <div className="flex justify-between mb-2.5">
