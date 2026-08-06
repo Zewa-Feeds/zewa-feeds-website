@@ -56,44 +56,13 @@ function TileWhy() {
   );
 }
 
-// ── Tile 2: Proof stats + bar chart ─────────────────────────────────────────
-function AnimatedBar({ pct, color, delay }) {
-  const [width, setWidth] = useState(0);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    // Trigger after a short delay so CSS transition plays visibly
-    const t = setTimeout(() => setWidth(pct), delay ?? 200);
-    return () => clearTimeout(t);
-  }, [pct, delay]);
-
-  return (
-    <div className="h-1.5 bg-surface-container-highest w-full overflow-hidden rounded-full">
-      <div
-        className="h-full rounded-full transition-all duration-[1200ms] ease-out"
-        style={{ width: `${width}%`, backgroundColor: color }}
-      />
-    </div>
-  );
-}
-
+// ── Tile 2: Proof stats ──────────────────────────────────────────────────────
 function TileProof() {
   const stats = [
     { value: "88%", label: "Bio-Digestibility", caption: "Absorbed nutrient profile vs 70% soy meal" },
     { value: "15%", label: "Faster Growth", caption: "8-week controlled trial vs leading brand" },
     { value: "10%", label: "Less Mortality", caption: "Controlled feeding study result" },
     { value: "Rich", label: "Colour Vibrancy", caption: "Natural carotenoids, zero synthetic dyes" },
-  ];
-
-  /*
-   * Fish meal is deliberately absent: its digestibility spans roughly 85–95%
-   * by grade and processing, so pinning it to a single figure is not
-   * defensible. Insect protein against soy meal is the honest comparison, and
-   * still the decisive one.
-   */
-  const bars = [
-    { label: "ZEWA INSECT PROTEIN", pct: 88, value: "88%", color: "#44e5c2", delay: 200 },
-    { label: "SOY MEAL", pct: 70, value: "70%", color: "#3c4a45", delay: 400 },
   ];
 
   return (
@@ -109,13 +78,17 @@ function TileProof() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 lg:gap-16 items-start">
-          {/* Stats grid */}
+        {/*
+          Single column since the digestion-efficiency chart was removed.
+          A lg:grid-cols-2 wrapper would leave the right half of the tile
+          empty, so the four stats now spread across the full width instead.
+        */}
+        <div>
           <div>
             <h2 className="font-display-lg text-[22px] sm:text-[32px] md:text-[40px] leading-tight mb-5 sm:mb-8 text-on-surface">
               The numbers that matter.
             </h2>
-            <div className="grid grid-cols-2 gap-3 sm:gap-5">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4 lg:gap-6">
               {stats.map((s) => (
                 <div key={s.label} className="bg-surface-container/60 backdrop-blur-sm p-3 sm:p-5 border border-on-surface/5">
                   <div className="text-[28px] sm:text-[40px] md:text-[48px] font-display-lg text-primary leading-none mb-1 sm:mb-2">
@@ -129,41 +102,6 @@ function TileProof() {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* Animated bar chart — hidden on mobile to save space */}
-          <div className="hidden sm:block bg-surface-container/40 backdrop-blur-sm p-8 border border-on-surface/5">
-            <div className="flex justify-between items-end mb-8">
-              <div className="font-headline-sm text-[18px] text-on-surface">Digestion Efficiency</div>
-              <div className="font-label-caps text-label-caps text-on-surface/30 text-[10px]">NABL LAB DATA</div>
-            </div>
-            <div className="space-y-7">
-              {bars.map((bar) => (
-                <div key={bar.label}>
-                  <div className="flex justify-between mb-2">
-                    <span className="font-button text-[11px] tracking-widest" style={{ color: bar.color }}>
-                      {bar.label}
-                    </span>
-                    <span className="font-button text-button text-on-surface/70">{bar.value}</span>
-                  </div>
-                  <AnimatedBar pct={bar.pct} color={bar.color} delay={bar.delay} />
-                </div>
-              ))}
-            </div>
-            <div className="mt-8 pt-6 border-t border-on-surface/10 grid grid-cols-2 gap-6">
-              <div>
-                <div className="text-[28px] font-display-lg text-primary leading-none mb-1">4.2x</div>
-                <p className="text-[11px] text-on-surface/40 leading-snug">
-                  More efficient amino acid conversion vs soy
-                </p>
-              </div>
-              <div>
-                <div className="text-[28px] font-display-lg text-primary leading-none mb-1">0%</div>
-                <p className="text-[11px] text-on-surface/40 leading-snug">
-                  Anti-nutritional factors vs common fillers
-                </p>
-              </div>
             </div>
           </div>
         </div>
