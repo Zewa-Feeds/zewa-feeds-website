@@ -1,10 +1,8 @@
-import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import { catalog } from "@/lib/api";
 import {
-  FOUNDER,
   HEADLINE_STATS,
   HERO,
   PURPOSE,
@@ -16,28 +14,51 @@ import {
   WHY,
 } from "@/lib/about";
 
-/** Rule-plus-caps eyebrow, matching Science and ClinicalProof. */
-function Eyebrow({ children }) {
+/**
+ * Rule-plus-caps eyebrow, matching Science and ClinicalProof.
+ *
+ * `onLight` swaps the brand mint for a darker green: #44e5c2 on white is about
+ * 1.6:1, far below the 4.5:1 needed to be readable.
+ */
+function Eyebrow({ children, onLight = false }) {
+  const color = onLight ? "text-[#00755f]" : "text-primary";
+  const rule = onLight ? "bg-[#00755f]" : "bg-primary";
   return (
     <div className="mb-7 flex items-center gap-3">
-      <div className="h-px w-6 bg-primary" />
-      <span className="font-label-caps text-label-caps tracking-[0.2em] text-primary">{children}</span>
+      <div className={`h-px w-6 ${rule}`} />
+      <span className={`font-label-caps text-label-caps tracking-[0.2em] ${color}`}>{children}</span>
     </div>
   );
 }
 
 /**
- * Section shell.
+ * Section shell — one place owns vertical rhythm, so no section can drift.
  *
- * One place owns vertical rhythm, so no section can drift. Generous by default
- * — the previous version stacked nine dense blocks with too little air between
- * them, which is what made the page feel heavy.
+ * Vertical rhythm was py-28 / sm:py-36 / lg:py-44 — 112px, 144px, then 176px
+ * top AND bottom. Two adjacent sections therefore put ~350px of empty space
+ * between their content on desktop, so the page read as mostly gaps with
+ * occasional text. Roughly two-thirds of that still separates the sections
+ * clearly without making the reader scroll through emptiness.
+ *
+ * Tones:
+ *   dark   — the page default
+ *   raised — a slightly lifted dark panel
+ *   light  — an inverted white band, used to break up a long dark page
+ *
+ * `light` sets a base text colour on the wrapper, but Reveal forwards only
+ * className — so children carrying an explicit `text-white` must still be
+ * overridden at the call site.
  */
 function Section({ children, tone = "dark", className = "" }) {
-  const bg = tone === "raised" ? "bg-[#0a1220]" : "bg-[#06080f]";
+  const bg =
+    tone === "light"
+      ? "bg-white text-[#0b1220]"
+      : tone === "raised"
+      ? "bg-[#0a1220]"
+      : "bg-[#06080f]";
   return (
     <Reveal className={`${bg} ${className}`}>
-      <div className="mx-auto max-w-[1240px] px-6 py-28 sm:px-10 sm:py-36 lg:py-44">{children}</div>
+      <div className="mx-auto max-w-[1240px] px-6 py-16 sm:px-10 sm:py-20 lg:py-24">{children}</div>
     </Reveal>
   );
 }
@@ -70,7 +91,7 @@ export default async function AboutPage() {
                 "radial-gradient(ellipse 70% 60% at 50% -10%, rgba(68,229,194,0.13), transparent 70%)",
             }}
           />
-          <div className="relative mx-auto max-w-[1240px] px-6 pb-32 pt-40 sm:px-10 sm:pb-40 sm:pt-52">
+          <div className="relative mx-auto max-w-[1240px] px-6 pb-20 pt-32 sm:px-10 sm:pb-24 sm:pt-36">
             <div className="mx-auto max-w-[900px] text-center">
               <div className="mb-8 flex items-center justify-center gap-3">
                 <div className="h-px w-6 bg-primary" />
@@ -96,7 +117,7 @@ export default async function AboutPage() {
             </div>
 
             {/* Three figures, generously spaced — the credibility argument in one row. */}
-            <ul className="mx-auto mt-24 grid max-w-[820px] grid-cols-1 gap-12 sm:grid-cols-3 sm:gap-8">
+            <ul className="mx-auto mt-16 grid max-w-[820px] grid-cols-1 gap-12 sm:grid-cols-3 sm:gap-8">
               {HEADLINE_STATS.map((stat) => (
                 <li key={stat.label} className="text-center">
                   <div
@@ -115,7 +136,7 @@ export default async function AboutPage() {
 
         {/* ── OUR STORY ─────────────────────────────────────────────── */}
         <Section tone="raised" className="border-y border-white/5">
-          <div className="grid gap-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-24">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
             <div>
               <Eyebrow>{STORY.eyebrow}</Eyebrow>
               <h2
@@ -144,13 +165,13 @@ export default async function AboutPage() {
         </Section>
 
         {/* ── MISSION & VISION ──────────────────────────────────────── */}
-        <Section>
-          <div className="grid gap-16 md:grid-cols-2 md:gap-20">
+        <Section tone="light">
+          <div className="grid gap-10 md:grid-cols-2 md:gap-14">
             {PURPOSE.map((item) => (
               <div key={item.label}>
-                <Eyebrow>{item.label}</Eyebrow>
+                <Eyebrow onLight>{item.label}</Eyebrow>
                 <p
-                  className="font-display-lg leading-[1.3] text-white/90"
+                  className="font-display-lg leading-[1.3] text-[#0b1220]/90"
                   style={{ fontSize: "clamp(22px, 2.4vw, 30px)" }}
                 >
                   {item.text}
@@ -181,7 +202,7 @@ export default async function AboutPage() {
           </div>
 
           {/* Closed loop — three steps, connected on desktop. */}
-          <ol className="relative mx-auto mt-24 grid max-w-[980px] gap-14 sm:grid-cols-3 sm:gap-8">
+          <ol className="relative mx-auto mt-16 grid max-w-[980px] gap-14 sm:grid-cols-3 sm:gap-8">
             <div
               aria-hidden="true"
               className="absolute left-[16%] right-[16%] top-6 hidden h-px sm:block"
@@ -211,121 +232,28 @@ export default async function AboutPage() {
           </p>
         </Section>
 
-        {/* ── FOUNDER SPOTLIGHT ─────────────────────────────────────── */}
-        <section className="relative overflow-hidden bg-[#06080f]">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(ellipse 50% 60% at 22% 45%, rgba(68,229,194,0.09), transparent 65%)",
-            }}
-          />
-          <Reveal className="relative">
-            <div className="mx-auto max-w-[1240px] px-6 py-28 sm:px-10 sm:py-36 lg:py-44">
-              <div className="grid items-center gap-16 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] lg:gap-24">
-                {/* Portrait */}
-                <div className="relative mx-auto w-full max-w-[380px] lg:mx-0">
-                  <div
-                    aria-hidden="true"
-                    className="absolute -inset-4 rounded-[2rem] opacity-60"
-                    style={{
-                      background:
-                        "linear-gradient(150deg, rgba(68,229,194,0.16), transparent 60%)",
-                    }}
-                  />
-                  {/*
-                    The source JPEG has thin black bars baked into all four
-                    edges (and is very slightly rotated, so they are wedge-
-                    shaped). Scaling to 108% inside a fixed-aspect, overflow-
-                    hidden frame pushes them outside the visible area — the
-                    subject is centred with headroom, so nothing meaningful is
-                    lost. Fixing the asset itself would be cleaner; this keeps
-                    the original file untouched.
-                  */}
-                  <div className="relative aspect-square overflow-hidden rounded-[1.75rem] border border-white/10">
-                    <Image
-                      src={FOUNDER.portrait}
-                      alt={FOUNDER.portraitAlt}
-                      fill
-                      sizes="(max-width: 1024px) 380px, 420px"
-                      className="scale-[1.08] object-cover object-center"
-                    />
-                  </div>
-                </div>
-
-                {/* Statement */}
-                <div>
-                  <Eyebrow>{FOUNDER.eyebrow}</Eyebrow>
-
-                  <blockquote
-                    className="font-display-lg leading-[1.35] text-white/90"
-                    style={{ fontSize: "clamp(21px, 2.5vw, 31px)" }}
-                  >
-                    &ldquo;{FOUNDER.statement}&rdquo;
-                  </blockquote>
-
-                  <div className="mt-10 flex items-baseline gap-3">
-                    <span className="font-headline-sm text-[17px] text-white">{FOUNDER.name}</span>
-                    <span className="font-body-md text-[13px] text-white/35">{FOUNDER.role}</span>
-                  </div>
-
-                  <p className="font-body-md mt-6 max-w-[520px] text-[14.5px] leading-[1.8] text-white/42">
-                    {FOUNDER.bio}
-                  </p>
-
-                  <dl className="mt-12 grid grid-cols-2 gap-x-8 gap-y-6 border-t border-white/8 pt-10 sm:grid-cols-4">
-                    {FOUNDER.credentials.map((c) => (
-                      <div key={c.label}>
-                        <dt className="font-headline-sm text-[13.5px] text-primary">{c.label}</dt>
-                        <dd className="font-body-md mt-1 text-[12px] leading-snug text-white/32">
-                          {c.detail}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-
-                  <ul className="mt-10 space-y-2.5">
-                    {FOUNDER.honours.map((honour) => (
-                      <li key={honour} className="flex items-start gap-3">
-                        <span
-                          aria-hidden="true"
-                          className="mt-[9px] h-1 w-1 shrink-0 rounded-full bg-primary/50"
-                        />
-                        <span className="font-body-md text-[13px] leading-snug text-white/38">
-                          {honour}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        </section>
-
         {/* ── VALUES ────────────────────────────────────────────────── */}
-        <Section tone="raised" className="border-y border-white/5">
+        <Section tone="light" className="border-y border-black/5">
           <div className="max-w-[560px]">
-            <Eyebrow>{VALUES.eyebrow}</Eyebrow>
+            <Eyebrow onLight>{VALUES.eyebrow}</Eyebrow>
             <h2
-              className="font-display-lg leading-[1.15] text-white"
+              className="font-display-lg leading-[1.15] text-[#0b1220]"
               style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
             >
               {VALUES.title}
             </h2>
           </div>
 
-          <ul className="mt-20 grid gap-x-16 gap-y-14 sm:grid-cols-2">
+          <ul className="mt-14 grid gap-x-16 gap-y-12 sm:grid-cols-2">
             {VALUES.items.map((value, i) => (
               <li key={value.title}>
-                <span className="font-label-caps text-[10px] tracking-[0.2em] text-primary/50">
+                <span className="font-label-caps text-[10px] tracking-[0.2em] text-[#00755f]">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="font-headline-sm mt-4 text-[19px] leading-snug text-white">
+                <h3 className="font-headline-sm mt-4 text-[19px] leading-snug text-[#0b1220]">
                   {value.title}
                 </h3>
-                <p className="font-body-md mt-3 max-w-[400px] text-[14px] leading-[1.75] text-white/42">
+                <p className="font-body-md mt-3 max-w-[400px] text-[14px] leading-[1.75] text-[#0b1220]/60">
                   {value.detail}
                 </p>
               </li>
@@ -335,7 +263,7 @@ export default async function AboutPage() {
 
         {/* ── TRUST ─────────────────────────────────────────────────── */}
         <Section>
-          <div className="grid gap-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-24">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-16">
             <div>
               <Eyebrow>{TRUST.eyebrow}</Eyebrow>
               <h2
@@ -348,7 +276,7 @@ export default async function AboutPage() {
                 {TRUST.body}
               </p>
 
-              <div className="mt-12 flex gap-16">
+              <div className="mt-10 flex gap-12">
                 {TRUST.trialStats.map((stat) => (
                   <div key={stat.label}>
                     <div
