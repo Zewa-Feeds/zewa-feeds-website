@@ -107,6 +107,20 @@ export default function CheckoutPage() {
       });
   }, []);
 
+  /*
+   * Bring a checkout-level failure into view.
+   *
+   * The Razorpay modal closes and hands the page back at whatever scroll
+   * position it had, which is rarely the top — so a declined payment could
+   * render its banner entirely offscreen and look like nothing happened.
+   */
+  useEffect(() => {
+    if (!errors._root) return;
+    document
+      .getElementById("checkout-root-error")
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [errors._root]);
+
   // Re-price when state or email changes for GST tax calculation
   useEffect(() => {
     if (form.state) void validate({ state: form.state, email: form.email || undefined });
@@ -293,18 +307,30 @@ export default function CheckoutPage() {
     if (problem) setCouponError(problem.message);
   };
 
-  const pollUntilPaid = async (orderNo, email, timeoutMs = 90_000) => {
+  /**
+   * Wait for the webhook to mark the order paid.
+   *
+   * Only used when the outcome is genuinely unknown — the customer closed the
+   * modal, or our confirm call failed after Razorpay took the money. A declined
+   * payment never reaches here, so the wait is short: 30s is long enough for a
+   * webhook round trip, and a counter that climbs past two minutes reads as a
+   * frozen page rather than as progress.
+   *
+   * Stops early on a terminal payment state instead of waiting out the clock.
+   */
+  const pollUntilPaid = async (orderNo, email, timeoutMs = 30_000) => {
     const started = Date.now();
     while (Date.now() - started < timeoutMs) {
       await new Promise((r) => setTimeout(r, 3000));
       try {
         const status = await checkoutApi.status(orderNo, email);
         if (status.paymentStatus === "PAID") return true;
-        if (status.status === "CANCELLED") return false;
+        if (status.status === "CANCELLED" || status.paymentStatus === "FAILED") return false;
       } catch {
-        /* transient */
+        /* transient — keep waiting */
       }
-      setStatusText(`Confirming payment with bank… ${Math.round((Date.now() - started) / 1000)}s`);
+      const left = Math.max(0, Math.ceil((timeoutMs - (Date.now() - started)) / 1000));
+      setStatusText(`Checking with your bank… ${left}s remaining`);
     }
     return false;
   };
@@ -385,27 +411,45 @@ export default function CheckoutPage() {
         return;
       }
 
-      const completed = await openRazorpay(result, form, async (payload) => {
+      const { outcome, message } = await openRazorpay(result, form, async (payload) => {
         await checkoutApi.confirm(result.orderNo, payload);
       });
 
-      if (completed) {
+      if (outcome === "paid") {
+        clearCart();
+        sessionStorage.removeItem(STORAGE_FORM_KEY);
+        setStep("success");
+        return;
+      }
+
+      /*
+       * A declined payment is final — stop now.
+       *
+       * Polling here was the bug behind the endless "Confirming payment with
+       * bank… 118s" counter: the bank had already said no, so no amount of
+       * waiting would change the answer. Only an ambiguous close (the customer
+       * shut the modal, or our confirm call failed after Razorpay took the
+       * money) is worth waiting on, because the webhook may still settle it.
+       */
+      if (outcome === "failed" || outcome === "unavailable") {
+        setErrors({
+          _root: `${message} Your order ${result.orderNo} is saved — you can try paying again.`,
+        });
+        setStep("form");
+        return;
+      }
+
+      setStatusText("Checking whether your payment went through…");
+      const paid = await pollUntilPaid(result.orderNo, form.email.trim(), 30_000);
+      if (paid) {
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         setStep("success");
       } else {
-        setStatusText("Waiting for payment confirmation…");
-        const paid = await pollUntilPaid(result.orderNo, form.email.trim(), 120_000);
-        if (paid) {
-          clearCart();
-          sessionStorage.removeItem(STORAGE_FORM_KEY);
-          setStep("success");
-        } else {
-          setErrors({
-            _root: `Payment was not completed. Order ${result.orderNo} is saved — pay within 30 minutes or it will be cancelled.`,
-          });
-          setStep("form");
-        }
+        setErrors({
+          _root: `Payment was not completed. Order ${result.orderNo} is saved — pay within 30 minutes or it will be cancelled.`,
+        });
+        setStep("form");
       }
     } catch (err) {
       setErrors(err.fields ?? { _root: err.message });
@@ -536,9 +580,20 @@ export default function CheckoutPage() {
           </div>
 
           {/* Global Root Errors */}
+          {/*
+            `id` and the scroll effect below matter after a failed payment: the
+            Razorpay modal closes and returns you to wherever the page was
+            scrolled, which is usually nowhere near this banner. Without it the
+            page just looks like nothing happened.
+          */}
           {errors._root && (
-            <div className="mb-8 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-[13px] text-red-300 font-[Montserrat] flex items-center gap-3">
-              <svg className="w-5 h-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div
+              id="checkout-root-error"
+              role="alert"
+              aria-live="assertive"
+              className="mb-8 flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-[13px] text-red-300 font-[Montserrat]"
+            >
+              <svg className="h-5 w-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>{errors._root}</span>
@@ -912,6 +967,22 @@ export default function CheckoutPage() {
 }
 
 // Razorpay SDK popup handler (Production path)
+/**
+ * Open the Razorpay modal and report HOW it ended.
+ *
+ * This used to return a bare boolean, which collapsed four very different
+ * outcomes into `false`: the customer cancelled, the bank declined, the SDK
+ * failed to load, or confirmation failed on our side. The caller could only
+ * assume "maybe it is still in flight" and poll for two minutes — so a card
+ * that was declined instantly left the customer watching a "Confirming payment
+ * with bank… 118s" counter before finally being told it did not work.
+ *
+ * Returns { outcome, message }:
+ *   "paid"      — confirmed with our API, order is done
+ *   "failed"    — Razorpay reported payment.failed, with the bank's reason
+ *   "dismissed" — the customer closed the modal without paying
+ *   "unavailable" — the SDK could not load or no public key was issued
+ */
 async function openRazorpay(result, form, onSuccess) {
   const loaded = await new Promise((resolve) => {
     if (window.Razorpay) return resolve(true);
@@ -922,9 +993,26 @@ async function openRazorpay(result, form, onSuccess) {
     document.body.appendChild(script);
   });
 
-  if (!loaded || !result.payment.publicKey) return false;
+  if (!loaded || !result.payment.publicKey) {
+    return {
+      outcome: "unavailable",
+      message: "Could not reach the payment gateway. Check your connection and try again.",
+    };
+  }
 
   return new Promise((resolve) => {
+    /*
+     * `handler` and `payment.failed` can both fire, and ondismiss always fires
+     * when the modal closes. First result wins — otherwise a failed payment
+     * would be overwritten by the dismissal that follows it.
+     */
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+
     const rzp = new window.Razorpay({
       key: result.payment.publicKey,
       amount: result.payment.amountPaise,
@@ -943,13 +1031,35 @@ async function openRazorpay(result, form, onSuccess) {
             razorpayPaymentId: response.razorpay_payment_id,
             razorpaySignature: response.razorpay_signature,
           });
-          resolve(true);
-        } catch {
-          resolve(false);
+          finish({ outcome: "paid" });
+        } catch (err) {
+          /*
+           * Razorpay took the money but our confirm call failed. Do NOT tell
+           * the customer the payment failed — the webhook is authoritative and
+           * will settle the order, so fall through to polling.
+           */
+          finish({
+            outcome: "dismissed",
+            message: err?.message || "Payment received — confirming with our server.",
+          });
         }
       },
-      modal: { ondismiss: () => resolve(false) },
+      modal: { ondismiss: () => finish({ outcome: "dismissed" }) },
     });
+
+    /*
+     * The decisive fix: subscribe to payment.failed. Razorpay fires this the
+     * moment the bank declines, so we can stop immediately with the real
+     * reason instead of polling for a confirmation that will never arrive.
+     */
+    rzp.on("payment.failed", (event) => {
+      const e = event?.error ?? {};
+      finish({
+        outcome: "failed",
+        message: e.description || e.reason || "Your bank declined the payment.",
+      });
+    });
+
     rzp.open();
   });
 }
