@@ -38,7 +38,7 @@ const STORAGE_KEY = "zewa_cart_v2";
 const FALLBACK_MAX_QTY = 10;
 
 /** Ceiling for one line: what the API said, else the fallback. */
-const lineMax = (item) => item?.maxQty ?? FALLBACK_MAX_QTY;
+export const lineMax = (item) => item?.maxQty ?? FALLBACK_MAX_QTY;
 
 function reducer(state, action) {
   switch (action.type) {
@@ -95,6 +95,19 @@ function reducer(state, action) {
             mrpPaise: line.mrpPaise,
             image: line.imageUrl ?? i.image,
             availableStock: line.availableStock,
+            /*
+             * The real ceiling for every quantity stepper.
+             *
+             * The cart page read `item.maxQty ?? 10`, but nothing ever set
+             * maxQty — so every line fell back to 10 and a customer could put
+             * 10 of something in the cart when only 3 existed. Deriving it
+             * from the server's availableStock caps each stepper at what is
+             * actually in stock, still bounded by the per-order limit.
+             */
+            maxQty:
+              typeof line.availableStock === "number"
+                ? Math.min(line.availableStock, FALLBACK_MAX_QTY)
+                : FALLBACK_MAX_QTY,
           };
         })
         .filter(Boolean);

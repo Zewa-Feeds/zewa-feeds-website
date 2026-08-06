@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { formatInr } from "@/lib/api";
 import { CARD, EASE } from "./tokens";
+import { lineMax } from "@/lib/cartContext";
 
 export default function OrderSummaryCard({
   items = [],
@@ -129,10 +130,28 @@ export default function OrderSummaryCard({
                       >
                         {item.qty}
                       </span>
+                      {/*
+                        Capped at the line's real ceiling.
+
+                        This stepper had no upper bound at all, so a customer
+                        could set 10 of an item with 3 in stock and only find
+                        out when the server rejected the order.
+                      */}
                       <button
                         type="button"
-                        onClick={() => setQty && setQty(item.sku, item.qty + 1)}
-                        className="relative flex h-5 w-5 items-center justify-center rounded text-white/50 transition-colors before:absolute before:left-1/2 before:top-1/2 before:h-11 before:w-9 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] hover:bg-white/10 hover:text-white"
+                        onClick={() =>
+                          setQty && item.qty < lineMax(item) && setQty(item.sku, item.qty + 1)
+                        }
+                        disabled={item.qty >= lineMax(item)}
+                        title={
+                          item.qty >= lineMax(item)
+                            ? typeof item.availableStock === "number" &&
+                              item.availableStock <= lineMax(item)
+                              ? `Only ${item.availableStock} in stock`
+                              : `Maximum ${lineMax(item)} per order`
+                            : undefined
+                        }
+                        className="relative flex h-5 w-5 items-center justify-center rounded text-white/50 transition-colors before:absolute before:left-1/2 before:top-1/2 before:h-11 before:w-9 before:-translate-x-1/2 before:-translate-y-1/2 before:content-[''] hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent"
                         aria-label={`Increase quantity of ${item.name}`}
                       >
                         +
