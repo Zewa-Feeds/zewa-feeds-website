@@ -76,7 +76,7 @@ const nav = {
   /*
    * `soon: true` marks a destination that does not exist yet.
    *
-   * Those entries render as plain text with a "Soon" tag instead of as links:
+   * Those entries render as plain text with a "Coming Soon" tag, not as links:
    * an <a href="#"> looks clickable, does nothing, and reads as a broken site.
    * Saying the page is coming is honest and costs nothing. Remove the flag and
    * set a real href as each one ships.
@@ -172,12 +172,12 @@ export default function Footer() {
                       the badge carrying the explanation. Styling it like the
                       live links but inert would be worse than either option.
                     */
-                    <li key={link.label} className="flex items-center gap-2">
+                    <li key={link.label} className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span className="text-[13.5px] leading-none font-normal text-white/25">
                         {link.label}
                       </span>
-                      <span className="rounded-full border border-[#d4793a]/30 bg-[#d4793a]/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#d4793a]">
-                        Soon
+                      <span className="whitespace-nowrap rounded-full border border-[#d4793a]/30 bg-[#d4793a]/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#d4793a]">
+                        Coming Soon
                       </span>
                     </li>
                   ) : (
