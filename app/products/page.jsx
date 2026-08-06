@@ -1027,7 +1027,7 @@ export default function ProductsPage() {
                 {[
                   { val: "46%", label: "Max Protein", sub: "in the range" },
                   { val: "88%", label: "Digestibility", sub: "lab verified" },
-                  { val: "10+", label: "Formulas", sub: "species-specific" },
+                  { val: "13+", label: "Formulas", sub: "species-specific" },
                 ].map((s) => (
                   <div key={s.label} className="flex flex-col gap-1">
                     <span className="font-[Playfair_Display] text-[38px] text-primary leading-none">{s.val}</span>
