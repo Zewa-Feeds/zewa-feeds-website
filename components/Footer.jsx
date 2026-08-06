@@ -56,14 +56,21 @@ const socialLinks = [
 ];
 
 const nav = {
+  /*
+   * Categories, not individual products.
+   *
+   * This list used to name seven specific products, every one of them pointing
+   * at href="#" — and most no longer exist in the catalogue. A footer cannot
+   * fetch the live catalogue without becoming a client component on every page,
+   * so it links to filtered listings instead: always valid, and nothing to keep
+   * in sync as the range changes.
+   */
   Products: [
-    { label: "Guppy Bites G2", href: "#" },
-    { label: "Betta Bites F3", href: "#" },
-    { label: "Tetra Pellets F2", href: "#" },
-    { label: "Cichlid Bites C4/C5", href: "#" },
-    { label: "Pleco Bites P5", href: "#" },
-    { label: "Shrimp Grazers S5", href: "#" },
-    { label: "Hatch'E H1/H2/H3", href: "#" },
+    { label: "All Products", href: "/products" },
+    { label: "Dried BSF Larvae", href: "/products?category=Dried+BSF+Larvae" },
+    { label: "Slow Sinking Pellets", href: "/products?category=Slow+Sinking+Pellets" },
+    { label: "Floating Pellets", href: "/products?category=Floating+Pellets" },
+    { label: "Hatchery Feeds", href: "/products?category=Hatchery+Feeds" },
     { label: "View all products →", href: "/products", accent: true },
   ],
   Learn: [

@@ -44,6 +44,23 @@ const TRUST_BADGES = [
   { icon: <IcoLarva />, label: "Insect Protein" },
 ];
 
+/**
+ * Shown when a product carries no image of its own.
+ *
+ * A neutral panel rather than a photo of some other product: borrowing another
+ * item's picture is worse than showing none, because it misrepresents what the
+ * customer is buying.
+ */
+const PLACEHOLDER_IMAGE =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">` +
+      `<rect width="400" height="400" fill="#0d1321"/>` +
+      `<text x="200" y="205" text-anchor="middle" fill="#3c4a45"` +
+      ` font-family="Montserrat,sans-serif" font-size="16">Image coming soon</text>` +
+      `</svg>`,
+  );
+
 const CATEGORIES = [
   "All",
   "Dried BSF Larvae",
@@ -52,177 +69,6 @@ const CATEGORIES = [
   "Bottom Dwellers",
   "Hatchery Feeds",
   "1kg Packs",
-];
-
-const FALLBACK_SPOTLIGHT = [
-  {
-    name: "Betta Bites F3",
-    slug: "betta-bites-f3",
-    category: "Betta",
-    tagline: "100% natural insect-protein formula for vibrant, healthy bettas",
-    price: "₹249",
-    mrp: "₹310",
-    packs: ["45g", "1kg"],
-    badge: "BESTSELLER",
-    protein: "46%",
-    stat: "Highest protein in the range",
-    image: "/Bottles/Betta/Betta F3_Front.png",
-    accent: "rgba(68,229,194,0.22)",
-    accentStrong: "rgba(68,229,194,0.45)",
-  },
-  {
-    name: "Cichlid Bites C4",
-    slug: "cichlid-bites-c4",
-    category: "Cichlid",
-    tagline: "High-energy insect protein for aggressive cichlid species",
-    price: "₹279",
-    mrp: "₹349",
-    packs: ["100g", "1kg"],
-    badge: "NEW",
-    protein: "44%",
-    stat: "Supports jaw muscle development",
-    image: "/Bottles/Cichild/Cichild C4_Front.png",
-    accent: "rgba(68,229,194,0.20)",
-    accentStrong: "rgba(68,229,194,0.45)",
-  },
-  {
-    name: "DBSFL 25g",
-    slug: "dried-bsf-larvae-25g",
-    category: "Hatchery",
-    tagline: "Whole dried larvae — maximum insect nutrition per gram",
-    price: "₹199",
-    mrp: "₹249",
-    packs: ["25g"],
-    badge: "PRO",
-    protein: "50%",
-    stat: "Whole larvae — maximum nutrition",
-    image: "/Bottles/DBSFL/DBSFL 25G.png",
-    accent: "rgba(68,229,194,0.20)",
-    accentStrong: "rgba(68,229,194,0.45)",
-  },
-];
-
-const FALLBACK_PRODUCTS = [
-  {
-    name: "Betta Bites F3",
-    slug: "betta-bites-f3",
-    tags: ["Slow Sinking Pellets", "1kg Packs"],
-    tagline: "100% natural insect-protein formula for vibrant, healthy bettas",
-    price: 249,
-    mrp: "₹310",
-    packs: ["45g", "1kg"],
-    badge: "BESTSELLER",
-    badgeColor: "bg-primary text-[#00382d]",
-    protein: "46%",
-    image: "/Bottles/Betta/Betta F3_Front.png",
-    video: "/videos/brand_video.mp4",
-    gallery: [
-      "/Bottles/Betta/Betta F3_Front.png",
-      "/Bottles/Betta/Betta F3_Back.png",
-      "/Bottles/Betta/Betta 01.png",
-      "/Bottles/Betta/Betta 02.png",
-      "/Bottles/Betta/Betta 03.png",
-    ],
-    accentColor: "rgba(68,229,194,0.18)",
-  },
-  {
-    name: "Cichlid Bites C4",
-    slug: "cichlid-bites-c4",
-    tags: ["Floating Pellets", "Bottom Dwellers", "1kg Packs"],
-    tagline: "High-energy insect protein for aggressive cichlid species",
-    price: 279,
-    mrp: "₹349",
-    packs: ["100g", "1kg"],
-    badge: "NEW",
-    badgeColor: "bg-primary text-[#00382d]",
-    protein: "44%",
-    image: "/Bottles/Cichild/Cichild C4_Front.png",
-    video: "/videos/brand_video.mp4",
-    gallery: [
-      "/Bottles/Cichild/Cichild C4_Front.png",
-      "/Bottles/Cichild/Cichild C4_back.png",
-      "/Bottles/Cichild/Cichild 01.png",
-      "/Bottles/Cichild/Cichild 02.png",
-      "/Bottles/Cichild/Cichild 03.png",
-    ],
-    accentColor: "rgba(68,229,194,0.15)",
-  },
-  {
-    name: "Dried BSF Larvae 25g",
-    slug: "dried-bsf-larvae-25g",
-    tags: ["Dried BSF Larvae", "Hatchery Feeds"],
-    tagline: "Whole dried larvae — maximum insect nutrition per gram",
-    price: 199,
-    mrp: "₹249",
-    packs: ["25g"],
-    badge: "PRO",
-    badgeColor: "bg-primary text-[#00382d]",
-    protein: "50%",
-    image: "/Bottles/DBSFL/DBSFL 25G.png",
-    video: "/videos/brand_video.mp4",
-    gallery: [
-      "/Bottles/DBSFL/DBSFL 25G.png",
-      "/Bottles/DBSFL/DBSFL25_02.png",
-      "/Bottles/DBSFL/India/25/Artboard 1.png",
-      "/Bottles/DBSFL/India/25/Artboard 1 copy.png",
-    ],
-    accentColor: "rgba(68,229,194,0.15)",
-  },
-  {
-    name: "Dried BSF Larvae 75g",
-    slug: "dried-bsf-larvae-75g",
-    tags: ["Dried BSF Larvae", "Hatchery Feeds", "1kg Packs"],
-    tagline: "Large pack for hatchery operators & serious breeders",
-    price: 449,
-    mrp: "₹560",
-    packs: ["75g"],
-    badge: null,
-    protein: "50%",
-    image: "/Bottles/DBSFL/DBSFL 75G.png",
-    video: "/videos/brand_video.mp4",
-    gallery: [
-      "/Bottles/DBSFL/DBSFL 75G.png",
-      "/Bottles/DBSFL/DBSFL 75G_Front.png",
-      "/Bottles/DBSFL/DBSFL 75G_back.png",
-      "/Bottles/DBSFL/India/75/Artboard 1.png",
-    ],
-    accentColor: "rgba(68,229,194,0.12)",
-  },
-  {
-    name: "Guppy Bites G2",
-    slug: "guppy-bites-g2",
-    tags: ["Slow Sinking Pellets", "Bottom Dwellers"],
-    tagline: "Precision micro-nutrition for guppies & livebearers",
-    price: 199,
-    mrp: "₹249",
-    packs: ["45g", "500g"],
-    badge: null,
-    protein: "40%",
-    image: "/Bottles/Guppy/Guppy G2_Front.png",
-    video: "/videos/brand_video.mp4",
-    gallery: [
-      "/Bottles/Guppy/Guppy G2_Front.png",
-      "/Bottles/Guppy/Guppy G2_Back.png",
-      "/Bottles/Guppy/Guppy 01.png",
-      "/Bottles/Guppy/Guppy 02.png",
-      "/Bottles/Guppy/Guppy 03.png",
-    ],
-    accentColor: "rgba(68,229,194,0.10)",
-  },
-  {
-    name: "Full Range",
-    slug: null,
-    tags: [],
-    tagline: "The complete Zewa insect-protein lineup",
-    price: null,
-    mrp: null,
-    packs: [],
-    badge: null,
-    protein: null,
-    image: "/Bottles/All products.jpg",
-    gallery: ["/Bottles/All products.jpg"],
-    accentColor: "rgba(68,229,194,0.08)",
-  },
 ];
 
 function ProductCard({ p }) {
@@ -551,39 +397,51 @@ const QUIZ = [
   },
 ];
 
-function getResult(answers) {
+/**
+ * Pick a recommendation from the LIVE catalogue.
+ *
+ * The four results here used to be hardcoded, naming products like
+ * "Betta Bites F3" whose slugs 404 — so the quiz confidently recommended
+ * things nobody could buy. Matching against real products means the quiz can
+ * only ever suggest something that exists and is in stock.
+ *
+ * Matching is deliberately loose (species keyword against name, category and
+ * tags): the catalogue is small, and a near-miss recommendation is far better
+ * than a dead link. Falls back to the first product, and returns null when the
+ * catalogue is empty so the caller can hide the quiz entirely.
+ */
+function getResult(answers, products) {
+  if (!products || products.length === 0) return null;
+
   const { species, stage } = answers;
-  if (species === "betta") return {
-    name: "Betta Bites F3", badge: "PERFECT MATCH", accent: "#44e5c2",
-    tagline: "46% insect protein · slow-sinking · zero soy fillers",
-    why: "Betta Bites F3 matches the betta's ancestral diet — high insect protein, slow-sinking so they feed at their natural depth, with natural carotenoids for vivid colour.",
-    image: "/Bottles/Betta/Betta F3_Front.png", href: "/products/betta-bites-f3",
-    stats: [{ val: "46%", label: "Protein" }, { val: "88%", label: "Digestibility" }, { val: "0%", label: "Soy" }],
-  };
-  if (species === "cichlid") return {
-    name: "Cichlid Bites C4", badge: "BEST FIT", accent: "#38bdf8",
-    tagline: "44% insect protein · floating pellets · high-energy formula",
-    why: "C4's floating pellets trigger the cichlid's natural surface-strike feeding instinct. Dense amino acids support jaw muscle growth and aggressive body mass.",
-    image: "/Bottles/Cichild/Cichild C4_Front.png", href: "/products",
-    stats: [{ val: "44%", label: "Protein" }, { val: "85%", label: "Digestibility" }, { val: "0%", label: "Soy" }],
-  };
-  if (species === "hatchery" || stage === "fry") return {
-    name: "Dried BSF Larvae 25g", badge: "RECOMMENDED", accent: "#a78bfa",
-    tagline: "50% insect protein · whole larvae · hatchery grade",
-    why: "Whole Black Soldier Fly Larvae are the densest natural protein source available — critical in the fry phase where every gram drives cellular development.",
-    image: "/Bottles/DBSFL/DBSFL 25G.png", href: "/products",
-    stats: [{ val: "50%", label: "Protein" }, { val: "92%", label: "Digestibility" }, { val: "0%", label: "Fillers" }],
-  };
+  const hay = (p) =>
+    `${p.name} ${p.category ?? ""} ${(p.tags ?? []).join(" ")}`.toLowerCase();
+
+  // Fry and hatchery need the densest feed, whatever it is called.
+  const wants =
+    species === "hatchery" || stage === "fry"
+      ? ["larva", "bsf", "hatch", "fry", "starter"]
+      : [species];
+
+  const match =
+    products.find((p) => wants.some((w) => w && hay(p).includes(w))) ?? products[0];
+
   return {
-    name: "Guppy Bites G2", badge: "GREAT MATCH", accent: "#44e5c2",
-    tagline: "40% insect protein · micro pellets · balanced omnivore formula",
-    why: "G2's micro-pellet format and balanced omega profile make it ideal for livebearers and small ornamentals that need daily colour and sustained vitality.",
-    image: "/Bottles/Guppy/Guppy G2_Front.png", href: "/products",
-    stats: [{ val: "40%", label: "Protein" }, { val: "86%", label: "Digestibility" }, { val: "0%", label: "Soy" }],
+    name: match.name,
+    badge: match === products[0] ? "GREAT MATCH" : "PERFECT MATCH",
+    accent: "#44e5c2",
+    tagline: match.tagline ?? "",
+    why: match.tagline ?? "",
+    image: match.image,
+    href: match.slug ? `/products/${match.slug}` : "/products",
+    stats: [
+      match.protein ? { val: match.protein, label: "Protein" } : null,
+      { val: "0%", label: "Soy" },
+    ].filter(Boolean),
   };
 }
 
-function FindMyFeedQuiz({ onClose }) {
+function FindMyFeedQuiz({ onClose, products }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
@@ -609,7 +467,7 @@ function FindMyFeedQuiz({ onClose }) {
     if (step < QUIZ.length - 1) {
       transition(() => setStep(step + 1));
     } else {
-      transition(() => setResult(getResult(next)));
+      transition(() => setResult(getResult(next, products)));
     }
   };
 
@@ -972,7 +830,7 @@ function adaptProduct(api) {
     badge: api.badge ?? null,
     badgeColor: "bg-primary text-[#00382d]",
     protein: api.proteinPct ? `${api.proteinPct}%` : null,
-    image: cardImages[0] ?? api.images?.[0]?.url ?? FALLBACK_PRODUCTS[0].image,
+    image: cardImages[0] ?? api.images?.[0]?.url ?? PLACEHOLDER_IMAGE,
     // Cap at 4: a card is a glance, not a gallery. The PDP has the full set.
     gallery: (cardImages.length ? cardImages : (api.images ?? []).map((i) => i.url)).slice(0, 4),
     /** The card cycles to this after ~3s of hover. Null hides that behaviour. */
@@ -1001,13 +859,13 @@ function adaptSpotlight(api) {
     slug: api.slug,
     tagline: api.tagline,
     sub: api.subText,
-    // String, with the symbol, to match FALLBACK_SPOTLIGHT.
+    // String, with the symbol, matching how the card renders price.
     price: api.pricePaise ? formatInr(api.pricePaise) : "",
     mrp: api.mrpPaise && api.mrpPaise > api.pricePaise ? formatInr(api.mrpPaise) : null,
     packs: api.packs ?? [],
     badge: api.badge ?? null,
     protein: api.proteinPct ? `${api.proteinPct}%` : null,
-    image: api.imageUrl ?? FALLBACK_SPOTLIGHT[0].image,
+    image: api.imageUrl ?? PLACEHOLDER_IMAGE,
     category: api.category ?? api.name,
     accent: "rgba(68,229,194,0.22)",
     accentStrong: "rgba(68,229,194,0.45)",
@@ -1021,21 +879,17 @@ export default function ProductsPage() {
   const [fading, setFading] = useState(false);
 
   /**
-   * Live catalogue.
+   * Live catalogue — the API is the only source of products.
    *
-   * Falls back to the bundled arrays if the API is unreachable, so a backend
-   * outage degrades to a stale catalogue rather than an empty page.
+   * There is deliberately NO bundled fallback catalogue. One used to exist, and
+   * whenever the API was unreachable it rendered six invented products with
+   * prices and slugs that no longer matched anything real: customers saw items
+   * that could not be bought, linking to pages that 404. Showing the catalogue
+   * is unavailable is honest; showing a fictional one is not.
    */
   const [apiProducts, setApiProducts] = useState(null);
   const [apiSpotlights, setApiSpotlights] = useState(null);
-  /**
-   * "loading" | "ready" | "failed".
-   *
-   * The fallback arrays must only appear when the fetch has actually FAILED.
-   * Previously `apiProducts ?? FALLBACK_PRODUCTS` rendered the bundled catalogue
-   * during the very first paint, so a hard refresh flashed six hardcoded
-   * products before the real ones replaced them.
-   */
+  /** "loading" | "ready" | "failed" — drives the skeleton and the error panel. */
   const [loadState, setLoadState] = useState("loading");
 
   useEffect(() => {
@@ -1048,7 +902,6 @@ export default function ProductsPage() {
         setLoadState("ready");
       })
       .catch(() => {
-        // Genuine outage — now the stale catalogue is better than an empty page.
         if (!cancelled) setLoadState("failed");
       });
     return () => {
@@ -1057,8 +910,9 @@ export default function ProductsPage() {
   }, []);
 
   const loading = loadState === "loading";
-  // Empty while loading, so nothing wrong is ever shown; fallback only on failure.
-  const PRODUCTS = apiProducts ?? (loadState === "failed" ? FALLBACK_PRODUCTS : []);
+  const failed = loadState === "failed";
+  // Real products or none. Never invented ones.
+  const PRODUCTS = apiProducts ?? [];
   /*
    * NO FALLBACK FOR THE SPOTLIGHT.
    *
@@ -1305,6 +1159,42 @@ export default function ProductsPage() {
               : filtered.map((p, i) => <ProductCard key={`${p.name}-${i}`} p={p} />)}
           </div>
 
+          {/*
+            Honest failure states.
+
+            Both sit outside the grid so they are never mistaken for a product.
+            A retry is offered rather than a dead end — the usual cause is a
+            transient network blip or a backend still waking up.
+          */}
+          {failed && (
+            <div className="mt-8 flex flex-col items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.02] px-6 py-14 text-center">
+              <h3 className="font-[Playfair_Display] text-[20px] font-bold text-white">
+                We couldn&apos;t load the catalogue
+              </h3>
+              <p className="max-w-md text-[13px] leading-relaxed text-white/45 font-[Montserrat]">
+                Our product service is not responding right now. Nothing is wrong
+                with your order or cart — please try again in a moment.
+              </p>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="mt-1 rounded-xl bg-primary px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-[#00382d] font-[Montserrat] transition-all hover:bg-primary/90 active:scale-[0.98]"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
+          {!loading && !failed && filtered.length === 0 && (
+            <div className="mt-8 rounded-2xl border border-white/10 bg-white/[0.02] px-6 py-14 text-center">
+              <p className="text-[13px] text-white/45 font-[Montserrat]">
+                {PRODUCTS.length === 0
+                  ? "No products are available just yet. Please check back soon."
+                  : "No products match this filter."}
+              </p>
+            </div>
+          )}
+
         </section>
 
         {/* ── Find My Feed Section ─────────────────────────────────────── */}
@@ -1450,7 +1340,7 @@ export default function ProductsPage() {
 
       </main>
       <Footer />
-      {quizOpen && <FindMyFeedQuiz onClose={() => setQuizOpen(false)} />}
+      {quizOpen && <FindMyFeedQuiz onClose={() => setQuizOpen(false)} products={PRODUCTS} />}
     </>
   );
 }

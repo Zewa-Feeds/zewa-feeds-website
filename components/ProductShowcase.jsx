@@ -1,50 +1,42 @@
 import Image from "next/image";
 import Reveal from "./Reveal";
+import { catalog } from "@/lib/api";
 
-const HERO = {
-  name: "Betta Bites F3",
-  slug: "betta-bites-f3",
-  badge: "BESTSELLER",
-  tagline: "Engineered for the betta's ancestral diet.",
-  description:
-    "Our flagship formula packs 46% insect protein from Black Soldier Fly Larvae — the same prey bettas evolved to hunt. Zero soy fillers, zero synthetic binders. Just the amino acid profile your fish was built for.",
-  stats: [
-    { val: "46%", label: "Protein" },
-    { val: "88%", label: "Digestibility" },
-    { val: "0%", label: "Soy Filler" },
-  ],
-  image: "/Bottles/Betta/Betta F3_Front.png",
-  accentColor: "rgba(68,229,194,0.14)",
-};
+/**
+ * Homepage range section — driven entirely by the catalogue API.
+ *
+ * This used to be a hardcoded HERO plus three SECONDARY entries. They named
+ * products by slugs that no longer exist ("betta-bites-f3"), so the homepage
+ * advertised items that could not be bought and linked to 404s. A server
+ * component can await the real catalogue directly, so there is no reason to
+ * carry a second, silently-diverging copy of the product list.
+ */
 
-const SECONDARY = [
-  {
-    name: "Cichlid Bites C4",
-    slug: null,
-    badge: "NEW",
-    badgeColor: "#0284c7",
-    tagline: "High-energy formula for aggressive cichlid species.",
-    image: "/Bottles/Cichild/Cichild C4_Front.png",
-    accentColor: "rgba(56,189,248,0.18)",
-  },
-  {
-    name: "Dried BSF Larvae",
-    slug: null,
-    badge: "PRO",
-    badgeColor: "#7c3aed",
-    tagline: "Whole dried larvae — maximum nutrition per gram.",
-    image: "/Bottles/DBSFL/DBSFL 25G.png",
-    accentColor: "rgba(139,92,246,0.18)",
-  },
-  {
-    name: "Guppy Bites G2",
-    slug: null,
-    badge: null,
-    tagline: "Precision micro-nutrition for guppies & livebearers.",
-    image: "/Bottles/Guppy/Guppy G2_Front.png",
-    accentColor: "rgba(68,229,194,0.10)",
-  },
+const ACCENTS = [
+  "rgba(68,229,194,0.14)",
+  "rgba(56,189,248,0.18)",
+  "rgba(139,92,246,0.18)",
+  "rgba(68,229,194,0.10)",
 ];
+
+/** API product -> the shape this section renders. */
+function adapt(api, i = 0) {
+  const first = (api.packs ?? [])[0];
+  return {
+    name: api.name,
+    slug: api.slug,
+    badge: api.badge ?? null,
+    tagline: api.shortDesc ?? "",
+    description: api.shortDesc ?? "",
+    stats: [
+      api.proteinPct ? { val: `${api.proteinPct}%`, label: "Protein" } : null,
+      { val: "0%", label: "Soy Filler" },
+      first ? { val: first.pack, label: "Pack" } : null,
+    ].filter(Boolean),
+    image: (api.images ?? [])[0]?.url ?? null,
+    accentColor: ACCENTS[i % ACCENTS.length],
+  };
+}
 
 function ArrowIcon() {
   return (
@@ -54,7 +46,25 @@ function ArrowIcon() {
   );
 }
 
-export default function ProductShowcase() {
+export default async function ProductShowcase() {
+  /*
+   * Server-side fetch: the markup ships already populated, so there is no
+   * loading flash and no client-side JavaScript for this section.
+   *
+   * On failure the whole section is omitted rather than shown empty or with
+   * invented products — the homepage simply skips the range block.
+   */
+  let products = [];
+  try {
+    products = await catalog.products();
+  } catch {
+    return null;
+  }
+  if (products.length === 0) return null;
+
+  const HERO = adapt(products[0], 0);
+  const SECONDARY = products.slice(1, 4).map((p, i) => adapt(p, i + 1));
+
   return (
     <Reveal id="products" className="bg-[#06080f]">
       <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-24 sm:pt-32 pb-24 sm:pb-32">
@@ -88,18 +98,22 @@ export default function ProductShowcase() {
             style={{ minHeight: "340px" }}>
             <div className="absolute inset-0 pointer-events-none"
               style={{ background: "radial-gradient(circle at 50% 55%, rgba(68,229,194,0.12), transparent 60%)" }} />
-            <Image
-              src={HERO.image}
-              alt={HERO.name}
-              width={380}
-              height={380}
-              priority
-              className="relative z-10 object-contain max-h-[320px] w-auto transition-transform duration-700 group-hover:scale-105 group-hover:-translate-y-2"
-              style={{ filter: "drop-shadow(0 24px 48px rgba(0,0,0,0.55))" }}
-            />
-            <span className="absolute top-6 left-6 text-[9px] font-bold px-3 py-1.5 rounded-full tracking-[0.2em] font-[Montserrat] bg-primary text-[#00382d]">
-              {HERO.badge}
-            </span>
+            {HERO.image && (
+              <Image
+                src={HERO.image}
+                alt={HERO.name}
+                width={380}
+                height={380}
+                priority
+                className="relative z-10 object-contain max-h-[320px] w-auto transition-transform duration-700 group-hover:scale-105 group-hover:-translate-y-2"
+                style={{ filter: "drop-shadow(0 24px 48px rgba(0,0,0,0.55))" }}
+              />
+            )}
+            {HERO.badge && (
+              <span className="absolute top-6 left-6 text-[9px] font-bold px-3 py-1.5 rounded-full tracking-[0.2em] font-[Montserrat] bg-primary text-[#00382d]">
+                {HERO.badge}
+              </span>
+            )}
           </div>
 
           {/* Text — right 45% */}
@@ -140,8 +154,8 @@ export default function ProductShowcase() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-12">
           {SECONDARY.map((p) => (
             <a
-              key={p.name}
-              href="/products"
+              key={p.slug ?? p.name}
+              href={p.slug ? `/products/${p.slug}` : "/products"}
               className="group relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
               style={{ background: "linear-gradient(160deg, #0d1726 0%, #0a1219 100%)" }}
             >
@@ -155,17 +169,19 @@ export default function ProductShowcase() {
                   style={{ background: `radial-gradient(circle at 50% 60%, ${p.accentColor}, transparent 65%)` }} />
                 {/* Sized container so fill-mode Image has no wrapper bg */}
                 <div className="relative z-10 w-[170px] h-[170px] transition-transform duration-500 group-hover:scale-105 group-hover:-translate-y-1">
-                  <Image
-                    src={p.image}
-                    alt={p.name}
-                    fill
-                    className="object-contain"
-                    style={{ filter: "drop-shadow(0 12px 28px rgba(0,0,0,0.5))" }}
-                  />
+                  {p.image && (
+                    <Image
+                      src={p.image}
+                      alt={p.name}
+                      fill
+                      className="object-contain"
+                      style={{ filter: "drop-shadow(0 12px 28px rgba(0,0,0,0.5))" }}
+                    />
+                  )}
                 </div>
                 {p.badge && (
                   <span className="absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] text-white z-10"
-                    style={{ background: p.badgeColor || "#00a882" }}>
+                    style={{ background: "#00a882" }}>
                     {p.badge}
                   </span>
                 )}
