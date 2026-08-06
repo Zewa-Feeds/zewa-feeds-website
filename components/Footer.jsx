@@ -119,11 +119,11 @@ export default function Footer() {
                 </svg>
                 info@zewafeeds.com
               </a>
-              <a href="tel:+919496642259" className="group flex items-center gap-2.5 text-[13px] text-white/45 hover:text-primary transition-colors duration-200">
+              <a href="tel:+919500439828" className="group flex items-center gap-2.5 text-[13px] text-white/45 hover:text-primary transition-colors duration-200">
                 <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4 shrink-0 text-white/25 group-hover:text-primary transition-colors">
                   <path d="M3 4.5A1.5 1.5 0 014.5 3h1.879a.5.5 0 01.471.333l1.2 3.2a.5.5 0 01-.13.542L6.48 8.416a9.045 9.045 0 004.104 4.104l1.341-1.44a.5.5 0 01.542-.13l3.2 1.2a.5.5 0 01.333.471V14.5A1.5 1.5 0 0114.5 16 11.5 11.5 0 013 4.5z" stroke="currentColor" strokeWidth="1.2"/>
                 </svg>
-                +91 94966 42259
+                +91 95004 39828
               </a>
               <a href="https://zewafeeds.com" className="text-[13px] text-primary/50 hover:text-primary transition-colors duration-200">
                 zewafeeds.com
