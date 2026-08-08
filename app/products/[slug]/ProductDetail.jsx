@@ -256,14 +256,26 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 visible. The tint stays for transparent PNG cutouts, which do sit
                 on it.
               */}
+              {/*
+                The frame is ALWAYS square — it must not resize between slides.
+
+                An aspect-video frame fitted the 1920x1080 video exactly, but the
+                frame then shrank from 588px to 331px whenever you stepped onto
+                it, shifting everything below by 257px. Stable geometry is worth
+                more than filling one slide of five.
+
+                The video is centred instead, with the light panel visible above
+                and below it — which is why the panel stays for video as well as
+                for transparent cutouts, and is dropped only for the full-bleed
+                JPG slides that cover the box edge to edge.
+              */}
               <div
-                className={`group relative overflow-hidden rounded-3xl flex items-center justify-center ${
-                  active?.type === "VIDEO" ? "aspect-video" : "aspect-square"
-                }`}
+                className="group relative aspect-square overflow-hidden rounded-3xl flex items-center justify-center"
                 style={{
-                  background: isCutout(active?.url)
-                    ? (presentation.accentBg ?? "#f4f7f6")
-                    : "transparent",
+                  background:
+                    isCutout(active?.url) || active?.type === "VIDEO"
+                      ? (presentation.accentBg ?? "#f4f7f6")
+                      : "transparent",
                 }}
               >
                 {active?.type === "VIDEO" ? (
@@ -286,10 +298,13 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                     controls
                     playsInline
                     preload="metadata"
-                    // No padding: the frame is now aspect-video, so the file
-                    // fills it exactly. Padding would reintroduce the letterbox
-                    // bars this change removes.
-                    className="h-full w-full object-contain"
+                    /*
+                     * object-contain in the square frame centres the 16:9 file
+                     * and leaves the panel showing above and below. Slight
+                     * rounding so it reads as a video sitting ON the panel
+                     * rather than a band cutting across it.
+                     */
+                    className="h-full w-full rounded-xl object-contain"
                   />
                 ) : (
                   <Image
