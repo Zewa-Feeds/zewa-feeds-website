@@ -1054,49 +1054,15 @@ export default function ProductsPage() {
       <main className="bg-[#06080f] text-[#dde2f6] min-h-screen">
 
         {/* ── Hero banner ─────────────────────────────────────────────── */}
-        {/*
-          `pt-20` clears the fixed header for the TEXT slide. The banner slide
-          escapes it with -mt-20 and sits UNDER the header instead, which is
-          what makes it read as full-bleed rather than a framed picture.
-        */}
-        <section className="relative overflow-hidden pt-20">
+        <section className="relative overflow-hidden pt-16 sm:pt-20">
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(68,229,194,0.07) 0%, transparent 70%), linear-gradient(180deg, #06080f 0%, #0b1220 100%)" }} />
 
-          {/*
-            Two slides in one fixed-height box.
-
-            Both are absolutely positioned and cross-faded, so the section never
-            changes height — swapping between a 2:1 image and a text block by
-            re-flowing would shove the whole product grid up and down every few
-            seconds.
-
-            The height is driven by the text slide, which is the taller of the
-            two; the banner is object-cover inside it, so it fills without
-            letterboxing at any viewport width.
-          */}
-          <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-16 pb-14 sm:pb-20">
-            {/*
-              Both slides share this height, so the section never resizes.
-
-              Back to roughly what the text needs. A 560px box let the 2:1
-              banner show whole, but handed half the viewport to it — far too
-              much for one decorative slide.
-            */}
+          <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-10 sm:pt-14 pb-8 sm:pb-12">
             <div className="relative flex min-h-[260px] items-center sm:min-h-[280px]">
 
               {/* Slide 0 — the range statement */}
-              {/*
-                Only the ACTIVE slide is mounted.
-
-                Cross-fading with opacity-0 looked right on paper but rendered
-                both slides at once: an opacity-0 parent still composites its
-                children, and the banner escapes this container upward via
-                -mt-36, so the faded heading and stats showed straight through
-                the artwork. Unmounting is unambiguous — there is nothing behind
-                the banner to bleed through.
-              */}
               {heroSlide === 0 && (
-              <div className="w-full">
+              <div className="w-full animate-fadeIn">
                 <div className="flex flex-col justify-between gap-10 lg:flex-row lg:items-center">
                   <div className="max-w-xl">
                     <div className="mb-5 flex items-center gap-3">
@@ -1131,45 +1097,8 @@ export default function ProductsPage() {
 
               {/* Slide 1 — the brand banner */}
               {heroSlide === 1 && (
-              <div className="w-full">
-                {/*
-                  object-cover with the focal point low.
-
-                  The artwork is 2:1 in a ~3.6:1 box, so something has to give.
-                  Stretching it (object-fill) would render everything 1.9x too
-                  wide — round bottle caps become ovals, the logo warps — which
-                  is not acceptable on brand artwork.
-
-                  A PRE-CROPPED asset in an aspect-ratio box.
-
-                  Banner 3.png is 2:1 and mostly sky and headline — the products
-                  sit in a band at y=34-95%. Fitting that band into a short
-                  full-bleed box was impossible: a fixed pixel height shows a
-                  different fraction of the artwork at every viewport width, so
-                  no object-position held. Showing the whole band needed a 2.6:1
-                  box, which came out at ~68% of screen height.
-
-                  banner-products.png is that band, cropped once at build time:
-                  2880 x 879, natively 3.28:1. The box matches, so the image
-                  fills it edge to edge with nothing cropped at any width, and
-                  the banner stays short. The original file is untouched.
-                */}
-                {/*
-                  The banner fills the slot exactly — no gaps above or below.
-
-                  Height is deliberately container + cancelled padding:
-                  280 (container) + 80 (section pt-20) + 64 (wrapper pt-16) = 424.
-
-                  The wrapper's BOTTOM padding is deliberately NOT cancelled.
-                  Extending through it made the banner flush with the section
-                  edge, which put the sticky filter bar (top-20) directly against
-                  the artwork and sliced the bases off the product bags. That
-                  padding is the clearance the products need.
-
-                  w-screen with the centring transform escapes max-w-[1440px], so
-                  it also spans the full viewport width.
-                */}
-                <div className="relative left-1/2 -mt-36 aspect-[3.28/1] w-screen -translate-x-1/2 overflow-hidden">
+              <div className="w-full animate-fadeIn">
+                <div className="relative left-1/2 -translate-x-1/2 w-screen aspect-[3.28/1] max-h-[340px] overflow-hidden">
                   <Image
                     src="/banner-products.png"
                     alt="Zewa Feeds — to nourish every species of fish"
@@ -1178,47 +1107,40 @@ export default function ProductsPage() {
                     sizes="(max-width: 1440px) 100vw, 1440px"
                     priority
                   />
+                  {/* Subtle bottom fade mask to blend smoothly into the section background */}
+                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0b1220] via-[#0b1220]/60 to-transparent pointer-events-none" />
                 </div>
               </div>
               )}
 
-              {/* Slide dots — bottom right, as requested */}
-              <div className="absolute bottom-0 right-0 z-10 flex items-center gap-2">
-                {[0, 1].map((i) => (
+              {/* Slide controls */}
+              <div className="absolute bottom-0 right-0 z-10 flex items-center gap-3">
+                {[
+                  { label: "Our Range", idx: 0 },
+                  { label: "Product Lineup", idx: 1 },
+                ].map(({ label, idx }) => (
                   <button
-                    key={i}
+                    key={idx}
                     type="button"
-                    onClick={() => setHeroSlide(i)}
-                    aria-label={i === 0 ? "Show range summary" : "Show brand banner"}
-                    aria-current={heroSlide === i}
-                    className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
-                      heroSlide === i ? "w-6 bg-primary" : "w-2 bg-white/25 hover:bg-white/50"
+                    onClick={() => setHeroSlide(idx)}
+                    aria-label={`Show ${label}`}
+                    aria-current={heroSlide === idx}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wider font-[Montserrat] uppercase transition-all duration-300 ${
+                      heroSlide === idx
+                        ? "bg-primary/15 text-primary border border-primary/30"
+                        : "text-white/30 hover:text-white/60 bg-white/5 border border-transparent"
                     }`}
-                  />
+                  >
+                    <span className={`h-1.5 rounded-full transition-all duration-300 ${heroSlide === idx ? "w-3 bg-primary" : "w-1.5 bg-white/30"}`} />
+                    {label}
+                  </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Scroll cue */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
-            style={{ animation: "scrollBounce 2s ease-in-out infinite" }}>
-            <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="text-white/30">
-              <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="text-primary/35">
-              <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.3) 50%, transparent)" }} />
-
-          <style>{`
-            @keyframes scrollBounce {
-              0%, 100% { transform: translateY(0) translateX(-50%); opacity: 1; }
-              50%       { transform: translateY(4px) translateX(-50%); opacity: 0.5; }
-            }
-          `}</style>
+          {/* Bottom subtle edge divider */}
+          <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.25) 50%, transparent)" }} />
         </section>
 
         {/* ── Filter bar ──────────────────────────────────────────────── */}
