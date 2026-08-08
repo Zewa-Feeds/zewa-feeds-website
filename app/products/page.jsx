@@ -1116,17 +1116,19 @@ export default function ProductsPage() {
                   below the site header and still holds the product line-up.
                 */}
                 {/*
-                  Negative margins cancel the wrapper's padding.
+                  The banner fills the slot exactly — no gaps above or below.
 
-                  The wrapper adds pt-16 / pb-20 / px-16 because the TEXT slide
-                  needs that breathing room. The banner does not — it read as an
-                  image floating in a large empty box. Pulling it back out by the
-                  same amounts lets it run to the section edges, while the text
-                  slide keeps its padding untouched.
+                  Height is deliberately container + cancelled padding:
+                  360 (container) + 80 (section pt-20) + 64 (wrapper pt-16)
+                  + 80 (wrapper pb-20) = 584, with -mt-36 and -mb-20 cancelling
+                  the paddings at both ends. Every one of those four values had
+                  to be accounted for; missing any single one left a strip of
+                  background, which is what kept reappearing.
 
-                  Rounding drops too: a full-bleed band has no corners to round.
+                  w-screen with the centring transform escapes max-w-[1440px], so
+                  it also spans the full viewport width.
                 */}
-                <div className="relative left-1/2 -mb-14 -mt-36 h-[380px] w-screen -translate-x-1/2 overflow-hidden sm:-mb-20 sm:h-[440px]">
+                <div className="relative left-1/2 -mb-14 -mt-36 h-[500px] w-screen -translate-x-1/2 overflow-hidden sm:-mb-20 sm:h-[584px]">
                   <Image
                     src="/Banner 3.png"
                     alt="Zewa Feeds — to nourish every species of fish"
