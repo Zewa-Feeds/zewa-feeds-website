@@ -1022,6 +1022,11 @@ export default function ProductsPage() {
       <main className="bg-[#06080f] text-[#dde2f6] min-h-screen">
 
         {/* ── Hero banner ─────────────────────────────────────────────── */}
+        {/*
+          `pt-20` clears the fixed header for the TEXT slide. The banner slide
+          escapes it with -mt-20 and sits UNDER the header instead, which is
+          what makes it read as full-bleed rather than a framed picture.
+        */}
         <section className="relative overflow-hidden pt-20">
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(68,229,194,0.07) 0%, transparent 70%), linear-gradient(180deg, #06080f 0%, #0b1220 100%)" }} />
 
@@ -1104,12 +1109,11 @@ export default function ProductsPage() {
                   wide — round bottle caps become ovals, the logo warps — which
                   is not acceptable on brand artwork.
 
-                  Cropping is the honest trade, and this banner takes it well.
-                  At 360px the visible slice is the middle 55% of the image —
-                  roughly y=23% to 77% — which holds both the headline (~15-25%)
-                  and the product line-up (~40-85%). Only empty background is
-                  lost. `object-bottom` was wrong here: it starts the crop at
-                  45% and cuts the headline off.
+                  Focal point at 35%, not centre. Full-bleed at ~1920px wide,
+                  the box shows only ~46% of the artwork height; centring that
+                  slice lands on y=27-73% and crops the banner's own headline
+                  (~15-25%) clean off. Biasing upward keeps the headline just
+                  below the site header and still holds the product line-up.
                 */}
                 {/*
                   Negative margins cancel the wrapper's padding.
@@ -1122,12 +1126,12 @@ export default function ProductsPage() {
 
                   Rounding drops too: a full-bleed band has no corners to round.
                 */}
-                <div className="relative -mx-6 -mb-14 -mt-16 h-[300px] w-auto overflow-hidden sm:-mx-10 sm:-mb-20 sm:h-[360px] lg:-mx-16">
+                <div className="relative left-1/2 -mb-14 -mt-36 h-[380px] w-screen -translate-x-1/2 overflow-hidden sm:-mb-20 sm:h-[440px]">
                   <Image
                     src="/Banner 3.png"
                     alt="Zewa Feeds — to nourish every species of fish"
                     fill
-                    className="object-cover object-center"
+                    className="object-cover object-[center_35%]"
                     sizes="(max-width: 1440px) 100vw, 1440px"
                     priority
                   />
