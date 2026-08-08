@@ -1057,38 +1057,38 @@ export default function ProductsPage() {
         <section className="relative overflow-hidden pt-14 sm:pt-16">
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(68,229,194,0.07) 0%, transparent 70%), linear-gradient(180deg, #06080f 0%, #0b1220 100%)" }} />
 
-          <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-5 sm:pt-6 pb-5 sm:pb-6">
-            {/* Shared fixed height box for BOTH slides so sizes are 100% identical and balanced */}
-            <div className="relative flex h-[260px] sm:h-[320px] lg:h-[360px] items-center">
+          <div className="relative mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-16 pt-4 sm:pt-6 pb-4 sm:pb-6">
+            {/* Responsive height container shared by BOTH slides */}
+            <div className="relative flex min-h-[220px] sm:min-h-[280px] md:min-h-[320px] lg:min-h-[360px] items-center">
 
               {/* Slide 0 — the range statement */}
               {heroSlide === 0 && (
-              <div className="w-full animate-fadeIn">
+              <div className="w-full animate-fadeIn py-2">
                 <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
                   <div className="max-w-xl">
-                    <div className="mb-4 flex items-center gap-3">
+                    <div className="mb-3 sm:mb-4 flex items-center gap-3">
                       <div className="h-px w-5 bg-primary" />
                       <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary font-[Montserrat]">Our Range</span>
                     </div>
-                    <h1 className="mb-4 font-[Playfair_Display] text-[36px] leading-[1.0] text-white sm:text-[52px]">
+                    <h1 className="mb-3 sm:mb-4 font-[Playfair_Display] text-[28px] sm:text-[40px] md:text-[52px] leading-[1.0] text-white">
                       Engineered<br />
                       <span className="italic text-primary">for the species.</span>
                     </h1>
-                    <p className="mb-4 text-[14px] sm:text-[15px] leading-relaxed text-white/45 font-[Montserrat]">
+                    <p className="mb-3 sm:mb-4 text-[12px] sm:text-[14px] md:text-[15px] leading-relaxed text-white/45 font-[Montserrat]">
                       Every formula is NABL lab-tested, insect-protein based, and calibrated for a specific species and life stage.
                     </p>
                   </div>
 
-                  <div className="flex shrink-0 gap-8 lg:gap-12">
+                  <div className="flex shrink-0 gap-6 sm:gap-8 lg:gap-12">
                     {[
                       { val: "46%", label: "Max Protein", sub: "in the range" },
                       { val: "88%", label: "Digestibility", sub: "lab verified" },
                       { val: "13+", label: "Formulas", sub: "species-specific" },
                     ].map((s) => (
                       <div key={s.label} className="flex flex-col gap-0.5">
-                        <span className="font-[Playfair_Display] text-[34px] sm:text-[42px] leading-none text-primary">{s.val}</span>
-                        <span className="text-[12px] font-semibold text-white/70 font-[Montserrat]">{s.label}</span>
-                        <span className="text-[10px] text-white/25 font-[Montserrat]">{s.sub}</span>
+                        <span className="font-[Playfair_Display] text-[26px] sm:text-[34px] md:text-[42px] leading-none text-primary">{s.val}</span>
+                        <span className="text-[10px] sm:text-[12px] font-semibold text-white/70 font-[Montserrat]">{s.label}</span>
+                        <span className="text-[9px] text-white/25 font-[Montserrat] hidden sm:block">{s.sub}</span>
                       </div>
                     ))}
                   </div>
@@ -1098,13 +1098,13 @@ export default function ProductsPage() {
 
               {/* Slide 1 — the brand banner */}
               {heroSlide === 1 && (
-              <div className="w-full h-full animate-fadeIn flex items-center justify-center">
-                <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#070d18]">
+              <div className="w-full h-full animate-fadeIn flex items-center justify-center py-1">
+                <div className="relative w-full aspect-[2/1] max-h-[220px] sm:max-h-[280px] md:max-h-[320px] lg:max-h-[360px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#060c18]">
                   <Image
-                    src="/banner-products.png"
-                    alt="Zewa Feeds — to nourish every species of fish"
+                    src="/Banner 3.png"
+                    alt="Zewa Feeds — To nourish every species of fish"
                     fill
-                    className="object-cover object-bottom"
+                    className="object-contain object-center"
                     sizes="(max-width: 1440px) 100vw, 1440px"
                     priority
                   />
