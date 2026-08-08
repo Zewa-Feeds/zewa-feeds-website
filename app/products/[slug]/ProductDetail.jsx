@@ -23,6 +23,16 @@ import { discountPct, formatInr } from "@/lib/api";
  * `dangerouslySetInnerHTML` is safe here specifically because the backend
  * sanitises rich text on write against an allowlist — see Backend/src/lib/sanitize.ts.
  */
+/**
+ * Is this asset a transparent cutout that needs padding and a backdrop?
+ *
+ * PNGs in this catalogue are bottle shots on transparency; JPGs are full-bleed
+ * design slides that carry their own layout and margins. Extension is a crude
+ * signal but an accurate one here, and it beats adding a CMS field nobody would
+ * remember to set.
+ */
+const isCutout = (url) => /\.png(\?|$)/i.test(url ?? "");
+
 export default function ProductDetail({ product, isDraft = false, isPreview = false }) {
   /*
    * TWO DIFFERENT QUESTIONS, previously conflated:
@@ -233,9 +243,28 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 A CMS-supplied accentBg still wins, so a product can override
                 this per-item.
               */}
+              {/*
+                The frame takes the shape of what it holds.
+
+                Images are 1:1, but the product video is 1920x1080. Forcing 16:9
+                into a square left ~44% of the frame empty above and below the
+                video — letterboxing that no amount of padding fixes, because it
+                is the aspect mismatch itself.
+
+                No background either when the media is full-bleed: a JPG slide or
+                a video fills the box edge to edge, so a panel behind it is never
+                visible. The tint stays for transparent PNG cutouts, which do sit
+                on it.
+              */}
               <div
-                className="group relative aspect-square rounded-3xl overflow-hidden flex items-center justify-center"
-                style={{ background: presentation.accentBg ?? "#f4f7f6" }}
+                className={`group relative overflow-hidden rounded-3xl flex items-center justify-center ${
+                  active?.type === "VIDEO" ? "aspect-video" : "aspect-square"
+                }`}
+                style={{
+                  background: isCutout(active?.url)
+                    ? (presentation.accentBg ?? "#f4f7f6")
+                    : "transparent",
+                }}
               >
                 {active?.type === "VIDEO" ? (
                   /*
@@ -257,7 +286,10 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                     controls
                     playsInline
                     preload="metadata"
-                    className="w-full h-full object-contain p-6"
+                    // No padding: the frame is now aspect-video, so the file
+                    // fills it exactly. Padding would reintroduce the letterbox
+                    // bars this change removes.
+                    className="h-full w-full object-contain"
                   />
                 ) : (
                   <Image
@@ -279,7 +311,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                      * are full-bleed layouts and should fill it completely.
                      */
                     className={`h-full w-full object-contain ${
-                      /\.png(\?|$)/i.test(active?.url ?? "") ? "p-10" : "p-0"
+                      isCutout(active?.url) ? "p-10" : "p-0"
                     }`}
                     priority
                   />
@@ -359,7 +391,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                         // Same rule as the main frame: pad cutouts, let
                         // full-bleed slides fill the tile.
                         className={`h-full w-full object-contain ${
-                          /\.png(\?|$)/i.test(item.url ?? "") ? "p-2" : "p-0"
+                          isCutout(item.url) ? "p-2" : "p-0"
                         }`}
                       />
                       {item.type === "VIDEO" && (
