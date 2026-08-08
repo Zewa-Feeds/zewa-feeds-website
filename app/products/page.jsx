@@ -1039,15 +1039,13 @@ export default function ProductsPage() {
           */}
           <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-16 pb-14 sm:pb-20">
             {/*
-              One shared height for both slides.
+              Both slides share this height, so the section never resizes.
 
-              Taller than the text needs (which just centres in the extra room)
-              so the 2:1 banner can be shown WHOLE. At 340px the banner was
-              cropping 48% of its height and cutting the product bags in half;
-              contain in a 340px box instead left 48% empty width. A ~2:1 box
-              solves both, at the cost of some whitespace around the text.
+              Back to roughly what the text needs. A 560px box let the 2:1
+              banner show whole, but handed half the viewport to it — far too
+              much for one decorative slide.
             */}
-            <div className="relative flex min-h-[340px] items-center sm:min-h-[560px]">
+            <div className="relative flex min-h-[300px] items-center sm:min-h-[360px]">
 
               {/* Slide 0 — the range statement */}
               <div
@@ -1099,20 +1097,26 @@ export default function ProductsPage() {
                 aria-hidden={heroSlide !== 1}
               >
                 {/*
-                  object-CONTAIN, not cover.
+                  object-cover with the focal point low.
 
-                  The slide box is ~1312x340 (3.86:1) because its height is set
-                  by the taller text slide, but the artwork is 2:1. Covering that
-                  box cropped 48% of the image height — the product bags were cut
-                  off mid-bag. Containing it shows the whole banner, centred,
-                  which is what a designed banner needs.
+                  The artwork is 2:1 in a ~3.6:1 box, so something has to give.
+                  Stretching it (object-fill) would render everything 1.9x too
+                  wide — round bottle caps become ovals, the logo warps — which
+                  is not acceptable on brand artwork.
+
+                  Cropping is the honest trade, and this banner takes it well.
+                  At 360px the visible slice is the middle 55% of the image —
+                  roughly y=23% to 77% — which holds both the headline (~15-25%)
+                  and the product line-up (~40-85%). Only empty background is
+                  lost. `object-bottom` was wrong here: it starts the crop at
+                  45% and cuts the headline off.
                 */}
-                <div className="relative h-[340px] w-full overflow-hidden rounded-2xl sm:h-[560px]">
+                <div className="relative h-[300px] w-full overflow-hidden rounded-2xl sm:h-[360px]">
                   <Image
                     src="/Banner 3.png"
                     alt="Zewa Feeds — to nourish every species of fish"
                     fill
-                    className="object-contain"
+                    className="object-cover object-center"
                     sizes="(max-width: 1440px) 100vw, 1440px"
                     priority
                   />
