@@ -1054,39 +1054,39 @@ export default function ProductsPage() {
       <main className="bg-[#06080f] text-[#dde2f6] min-h-screen">
 
         {/* ── Hero banner ─────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden pt-16 sm:pt-20">
+        <section className="relative overflow-hidden pt-14 sm:pt-16">
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(68,229,194,0.07) 0%, transparent 70%), linear-gradient(180deg, #06080f 0%, #0b1220 100%)" }} />
 
-          <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-6 sm:pt-8 pb-6 sm:pb-8">
-            {/* Shared fixed height box for BOTH slides so sizes are 100% identical and full */}
-            <div className="relative flex h-[300px] sm:h-[380px] lg:h-[430px] items-center">
+          <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-5 sm:pt-6 pb-5 sm:pb-6">
+            {/* Shared fixed height box for BOTH slides so sizes are 100% identical and balanced */}
+            <div className="relative flex h-[260px] sm:h-[320px] lg:h-[360px] items-center">
 
               {/* Slide 0 — the range statement */}
               {heroSlide === 0 && (
               <div className="w-full animate-fadeIn">
-                <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-center">
+                <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
                   <div className="max-w-xl">
-                    <div className="mb-5 flex items-center gap-3">
+                    <div className="mb-4 flex items-center gap-3">
                       <div className="h-px w-5 bg-primary" />
                       <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary font-[Montserrat]">Our Range</span>
                     </div>
-                    <h1 className="mb-5 font-[Playfair_Display] text-[42px] leading-[1.0] text-white sm:text-[60px]">
+                    <h1 className="mb-4 font-[Playfair_Display] text-[36px] leading-[1.0] text-white sm:text-[52px]">
                       Engineered<br />
                       <span className="italic text-primary">for the species.</span>
                     </h1>
-                    <p className="mb-5 text-[15px] sm:text-[16px] leading-relaxed text-white/45 font-[Montserrat]">
+                    <p className="mb-4 text-[14px] sm:text-[15px] leading-relaxed text-white/45 font-[Montserrat]">
                       Every formula is NABL lab-tested, insect-protein based, and calibrated for a specific species and life stage.
                     </p>
                   </div>
 
-                  <div className="flex shrink-0 gap-8 lg:gap-14">
+                  <div className="flex shrink-0 gap-8 lg:gap-12">
                     {[
                       { val: "46%", label: "Max Protein", sub: "in the range" },
                       { val: "88%", label: "Digestibility", sub: "lab verified" },
                       { val: "13+", label: "Formulas", sub: "species-specific" },
                     ].map((s) => (
-                      <div key={s.label} className="flex flex-col gap-1">
-                        <span className="font-[Playfair_Display] text-[38px] sm:text-[48px] leading-none text-primary">{s.val}</span>
+                      <div key={s.label} className="flex flex-col gap-0.5">
+                        <span className="font-[Playfair_Display] text-[34px] sm:text-[42px] leading-none text-primary">{s.val}</span>
                         <span className="text-[12px] font-semibold text-white/70 font-[Montserrat]">{s.label}</span>
                         <span className="text-[10px] text-white/25 font-[Montserrat]">{s.sub}</span>
                       </div>
