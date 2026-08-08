@@ -129,6 +129,15 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
   const [activeIndex, setActiveIndex] = useState(0);
   const active = media[activeIndex] ?? media[0];
 
+  /**
+   * Move through the gallery, wrapping at both ends.
+   *
+   * The `+ length` before the modulo keeps it correct going backwards from 0 —
+   * `-1 % n` is -1 in JavaScript, not n-1.
+   */
+  const step = (dir) =>
+    setActiveIndex((i) => (i + dir + media.length) % media.length);
+
   /*
    * COMING_SOON products are served by the catalogue on purpose (so they can be
    * teased before launch) but must not be purchasable. The API now sends `status`
@@ -211,9 +220,22 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
             {/* ── Gallery ─────────────────────────────────────────────── */}
             <div className="flex flex-col gap-4">
+              {/*
+                Light frame, not the page's dark surface.
+
+                This defaulted to rgba(68,229,194,0.06) — a barely-tinted teal
+                that reads as near-black over the dark page. Product artwork is
+                designed for print and packaging, so several assets carry dark
+                text on a transparent background; on that frame the text was
+                effectively invisible. A near-white panel is what the artwork
+                expects, and it also makes the bottle photography pop.
+
+                A CMS-supplied accentBg still wins, so a product can override
+                this per-item.
+              */}
               <div
-                className="relative aspect-square rounded-3xl overflow-hidden flex items-center justify-center"
-                style={{ background: presentation.accentBg ?? "rgba(68,229,194,0.06)" }}
+                className="group relative aspect-square rounded-3xl overflow-hidden flex items-center justify-center"
+                style={{ background: presentation.accentBg ?? "#f4f7f6" }}
               >
                 {active?.type === "VIDEO" ? (
                   /*
@@ -252,6 +274,46 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                     {product.badge}
                   </span>
                 )}
+
+                {/*
+                  Prev / next arrows.
+
+                  Previously the only way through 19 images was the thumbnail
+                  strip, which needs horizontal scrolling to even reach the
+                  later ones. Dark chevrons because the frame is now light.
+
+                  type="button" matters: this sits inside the page, and a bare
+                  <button> in a form context would submit it.
+                */}
+                {media.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => step(-1)}
+                      aria-label="Previous image"
+                      className="absolute left-3 top-1/2 z-10 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/80 text-[#0b1220] shadow-sm backdrop-blur transition-all hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                        <path d="M7.5 2L3.5 6L7.5 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => step(1)}
+                      aria-label="Next image"
+                      className="absolute right-3 top-1/2 z-10 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/80 text-[#0b1220] shadow-sm backdrop-blur transition-all hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                        <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+
+                    {/* Position readout — 19 thumbnails give no sense of place. */}
+                    <span className="absolute bottom-4 right-4 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold tabular-nums text-white/90 font-[Montserrat]">
+                      {activeIndex + 1} / {media.length}
+                    </span>
+                  </>
+                )}
               </div>
 
               {media.length > 1 && (
@@ -260,10 +322,15 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                     <button
                       key={item.url + i}
                       onClick={() => setActiveIndex(i)}
+                      type="button"
+                      // Same light fill as the main frame, or dark-inked
+                      // artwork is unreadable at 72px too.
                       className={`relative shrink-0 w-[72px] h-[72px] rounded-xl overflow-hidden border transition-all duration-200 ${
-                        i === activeIndex ? "border-primary/60" : "border-white/8 hover:border-white/20"
+                        i === activeIndex
+                          ? "border-primary ring-2 ring-primary/40"
+                          : "border-white/10 hover:border-white/30"
                       }`}
-                      style={{ background: presentation.accentBg ?? "rgba(68,229,194,0.06)" }}
+                      style={{ background: presentation.accentBg ?? "#f4f7f6" }}
                       aria-label={
                         item.type === "VIDEO" ? "Play product video" : `View image ${i + 1}`
                       }
