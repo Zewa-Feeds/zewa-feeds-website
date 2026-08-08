@@ -1108,16 +1108,19 @@ export default function ProductsPage() {
                   wide — round bottle caps become ovals, the logo warps — which
                   is not acceptable on brand artwork.
 
-                  Focal point at 68%: the crop deliberately EXCLUDES the
-                  banner's own "DISCOVER A DIVERSE RANGE..." headline and shows
-                  the product line-up instead. That headline competed with the
-                  site's own typography and repeated what the page already says,
-                  while the products are the reason to look at the banner.
+                  object-bottom, not a percentage.
 
-                  The 424px box shows 44% of the artwork, and the products sit
-                  at y=40-89% (measured off the file, not estimated). 68% puts
-                  the slice at y=46-90%, so the bags are complete to their bases
-                  and the headline is above the crop.
+                  The products end at y=88.8% (measured off the file). A fixed
+                  percentage cannot hold that: this is full-bleed, so the taller
+                  the viewport is wide, the smaller a fraction of the artwork the
+                  424px box shows — at 68% the slice ended at y=90% on a 1920px
+                  screen but y=82% on a 3024px one, slicing the bags off on wide
+                  displays only.
+
+                  Anchoring to the bottom pins the crop to the base of the
+                  artwork, so the bags are complete at every width. It also drops
+                  the banner's own headline on anything above ~1280px; below
+                  that the whole 2:1 image fits the box anyway.
                 */}
                 {/*
                   The banner fills the slot exactly — no gaps above or below.
@@ -1139,7 +1142,7 @@ export default function ProductsPage() {
                     src="/Banner 3.png"
                     alt="Zewa Feeds — to nourish every species of fish"
                     fill
-                    className="object-cover object-[center_68%]"
+                    className="object-cover object-bottom"
                     sizes="(max-width: 1440px) 100vw, 1440px"
                     priority
                   />
