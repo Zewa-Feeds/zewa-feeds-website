@@ -1098,15 +1098,16 @@ export default function ProductsPage() {
               {/* Slide 1 — the brand banner */}
               {heroSlide === 1 && (
               <div className="w-full animate-fadeIn flex items-center justify-center">
-                <div className="relative w-full h-[180px] sm:h-[210px] overflow-hidden rounded-2xl">
+                <div className="relative w-full aspect-[2.4/1] sm:aspect-[2.7/1] max-h-[340px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#08101d]">
                   <Image
                     src="/Banner 3.png"
                     alt="Zewa Feeds — to nourish every species of fish"
                     fill
-                    className="object-contain object-center"
+                    className="object-cover object-center"
                     sizes="(max-width: 1440px) 100vw, 1440px"
                     priority
                   />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl pointer-events-none" />
                 </div>
               </div>
               )}
