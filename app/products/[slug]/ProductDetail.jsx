@@ -265,7 +265,22 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                     alt={active?.alt ?? product.name}
                     width={640}
                     height={640}
-                    className="object-contain w-full h-full p-10"
+                    /*
+                     * Padding only for transparent cutouts.
+                     *
+                     * Every asset is a 1:1 square, matching this frame, so
+                     * object-contain never crops. But a flat p-10 shrank the
+                     * artwork to 86% of the frame — and the JPG design slides
+                     * ("Key Features", nutrition panels) already carry their
+                     * own margins, so the result looked inset and clipped.
+                     *
+                     * PNGs here are bottle cutouts on transparency, which do
+                     * need breathing room or they touch the frame edge. JPGs
+                     * are full-bleed layouts and should fill it completely.
+                     */
+                    className={`h-full w-full object-contain ${
+                      /\.png(\?|$)/i.test(active?.url ?? "") ? "p-10" : "p-0"
+                    }`}
                     priority
                   />
                 )}
@@ -341,7 +356,11 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                         alt={item.alt ?? ""}
                         width={72}
                         height={72}
-                        className="object-contain w-full h-full p-2"
+                        // Same rule as the main frame: pad cutouts, let
+                        // full-bleed slides fill the tile.
+                        className={`h-full w-full object-contain ${
+                          /\.png(\?|$)/i.test(item.url ?? "") ? "p-2" : "p-0"
+                        }`}
                       />
                       {item.type === "VIDEO" && (
                         <span className="absolute inset-0 grid place-items-center bg-black/35">
