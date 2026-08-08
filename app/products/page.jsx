@@ -1111,7 +1111,18 @@ export default function ProductsPage() {
                   lost. `object-bottom` was wrong here: it starts the crop at
                   45% and cuts the headline off.
                 */}
-                <div className="relative h-[300px] w-full overflow-hidden rounded-2xl sm:h-[360px]">
+                {/*
+                  Negative margins cancel the wrapper's padding.
+
+                  The wrapper adds pt-16 / pb-20 / px-16 because the TEXT slide
+                  needs that breathing room. The banner does not — it read as an
+                  image floating in a large empty box. Pulling it back out by the
+                  same amounts lets it run to the section edges, while the text
+                  slide keeps its padding untouched.
+
+                  Rounding drops too: a full-bleed band has no corners to round.
+                */}
+                <div className="relative -mx-6 -mb-14 -mt-16 h-[300px] w-auto overflow-hidden sm:-mx-10 sm:-mb-20 sm:h-[360px] lg:-mx-16">
                   <Image
                     src="/Banner 3.png"
                     alt="Zewa Feeds — to nourish every species of fish"
