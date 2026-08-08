@@ -1054,40 +1054,40 @@ export default function ProductsPage() {
       <main className="bg-[#06080f] text-[#dde2f6] min-h-screen">
 
         {/* ── Hero banner ─────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden pt-16 sm:pt-20">
+        <section className="relative overflow-hidden pt-14 sm:pt-16">
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(68,229,194,0.07) 0%, transparent 70%), linear-gradient(180deg, #06080f 0%, #0b1220 100%)" }} />
 
-          <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-10 sm:pt-14 pb-8 sm:pb-12">
-            <div className="relative flex min-h-[260px] items-center sm:min-h-[280px]">
+          <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-6 sm:pt-8 pb-4 sm:pb-6">
+            <div className="relative flex min-h-[180px] items-center sm:min-h-[210px]">
 
               {/* Slide 0 — the range statement */}
               {heroSlide === 0 && (
               <div className="w-full animate-fadeIn">
-                <div className="flex flex-col justify-between gap-10 lg:flex-row lg:items-center">
+                <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
                   <div className="max-w-xl">
-                    <div className="mb-5 flex items-center gap-3">
+                    <div className="mb-3 flex items-center gap-3">
                       <div className="h-px w-5 bg-primary" />
                       <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary font-[Montserrat]">Our Range</span>
                     </div>
-                    <h1 className="mb-5 font-[Playfair_Display] text-[44px] leading-[1.0] text-white sm:text-[64px]">
+                    <h1 className="mb-3 font-[Playfair_Display] text-[34px] leading-[1.0] text-white sm:text-[48px]">
                       Engineered<br />
                       <span className="italic text-primary">for the species.</span>
                     </h1>
-                    <p className="mb-7 text-[15px] leading-relaxed text-white/45 font-[Montserrat]">
+                    <p className="mb-4 text-[13px] sm:text-[14px] leading-relaxed text-white/45 font-[Montserrat]">
                       Every formula is NABL lab-tested, insect-protein based, and calibrated for a specific species and life stage.
                     </p>
                   </div>
 
-                  <div className="flex shrink-0 gap-10 lg:gap-14">
+                  <div className="flex shrink-0 gap-8 lg:gap-12">
                     {[
                       { val: "46%", label: "Max Protein", sub: "in the range" },
                       { val: "88%", label: "Digestibility", sub: "lab verified" },
                       { val: "13+", label: "Formulas", sub: "species-specific" },
                     ].map((s) => (
-                      <div key={s.label} className="flex flex-col gap-1">
-                        <span className="font-[Playfair_Display] text-[38px] leading-none text-primary">{s.val}</span>
-                        <span className="text-[12px] font-semibold text-white/70 font-[Montserrat]">{s.label}</span>
-                        <span className="text-[10px] text-white/25 font-[Montserrat]">{s.sub}</span>
+                      <div key={s.label} className="flex flex-col gap-0.5">
+                        <span className="font-[Playfair_Display] text-[30px] sm:text-[36px] leading-none text-primary">{s.val}</span>
+                        <span className="text-[11px] font-semibold text-white/70 font-[Montserrat]">{s.label}</span>
+                        <span className="text-[9px] text-white/25 font-[Montserrat]">{s.sub}</span>
                       </div>
                     ))}
                   </div>
@@ -1098,7 +1098,7 @@ export default function ProductsPage() {
               {/* Slide 1 — the brand banner */}
               {heroSlide === 1 && (
               <div className="w-full animate-fadeIn">
-                <div className="relative left-1/2 -translate-x-1/2 w-screen aspect-[2.4/1] max-h-[360px] sm:max-h-[400px] overflow-hidden">
+                <div className="relative left-1/2 -translate-x-1/2 w-screen aspect-[3.2/1] max-h-[220px] sm:max-h-[260px] overflow-hidden">
                   <Image
                     src="/Banner 3.png"
                     alt="Zewa Feeds — to nourish every species of fish"
@@ -1108,32 +1108,24 @@ export default function ProductsPage() {
                     priority
                   />
                   {/* Subtle bottom fade mask to blend smoothly into the section background */}
-                  <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0b1220] via-[#0b1220]/60 to-transparent pointer-events-none" />
+                  <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#0b1220] via-[#0b1220]/60 to-transparent pointer-events-none" />
                 </div>
               </div>
               )}
 
-              {/* Slide controls */}
-              <div className="absolute bottom-0 right-0 z-10 flex items-center gap-3">
-                {[
-                  { label: "Our Range", idx: 0 },
-                  { label: "Product Lineup", idx: 1 },
-                ].map(({ label, idx }) => (
+              {/* Slide dots — bottom right */}
+              <div className="absolute bottom-0 right-0 z-10 flex items-center gap-2">
+                {[0, 1].map((i) => (
                   <button
-                    key={idx}
+                    key={i}
                     type="button"
-                    onClick={() => setHeroSlide(idx)}
-                    aria-label={`Show ${label}`}
-                    aria-current={heroSlide === idx}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wider font-[Montserrat] uppercase transition-all duration-300 ${
-                      heroSlide === idx
-                        ? "bg-primary/15 text-primary border border-primary/30"
-                        : "text-white/30 hover:text-white/60 bg-white/5 border border-transparent"
+                    onClick={() => setHeroSlide(i)}
+                    aria-label={i === 0 ? "Show range summary" : "Show brand banner"}
+                    aria-current={heroSlide === i}
+                    className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
+                      heroSlide === i ? "w-6 bg-primary" : "w-2 bg-white/25 hover:bg-white/50"
                     }`}
-                  >
-                    <span className={`h-1.5 rounded-full transition-all duration-300 ${heroSlide === idx ? "w-3 bg-primary" : "w-1.5 bg-white/30"}`} />
-                    {label}
-                  </button>
+                  />
                 ))}
               </div>
             </div>
