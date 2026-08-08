@@ -970,6 +970,25 @@ export default function ProductsPage() {
   const SPOTLIGHT = apiSpotlights ?? [];
   const [quizOpen, setQuizOpen] = useState(false);
 
+  /*
+   * Hero rotation: banner 7s, range statement 5s.
+   *
+   * The two slides hold for different lengths, so this cannot be one interval —
+   * the timeout is re-armed from the duration of whichever slide is showing.
+   * Keying the effect on `heroSlide` also means a click on the dots resets the
+   * clock, rather than leaving a stale timer to jump the slide moments later.
+   */
+  const [heroSlide, setHeroSlide] = useState(0);
+
+  useEffect(() => {
+    const HOLD_MS = [5000, 7000]; // [range statement, banner]
+    const timer = setTimeout(
+      () => setHeroSlide((s) => (s === 0 ? 1 : 0)),
+      HOLD_MS[heroSlide],
+    );
+    return () => clearTimeout(timer);
+  }, [heroSlide]);
+
   useEffect(() => {
     // Nothing to rotate while loading (or with a single slide) — and `% 0` is NaN.
     if (SPOTLIGHT.length < 2) return;
@@ -1006,34 +1025,97 @@ export default function ProductsPage() {
         <section className="relative overflow-hidden pt-20">
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(68,229,194,0.07) 0%, transparent 70%), linear-gradient(180deg, #06080f 0%, #0b1220 100%)" }} />
 
-          <div className="relative max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 pt-16 pb-14 sm:pb-20">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-              <div className="max-w-xl">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-5 h-px bg-primary" />
-                  <span className="text-[10px] font-bold text-primary tracking-[0.25em] font-[Montserrat] uppercase">Our Range</span>
-                </div>
-                <h1 className="font-[Playfair_Display] text-[44px] sm:text-[64px] text-white leading-[1.0] mb-5">
-                  Engineered<br />
-                  <span className="text-primary italic">for the species.</span>
-                </h1>
-                <p className="text-[15px] text-white/45 font-[Montserrat] leading-relaxed mb-7">
-                  Every formula is NABL lab-tested, insect-protein based, and calibrated for a specific species and life stage.
-                </p>
+          {/*
+            Two slides in one fixed-height box.
 
+            Both are absolutely positioned and cross-faded, so the section never
+            changes height — swapping between a 2:1 image and a text block by
+            re-flowing would shove the whole product grid up and down every few
+            seconds.
+
+            The height is driven by the text slide, which is the taller of the
+            two; the banner is object-cover inside it, so it fills without
+            letterboxing at any viewport width.
+          */}
+          <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-16 pb-14 sm:pb-20">
+            <div className="relative min-h-[300px] sm:min-h-[340px]">
+
+              {/* Slide 0 — the range statement */}
+              <div
+                className={`transition-opacity duration-700 ${
+                  heroSlide === 0
+                    ? "relative opacity-100"
+                    : "pointer-events-none absolute inset-0 opacity-0"
+                }`}
+                aria-hidden={heroSlide !== 0}
+              >
+                <div className="flex flex-col justify-between gap-10 lg:flex-row lg:items-center">
+                  <div className="max-w-xl">
+                    <div className="mb-5 flex items-center gap-3">
+                      <div className="h-px w-5 bg-primary" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary font-[Montserrat]">Our Range</span>
+                    </div>
+                    <h1 className="mb-5 font-[Playfair_Display] text-[44px] leading-[1.0] text-white sm:text-[64px]">
+                      Engineered<br />
+                      <span className="italic text-primary">for the species.</span>
+                    </h1>
+                    <p className="mb-7 text-[15px] leading-relaxed text-white/45 font-[Montserrat]">
+                      Every formula is NABL lab-tested, insect-protein based, and calibrated for a specific species and life stage.
+                    </p>
+                  </div>
+
+                  <div className="flex shrink-0 gap-10 lg:gap-14">
+                    {[
+                      { val: "46%", label: "Max Protein", sub: "in the range" },
+                      { val: "88%", label: "Digestibility", sub: "lab verified" },
+                      { val: "13+", label: "Formulas", sub: "species-specific" },
+                    ].map((s) => (
+                      <div key={s.label} className="flex flex-col gap-1">
+                        <span className="font-[Playfair_Display] text-[38px] leading-none text-primary">{s.val}</span>
+                        <span className="text-[12px] font-semibold text-white/70 font-[Montserrat]">{s.label}</span>
+                        <span className="text-[10px] text-white/25 font-[Montserrat]">{s.sub}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              <div className="flex gap-10 lg:gap-14 shrink-0">
-                {[
-                  { val: "46%", label: "Max Protein", sub: "in the range" },
-                  { val: "88%", label: "Digestibility", sub: "lab verified" },
-                  { val: "13+", label: "Formulas", sub: "species-specific" },
-                ].map((s) => (
-                  <div key={s.label} className="flex flex-col gap-1">
-                    <span className="font-[Playfair_Display] text-[38px] text-primary leading-none">{s.val}</span>
-                    <span className="text-[12px] font-semibold text-white/70 font-[Montserrat]">{s.label}</span>
-                    <span className="text-[10px] text-white/25 font-[Montserrat]">{s.sub}</span>
-                  </div>
+              {/* Slide 1 — the brand banner */}
+              <div
+                className={`transition-opacity duration-700 ${
+                  heroSlide === 1
+                    ? "relative opacity-100"
+                    : "pointer-events-none absolute inset-0 opacity-0"
+                }`}
+                aria-hidden={heroSlide !== 1}
+              >
+                <div className="relative h-[300px] w-full overflow-hidden rounded-2xl sm:h-[340px]">
+                  <Image
+                    src="/Banner 3.png"
+                    alt="Zewa Feeds — insect-protein aquatic nutrition"
+                    fill
+                    // 2:1 artwork in a wider-than-2:1 box, so cover crops the
+                    // top and bottom slightly rather than letterboxing.
+                    className="object-cover"
+                    sizes="(max-width: 1440px) 100vw, 1440px"
+                    priority
+                  />
+                </div>
+              </div>
+
+              {/* Slide dots — bottom right, as requested */}
+              <div className="absolute bottom-0 right-0 z-10 flex items-center gap-2">
+                {[0, 1].map((i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setHeroSlide(i)}
+                    aria-label={i === 0 ? "Show range summary" : "Show brand banner"}
+                    aria-current={heroSlide === i}
+                    className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
+                      heroSlide === i ? "w-6 bg-primary" : "w-2 bg-white/25 hover:bg-white/50"
+                    }`}
+                  />
                 ))}
               </div>
             </div>
