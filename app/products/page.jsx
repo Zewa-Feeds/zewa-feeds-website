@@ -1053,14 +1053,18 @@ export default function ProductsPage() {
             <div className="relative flex min-h-[260px] items-center sm:min-h-[280px]">
 
               {/* Slide 0 — the range statement */}
-              <div
-                className={`transition-opacity duration-700 ${
-                  heroSlide === 0
-                    ? "relative w-full opacity-100"
-                    : "pointer-events-none absolute inset-0 opacity-0"
-                }`}
-                aria-hidden={heroSlide !== 0}
-              >
+              {/*
+                Only the ACTIVE slide is mounted.
+
+                Cross-fading with opacity-0 looked right on paper but rendered
+                both slides at once: an opacity-0 parent still composites its
+                children, and the banner escapes this container upward via
+                -mt-36, so the faded heading and stats showed straight through
+                the artwork. Unmounting is unambiguous — there is nothing behind
+                the banner to bleed through.
+              */}
+              {heroSlide === 0 && (
+              <div className="w-full">
                 <div className="flex flex-col justify-between gap-10 lg:flex-row lg:items-center">
                   <div className="max-w-xl">
                     <div className="mb-5 flex items-center gap-3">
@@ -1091,16 +1095,11 @@ export default function ProductsPage() {
                   </div>
                 </div>
               </div>
+              )}
 
               {/* Slide 1 — the brand banner */}
-              <div
-                className={`transition-opacity duration-700 ${
-                  heroSlide === 1
-                    ? "relative w-full opacity-100"
-                    : "pointer-events-none absolute inset-0 opacity-0"
-                }`}
-                aria-hidden={heroSlide !== 1}
-              >
+              {heroSlide === 1 && (
+              <div className="w-full">
                 {/*
                   object-cover with the focal point low.
 
@@ -1143,6 +1142,7 @@ export default function ProductsPage() {
                   />
                 </div>
               </div>
+              )}
 
               {/* Slide dots — bottom right, as requested */}
               <div className="absolute bottom-0 right-0 z-10 flex items-center gap-2">
