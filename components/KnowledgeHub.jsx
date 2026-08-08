@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Reveal from "./Reveal";
 
 const ARTICLES = [
@@ -23,11 +24,25 @@ const ARTICLES = [
 
 export default function KnowledgeHub() {
   return (
-    <Reveal id="knowledge" className="bg-[#06080f]">
+    <Reveal id="knowledge" className="relative overflow-hidden bg-[#06080f]">
+      {/* ── Background Science Lab Image ───────────────────────────── */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <Image
+          src="/science-lab-bg.png"
+          alt="Laboratory research"
+          fill
+          className="object-cover object-right opacity-50 mix-blend-screen"
+          priority
+        />
+        {/* Left side vignette to keep left text crystal clear */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#06080f] via-[#06080f]/80 to-transparent" />
+        {/* Top/bottom edge vignettes */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#06080f] via-transparent to-[#06080f]" />
+      </div>
 
-      <div className="h-px w-full" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.2) 50%, transparent)" }} />
+      <div className="relative z-10 h-px w-full" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.2) 50%, transparent)" }} />
 
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-24 sm:pt-32 pb-24 sm:pb-32">
+      <div className="relative z-10 max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-24 sm:pt-32 pb-24 sm:pb-32">
 
         {/* Header row */}
         <div className="flex items-end justify-between gap-6 mb-10">
@@ -45,7 +60,7 @@ export default function KnowledgeHub() {
           </div>
           <a
             href="/blog"
-            className="hidden sm:inline-flex items-center gap-2 shrink-0 px-5 py-2.5 rounded-full border border-primary/25 text-primary text-[10px] font-bold tracking-[0.18em] uppercase font-[Montserrat] hover:bg-primary hover:text-[#00382d] transition-all duration-200"
+            className="hidden sm:inline-flex items-center gap-2 shrink-0 px-5 py-2.5 rounded-full border border-primary/25 text-primary text-[10px] font-bold tracking-[0.18em] uppercase font-[Montserrat] hover:bg-primary hover:text-[#00382d] transition-all duration-200 backdrop-blur-sm"
           >
             All Articles
             <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
@@ -55,8 +70,8 @@ export default function KnowledgeHub() {
         </div>
 
         {/* Article list */}
-        <div className="rounded-2xl overflow-hidden shadow-[0_16px_48px_rgba(0,0,0,0.4)]"
-          style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(8,14,26,0.97)" }}>
+        <div className="rounded-2xl overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.6)] backdrop-blur-md"
+          style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(8,14,26,0.82)" }}>
 
           {/* Top accent line */}
           <div className="h-px w-full" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.35) 50%, transparent)" }} />
