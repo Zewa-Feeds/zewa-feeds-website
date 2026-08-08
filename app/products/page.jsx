@@ -1011,10 +1011,42 @@ export default function ProductsPage() {
 
   const sp = SPOTLIGHT.length ? (SPOTLIGHT[slide % SPOTLIGHT.length] ?? SPOTLIGHT[0]) : null;
 
+  /*
+   * Filter chips matched with `tags.includes(active)` — an exact string
+   * comparison — and every chip except "Floating Pellets" therefore matched
+   * nothing. The catalogue returns "Slow-Sinking Pellets" while the chip reads
+   * "Slow Sinking Pellets", so a single hyphen silently emptied the grid.
+   *
+   * Normalising both sides (lowercase, punctuation stripped) makes the match
+   * tolerant of hyphens, en-dashes and case, which is the only difference
+   * between these two vocabularies. Pack-size chips like "1kg Packs" match
+   * against pack labels ("1kg Pouch") via the substring test, since a label is
+   * never exactly equal to the chip.
+   */
+  const norm = (s) => String(s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  /*
+   * A size chip names a weight, not a pack label. "1kg Packs" has to match
+   * "1kg Pouch": neither string contains the other, so compare on the weight
+   * token alone when the chip is a size rather than a category.
+   */
+  const sizeToken = (s) => {
+    const m = norm(s).match(/^(\d+(?:kg|g))/);
+    return m ? m[1] : null;
+  };
+
   const filtered =
     active === "All"
       ? PRODUCTS
-      : PRODUCTS.filter((p) => p.tags.includes(active));
+      : PRODUCTS.filter((p) => {
+          const target = norm(active);
+          const size = sizeToken(active);
+          return p.tags.some((tag) => {
+            const t = norm(tag);
+            if (size) return sizeToken(tag) === size;
+            return t === target || t.includes(target) || target.includes(t);
+          });
+        });
 
   return (
     <>
@@ -1108,19 +1140,19 @@ export default function ProductsPage() {
                   wide — round bottle caps become ovals, the logo warps — which
                   is not acceptable on brand artwork.
 
-                  object-bottom, not a percentage.
+                  A PRE-CROPPED asset in an aspect-ratio box.
 
-                  The products end at y=88.8% (measured off the file). A fixed
-                  percentage cannot hold that: this is full-bleed, so the taller
-                  the viewport is wide, the smaller a fraction of the artwork the
-                  424px box shows — at 68% the slice ended at y=90% on a 1920px
-                  screen but y=82% on a 3024px one, slicing the bags off on wide
-                  displays only.
+                  Banner 3.png is 2:1 and mostly sky and headline — the products
+                  sit in a band at y=34-95%. Fitting that band into a short
+                  full-bleed box was impossible: a fixed pixel height shows a
+                  different fraction of the artwork at every viewport width, so
+                  no object-position held. Showing the whole band needed a 2.6:1
+                  box, which came out at ~68% of screen height.
 
-                  Anchoring to the bottom pins the crop to the base of the
-                  artwork, so the bags are complete at every width. It also drops
-                  the banner's own headline on anything above ~1280px; below
-                  that the whole 2:1 image fits the box anyway.
+                  banner-products.png is that band, cropped once at build time:
+                  2880 x 879, natively 3.28:1. The box matches, so the image
+                  fills it edge to edge with nothing cropped at any width, and
+                  the banner stays short. The original file is untouched.
                 */}
                 {/*
                   The banner fills the slot exactly — no gaps above or below.
@@ -1137,12 +1169,12 @@ export default function ProductsPage() {
                   w-screen with the centring transform escapes max-w-[1440px], so
                   it also spans the full viewport width.
                 */}
-                <div className="relative left-1/2 -mt-36 h-[404px] w-screen -translate-x-1/2 overflow-hidden sm:h-[424px]">
+                <div className="relative left-1/2 -mt-36 aspect-[3.28/1] w-screen -translate-x-1/2 overflow-hidden">
                   <Image
-                    src="/Banner 3.png"
+                    src="/banner-products.png"
                     alt="Zewa Feeds — to nourish every species of fish"
                     fill
-                    className="object-cover object-bottom"
+                    className="object-cover object-center"
                     sizes="(max-width: 1440px) 100vw, 1440px"
                     priority
                   />
