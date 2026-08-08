@@ -15,7 +15,7 @@ export default function ClinicalProof() {
               </span>
             </div>
             <h2 className="font-display-lg text-[28px] sm:text-[36px] text-white leading-tight">
-              Science doesn't lie. The numbers do.
+              Science doesn&rsquo;t lie, neither do the numbers.
             </h2>
           </div>
           <p className="font-body-md text-[14px] text-white/40 max-w-xs leading-relaxed">

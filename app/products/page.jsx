@@ -1038,13 +1038,22 @@ export default function ProductsPage() {
             letterboxing at any viewport width.
           */}
           <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-16 pb-14 sm:pb-20">
-            <div className="relative min-h-[300px] sm:min-h-[340px]">
+            {/*
+              One shared height for both slides.
+
+              Taller than the text needs (which just centres in the extra room)
+              so the 2:1 banner can be shown WHOLE. At 340px the banner was
+              cropping 48% of its height and cutting the product bags in half;
+              contain in a 340px box instead left 48% empty width. A ~2:1 box
+              solves both, at the cost of some whitespace around the text.
+            */}
+            <div className="relative flex min-h-[340px] items-center sm:min-h-[560px]">
 
               {/* Slide 0 — the range statement */}
               <div
                 className={`transition-opacity duration-700 ${
                   heroSlide === 0
-                    ? "relative opacity-100"
+                    ? "relative w-full opacity-100"
                     : "pointer-events-none absolute inset-0 opacity-0"
                 }`}
                 aria-hidden={heroSlide !== 0}
@@ -1084,19 +1093,26 @@ export default function ProductsPage() {
               <div
                 className={`transition-opacity duration-700 ${
                   heroSlide === 1
-                    ? "relative opacity-100"
+                    ? "relative w-full opacity-100"
                     : "pointer-events-none absolute inset-0 opacity-0"
                 }`}
                 aria-hidden={heroSlide !== 1}
               >
-                <div className="relative h-[300px] w-full overflow-hidden rounded-2xl sm:h-[340px]">
+                {/*
+                  object-CONTAIN, not cover.
+
+                  The slide box is ~1312x340 (3.86:1) because its height is set
+                  by the taller text slide, but the artwork is 2:1. Covering that
+                  box cropped 48% of the image height — the product bags were cut
+                  off mid-bag. Containing it shows the whole banner, centred,
+                  which is what a designed banner needs.
+                */}
+                <div className="relative h-[340px] w-full overflow-hidden rounded-2xl sm:h-[560px]">
                   <Image
                     src="/Banner 3.png"
-                    alt="Zewa Feeds — insect-protein aquatic nutrition"
+                    alt="Zewa Feeds — to nourish every species of fish"
                     fill
-                    // 2:1 artwork in a wider-than-2:1 box, so cover crops the
-                    // top and bottom slightly rather than letterboxing.
-                    className="object-cover"
+                    className="object-contain"
                     sizes="(max-width: 1440px) 100vw, 1440px"
                     priority
                   />
