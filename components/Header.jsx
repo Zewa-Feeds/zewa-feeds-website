@@ -142,6 +142,8 @@ function CartIcon({ onClick, totalItems }) {
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null); // "products" | "learn" | null
+  /** Mobile drawer. Separate from activeMenu, which is the desktop hover menus. */
+  const [mobileOpen, setMobileOpen] = useState(false);
   /**
    * Products in the dropdown, from the catalogue API.
    *
@@ -344,7 +346,7 @@ export default function Header() {
           </button>
         </div>
 
-        {/* Mobile CTAs — unchanged */}
+        {/* Mobile: cart, Buy Now, and the nav toggle */}
         <div className="md:hidden flex items-center gap-2">
           {showCart && (
             <CartIcon onClick={() => setDrawerOpen(true)} totalItems={totalItems} />
@@ -354,9 +356,111 @@ export default function Header() {
               Buy Now
             </a>
           )}
+
+          {/*
+            The mobile nav was missing entirely — this block held only the cart
+            and Buy Now, so on a phone there was no route to Products, Our
+            Science, Knowledge Hub or About Us. The desktop <nav> is md:flex,
+            with no small-screen equivalent.
+          */}
+          <button
+            type="button"
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-nav"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-on-surface transition-colors hover:bg-white/10"
+          >
+            {mobileOpen ? (
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            )}
+          </button>
         </div>
 
       </div>
+
+      {/*
+        Mobile drawer.
+
+        Rendered outside the flex row so it spans the full width below the bar.
+        Products and Knowledge Hub have desktop dropdowns; here their children
+        are flattened into indented sub-links, because a nested hover menu has
+        no touch equivalent.
+      */}
+      {mobileOpen && (
+        <nav
+          id="mobile-nav"
+          className="md:hidden absolute left-0 right-0 top-20 max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-white/10 bg-surface/95 backdrop-blur-xl shadow-2xl shadow-black/40"
+        >
+          <ul className="flex flex-col px-5 py-4">
+            {navLinks.map((link) => (
+              <li key={link.label} className="border-b border-white/5 last:border-0">
+                <a
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`block py-3.5 font-button text-[14px] transition-colors ${
+                    isActive(link.href) ? "text-primary" : "text-on-surface hover:text-primary"
+                  }`}
+                >
+                  {link.label}
+                </a>
+
+                {link.label === "Products" && productLinks.length > 0 && (
+                  <ul className="pb-3 pl-4">
+                    {productLinks.map((p) => (
+                      <li key={p.href}>
+                        <a
+                          href={p.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={`block py-2 text-[13px] transition-colors ${
+                            p.accent ? "text-primary/80" : "text-on-surface-variant hover:text-on-surface"
+                          }`}
+                        >
+                          {p.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {link.label === "Knowledge Hub" && (
+                  <ul className="pb-3 pl-4">
+                    {LEARN_MENU.map((item) => (
+                      <li key={item.href}>
+                        <a
+                          href={item.href}
+                          onClick={() => setMobileOpen(false)}
+                          className={`block py-2 text-[13px] transition-colors ${
+                            item.accent ? "text-primary/80" : "text-on-surface-variant hover:text-on-surface"
+                          }`}
+                        >
+                          {item.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          <div className="border-t border-white/10 px-5 py-4">
+            <a
+              href="/products"
+              onClick={() => setMobileOpen(false)}
+              className="block bg-primary py-3 text-center font-button text-button uppercase tracking-widest text-on-primary"
+            >
+              Shop All Products
+            </a>
+          </div>
+        </nav>
+      )}
     </header>
   );
 }

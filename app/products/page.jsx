@@ -1108,11 +1108,14 @@ export default function ProductsPage() {
                   wide — round bottle caps become ovals, the logo warps — which
                   is not acceptable on brand artwork.
 
-                  Focal point at 35%, not centre. Full-bleed at ~1920px wide,
-                  the box shows only ~46% of the artwork height; centring that
-                  slice lands on y=27-73% and crops the banner's own headline
-                  (~15-25%) clean off. Biasing upward keeps the headline just
-                  below the site header and still holds the product line-up.
+                  Focal point at 60%: the crop deliberately EXCLUDES the
+                  banner's own "DISCOVER A DIVERSE RANGE..." headline and shows
+                  the product line-up instead. That headline competed with the
+                  site's own typography and repeated what the page already says,
+                  while the products are the reason to look at the banner.
+
+                  The visible slice is y=34-86% of the artwork, which holds every
+                  bag and bottle without any of the baked-in text.
                 */}
                 {/*
                   The banner fills the slot exactly — no gaps above or below.
@@ -1136,7 +1139,7 @@ export default function ProductsPage() {
                     src="/Banner 3.png"
                     alt="Zewa Feeds — to nourish every species of fish"
                     fill
-                    className="object-cover object-[center_35%]"
+                    className="object-cover object-[center_60%]"
                     sizes="(max-width: 1440px) 100vw, 1440px"
                     priority
                   />
