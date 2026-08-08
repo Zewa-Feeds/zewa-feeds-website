@@ -1050,7 +1050,7 @@ export default function ProductsPage() {
               banner show whole, but handed half the viewport to it — far too
               much for one decorative slide.
             */}
-            <div className="relative flex min-h-[300px] items-center sm:min-h-[360px]">
+            <div className="relative flex min-h-[260px] items-center sm:min-h-[280px]">
 
               {/* Slide 0 — the range statement */}
               <div
@@ -1119,16 +1119,20 @@ export default function ProductsPage() {
                   The banner fills the slot exactly — no gaps above or below.
 
                   Height is deliberately container + cancelled padding:
-                  360 (container) + 80 (section pt-20) + 64 (wrapper pt-16)
-                  + 80 (wrapper pb-20) = 584, with -mt-36 and -mb-20 cancelling
-                  the paddings at both ends. Every one of those four values had
-                  to be accounted for; missing any single one left a strip of
-                  background, which is what kept reappearing.
+                  280 (container) + 80 (section pt-20) + 64 (wrapper pt-16)
+                  + 80 (wrapper pb-20) = 504, with -mt-36 and -mb-20 cancelling
+                  the paddings at both ends. Every one of those four values has
+                  to be accounted for; missing any single one leaves a strip of
+                  visible background.
+
+                  The container is 280 rather than 360 because the text slide's
+                  content only measures ~258px — the extra 80 was making the
+                  banner taller than it needed to be.
 
                   w-screen with the centring transform escapes max-w-[1440px], so
                   it also spans the full viewport width.
                 */}
-                <div className="relative left-1/2 -mb-14 -mt-36 h-[500px] w-screen -translate-x-1/2 overflow-hidden sm:-mb-20 sm:h-[584px]">
+                <div className="relative left-1/2 -mb-14 -mt-36 h-[460px] w-screen -translate-x-1/2 overflow-hidden sm:-mb-20 sm:h-[504px]">
                   <Image
                     src="/Banner 3.png"
                     alt="Zewa Feeds — to nourish every species of fish"
