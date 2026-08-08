@@ -1098,9 +1098,9 @@ export default function ProductsPage() {
               {/* Slide 1 — the brand banner */}
               {heroSlide === 1 && (
               <div className="w-full animate-fadeIn">
-                <div className="relative left-1/2 -translate-x-1/2 w-screen aspect-[3.28/1] max-h-[340px] overflow-hidden">
+                <div className="relative left-1/2 -translate-x-1/2 w-screen aspect-[2.4/1] max-h-[360px] sm:max-h-[400px] overflow-hidden">
                   <Image
-                    src="/banner-products.png"
+                    src="/Banner 3.png"
                     alt="Zewa Feeds — to nourish every species of fish"
                     fill
                     className="object-cover object-center"
