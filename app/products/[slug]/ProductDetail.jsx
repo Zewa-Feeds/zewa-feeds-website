@@ -272,10 +272,23 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
               <div
                 className="group relative aspect-square overflow-hidden rounded-3xl flex items-center justify-center"
                 style={{
-                  background:
-                    isCutout(active?.url) || active?.type === "VIDEO"
-                      ? (presentation.accentBg ?? "#f4f7f6")
-                      : "transparent",
+                  /*
+                   * Three cases, one per kind of media:
+                   *
+                   *   PNG cutout  — light panel, so the bottle has something to
+                   *                 sit on and its dark label stays readable.
+                   *   VIDEO       — the PAGE colour. A 16:9 file in a square
+                   *                 frame leaves ~44% empty, and as a white band
+                   *                 that emptiness is the loudest thing on the
+                   *                 slide. Matching #06080f makes it vanish into
+                   *                 the page, so only the video itself reads.
+                   *   JPG slide   — transparent; the artwork covers the box.
+                   */
+                  background: isCutout(active?.url)
+                    ? (presentation.accentBg ?? "#f4f7f6")
+                    : active?.type === "VIDEO"
+                    ? "#06080f"
+                    : "transparent",
                 }}
               >
                 {active?.type === "VIDEO" ? (
@@ -299,12 +312,12 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                     playsInline
                     preload="metadata"
                     /*
-                     * object-contain in the square frame centres the 16:9 file
-                     * and leaves the panel showing above and below. Slight
-                     * rounding so it reads as a video sitting ON the panel
-                     * rather than a band cutting across it.
+                     * object-contain centres the 16:9 file in the square frame.
+                     * No rounding: the frame behind it is now the page colour,
+                     * so rounded corners would cut into the video itself rather
+                     * than soften an edge against a visible panel.
                      */
-                    className="h-full w-full rounded-xl object-contain"
+                    className="h-full w-full object-contain"
                   />
                 ) : (
                   <Image
