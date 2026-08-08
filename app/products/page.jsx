@@ -1108,38 +1108,38 @@ export default function ProductsPage() {
                   wide — round bottle caps become ovals, the logo warps — which
                   is not acceptable on brand artwork.
 
-                  Focal point at 60%: the crop deliberately EXCLUDES the
+                  Focal point at 68%: the crop deliberately EXCLUDES the
                   banner's own "DISCOVER A DIVERSE RANGE..." headline and shows
                   the product line-up instead. That headline competed with the
                   site's own typography and repeated what the page already says,
                   while the products are the reason to look at the banner.
 
-                  The visible slice is y=34-86% of the artwork, which holds every
-                  bag and bottle without any of the baked-in text.
+                  The 424px box shows 44% of the artwork, and the products sit
+                  at y=40-89% (measured off the file, not estimated). 68% puts
+                  the slice at y=46-90%, so the bags are complete to their bases
+                  and the headline is above the crop.
                 */}
                 {/*
                   The banner fills the slot exactly — no gaps above or below.
 
                   Height is deliberately container + cancelled padding:
-                  280 (container) + 80 (section pt-20) + 64 (wrapper pt-16)
-                  + 80 (wrapper pb-20) = 504, with -mt-36 and -mb-20 cancelling
-                  the paddings at both ends. Every one of those four values has
-                  to be accounted for; missing any single one leaves a strip of
-                  visible background.
+                  280 (container) + 80 (section pt-20) + 64 (wrapper pt-16) = 424.
 
-                  The container is 280 rather than 360 because the text slide's
-                  content only measures ~258px — the extra 80 was making the
-                  banner taller than it needed to be.
+                  The wrapper's BOTTOM padding is deliberately NOT cancelled.
+                  Extending through it made the banner flush with the section
+                  edge, which put the sticky filter bar (top-20) directly against
+                  the artwork and sliced the bases off the product bags. That
+                  padding is the clearance the products need.
 
                   w-screen with the centring transform escapes max-w-[1440px], so
                   it also spans the full viewport width.
                 */}
-                <div className="relative left-1/2 -mb-14 -mt-36 h-[460px] w-screen -translate-x-1/2 overflow-hidden sm:-mb-20 sm:h-[504px]">
+                <div className="relative left-1/2 -mt-36 h-[404px] w-screen -translate-x-1/2 overflow-hidden sm:h-[424px]">
                   <Image
                     src="/Banner 3.png"
                     alt="Zewa Feeds — to nourish every species of fish"
                     fill
-                    className="object-cover object-[center_60%]"
+                    className="object-cover object-[center_68%]"
                     sizes="(max-width: 1440px) 100vw, 1440px"
                     priority
                   />
