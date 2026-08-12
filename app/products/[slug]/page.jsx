@@ -32,8 +32,24 @@ export async function generateMetadata({ params }) {
 
   try {
     const product = await catalog.product(slug);
-    const title = product.seo?.title || `${product.name} | Zewa Feeds`;
-    const description = product.seo?.description || product.shortDesc;
+    /*
+     * Decode HTML entities before they reach the metadata object.
+     *
+     * The CMS stores SEO copy already escaped ("500g &amp; 1kg"), and Next
+     * escapes again on render — so search results showed the literal "&amp;".
+     * Metadata values must be plain text; escaping is the renderer's job.
+     */
+    const decodeEntities = (s) =>
+      String(s ?? "")
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#0?39;|&apos;/g, "'")
+        .replace(/&nbsp;/g, " ");
+
+    const title = decodeEntities(product.seo?.title || `${product.name} | Zewa Feeds`);
+    const description = decodeEntities(product.seo?.description || product.shortDesc);
 
     return {
       title: { absolute: title },

@@ -17,18 +17,60 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
+/**
+ * Production origin, used for absolute canonicals and OG URLs.
+ *
+ * Canonicals were inconsistent: About and blog posts declared absolute ones,
+ * PDPs used relative paths that resolved to whichever domain served them, and
+ * the homepage, /products and /blog declared none at all. On a domain change
+ * that leaves two indexable copies of the site with no authoritative signal.
+ *
+ * Override with NEXT_PUBLIC_SITE_URL at build time when the domain changes.
+ */
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://zewafeeds.com"
+).replace(/\/$/, "");
+
 export const metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Zewa Feeds",
+    // Was just "Zewa Feeds" — no category, keyword or location.
+    default: "Insect Protein Fish Food & BSF Larvae | Zewa Feeds India",
     template: "%s | Zewa Feeds",
   },
+  // 137 chars. The previous copy ran to 162 and truncated in results.
   description:
-    "Your fish is built to digest insects. Most fish food feeds it soy. Premium insect-protein nutrition optimised for aquatic vitality, backed by lab-verified science.",
+    "Lab-verified insect-protein fish food from Zewa Feeds India. 88% pepsin digestibility, NABL-tested, formulated by species and life stage.",
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Zewa Feeds",
+    title: "Insect Protein Fish Food & BSF Larvae | Zewa Feeds India",
     description:
-      "Premium insect-protein nutrition optimised for aquatic vitality, backed by lab-verified science.",
+      "Lab-verified insect-protein fish food. 88% pepsin digestibility, NABL-tested, formulated by species and life stage.",
+    url: SITE_URL,
+    siteName: "Zewa Feeds",
     type: "website",
+    locale: "en_IN",
+    /*
+     * No og:image was set, so every share on WhatsApp, LinkedIn or X rendered
+     * without one. Points at the products banner, which is already 2880x1440
+     * (2:1) and reads well at social crop.
+     */
+    images: [
+      {
+        url: "/Banner 3.png",
+        width: 2880,
+        height: 1440,
+        alt: "Zewa Feeds insect-protein aquatic nutrition range",
+      },
+    ],
+  },
+  twitter: {
+    // Was "summary", which shows a thumbnail rather than a banner.
+    card: "summary_large_image",
+    title: "Insect Protein Fish Food & BSF Larvae | Zewa Feeds India",
+    description:
+      "Lab-verified insect-protein fish food. 88% pepsin digestibility, NABL-tested.",
+    images: ["/Banner 3.png"],
   },
 };
 
