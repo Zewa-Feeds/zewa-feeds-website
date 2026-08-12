@@ -5,6 +5,7 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { ARTICLES } from "@/lib/articles";
+import { COMPANY } from "@/lib/company";
 
 export { ARTICLES };
 
@@ -231,7 +232,7 @@ export default function BlogPage() {
           {/* ── FOOTER STRIP ─── */}
           <div className="mt-16 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[11px] text-white/15 font-[Montserrat] tracking-wide text-center sm:text-left">
-              Every article reviewed against NABL lab data · Zewa Ecosystems Pvt Ltd · Thrissur, Kerala
+              Every article reviewed against NABL lab data · {COMPANY.legalName} · {COMPANY.address.city}, {COMPANY.address.state}
             </p>
             <div className="flex items-center gap-6">
               {[

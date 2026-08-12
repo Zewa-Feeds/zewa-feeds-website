@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
 import { formatInr } from "@/lib/api";
 import { PLACEHOLDER_IMAGE } from "./adapters";
+import { COMPANY } from "@/lib/company";
 
 // ─── SVG icons ────────────────────────────────────────────────────────────────
 const IcoMicroscope = () => (
@@ -1447,7 +1448,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory }
           {/* Trust strip */}
           <div className="pt-0 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[11px] text-white/18 font-[Montserrat] tracking-wide text-center sm:text-left">
-              Manufactured at Zewa Ecosystems Pvt Ltd · Thrissur, Kerala · NABL Lab Certified
+              Manufactured at {COMPANY.legalName} · {COMPANY.address.city}, {COMPANY.address.state} · NABL Lab Certified
             </p>
             <div className="flex items-center gap-6">
               {TRUST_BADGES.map((b) => (

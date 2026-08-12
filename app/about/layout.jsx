@@ -1,3 +1,5 @@
+import { COMPANY } from "@/lib/company";
+
 const SITE = "https://zewafeeds.com";
 const URL = `${SITE}/about`;
 
@@ -34,7 +36,7 @@ const SCHEMA = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "@id": `${SITE}#organization`,
-  name: "Zewa Ecosystems Pvt Ltd",
+  name: COMPANY.legalName,
   alternateName: "Zewa Feeds",
   url: SITE,
   description: DESCRIPTION,
@@ -49,10 +51,10 @@ const SCHEMA = {
   },
   address: {
     "@type": "PostalAddress",
-    streetAddress: "17/31A TR Nair Road, Kuttanellur PO",
-    addressLocality: "Thrissur",
-    addressRegion: "Kerala",
-    postalCode: "680014",
+    streetAddress: `${COMPANY.address.line1}, ${COMPANY.address.line2}`,
+    addressLocality: COMPANY.address.city,
+    addressRegion: COMPANY.address.state,
+    postalCode: COMPANY.address.postalCode,
     addressCountry: "IN",
   },
   /*
@@ -60,10 +62,10 @@ const SCHEMA = {
    * even though the footer displays it grouped for readability. Keep both in
    * step: this is the number search results and the business panel show.
    */
-  telephone: "+91-95004-39828",
+  telephone: COMPANY.phone.replace(/\s+/g, "-"),
   contactPoint: {
     "@type": "ContactPoint",
-    telephone: "+91-95004-39828",
+    telephone: COMPANY.phone.replace(/\s+/g, "-"),
     contactType: "customer service",
     areaServed: "IN",
     availableLanguage: ["en", "ml"],

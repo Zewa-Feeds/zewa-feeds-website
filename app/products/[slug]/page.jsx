@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { catalog } from "@/lib/api";
 import ProductDetail from "./ProductDetail";
 import { SITE_URL } from "@/lib/site";
+import { COMPANY } from "@/lib/company";
 
 /**
  * Product detail page — one route for the whole catalogue.
@@ -106,7 +107,7 @@ export default async function ProductPage({ params }) {
           : "https://schema.org/InStock",
       url: `${SITE_URL}/products/${product.slug}`,
       itemCondition: "https://schema.org/NewCondition",
-      seller: { "@type": "Organization", name: "Zewa Ecosystems Pvt Ltd" },
+      seller: { "@type": "Organization", name: COMPANY.legalName },
     }));
 
   const prices = offers.map((o) => Number(o.price)).filter(Number.isFinite);
