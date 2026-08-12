@@ -1,8 +1,10 @@
+import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import { catalog } from "@/lib/api";
 import {
+  FOUNDER,
   HEADLINE_STATS,
   HERO,
   PURPOSE,
@@ -134,8 +136,25 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* ── OUR STORY ─────────────────────────────────────────────── */}
+        {/* ── MISSION & VISION ──────────────────────────────────────── */}
         <Section tone="raised" className="border-y border-white/5">
+          <div className="grid gap-10 md:grid-cols-2 md:gap-14">
+            {PURPOSE.map((item) => (
+              <div key={item.label}>
+                <Eyebrow onLight>{item.label}</Eyebrow>
+                <p
+                  className="font-display-lg leading-[1.3] text-[#0b1220]/90"
+                  style={{ fontSize: "clamp(22px, 2.4vw, 30px)" }}
+                >
+                  {item.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* ── OUR STORY ─────────────────────────────────────────────── */}
+        <Section tone="light">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
             <div>
               <Eyebrow>{STORY.eyebrow}</Eyebrow>
@@ -161,23 +180,6 @@ export default async function AboutPage() {
                 ))}
               </ul>
             </div>
-          </div>
-        </Section>
-
-        {/* ── MISSION & VISION ──────────────────────────────────────── */}
-        <Section tone="light">
-          <div className="grid gap-10 md:grid-cols-2 md:gap-14">
-            {PURPOSE.map((item) => (
-              <div key={item.label}>
-                <Eyebrow onLight>{item.label}</Eyebrow>
-                <p
-                  className="font-display-lg leading-[1.3] text-[#0b1220]/90"
-                  style={{ fontSize: "clamp(22px, 2.4vw, 30px)" }}
-                >
-                  {item.text}
-                </p>
-              </div>
-            ))}
           </div>
         </Section>
 
@@ -388,6 +390,83 @@ export default async function AboutPage() {
               );
             })}
           </ul>
+        </Section>
+
+        {/* ── FOUNDER ───────────────────────────────────────────────── */}
+        {/*
+          Closes the page rather than opening it.
+
+          The FOUNDER record existed in lib/about.js but was never rendered, so
+          a page about the company named nobody who runs it — the one thing a
+          distributor or wholesale buyer checks an About page for. It sits after
+          the range and before the CTA: by this point the argument is made, and
+          the founder is the person standing behind it.
+        */}
+        <Section tone="raised" className="border-y border-white/5">
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:gap-16">
+            <div>
+              <div className="relative aspect-[4/5] w-full max-w-[320px] overflow-hidden rounded-xl bg-white/5">
+                <Image
+                  src={FOUNDER.portrait}
+                  alt={FOUNDER.portraitAlt}
+                  fill
+                  sizes="(max-width: 1024px) 80vw, 320px"
+                  className="object-cover"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Eyebrow>{FOUNDER.eyebrow}</Eyebrow>
+              <h2
+                className="font-display-lg leading-[1.15] text-white"
+                style={{ fontSize: "clamp(26px, 3.2vw, 38px)" }}
+              >
+                {FOUNDER.name}
+              </h2>
+              <p className="font-label-caps mt-3 text-[11px] tracking-[0.16em] text-primary">
+                {FOUNDER.role}
+              </p>
+
+              <blockquote className="mt-8 border-l border-primary/30 pl-7">
+                <p className="font-body-lg text-[16.5px] leading-[1.75] text-white/75">
+                  {FOUNDER.statement}
+                </p>
+              </blockquote>
+
+              <p className="font-body-md mt-8 text-[15.5px] leading-[1.8] text-white/50">
+                {FOUNDER.bio}
+              </p>
+
+              <div className="mt-10 grid gap-8 sm:grid-cols-2">
+                <div>
+                  <h3 className="font-label-caps text-[10px] tracking-[0.18em] text-white/35">
+                    EDUCATION
+                  </h3>
+                  <ul className="mt-4 space-y-2.5">
+                    {FOUNDER.credentials.map((c) => (
+                      <li key={c.label} className="font-body-md text-[14px] leading-snug text-white/60">
+                        <span className="text-white/85">{c.label}</span>
+                        <span className="text-white/35"> · {c.detail}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-label-caps text-[10px] tracking-[0.18em] text-white/35">
+                    RECOGNITION
+                  </h3>
+                  <ul className="mt-4 space-y-2.5">
+                    {FOUNDER.honours.map((h) => (
+                      <li key={h} className="font-body-md text-[14px] leading-snug text-white/60">
+                        {h}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
         </Section>
 
         {/* ── CTA ───────────────────────────────────────────────────── */}

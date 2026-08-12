@@ -792,7 +792,18 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 ["description", "Description"],
                 ["nutrition", "Nutrition"],
                 ["feeding", "Feeding guide"],
-                ["reviews", `Reviews${product.reviews?.count ? ` (${product.reviews.count})` : ""}`],
+                /*
+                 * The Reviews tab is hidden until there is at least one review.
+                 * Nothing in the catalogue has any yet, so every product offered
+                 * a tab whose only content was "No reviews yet" — a click that
+                 * leads nowhere, on the page where a shopper is deciding whether
+                 * to trust the product.
+                 *
+                 * The star summary above is already guarded the same way.
+                 */
+                ...(product.reviews?.count > 0
+                  ? [["reviews", `Reviews (${product.reviews.count})`]]
+                  : []),
               ].map(([key, label]) => (
                 <button
                   key={key}
