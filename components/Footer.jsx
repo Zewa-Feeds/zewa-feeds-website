@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { COMPANY, COMPANY_ADDRESS_LINE } from "@/lib/company";
 
 const socialLinks = [
   {
@@ -207,16 +208,55 @@ export default function Footer() {
         </div>
       </div>
 
+      {/*
+        Seller identity and statutory links.
+
+        The Consumer Protection (E-Commerce) Rules 2020 require the legal name,
+        registered address and a consumer-care contact to be displayed — the
+        address previously appeared only on the About page. Privacy and Terms
+        pointed at "#", on a site that takes live payments.
+      */}
+      <div className="border-t border-white/6">
+        <div className="mx-auto max-w-[1440px] px-6 py-6 sm:px-10 lg:px-16">
+          <p className="text-[11px] leading-relaxed text-white/25">
+            {COMPANY.legalName} · {COMPANY_ADDRESS_LINE}
+          </p>
+          <p className="mt-1 text-[11px] leading-relaxed text-white/25">
+            Consumer care:{" "}
+            <a href={`mailto:${COMPANY.email}`} className="hover:text-white/50 transition-colors">
+              {COMPANY.email}
+            </a>{" "}
+            ·{" "}
+            <a href={COMPANY.phoneHref} className="hover:text-white/50 transition-colors">
+              {COMPANY.phone}
+            </a>{" "}
+            · Country of origin: {COMPANY.countryOfOrigin}
+          </p>
+        </div>
+      </div>
+
       {/* ── Bottom bar ─────────────────────────────────── */}
       <div className="border-t border-white/6">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
           <p className="text-[11px] text-white/20 tracking-wide">
-            © 2026 Zewa Ecosystems Pvt Ltd · All rights reserved
+            © 2026 {COMPANY.legalName} · All rights reserved
           </p>
-          <div className="flex items-center gap-5">
-            <a href="#" className="text-[11px] text-white/20 hover:text-white/45 transition-colors tracking-wide">Privacy Policy</a>
-            <span className="text-white/10">·</span>
-            <a href="#" className="text-[11px] text-white/20 hover:text-white/45 transition-colors tracking-wide">Terms of Use</a>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            {[
+              { label: "Privacy Policy", href: "/privacy" },
+              { label: "Terms of Use", href: "/terms" },
+              { label: "Shipping", href: "/shipping" },
+              { label: "Returns & Refunds", href: "/returns" },
+              { label: "Contact", href: "/contact" },
+            ].map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                className="text-[11px] tracking-wide text-white/20 transition-colors hover:text-white/45"
+              >
+                {l.label}
+              </a>
+            ))}
           </div>
         </div>
       </div>
