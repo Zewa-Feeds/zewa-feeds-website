@@ -7,14 +7,14 @@ const SLIDE_DURATION = 5000; // ms before auto-advancing tiles 1 & 2
 // ── Tile 1: WHY provocation ──────────────────────────────────────────────────
 function TileWhy() {
   return (
-    <div className="relative w-full h-full flex items-center">
+    <div className="relative w-full md:h-full flex items-center">
       {/* Illustration placeholder background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#080e1c] via-[#0d1a2e] to-[#091a18]" />
       {/* Subtle teal orb */}
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[55%] h-[80%] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
       <div className="absolute right-[10%] top-[20%] w-[30%] h-[50%] rounded-full bg-primary/8 blur-[80px] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 py-6 sm:py-0">
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-6 pb-24 md:py-0">
         <div className="max-w-2xl">
           <div className="flex items-center gap-3 mb-5 sm:mb-8">
             <div className="w-8 h-px bg-primary" />
@@ -74,11 +74,11 @@ function TileProof() {
   ];
 
   return (
-    <div className="relative w-full h-full flex items-center">
+    <div className="relative w-full md:h-full flex items-center">
       <div className="absolute inset-0 bg-gradient-to-br from-[#080e1c] via-[#0a1520] to-[#080e1c]" />
       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[40%] h-[60%] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 py-4 sm:py-8 overflow-y-auto">
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-4 pb-24 md:py-8 overflow-y-auto">
         <div className="flex items-center gap-3 mb-5 sm:mb-8">
           <div className="w-8 h-px bg-primary" />
           <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
@@ -132,7 +132,7 @@ function TileVideo({ onVideoEnd }) {
   }, [onVideoEnd]);
 
   return (
-    <div className="absolute inset-0 bg-[#080e1c]">
+    <div className="relative md:absolute md:inset-0 bg-[#080e1c]">
       {/*
         The film is 2880x1440 — a 2:1 landscape — inside a hero that is 90dvh
         tall. On a phone that frame is roughly 350x719, so filling it with
@@ -149,7 +149,7 @@ function TileVideo({ onVideoEnd }) {
         From md up the frame is wide enough that cover crops very little, and
         full-bleed is the better look, so the old behaviour is kept there.
       */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-5 md:gap-0 md:px-0 md:p-0">
+      <div className="relative md:absolute md:inset-0 flex flex-col items-center justify-center gap-4 px-5 pt-8 pb-24 md:gap-0 md:px-0 md:pt-0 md:pb-0">
         {/* Mobile-only caption, so it sits with the video rather than adrift. */}
         <div className="flex w-full items-center gap-3 md:hidden">
           <div className="h-px w-8 bg-primary" />
@@ -242,11 +242,29 @@ export default function Hero() {
     goTo(0); // loop back to tile 1 after video
   }, [goTo]);
 
+  /*
+   * HEIGHT IS CONTENT-DRIVEN ON MOBILE, viewport-driven from md up.
+   *
+   * This was a flat 90dvh with a 620px floor at every width. On a phone that is
+   * ~759px, while the slides need roughly 340-570px — so the shorter ones sat in
+   * about 420px of empty background, above and below the content.
+   *
+   * Mobile now sizes to whatever the active slide needs (with a floor so the
+   * shortest slide still reads as a hero, and a cap so the tallest never exceeds
+   * the viewport). The desktop treatment is unchanged: a fixed 90dvh canvas is
+   * what makes the full-bleed video and the side arrows work.
+   */
   return (
-    <section className="relative w-full pt-20" style={{ height: "90dvh", minHeight: "620px" }}>
-      {/* Slides */}
+    <section
+      className="relative w-full pt-20 min-h-[26rem] max-h-[100dvh] md:h-[90dvh] md:min-h-[620px] md:max-h-none"
+    >
+      {/*
+        Slides are in normal flow on mobile so their height sizes the section;
+        absolutely positioned from md up, where the section has a fixed height
+        and the slides fill it.
+      */}
       <div
-        className="absolute inset-0 overflow-hidden transition-opacity duration-[400ms]"
+        className="relative md:absolute md:inset-0 overflow-hidden transition-opacity duration-[400ms]"
         style={{ opacity: animating ? 0 : 1 }}
       >
         {current === 0 && <TileWhy />}
