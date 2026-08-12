@@ -44,7 +44,13 @@ export function adaptProduct(api) {
    */
   const packs = api.packs ?? [];
   const first = packs.find((p) => p.inStock !== false) ?? packs[0];
+  /*
+   * Whitespace-stripped for tag MATCHING (the filter normalises the same way).
+   * `packLabels` keeps the readable form, because these strings are also shown
+   * on the filter chips — "45g — Pack of 2", not "45g—Packof2".
+   */
   const packSizes = (api.packs ?? []).map((v) => v.pack.replace(/\s+/g, ""));
+  const packLabels = (api.packs ?? []).map((v) => v.pack);
 
   /*
    * CARD GALLERY = THE BASE PACK ONLY, plus shared assets.
@@ -72,6 +78,8 @@ export function adaptProduct(api) {
     slug: api.slug,
     // Filter chips match on category and pack size.
     tags: [api.category, ...packSizes],
+    /** Readable pack names, for display rather than matching. */
+    packLabels,
     tagline: api.shortDesc,
     price: first ? first.pricePaise / 100 : 0,
     mrp: first && first.mrpPaise > first.pricePaise ? formatInr(first.mrpPaise) : null,

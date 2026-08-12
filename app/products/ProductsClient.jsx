@@ -46,15 +46,48 @@ const TRUST_BADGES = [
 ];
 
 
-const CATEGORIES = [
-  "All",
-  "Dried BSF Larvae",
-  "Slow Sinking Pellets",
-  "Floating Pellets",
-  "Bottom Dwellers",
-  "Hatchery Feeds",
-  "1kg Packs",
-];
+/**
+ * Filter chips, derived from the catalogue actually being displayed.
+ *
+ * This was a hardcoded list of seven written for a fuller range than exists.
+ * Three of them — "Dried BSF Larvae", "Bottom Dwellers", "Hatchery Feeds" —
+ * matched no product, so a shopper clicking them got an empty grid on a store
+ * that takes payments. Deriving the list means a chip can only appear if
+ * something is behind it, and new categories show up on their own as the
+ * catalogue grows.
+ *
+ * Categories come first (the primary axis), then pack sizes, matching how
+ * `tags` is assembled in adapters.js.
+ */
+function buildCategories(products) {
+  const categories = [];
+  const sizes = [];
+
+  for (const p of products) {
+    const [category] = p.tags ?? [];
+    if (category && !categories.includes(category)) categories.push(category);
+    for (const label of p.packLabels ?? []) {
+      if (label && !sizes.includes(label)) sizes.push(label);
+    }
+  }
+
+  /*
+   * Multi-packs ("45g — Pack of 2") are a purchase option, not a way anyone
+   * browses a catalogue, and listing all seven pushed the real categories off
+   * the left of the strip. Only plain weights become chips.
+   */
+  const plain = sizes.filter((s) => /^[\d.]+\s*(kg|g)\b/i.test(s) && !/pack of/i.test(s));
+
+  // Sort by actual weight — otherwise "1kg" sorts before "200g".
+  const grams = (s) => {
+    const m = /^([\d.]+)\s*(kg|g)\b/i.exec(String(s).trim());
+    if (!m) return Number.MAX_SAFE_INTEGER;
+    return parseFloat(m[1]) * (m[2].toLowerCase() === "kg" ? 1000 : 1);
+  };
+  plain.sort((a, b) => grams(a) - grams(b));
+
+  return ["All", ...categories, ...plain];
+}
 
 function ProductCard({ p }) {
   const gallery = p.gallery || [p.image];
@@ -914,6 +947,18 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory }
    * showing a fictional one is not.
    */
   const PRODUCTS = products;
+  /*
+   * Derived per render from the catalogue in hand, so the chips and the grid
+   * can never disagree about what exists.
+   */
+  const CATEGORIES = buildCategories(PRODUCTS);
+  /*
+   * A ?category= value that no longer exists — an old bookmark, or a chip
+   * removed as the catalogue changed — would leave the grid empty with no chip
+   * highlighted, which reads as a broken page rather than an empty filter.
+   * Falling back to "All" shows the catalogue instead.
+   */
+  const activeCategory = CATEGORIES.includes(active) ? active : "All";
   const loading = false;
   const failed = loadFailed;
   /*
@@ -994,11 +1039,11 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory }
   };
 
   const filtered =
-    active === "All"
+    activeCategory === "All"
       ? PRODUCTS
       : PRODUCTS.filter((p) => {
-          const target = norm(active);
-          const size = sizeToken(active);
+          const target = norm(activeCategory);
+          const size = sizeToken(activeCategory);
           return p.tags.some((tag) => {
             const t = norm(tag);
             if (size) return sizeToken(tag) === size;
@@ -1102,7 +1147,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory }
                   key={cat}
                   onClick={() => selectCategory(cat)}
                   className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-[0.08em] uppercase font-[Montserrat] transition-all duration-200 ${
-                    active === cat
+                    activeCategory === cat
                       ? "bg-primary text-[#00382d]"
                       : "text-white/35 hover:text-white/65 hover:bg-white/5"
                   }`}
