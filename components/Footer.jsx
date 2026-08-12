@@ -237,9 +237,16 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* ── Bottom bar ─────────────────────────────────── */}
-      <div className="border-t border-white/6">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+      {/*
+        ── Bottom bar ───────────────────────────────────
+
+        No border of its own. The seller-identity block above already opens with
+        one, and a second rule here drew two lines a few pixels apart with only
+        the address between them. Both blocks are fine print, so they read as a
+        single group under one rule.
+      */}
+      <div>
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 pb-5 flex flex-col sm:flex-row justify-between items-center gap-3">
           <p className="text-[11px] text-white/20 tracking-wide">
             © 2026 {COMPANY.legalName} · All rights reserved
           </p>
