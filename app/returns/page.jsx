@@ -39,7 +39,7 @@ export default function ReturnsPage() {
       <PolicySection heading="What we cannot accept">
         <p>
           Opened packs, unless the contents were defective. Change of mind once a
-          consumable food product has been dispatched. Claims raised more than 7
+          consumable food product has been dispatched. Claims raised more than 3
           days after delivery.
         </p>
       </PolicySection>
@@ -50,7 +50,7 @@ export default function ReturnsPage() {
           <a href={`mailto:${COMPANY.email}`} className="text-primary hover:underline">
             {COMPANY.email}
           </a>{" "}
-          within <strong className="text-white/75">7 days of delivery</strong> with
+          within <strong className="text-white/75">3 days of delivery</strong> with
           your order number and photographs of the item and its packaging.
         </p>
         <p>

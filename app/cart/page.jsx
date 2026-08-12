@@ -172,8 +172,15 @@ export default function CartPage() {
                 <div className="pt-4 border-t border-white/6 flex flex-col gap-2.5">
                   {[
                     { text: "Secure checkout", svg: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /> },
-                    { text: "Free shipping above ₹499", svg: <path d="M1 3h15v11H1zM16 8h4l3 3v3h-7V8zM5.5 17a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 17a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /> },
-                    { text: "Easy returns within 7 days", svg: <path d="M9 14L5 10l4-4M5 10h8a4 4 0 010 8h-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /> },
+                    /*
+                     * The live setting is a ₹999 free threshold (CMS -> Settings ->
+                     * Shipping, freeThresholdPaise 99900). This badge said ₹499,
+                     * which promised free delivery on orders that are charged ₹60.
+                     */
+                    { text: "Free shipping above ₹999", svg: <path d="M1 3h15v11H1zM16 8h4l3 3v3h-7V8zM5.5 17a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 17a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /> },
+                    // Must match /returns — a trust badge that overstates the window on the
+                    // cart is a promise made at the moment of payment.
+                    { text: "Easy returns within 3 days", svg: <path d="M9 14L5 10l4-4M5 10h8a4 4 0 010 8h-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /> },
                   ].map((t, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5 text-primary/40 shrink-0">{t.svg}</svg>
