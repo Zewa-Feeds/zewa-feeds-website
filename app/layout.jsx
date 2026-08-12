@@ -27,9 +27,8 @@ const playfair = Playfair_Display({
  *
  * Override with NEXT_PUBLIC_SITE_URL at build time when the domain changes.
  */
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://zewafeeds.com"
-).replace(/\/$/, "");
+export { SITE_URL } from "@/lib/site";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),

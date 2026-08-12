@@ -86,7 +86,9 @@ const nav = {
     { label: "Knowledge Hub", href: "/blog" },
     { label: "Feeding Guides", href: "#", soon: true },
     { label: "Hatchery Resources", href: "#", soon: true },
-    { label: "Our Science", href: "#", soon: true },
+    // Live: #science is the R&D section on the homepage. The nav links it too,
+    // so marking it "Coming Soon" here contradicted the header.
+    { label: "Our Science", href: "/#science" },
   ],
   Company: [
     { label: "Find Nearest Dealer", href: "#", soon: true },

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { catalog } from "@/lib/api";
 import ProductDetail from "./ProductDetail";
-import { SITE_URL } from "@/app/layout";
+import { SITE_URL } from "@/lib/site";
 
 /**
  * Product detail page — one route for the whole catalogue.

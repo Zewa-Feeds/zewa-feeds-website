@@ -22,7 +22,11 @@ const VIEW_ALL = { label: "View all products →", href: "/products", accent: tr
 const LEARN_MENU = [
   { label: "Knowledge Hub",  href: "/blog" },
   { label: "Our Science",    href: "/#science" },
-  { label: "Sustainability", href: "/blog/ammonia-reduction-high-absorption-diets" },
+  /*
+   * Renamed to match its destination. It read "Sustainability" but pointed at
+   * a single article, so it promised a section that does not exist.
+   */
+  { label: "Ammonia & Water Quality", href: "/blog/ammonia-reduction-high-absorption-diets" },
   { label: "About Zewa",    href: "/about" },
   { label: "Browse all articles →", href: "/blog", accent: true },
 ];

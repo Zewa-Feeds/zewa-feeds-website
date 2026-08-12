@@ -165,6 +165,30 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
     return [forPack[leadIdx], ...forPack.filter((_, i) => i !== leadIdx)];
   })();
 
+  /**
+   * Alt text for a gallery item.
+   *
+   * The CMS `alt` field is optional and mostly unfilled, so the gallery was
+   * emitting empty alt on thumbnails and bare "<name> — 2" on the main frame:
+   * useless to a screen reader, which hears the product name repeated once per
+   * image with no way to tell them apart.
+   *
+   * A CMS-authored alt always wins. Otherwise describe what the slide actually
+   * is — the pack it belongs to, or its position — so each one is distinct.
+   */
+  const mediaAlt = (item, i) => {
+    if (item?.alt?.trim()) return item.alt.trim();
+    if (item?.type === "VIDEO") return `${product.name} product video`;
+
+    const packLabel = item?.sku
+      ? product.packs?.find((p) => p.sku === item.sku)?.pack
+      : null;
+    if (packLabel) return `${product.name}, ${packLabel} pack`;
+    return i === 0
+      ? `${product.name} pack`
+      : `${product.name}, view ${i + 1} of ${media.length}`;
+  };
+
   const primaryImage = media.find((m) => m.type === "IMAGE")?.url ?? media[0]?.url;
   const [activeIndex, setActiveIndex] = useState(0);
   const active = media[activeIndex] ?? media[0];
@@ -352,7 +376,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 ) : (
                   <Image
                     src={active?.url ?? primaryImage}
-                    alt={active?.alt ?? product.name}
+                    alt={mediaAlt(active, activeIndex)}
                     width={640}
                     height={640}
                     /*
@@ -443,7 +467,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                       {/* A video thumbnail is its poster frame — never the video. */}
                       <Image
                         src={item.type === "VIDEO" ? (item.posterUrl ?? primaryImage) : item.url}
-                        alt={item.alt ?? ""}
+                        alt={mediaAlt(item, i)}
                         width={72}
                         height={72}
                         // Same rule as the main frame: pad cutouts, let

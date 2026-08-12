@@ -16,6 +16,7 @@ import {
   Takeaways,
 } from "@/components/blog/ArticleBlocks";
 import { ReadingProgress, TableOfContents } from "@/components/blog/ArticleNav";
+import { SITE_URL } from "@/lib/site";
 
 function renderBlock(block, i, tagColor) {
   switch (block.type) {
@@ -104,8 +105,40 @@ export default function ArticlePage() {
   const related = ARTICLES.filter((a) => a.slug !== slug).slice(0, 2);
   const hasToc = article.toc?.length > 0;
 
+  /*
+   * Article structured data. The route had none, so search engines saw the
+   * posts as untyped pages with no author, publisher or publication date —
+   * none of which they can infer from the visible layout.
+   *
+   * datePublished needs ISO 8601; article.date is the human-readable form
+   * ("22 April 2026"), which is why every record carries isoDate alongside it.
+   */
+  const articleLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.excerpt,
+    image: article.image ? `${SITE_URL}${article.image}` : undefined,
+    datePublished: article.isoDate,
+    dateModified: article.isoDate,
+    author: { "@type": "Organization", name: article.author || "Zewa Feeds" },
+    publisher: {
+      "@type": "Organization",
+      name: "Zewa Feeds",
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png` },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}/blog/${article.slug}`,
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+      />
       {article.toc?.length > 0 && (
         <ReadingProgress targetId="article-body" accent={article.tagColor} />
       )}
@@ -152,7 +185,7 @@ export default function ArticlePage() {
               </span>
               <span className="text-[11px] text-white/30 font-[Montserrat]">{article.readTime} read</span>
               <span className="text-white/12 select-none">·</span>
-              <span className="text-[11px] text-white/30 font-[Montserrat]">{article.date}</span>
+              <time dateTime={article.isoDate} className="text-[11px] text-white/30 font-[Montserrat]">{article.date}</time>
             </div>
 
             <h1 className="font-[Playfair_Display] text-white leading-[1.1] mb-5"

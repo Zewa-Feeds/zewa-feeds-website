@@ -373,6 +373,16 @@ export default async function AboutPage() {
                     <p className="font-body-md mt-8 text-[12.5px] tracking-wide text-white/35">
                       {product.spec}
                     </p>
+                    {/*
+                      Unpublished lines were rendered as dead cards, visually
+                      identical to the ones that navigate. Saying so turns a
+                      broken-looking tile into a deliberate one.
+                    */}
+                    {!live && (
+                      <span className="font-label-caps mt-4 inline-block self-start rounded-full border border-white/15 px-2.5 py-1 text-[9px] tracking-[0.16em] text-white/40">
+                        COMING SOON
+                      </span>
+                    )}
                   </Card>
                 </li>
               );
