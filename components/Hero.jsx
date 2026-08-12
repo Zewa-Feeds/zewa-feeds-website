@@ -133,15 +133,48 @@ function TileVideo({ onVideoEnd }) {
 
   return (
     <div className="absolute inset-0 bg-[#080e1c]">
-      {/* Mobile: padded framed video with breathing room around it */}
-      <div className="absolute inset-0 flex items-center justify-center p-5 sm:p-8 md:p-0">
-        <div className="relative w-full h-full overflow-hidden rounded-2xl md:rounded-none">
+      {/*
+        The film is 2880x1440 — a 2:1 landscape — inside a hero that is 90dvh
+        tall. On a phone that frame is roughly 350x719, so filling it with
+        object-cover cropped away about 76% of the width: viewers saw a narrow
+        vertical strip of the middle, not the shot.
+
+        So on mobile it is letterboxed into a 16:9 window, the way a player
+        shows a landscape clip on a portrait screen. 16:9 rather than the source
+        2:1 deliberately: at full 2:1 the video is only about 25% of the hero
+        height and reads as a thin strip, whereas a 16:9 window still shows
+        ~89% of the frame while occupying a sensible amount of the slide. The
+        crop drops from roughly 76% to 11%.
+
+        From md up the frame is wide enough that cover crops very little, and
+        full-bleed is the better look, so the old behaviour is kept there.
+      */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-5 md:gap-0 md:px-0 md:p-0">
+        {/* Mobile-only caption, so it sits with the video rather than adrift. */}
+        <div className="flex w-full items-center gap-3 md:hidden">
+          <div className="h-px w-8 bg-primary" />
+          <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
+            BRAND FILM
+          </span>
+        </div>
+        {/*
+          aspect-video (16/9) as a CLASS, not an inline style: an inline
+          aspect-ratio wins over any breakpoint class, so md:aspect-auto could
+          never restore the full-bleed desktop frame.
+        */}
+        <div className="relative w-full aspect-video overflow-hidden rounded-2xl md:aspect-auto md:h-full md:rounded-none">
           <video
             ref={videoRef}
             muted
             playsInline
             poster="/videos/brand_poster.jpg"
-            className="absolute inset-0 w-full h-full object-cover"
+            /*
+             * cover at both sizes — the 16:9 window is what limits the crop,
+             * not the fit. contain here would refit the 2:1 source by width and
+             * add its own bars inside the window, making the 16:9 framing
+             * pointless: 76% cropped becomes 11%, not 0%.
+             */
+            className="absolute inset-0 h-full w-full object-cover"
           >
             <source src="/videos/brand_video.webm" type="video/webm" />
             <source src="/videos/brand_video.mp4" type="video/mp4" />
@@ -151,12 +184,21 @@ function TileVideo({ onVideoEnd }) {
         </div>
       </div>
 
-      {/* Label */}
-      <div className="absolute top-24 left-8 sm:left-12 flex items-center gap-3 z-10">
-        <div className="w-8 h-px bg-primary" />
-        <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
-          BRAND FILM
-        </span>
+      {/*
+        Label.
+
+        On mobile it is anchored just above the letterboxed video rather than at
+        top-24, where it floated in the empty band with nothing under it. From md
+        up the video is full-bleed again, so it returns to the absolute position
+        it has always had.
+      */}
+      <div className="absolute inset-0 hidden md:flex md:items-start md:justify-start pointer-events-none">
+        <div className="mt-24 ml-8 sm:ml-12 flex items-center gap-3">
+          <div className="h-px w-8 bg-primary" />
+          <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
+            BRAND FILM
+          </span>
+        </div>
       </div>
     </div>
   );
