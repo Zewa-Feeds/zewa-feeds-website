@@ -1,26 +1,19 @@
 import Image from "next/image";
 import Reveal from "./Reveal";
+import { ARTICLES as ALL_ARTICLES } from "@/lib/articles";
 
-const ARTICLES = [
-  {
-    tag: "BIOLOGY",
-    readTime: "6 min",
-    title: "Microbiome health and the impact of insect chitin.",
-    slug: "microbiome-health-insect-chitin",
-  },
-  {
-    tag: "SUSTAINABILITY",
-    readTime: "4 min",
-    title: "Reducing ammonia output through high-absorption diets.",
-    slug: "ammonia-reduction-high-absorption-diets",
-  },
-  {
-    tag: "NUTRITION",
-    readTime: "5 min",
-    title: "The role of carotenoids in natural colour enhancement.",
-    slug: "carotenoids-natural-color-enhancement",
-  },
-];
+/*
+ * Read from the real article source rather than a hand-kept copy.
+ *
+ * This list used to be duplicated here, and it drifted: it still pointed at
+ * "microbiome-health-insect-chitin" after that article was re-slugged, so the
+ * homepage linked to a 404. Deriving it means the two can no longer disagree.
+ *
+ * Ordered newest first and capped at three — this is a teaser, not the index.
+ */
+const ARTICLES = [...ALL_ARTICLES]
+  .sort((a, b) => (a.isoDate < b.isoDate ? 1 : -1))
+  .slice(0, 3);
 
 export default function KnowledgeHub() {
   return (
