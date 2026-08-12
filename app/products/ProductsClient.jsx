@@ -60,6 +60,20 @@ function ProductCard({ p }) {
   const gallery = p.gallery || [p.image];
   const [imgIdx, setImgIdx] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
+  /**
+   * Is the image well currently showing its LIGHT treatment?
+   *
+   * Drives the well background, the accent wash, and the contrast of the
+   * arrows and dots drawn over it — all of which were built white-on-dark and
+   * vanish against a light backdrop.
+   *
+   * Unlike the PDP, this is NOT decided per image. The grid shows every product
+   * side by side, so keying off each card's current slide made cards flip
+   * between light and dark as their galleries auto-rotated — some products lead
+   * with a PNG cutout, others with a JPEG. The well stays light for every card
+   * and only reverts for video, which brings its own dark frame.
+   */
+  const onLight = !showVideo;
   const autoTimerRef = useRef(null);
   const videoTimerRef = useRef(null);
   const videoRef = useRef(null);
@@ -142,10 +156,28 @@ function ProductCard({ p }) {
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor || "rgba(68,229,194,0.12)"}, transparent)` }} />
 
-      {/* Image / Video zone */}
-      <div className="relative flex items-center justify-center pt-8 pb-4 px-6" style={{ minHeight: "220px" }}>
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: `radial-gradient(circle at 50% 60%, ${p.accentColor || "rgba(68,229,194,0.10)"}, transparent 65%)` }} />
+      {/*
+        Image / Video zone.
+
+        Cutout artwork is dark-on-transparent and was unreadable against the
+        dark card — the same problem already fixed on the PDP, so the same rule
+        applies here: a light well behind cutouts, nothing behind full-bleed
+        photography or video, which bring their own background.
+
+        The accent wash only reads on the dark treatment; over the light well it
+        muddies the artwork, so it is skipped there.
+      */}
+      <div
+        className="relative flex items-center justify-center pt-8 pb-4 px-6"
+        style={{
+          minHeight: "220px",
+          background: onLight ? (p.accentBg ?? "#f4f7f6") : "transparent",
+        }}
+      >
+        {!onLight && (
+          <div className="absolute inset-0 pointer-events-none"
+            style={{ background: `radial-gradient(circle at 50% 60%, ${p.accentColor || "rgba(68,229,194,0.10)"}, transparent 65%)` }} />
+        )}
 
         {/* Gallery images — crossfade */}
         {gallery.map((src, gi) => (
@@ -157,7 +189,11 @@ function ProductCard({ p }) {
             height={220}
             className="absolute object-contain max-h-[200px] w-auto pointer-events-none"
             style={{
-              filter: "drop-shadow(0 12px 32px rgba(0,0,0,0.5))",
+              // Tuned to the well, not the file type: the heavy dark shadow
+              // reads as grime on a light backdrop.
+              filter: onLight
+                ? "drop-shadow(0 10px 22px rgba(11,18,32,0.18))"
+                : "drop-shadow(0 12px 32px rgba(0,0,0,0.5))",
               opacity: !showVideo && gi === imgIdx ? 1 : 0,
               transform: !showVideo && gi === imgIdx ? "scale(1.05) translateY(-4px)" : "scale(1) translateY(0)",
               transition: "opacity 0.4s ease, transform 0.4s ease",
@@ -216,10 +252,10 @@ function ProductCard({ p }) {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              className="absolute left-1 top-1/2 -translate-y-1/2 z-30 flex h-6 w-6 items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-white/10"
+              className={`absolute left-1 top-1/2 -translate-y-1/2 z-30 flex h-6 w-6 items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${onLight ? "hover:bg-black/5" : "hover:bg-white/10"}`}
             >
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" }}>
-                <path d="M7.5 2L3.5 6L7.5 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ filter: onLight ? "none" : "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" }}>
+                <path d="M7.5 2L3.5 6L7.5 10" stroke={onLight ? "#0b1220" : "white"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
             <button
@@ -236,10 +272,10 @@ function ProductCard({ p }) {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              className="absolute right-1 top-1/2 -translate-y-1/2 z-30 flex h-6 w-6 items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-white/10"
+              className={`absolute right-1 top-1/2 -translate-y-1/2 z-30 flex h-6 w-6 items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${onLight ? "hover:bg-black/5" : "hover:bg-white/10"}`}
             >
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" }}>
-                <path d="M4.5 2L8.5 6L4.5 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ filter: onLight ? "none" : "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" }}>
+                <path d="M4.5 2L8.5 6L4.5 10" stroke={onLight ? "#0b1220" : "white"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
@@ -247,7 +283,7 @@ function ProductCard({ p }) {
             <div className="absolute bottom-1 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               {gallery.map((_, gi) => (
                 <span key={gi} className="block rounded-full transition-all duration-300"
-                  style={{ width: gi === imgIdx ? "16px" : "4px", height: "4px", background: gi === imgIdx ? "rgba(68,229,194,1)" : "rgba(255,255,255,0.25)" }} />
+                  style={{ width: gi === imgIdx ? "16px" : "4px", height: "4px", background: gi === imgIdx ? (onLight ? "#00755f" : "rgba(68,229,194,1)") : (onLight ? "rgba(11,18,32,0.22)" : "rgba(255,255,255,0.25)") }} />
               ))}
             </div>
           </>

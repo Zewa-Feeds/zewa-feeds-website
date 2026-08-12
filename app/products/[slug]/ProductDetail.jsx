@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReviewForm from "@/components/ReviewForm";
 import { useCart } from "@/lib/cartContext";
+import { isCutout } from "@/app/products/adapters";
 import { discountPct, formatInr } from "@/lib/api";
 import { COMPANY, COMPANY_ADDRESS_LINE } from "@/lib/company";
 
@@ -60,8 +61,6 @@ function tidyExcerpt(text, limit = 200) {
     .replace(/[\s,;:.\-–—]+$/, "");  // and any dangling punctuation
   return `${cleaned}…`;
 }
-
-const isCutout = (url) => /\.png(\?|$)/i.test(url ?? "");
 
 export default function ProductDetail({ product, isDraft = false, isPreview = false }) {
   /*

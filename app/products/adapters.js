@@ -86,6 +86,12 @@ export function adaptProduct(api) {
     video,
     accentColor: api.presentation?.accent ?? "rgba(68,229,194,0.18)",
     /*
+     * Backdrop for the card's image well, matching the PDP gallery.
+     * Artwork is dark-on-transparent, so it was unreadable against the dark
+     * card. Same #f4f7f6 fallback the PDP uses.
+     */
+    accentBg: api.presentation?.accentBg ?? "#f4f7f6",
+    /*
      * Stock of the pack this card sells — NOT api.inStock.
      *
      * api.inStock is true when any pack is available, so using it here let the
@@ -128,3 +134,15 @@ export function adaptSpotlight(api) {
     stat: api.subText ?? "",
   };
 }
+
+/**
+ * Is this asset a transparent cutout rather than a full-bleed photo?
+ *
+ * Cutout artwork is dark-on-transparent, so it disappears against the dark
+ * card and PDP surfaces and needs a light backdrop behind it. Full-bleed
+ * photography brings its own background and must stay edge to edge.
+ *
+ * PNG is the signal: the catalogue exports cutouts as PNG and photographs as
+ * JPEG. Shared so the card grid and the PDP cannot drift apart on this.
+ */
+export const isCutout = (url) => /\.png(\?|$)/i.test(url ?? "");
