@@ -4,22 +4,27 @@ import { COMPANY } from "@/lib/company";
 export const metadata = {
   title: "Shipping Policy",
   description:
-    "Delivery timelines, shipping charges and dispatch information for Zewa Feeds orders across India.",
+    "Delivery timelines and dispatch information for Zewa Feeds orders across India.",
   alternates: { canonical: "/shipping" },
 };
 
 /*
- * Figures match the live store settings (CMS → Settings → Shipping):
- * free above ₹999, ₹60 below, 3–5 business days. If those change in the CMS,
- * this page must be updated to match — a published policy that contradicts
- * what checkout charges is worse than no policy.
+ * NO CHARGES SECTION HERE, deliberately.
+ *
+ * It previously published fixed rates (free above ₹999, ₹60 below). Those are
+ * not settled, and a policy page that contradicts what checkout actually
+ * charges is worse than one that stays quiet: checkout shows the real figure
+ * before payment, which is what the E-Commerce Rules require.
+ *
+ * Timelines below do match CMS → Settings → Shipping. If those change there,
+ * update this page too.
  */
 export default function ShippingPage() {
   return (
     <PolicyPage
       title="Shipping Policy"
       updated="9 August 2026"
-      intro="How and when we dispatch orders, what delivery costs, and what to do if something goes wrong in transit."
+      intro="How and when we dispatch orders, and what to do if something goes wrong in transit."
     >
       <PolicySection heading="Where we deliver">
         <p>
@@ -29,17 +34,6 @@ export default function ShippingPage() {
           A small number of PIN codes are not serviceable by our courier partners.
           If yours is one of them, checkout will tell you before you pay.
         </p>
-      </PolicySection>
-
-      <PolicySection heading="Charges">
-        <p>
-          <strong className="text-white/75">Free delivery</strong> on orders of
-          ₹999 and above.
-        </p>
-        <p>
-          <strong className="text-white/75">₹60 flat</strong> on orders below ₹999.
-        </p>
-        <p>The exact charge is shown at checkout before payment.</p>
       </PolicySection>
 
       <PolicySection heading="Dispatch and delivery time">
@@ -73,7 +67,7 @@ export default function ShippingPage() {
             {COMPANY.email}
           </a>
           . If tracking shows delivered but you have not received it, tell us
-          within 7 days and we will raise it with the courier.
+          within 3 days and we will raise it with the courier.
         </p>
       </PolicySection>
     </PolicyPage>

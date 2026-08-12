@@ -51,6 +51,14 @@ function Eyebrow({ children, onLight = false }) {
  * className — so children carrying an explicit `text-white` must still be
  * overridden at the call site.
  */
+/**
+ * Is the founder section shown?
+ *
+ * Hidden for now at the team's request. The block and its content are left
+ * intact — flip this to true to bring it back.
+ */
+const SHOW_FOUNDER = false;
+
 function Section({ children, tone = "dark", className = "" }) {
   const bg =
     tone === "light"
@@ -136,8 +144,15 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* ── MISSION & VISION ──────────────────────────────────────── */}
-        <Section tone="raised" className="border-y border-white/5">
+        {/*
+          ── MISSION & VISION ────────────────────────────────────────
+
+          Keeps the LIGHT treatment it was designed for: the eyebrow renders
+          onLight and the copy is #0b1220 ink. Moving this above Our Story
+          earlier swapped the tones to preserve the light/dark alternation, which
+          left dark ink on a dark panel here and white text on white below.
+        */}
+        <Section tone="light">
           <div className="grid gap-10 md:grid-cols-2 md:gap-14">
             {PURPOSE.map((item) => (
               <div key={item.label}>
@@ -153,8 +168,8 @@ export default async function AboutPage() {
           </div>
         </Section>
 
-        {/* ── OUR STORY ─────────────────────────────────────────────── */}
-        <Section tone="light">
+        {/* ── OUR STORY — dark, matching its text-white copy ────────── */}
+        <Section tone="raised" className="border-y border-white/5">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
             <div>
               <Eyebrow>{STORY.eyebrow}</Eyebrow>
@@ -392,16 +407,14 @@ export default async function AboutPage() {
           </ul>
         </Section>
 
-        {/* ── FOUNDER ───────────────────────────────────────────────── */}
         {/*
-          Closes the page rather than opening it.
+          ── FOUNDER ─────────────────────────────────────────────────
 
-          The FOUNDER record existed in lib/about.js but was never rendered, so
-          a page about the company named nobody who runs it — the one thing a
-          distributor or wholesale buyer checks an About page for. It sits after
-          the range and before the CTA: by this point the argument is made, and
-          the founder is the person standing behind it.
+          HIDDEN FOR NOW. Kept in place rather than deleted: the content is
+          finished and the portrait exists, so bringing it back is a one-line
+          change — flip SHOW_FOUNDER to true.
         */}
+        {SHOW_FOUNDER && (
         <Section tone="raised" className="border-y border-white/5">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:gap-16">
             <div>
@@ -468,6 +481,7 @@ export default async function AboutPage() {
             </div>
           </div>
         </Section>
+        )}
 
         {/* ── CTA ───────────────────────────────────────────────────── */}
         <Section className="border-t border-white/5">
