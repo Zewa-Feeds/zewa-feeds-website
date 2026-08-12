@@ -73,7 +73,13 @@ function ProductCard({ p }) {
    * with a PNG cutout, others with a JPEG. The well stays light for every card
    * and only reverts for video, which brings its own dark frame.
    */
-  const onLight = !showVideo;
+  /*
+   * The gallery controls sit ON the photograph now that it fills the well, and
+   * the photos disagree — white for Koi, dark navy for Betta. Neither a light
+   * nor a dark treatment works across both, so the controls carry their own
+   * contrast: a translucent dark scrim with a white glyph, which reads on
+   * anything underneath.
+   */
   const autoTimerRef = useRef(null);
   const videoTimerRef = useRef(null);
   const videoRef = useRef(null);
@@ -159,43 +165,38 @@ function ProductCard({ p }) {
       {/*
         Image / Video zone.
 
-        Cutout artwork is dark-on-transparent and was unreadable against the
-        dark card — the same problem already fixed on the PDP, so the same rule
-        applies here: a light well behind cutouts, nothing behind full-bleed
-        photography or video, which bring their own background.
+        Photography FILLS this area rather than sitting inside it.
 
-        The accent wash only reads on the dark treatment; over the light well it
-        muddies the artwork, so it is skipped there.
+        Each product's imagery carries its own backdrop, and they disagree: the
+        Koi shot is white, Betta is dark navy, Guppy is a transparent cutout.
+        Any well colour chosen here therefore framed at least one of them as a
+        visible rectangle in a second, slightly different shade. Letting the
+        photo cover the well makes its own background the card's background, so
+        there is no second colour to mismatch.
+
+        The white underlay is for transparent cutouts only — they have no
+        background of their own and would otherwise show the dark card through.
+        The well is SQUARE because the source photography is 1:1. At the old
+        220px-tall letterbox, object-cover cropped the packs badly — Betta lost
+        its lower half. Matching the source aspect means the photo fills the
+        well with no crop at all.
       */}
       <div
-        className="relative flex items-center justify-center pt-8 pb-4 px-6"
-        style={{
-          minHeight: "220px",
-          background: onLight ? (p.accentBg ?? "#f4f7f6") : "transparent",
-        }}
+        className="relative aspect-square overflow-hidden"
+        style={{ background: "#ffffff" }}
       >
-        {!onLight && (
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ background: `radial-gradient(circle at 50% 60%, ${p.accentColor || "rgba(68,229,194,0.10)"}, transparent 65%)` }} />
-        )}
-
         {/* Gallery images — crossfade */}
         {gallery.map((src, gi) => (
           <Image
             key={src}
             src={src}
             alt={`${p.name} ${gi + 1}`}
-            width={220}
-            height={220}
-            className="absolute object-contain max-h-[200px] w-auto pointer-events-none"
+            width={440}
+            height={440}
+            className="absolute inset-0 h-full w-full object-cover pointer-events-none"
             style={{
-              // Tuned to the well, not the file type: the heavy dark shadow
-              // reads as grime on a light backdrop.
-              filter: onLight
-                ? "drop-shadow(0 10px 22px rgba(11,18,32,0.18))"
-                : "drop-shadow(0 12px 32px rgba(0,0,0,0.5))",
               opacity: !showVideo && gi === imgIdx ? 1 : 0,
-              transform: !showVideo && gi === imgIdx ? "scale(1.05) translateY(-4px)" : "scale(1) translateY(0)",
+              transform: !showVideo && gi === imgIdx ? "scale(1.02)" : "scale(1)",
               transition: "opacity 0.4s ease, transform 0.4s ease",
               zIndex: gi === imgIdx ? 2 : 1,
             }}
@@ -252,10 +253,10 @@ function ProductCard({ p }) {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              className={`absolute left-1 top-1/2 -translate-y-1/2 z-30 flex h-6 w-6 items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${onLight ? "hover:bg-black/5" : "hover:bg-white/10"}`}
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-black/60"
             >
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ filter: onLight ? "none" : "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" }}>
-                <path d="M7.5 2L3.5 6L7.5 10" stroke={onLight ? "#0b1220" : "white"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                <path d="M7.5 2L3.5 6L7.5 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
             <button
@@ -272,10 +273,10 @@ function ProductCard({ p }) {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              className={`absolute right-1 top-1/2 -translate-y-1/2 z-30 flex h-6 w-6 items-center justify-center rounded-full opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${onLight ? "hover:bg-black/5" : "hover:bg-white/10"}`}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm opacity-0 transition-all duration-200 group-hover:opacity-100 hover:bg-black/60"
             >
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ filter: onLight ? "none" : "drop-shadow(0 1px 3px rgba(0,0,0,0.9))" }}>
-                <path d="M4.5 2L8.5 6L4.5 10" stroke={onLight ? "#0b1220" : "white"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                <path d="M4.5 2L8.5 6L4.5 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
 
@@ -283,7 +284,7 @@ function ProductCard({ p }) {
             <div className="absolute bottom-1 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
               {gallery.map((_, gi) => (
                 <span key={gi} className="block rounded-full transition-all duration-300"
-                  style={{ width: gi === imgIdx ? "16px" : "4px", height: "4px", background: gi === imgIdx ? (onLight ? "#00755f" : "rgba(68,229,194,1)") : (onLight ? "rgba(11,18,32,0.22)" : "rgba(255,255,255,0.25)") }} />
+                  style={{ width: gi === imgIdx ? "16px" : "4px", height: "4px", background: gi === imgIdx ? "rgba(68,229,194,1)" : "rgba(255,255,255,0.55)", boxShadow: "0 1px 3px rgba(0,0,0,0.45)" }} />
               ))}
             </div>
           </>
