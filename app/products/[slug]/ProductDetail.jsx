@@ -31,6 +31,35 @@ import { discountPct, formatInr } from "@/lib/api";
  * signal but an accurate one here, and it beats adding a CMS field nobody would
  * remember to set.
  */
+/**
+ * Trim to a word boundary with an ellipsis.
+ *
+ * The catalogue's `shortDesc` is a hard 200-character cut of the full
+ * description, so it ends mid-word — "…paprica essence create a m". Nothing
+ * downstream can recover the missing words, but it can at least stop at the
+ * last whole word and signal that there is more.
+ */
+function tidyExcerpt(text, limit = 200) {
+  const s = String(text ?? "").trim();
+  if (!s) return "";
+
+  /*
+   * Detect the CMS cut, do not just re-apply our own.
+   *
+   * shortDesc arrives at EXACTLY the limit, so `s.length > limit` is false and
+   * a naive check leaves the mid-word ending untouched. What marks a truncated
+   * string is that it reaches the cap and does not end in sentence punctuation.
+   */
+  const looksTruncated = s.length >= limit && !/[.!?]$/.test(s);
+  if (!looksTruncated) return s;
+
+  const cleaned = s
+    .slice(0, limit)
+    .replace(/\s+\S*$/, "")          // drop the partial trailing word
+    .replace(/[\s,;:.\-–—]+$/, "");  // and any dangling punctuation
+  return `${cleaned}…`;
+}
+
 const isCutout = (url) => /\.png(\?|$)/i.test(url ?? "");
 
 export default function ProductDetail({ product, isDraft = false, isPreview = false }) {
@@ -449,8 +478,14 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 <h1 className="font-[Playfair_Display] text-[36px] sm:text-[44px] leading-tight text-white">
                   {product.name}
                 </h1>
+                {/*
+                  shortDesc is a hard 200-char cut and ends mid-word, so the
+                  hero showed "…paprica essence create a m". Tidy it to the last
+                  whole word — the complete copy renders in the Description tab
+                  below from fullDescHtml.
+                */}
                 <p className="mt-3 text-[14px] leading-relaxed text-white/45 font-[Montserrat]">
-                  {product.shortDesc}
+                  {tidyExcerpt(product.shortDesc)}
                 </p>
               </div>
 
