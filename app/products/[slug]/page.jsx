@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { catalog } from "@/lib/api";
 import ProductDetail from "./ProductDetail";
+import { SITE_URL } from "@/app/layout";
 
 /**
  * Product detail page — one route for the whole catalogue.
@@ -78,5 +79,89 @@ export default async function ProductPage({ params }) {
     throw err;
   }
 
-  return <ProductDetail product={product} />;
+  /*
+   * Product + Offer + BreadcrumbList schema.
+   *
+   * The site had Article schema on posts and Organization on About, but no
+   * Product schema anywhere — the one type that actually matters on a shop.
+   * It is what Google Shopping and AI assistants read to answer "what does
+   * this cost / is it in stock", which is the stated GEO objective.
+   *
+   * One Offer per pack, because each is a separately purchasable SKU at its
+   * own price. `highPrice`/`lowPrice` on the AggregateOffer let a result show
+   * a range rather than an arbitrary single figure.
+   */
+  const packs = product.packs ?? [];
+  const offers = packs
+    .filter((k) => typeof k.pricePaise === "number")
+    .map((k) => ({
+      "@type": "Offer",
+      sku: k.sku,
+      name: k.pack,
+      price: (k.pricePaise / 100).toFixed(2),
+      priceCurrency: "INR",
+      availability:
+        k.inStock === false
+          ? "https://schema.org/OutOfStock"
+          : "https://schema.org/InStock",
+      url: `${SITE_URL}/products/${product.slug}`,
+      itemCondition: "https://schema.org/NewCondition",
+      seller: { "@type": "Organization", name: "Zewa Ecosystems Pvt Ltd" },
+    }));
+
+  const prices = offers.map((o) => Number(o.price)).filter(Number.isFinite);
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.shortDesc || undefined,
+    sku: packs[0]?.sku,
+    category: product.category || undefined,
+    image: (product.images ?? []).slice(0, 6).map((i) => i.url),
+    brand: { "@type": "Brand", name: "Zewa Feeds" },
+    ...(offers.length === 1
+      ? { offers: offers[0] }
+      : offers.length > 1
+      ? {
+          offers: {
+            "@type": "AggregateOffer",
+            priceCurrency: "INR",
+            lowPrice: Math.min(...prices).toFixed(2),
+            highPrice: Math.max(...prices).toFixed(2),
+            offerCount: offers.length,
+            offers,
+          },
+        }
+      : {}),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Products", item: `${SITE_URL}/products` },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.name,
+        item: `${SITE_URL}/products/${product.slug}`,
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <ProductDetail product={product} />
+    </>
+  );
 }
