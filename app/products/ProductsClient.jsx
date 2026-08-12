@@ -183,7 +183,12 @@ function ProductCard({ p }) {
       */}
       <div
         className="relative aspect-square overflow-hidden"
-        style={{ background: "#ffffff" }}
+        style={{
+          // Dark while the (letterboxed) clip plays, so the bands above and
+          // below it read as a deliberate frame rather than white gaps.
+          background: showVideo ? "#06080f" : "#ffffff",
+          transition: "background-color 0.4s ease",
+        }}
       >
         {/* Gallery images — crossfade */}
         {gallery.map((src, gi) => (
@@ -203,7 +208,18 @@ function ProductCard({ p }) {
           />
         ))}
 
-        {/* Video — fades in after 3s hover */}
+        {/*
+          Video — fades in after 3s hover.
+
+          CONTAIN, not cover. The photography is 1:1 and fills the square well
+          exactly, but the clips are 16:9: covering a square with them crops
+          about 44% of the frame width, which cut the burned-in caption off
+          mid-sentence and removed the logo entirely.
+
+          So the clip is letterboxed and the well goes dark behind it for the
+          duration. Losing the white surround for a few seconds of hover is a
+          far smaller cost than showing a truncated caption.
+        */}
         {p.video && (
           <video
             ref={videoRef}
@@ -212,7 +228,7 @@ function ProductCard({ p }) {
             loop
             playsInline
             preload="none"
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            className="absolute inset-0 w-full h-full object-contain pointer-events-none"
             style={{
               opacity: showVideo ? 1 : 0,
               transition: "opacity 0.6s ease",
