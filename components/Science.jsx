@@ -55,12 +55,19 @@ export default function Science() {
               ensuring near-perfect absorption rates and drastically reducing tank
               pollution.
             </p>
-            <button
-              className="border-b pb-1 font-button text-button transition-colors duration-200"
+            {/*
+              Was a <button> with no handler. There is no white paper PDF, but
+              the fish-meal vs soy vs insect-protein article IS the long-form
+              substantiation this CTA promises — so it points there and says so,
+              rather than naming a document that does not exist.
+            */}
+            <a
+              href="/blog/fish-meal-vs-soy-vs-insect-protein"
+              className="inline-block border-b pb-1 font-button text-button transition-colors duration-200"
               style={{ color: ACCENT, borderColor: ACCENT }}
             >
-              READ THE WHITE PAPER →
-            </button>
+              READ THE RESEARCH →
+            </a>
           </div>
 
           {/* Right — chart card, tinted so it separates from the white page */}

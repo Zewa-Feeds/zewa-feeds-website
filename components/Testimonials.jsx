@@ -20,7 +20,7 @@ const testimonials = [
     initials: "DV",
   },
   {
-    quote: "As a hatchery operator the reduced ammonia output alone justifies the price. Less water changes means lower overhead. This product pays for itself.",
+    quote: "As a hatchery operator the reduced ammonia output alone justifies the price. Fewer water changes means lower overhead. This product pays for itself.",
     name: "Suresh Pillai",
     role: "Hatchery Operator, Alappuzha",
     initials: "SP",

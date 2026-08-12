@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import ReviewForm from "@/components/ReviewForm";
 import { useCart } from "@/lib/cartContext";
 import { discountPct, formatInr } from "@/lib/api";
+import { COMPANY, COMPANY_ADDRESS_LINE } from "@/lib/company";
 
 /**
  * Product detail — data-driven.
@@ -686,6 +687,58 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                   </ul>
                 </div>
               )}
+
+              {/*
+                Mandatory listing declarations.
+
+                The Legal Metrology (Packaged Commodities) Rules require an
+                e-commerce listing to show net quantity, country of origin,
+                the manufacturer's name and address, and consumer-care contact
+                details. None of these were on the page.
+
+                Net quantity comes from the selected pack, so it tracks the
+                variant the customer is actually buying rather than stating one
+                figure for the whole product.
+              */}
+              <details className="rounded-xl border border-white/10 bg-white/[0.02]">
+                <summary className="cursor-pointer list-none px-4 py-3 text-[12.5px] font-semibold text-white/70 font-[Montserrat] transition-colors hover:text-white">
+                  Product & seller information
+                </summary>
+                <dl className="space-y-2 border-t border-white/8 px-4 py-3.5 text-[12px] leading-relaxed text-white/45 font-[Montserrat]">
+                  {pack?.pack && (
+                    <div>
+                      <dt className="inline text-white/35">Net quantity: </dt>
+                      <dd className="inline">{pack.pack}</dd>
+                    </div>
+                  )}
+                  <div>
+                    <dt className="inline text-white/35">Country of origin: </dt>
+                    <dd className="inline">{COMPANY.countryOfOrigin}</dd>
+                  </div>
+                  <div>
+                    <dt className="inline text-white/35">Marketed by: </dt>
+                    <dd className="inline">
+                      {COMPANY.legalName}, {COMPANY_ADDRESS_LINE}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="inline text-white/35">Consumer care: </dt>
+                    <dd className="inline">
+                      <a href={`mailto:${COMPANY.email}`} className="text-primary hover:underline">
+                        {COMPANY.email}
+                      </a>
+                      {" · "}
+                      <a href={COMPANY.phoneHref} className="text-primary hover:underline">
+                        {COMPANY.phone}
+                      </a>
+                    </dd>
+                  </div>
+                  <p className="pt-1 text-[11.5px] text-white/30">
+                    Prices are inclusive of all taxes. Any struck-through figure is
+                    the printed maximum retail price.
+                  </p>
+                </dl>
+              </details>
 
               {/*
                 Explain the ceiling instead of leaving a dead "+". Only shown once

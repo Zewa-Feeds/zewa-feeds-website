@@ -37,9 +37,17 @@ function TileWhy() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <button className="bg-primary text-on-primary px-8 py-4 font-button text-button uppercase tracking-widest active:scale-95 transition-transform">
+            {/*
+              Was a <button> with no onClick — it looked like the page's primary
+              action and did nothing. #science is the R&D section further down
+              the same page, which is what the label promises.
+            */}
+            <a
+              href="#science"
+              className="bg-primary text-on-primary px-8 py-4 font-button text-button uppercase tracking-widest active:scale-95 transition-transform inline-block"
+            >
               EXPLORE THE SCIENCE
-            </button>
+            </a>
             <a
               href="#products"
               className="group flex items-center gap-3 font-button text-button text-on-surface/60 hover:text-primary transition-colors duration-300"
