@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, Suspense } from "react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
@@ -918,8 +919,45 @@ function adaptSpotlight(api) {
   };
 }
 
+/*
+ * useSearchParams() opts the tree into client-side rendering, so Next requires
+ * a Suspense boundary or the static export of /products fails at build.
+ */
 export default function ProductsPage() {
-  const [active, setActive] = useState("All");
+  return (
+    <Suspense fallback={null}>
+      <ProductsPageInner />
+    </Suspense>
+  );
+}
+
+function ProductsPageInner() {
+  /*
+   * The category filter is driven by ?category= in the URL.
+   *
+   * It was local state only, so the footer's category links — and any shared
+   * or bookmarked filter URL — landed on the unfiltered grid. Six indexable
+   * URLs all rendered the identical page.
+   *
+   * The chip still updates the URL via history.replaceState rather than a
+   * router push: this is a filter, not a navigation, so it should not stack
+   * entries in the back button.
+   */
+  const searchParams = useSearchParams();
+  const urlCategory = searchParams.get("category");
+  const [active, setActive] = useState(urlCategory || "All");
+
+  useEffect(() => {
+    setActive(urlCategory || "All");
+  }, [urlCategory]);
+
+  const selectCategory = useCallback((cat) => {
+    setActive(cat);
+    const url = new URL(window.location.href);
+    if (cat === "All") url.searchParams.delete("category");
+    else url.searchParams.set("category", cat);
+    window.history.replaceState(null, "", url);
+  }, []);
   const [slide, setSlide] = useState(0);
   const [fading, setFading] = useState(false);
 
@@ -1142,7 +1180,7 @@ export default function ProductsPage() {
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setActive(cat)}
+                  onClick={() => selectCategory(cat)}
                   className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-[0.08em] uppercase font-[Montserrat] transition-all duration-200 ${
                     active === cat
                       ? "bg-primary text-[#00382d]"
