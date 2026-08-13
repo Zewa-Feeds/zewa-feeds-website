@@ -14,7 +14,18 @@ function TileWhy() {
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[55%] h-[80%] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
       <div className="absolute right-[10%] top-[20%] w-[30%] h-[50%] rounded-full bg-primary/8 blur-[80px] pointer-events-none" />
 
+      {/*
+        Two columns from lg up.
+
+        Everything sat in a max-w-2xl block, so on a 1440px screen the content
+        was 672px wide and the right 720px — exactly half the slide — was empty.
+        The copy keeps its measure; the evidence for its claim moves beside it.
+
+        Below lg it stays one column: there is no spare width there, and the
+        panel would only push the CTAs off the fold.
+      */}
       <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-6 pb-24 md:py-0">
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16">
         <div className="max-w-2xl">
           <div className="flex items-center gap-3 mb-5 sm:mb-8">
             <div className="w-8 h-px bg-primary" />
@@ -57,6 +68,71 @@ function TileWhy() {
               </span>
               SEE THE FORMULAS
             </a>
+          </div>
+        </div>
+
+          {/*
+            Digestibility panel — the evidence for "built to digest insects".
+
+            Deliberately NOT the four proof stats: slide 2 is those, and
+            repeating them would make the two slides read as one. This is the
+            single comparison the headline rests on, and the same figures the
+            Science section charts further down the page.
+          */}
+          <div className="hidden lg:block">
+            <div
+              className="rounded-2xl border border-white/8 p-8"
+              style={{ background: "rgba(255,255,255,0.03)" }}
+            >
+              <div className="mb-7 flex items-baseline justify-between">
+                <span className="font-label-caps text-[10px] tracking-[0.18em] text-white/40">
+                  DIGESTION EFFICIENCY
+                </span>
+                <span className="font-label-caps text-[10px] tracking-[0.14em] text-white/25">
+                  PEPSIN, NABL LAB
+                </span>
+              </div>
+
+              <div className="space-y-7">
+                {[
+                  { label: "ZEWA INSECT PROTEIN", pct: 88, value: "88%", strong: true },
+                  { label: "SOY MEAL", pct: 70, value: "70%", strong: false },
+                ].map((bar) => (
+                  <div key={bar.label}>
+                    <div className="mb-2.5 flex items-baseline justify-between">
+                      <span
+                        className={`font-button text-[11px] tracking-widest ${
+                          bar.strong ? "text-primary" : "text-white/45"
+                        }`}
+                      >
+                        {bar.label}
+                      </span>
+                      <span
+                        className={`font-display-lg text-[20px] leading-none ${
+                          bar.strong ? "text-primary" : "text-white/45"
+                        }`}
+                      >
+                        {bar.value}
+                      </span>
+                    </div>
+                    <div className="h-[3px] w-full overflow-hidden rounded-full bg-white/8">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${bar.pct}%`,
+                          background: bar.strong ? "#44e5c2" : "rgba(255,255,255,0.25)",
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <p className="mt-8 border-t border-white/8 pt-6 text-[12px] leading-relaxed text-white/35">
+                More of every feeding absorbed as nutrition — and less of it
+                leaving the fish as ammonia.
+              </p>
+            </div>
           </div>
         </div>
       </div>
