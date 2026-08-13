@@ -48,46 +48,29 @@ const TRUST_BADGES = [
 
 
 /**
- * Filter chips, derived from the catalogue actually being displayed.
+ * Filter chips.
  *
- * This was a hardcoded list of seven written for a fuller range than exists.
- * Three of them — "Dried BSF Larvae", "Bottom Dwellers", "Hatchery Feeds" —
- * matched no product, so a shopper clicking them got an empty grid on a store
- * that takes payments. Deriving the list means a chip can only appear if
- * something is behind it, and new categories show up on their own as the
- * catalogue grows.
+ * The list is the CMS taxonomy (GET /catalog/categories), NOT a summary of the
+ * products currently on the page. Deriving it from the products was wrong: only
+ * three of thirteen products are published, so every category whose products
+ * are still DRAFT — Dried BSF Larvae, Bottom Dwellers, Hatchery Feeds —
+ * disappeared from the shop entirely.
  *
- * Categories come first (the primary axis), then pack sizes, matching how
- * `tags` is assembled in adapters.js.
+ * A chip with nothing behind it yet is the correct behaviour here: the taxonomy
+ * is fixed, and the products fill in as they are published.
+ *
+ * `fallback` is used only if the categories call fails, so the page still has
+ * filters rather than none.
  */
-function buildCategories(products) {
-  const categories = [];
-  const sizes = [];
+function buildCategories(categories, products) {
+  if (categories?.length) return ["All", ...categories];
 
+  const seen = [];
   for (const p of products) {
     const [category] = p.tags ?? [];
-    if (category && !categories.includes(category)) categories.push(category);
-    for (const label of p.packLabels ?? []) {
-      if (label && !sizes.includes(label)) sizes.push(label);
-    }
+    if (category && !seen.includes(category)) seen.push(category);
   }
-
-  /*
-   * Multi-packs ("45g — Pack of 2") are a purchase option, not a way anyone
-   * browses a catalogue, and listing all seven pushed the real categories off
-   * the left of the strip. Only plain weights become chips.
-   */
-  const plain = sizes.filter((s) => /^[\d.]+\s*(kg|g)\b/i.test(s) && !/pack of/i.test(s));
-
-  // Sort by actual weight — otherwise "1kg" sorts before "200g".
-  const grams = (s) => {
-    const m = /^([\d.]+)\s*(kg|g)\b/i.exec(String(s).trim());
-    if (!m) return Number.MAX_SAFE_INTEGER;
-    return parseFloat(m[1]) * (m[2].toLowerCase() === "kg" ? 1000 : 1);
-  };
-  plain.sort((a, b) => grams(a) - grams(b));
-
-  return ["All", ...categories, ...plain];
+  return ["All", ...seen];
 }
 
 function ProductCard({ p }) {
@@ -906,7 +889,7 @@ export default function ProductsClient(props) {
   return <ProductsPageInner {...props} />;
 }
 
-function ProductsPageInner({ products, spotlights, loadFailed, initialCategory }) {
+function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, categories }) {
   /*
    * The category filter is driven by ?category= in the URL.
    *
@@ -952,7 +935,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory }
    * Derived per render from the catalogue in hand, so the chips and the grid
    * can never disagree about what exists.
    */
-  const CATEGORIES = buildCategories(PRODUCTS);
+  const CATEGORIES = buildCategories(categories, PRODUCTS);
   /*
    * A ?category= value that no longer exists — an old bookmark, or a chip
    * removed as the catalogue changed — would leave the grid empty with no chip

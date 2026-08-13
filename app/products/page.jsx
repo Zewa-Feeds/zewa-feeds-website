@@ -32,6 +32,7 @@ export const revalidate = 3600;
 export default async function ProductsPage({ searchParams }) {
   let products = [];
   let spotlights = [];
+  let categories = [];
   let loadFailed = false;
 
   try {
@@ -39,9 +40,10 @@ export default async function ProductsPage({ searchParams }) {
      * Settled rather than all: a failing spotlights call must not blank the
      * product grid. Spotlights are a banner; the catalogue is the page.
      */
-    const [productsResult, spotlightsResult] = await Promise.allSettled([
+    const [productsResult, spotlightsResult, categoriesResult] = await Promise.allSettled([
       catalog.products(),
       catalog.spotlights(),
+      catalog.categories(),
     ]);
 
     if (productsResult.status === "fulfilled") {
@@ -52,6 +54,15 @@ export default async function ProductsPage({ searchParams }) {
 
     if (spotlightsResult.status === "fulfilled") {
       spotlights = spotlightsResult.value.map(adaptSpotlight);
+    }
+
+    /*
+     * Categories come from the CMS taxonomy, not from the products on the page.
+     * A failed call leaves the list empty, which the client falls back to
+     * deriving — better a short list than no filters at all.
+     */
+    if (categoriesResult.status === "fulfilled") {
+      categories = categoriesResult.value.map((c) => c.label);
     }
   } catch {
     loadFailed = true;
@@ -72,6 +83,7 @@ export default async function ProductsPage({ searchParams }) {
     <ProductsClient
       products={products}
       spotlights={spotlights}
+      categories={categories}
       loadFailed={loadFailed}
       initialCategory={initialCategory}
     />
