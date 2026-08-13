@@ -309,7 +309,7 @@ export default async function AboutPage() {
                 ))}
               </div>
               <p className="font-body-md mt-8 text-[12px] text-white/25">
-                8-week controlled feeding trial vs a leading premium brand. NABL lab certified.
+                Based on studies and trials conducted with leading research institutes. NABL lab certified.
               </p>
             </div>
 

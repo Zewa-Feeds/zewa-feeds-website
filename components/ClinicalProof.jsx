@@ -63,7 +63,12 @@ export default function ClinicalProof() {
 
         {/* Bottom note */}
         <p className="mt-8 font-body-md text-[12px] text-white/25 text-center tracking-wide">
-          Results from 8-week controlled feeding trial vs leading premium brand. NABL lab certified.
+          {/*
+            Attributed to the institutes rather than an unnamed "leading premium
+            brand": that comparison cannot be verified by a reader, and the
+            trials it refers to are not published.
+          */}
+          Based on studies and trials conducted with leading research institutes. NABL lab certified.
         </p>
       </div>
     </Reveal>

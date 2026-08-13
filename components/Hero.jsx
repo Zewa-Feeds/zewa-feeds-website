@@ -68,7 +68,7 @@ function TileWhy() {
 function TileProof() {
   const stats = [
     { value: "88%", label: "Bio-Digestibility", caption: "Absorbed nutrient profile vs 70% soy meal" },
-    { value: "15%", label: "Faster Growth", caption: "8-week controlled trial vs leading brand" },
+    { value: "15%", label: "Faster Growth", caption: "Studies and trials with leading research institutes" },
     { value: "10%", label: "Less Mortality", caption: "Controlled feeding study result" },
     { value: "Rich", label: "Colour Vibrancy", caption: "Natural carotenoids, zero synthetic dyes" },
   ];
@@ -167,6 +167,7 @@ function TileVideo({ onVideoEnd }) {
             ref={videoRef}
             muted
             playsInline
+            preload="metadata"
             poster="/videos/brand_poster.jpg"
             /*
              * cover at both sizes — the 16:9 window is what limits the crop,
@@ -176,6 +177,19 @@ function TileVideo({ onVideoEnd }) {
              */
             className="absolute inset-0 h-full w-full object-cover"
           >
+            {/*
+              Phones get a 1280-wide cut (3.2MB) instead of the 2880x1440
+              master (8.6MB). The video renders about 350px wide on a phone, so
+              the master decoded roughly 8x more pixels than it displayed — that
+              is what made playback stutter.
+
+              Order matters: the browser takes the FIRST source whose type and
+              media both match, so the narrow-viewport entry has to come first.
+              Both files are now +faststart; the master had its moov atom after
+              mdat, so playback could not begin until most of the 8.6MB had
+              downloaded.
+            */}
+            <source src="/videos/brand_video_720.mp4" type="video/mp4" media="(max-width: 767px)" />
             <source src="/videos/brand_video.webm" type="video/webm" />
             <source src="/videos/brand_video.mp4" type="video/mp4" />
           </video>

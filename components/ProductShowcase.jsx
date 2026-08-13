@@ -93,20 +93,26 @@ export default async function ProductShowcase() {
           <div className="absolute inset-0 pointer-events-none"
             style={{ background: `radial-gradient(ellipse 60% 70% at 30% 50%, ${HERO.accentColor}, transparent 65%)` }} />
 
-          {/* Image — left 55% on desktop, full width on mobile */}
-          <div className="relative w-full lg:w-[55%] flex items-center justify-center py-14 sm:py-20 px-10 sm:px-16"
-            style={{ minHeight: "340px" }}>
-            <div className="absolute inset-0 pointer-events-none"
-              style={{ background: "radial-gradient(circle at 50% 55%, rgba(68,229,194,0.12), transparent 60%)" }} />
+          {/*
+            Image — left 55% on desktop, full width on mobile.
+
+            WHITE WELL, matching the shop grid and the PDP gallery. The pack
+            artwork is dark-on-transparent, so on the dark card it read as a
+            murky silhouette; the listing images are shot on white, and this is
+            the same treatment they get everywhere else on the site.
+
+            The teal wash is dropped here — it only reads on the dark card and
+            muddies the artwork over white.
+          */}
+          <div className="relative w-full lg:w-[55%] aspect-square lg:aspect-auto lg:min-h-[340px] overflow-hidden bg-white">
             {HERO.image && (
               <Image
                 src={HERO.image}
                 alt={HERO.name}
-                width={380}
-                height={380}
+                fill
                 priority
-                className="relative z-10 object-contain max-h-[320px] w-auto transition-transform duration-700 group-hover:scale-105 group-hover:-translate-y-2"
-                style={{ filter: "drop-shadow(0 24px 48px rgba(0,0,0,0.55))" }}
+                sizes="(max-width: 1024px) 100vw, 55vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
             )}
             {HERO.badge && (
@@ -163,25 +169,26 @@ export default async function ProductShowcase() {
               <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                 style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor}, transparent)` }} />
 
-              {/* Image */}
-              <div className="relative flex items-center justify-center pt-10 pb-6 px-8" style={{ minHeight: "200px" }}>
-                <div className="absolute inset-0 pointer-events-none"
-                  style={{ background: `radial-gradient(circle at 50% 60%, ${p.accentColor}, transparent 65%)` }} />
-                {/* Sized container so fill-mode Image has no wrapper bg */}
-                <div className="relative z-10 w-[170px] h-[170px] transition-transform duration-500 group-hover:scale-105 group-hover:-translate-y-1">
-                  {p.image && (
-                    <Image
-                      src={p.image}
-                      alt={p.name}
-                      fill
-                      className="object-contain"
-                      style={{ filter: "drop-shadow(0 12px 28px rgba(0,0,0,0.5))" }}
-                    />
-                  )}
-                </div>
+              {/* Image — white well, same reasoning as the hero card above. */}
+              <div className="relative aspect-square overflow-hidden bg-white">
+                {p.image && (
+                  <Image
+                    src={p.image}
+                    alt={p.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                )}
                 {p.badge && (
                   <span className="absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] text-white z-10"
-                    style={{ background: "#00a882" }}>
+                    /*
+                     * #00a882 gave white text 3.03:1 — under the 4.5:1 needed
+                     * for small text, and more obvious now the badge sits on a
+                     * white well. #00755f is the accessible green already used
+                     * in the Science section (5.66:1).
+                     */
+                    style={{ background: "#00755f" }}>
                     {p.badge}
                   </span>
                 )}

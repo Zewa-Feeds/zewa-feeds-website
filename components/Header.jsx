@@ -399,7 +399,15 @@ export default function Header() {
       {mobileOpen && (
         <nav
           id="mobile-nav"
-          className="md:hidden absolute left-0 right-0 top-20 max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-white/10 bg-surface/95 backdrop-blur-xl shadow-2xl shadow-black/40"
+          /*
+           * z-50 and an OPAQUE background.
+           *
+           * The drawer had z-index:auto, so it created no stacking context above
+           * the hero — the page showed straight through it and the menu read as
+           * broken rather than as a panel. bg-surface/95 also let the slide
+           * behind bleed through; blur alone could not carry it on a busy hero.
+           */
+          className="md:hidden absolute left-0 right-0 top-20 z-50 max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-white/10 bg-surface backdrop-blur-xl shadow-2xl shadow-black/40"
         >
           <ul className="flex flex-col px-5 py-4">
             {navLinks.map((link) => (
@@ -434,7 +442,12 @@ export default function Header() {
 
                 {link.label === "Knowledge Hub" && (
                   <ul className="pb-3 pl-4">
-                    {LEARN_MENU.map((item) => (
+                    {/*
+                      Skip entries that repeat the parent. LEARN_MENU opens with
+                      "Knowledge Hub" -> /blog for the desktop dropdown, which
+                      here rendered directly beneath the identical parent link.
+                    */}
+                    {LEARN_MENU.filter((item) => item.href !== link.href).map((item) => (
                       <li key={item.href}>
                         <a
                           href={item.href}
