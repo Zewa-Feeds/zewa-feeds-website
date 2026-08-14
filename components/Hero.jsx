@@ -238,7 +238,16 @@ function TileVideo({ onVideoEnd }) {
           aspect-ratio wins over any breakpoint class, so md:aspect-auto could
           never restore the full-bleed desktop frame.
         */}
-        <div className="relative w-full aspect-video overflow-hidden rounded-2xl md:aspect-auto md:h-full md:rounded-none">
+        {/*
+          A framed window on mobile: hairline border, rounded corners and a soft
+          drop shadow so the letterboxed clip reads as a deliberate player
+          rather than a video floating on the page background.
+
+          All three are dropped from md up (md:border-0, md:rounded-none,
+          md:shadow-none) where the video is full-bleed and any edge treatment
+          would just cut a line across the slide.
+        */}
+        <div className="relative w-full aspect-video overflow-hidden rounded-2xl border border-white/12 shadow-[0_18px_40px_rgba(0,0,0,0.45)] md:aspect-auto md:h-full md:rounded-none md:border-0 md:shadow-none">
           <video
             ref={videoRef}
             muted
