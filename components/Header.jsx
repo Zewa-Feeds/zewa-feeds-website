@@ -148,6 +148,15 @@ export default function Header() {
   /** Mobile drawer. Separate from activeMenu, which is the desktop hover menus. */
   const [mobileOpen, setMobileOpen] = useState(false);
   /**
+   * Which mobile submenu is expanded, by parent label. Null means all closed.
+   *
+   * Single value rather than a set, so opening one closes the other: the drawer
+   * is a short panel on a phone and two open submenus push everything below the
+   * fold. Both start collapsed — they used to render permanently expanded, so
+   * the menu opened as a flat list of eleven links.
+   */
+  const [mobileSubmenu, setMobileSubmenu] = useState(null);
+  /**
    * Products in the dropdown, from the catalogue API.
    *
    * Starts empty so the menu never shows a link to a product that does not
@@ -368,7 +377,14 @@ export default function Header() {
           */}
           <button
             type="button"
-            onClick={() => setMobileOpen((v) => !v)}
+            onClick={() =>
+              setMobileOpen((v) => {
+                // Collapse any open submenu on the way out, so reopening the
+                // drawer always starts from the same clean list.
+                if (v) setMobileSubmenu(null);
+                return !v;
+              })
+            }
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
@@ -410,50 +426,80 @@ export default function Header() {
           className="md:hidden absolute left-0 right-0 top-20 z-50 max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-white/10 bg-surface backdrop-blur-xl shadow-2xl shadow-black/40"
         >
           <ul className="flex flex-col px-5 py-4">
-            {navLinks.map((link) => (
+            {navLinks.map((link) => {
+              /*
+               * Which submenu, if any, hangs off this item. Products is driven
+               * by the live catalogue, so it only counts as expandable once
+               * those links have loaded.
+               */
+              const submenu =
+                link.label === "Products"
+                  ? productLinks
+                  : link.label === "Knowledge Hub"
+                  ? // Skip entries that repeat the parent. LEARN_MENU opens with
+                    // "Knowledge Hub" -> /blog, identical to the parent link.
+                    LEARN_MENU.filter((item) => item.href !== link.href)
+                  : [];
+              const expandable = submenu.length > 0;
+              const expanded = mobileSubmenu === link.label;
+
+              return (
               <li key={link.label} className="border-b border-white/5 last:border-0">
-                <a
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`block py-3.5 font-button text-[14px] transition-colors ${
-                    isActive(link.href) ? "text-primary" : "text-on-surface hover:text-primary"
-                  }`}
-                >
-                  {link.label}
-                </a>
+                {/*
+                  The label and the toggle are SEPARATE controls. Tapping the
+                  label still navigates — making the whole row a toggle would
+                  strand anyone who wants the section landing page itself.
+                */}
+                <div className="flex items-center justify-between">
+                  <a
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block flex-1 py-3.5 font-button text-[14px] transition-colors ${
+                      isActive(link.href) ? "text-primary" : "text-on-surface hover:text-primary"
+                    }`}
+                  >
+                    {link.label}
+                  </a>
 
-                {link.label === "Products" && productLinks.length > 0 && (
-                  <ul className="pb-3 pl-4">
-                    {productLinks.map((p) => (
-                      <li key={p.href}>
-                        <a
-                          href={p.href}
-                          onClick={() => setMobileOpen(false)}
-                          className={`block py-2 text-[13px] transition-colors ${
-                            p.accent ? "text-primary/80" : "text-on-surface-variant hover:text-on-surface"
-                          }`}
-                        >
-                          {p.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                  {expandable && (
+                    <button
+                      type="button"
+                      onClick={() => setMobileSubmenu(expanded ? null : link.label)}
+                      aria-expanded={expanded}
+                      aria-label={`${expanded ? "Collapse" : "Expand"} ${link.label}`}
+                      // -mr-2 pulls the 44px tap target back to the visual edge
+                      // without shrinking it below the accessible minimum.
+                      className="-mr-2 flex h-11 w-11 shrink-0 items-center justify-center text-on-surface-variant transition-colors hover:text-primary"
+                    >
+                      <svg
+                        viewBox="0 0 12 12"
+                        fill="none"
+                        className="h-3 w-3 transition-transform duration-200"
+                        style={{ transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}
+                      >
+                        <path
+                          d="M2 4l4 4 4-4"
+                          stroke="currentColor"
+                          strokeWidth="1.6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                </div>
 
-                {link.label === "Knowledge Hub" && (
+                {expandable && expanded && (
                   <ul className="pb-3 pl-4">
-                    {/*
-                      Skip entries that repeat the parent. LEARN_MENU opens with
-                      "Knowledge Hub" -> /blog for the desktop dropdown, which
-                      here rendered directly beneath the identical parent link.
-                    */}
-                    {LEARN_MENU.filter((item) => item.href !== link.href).map((item) => (
+                    {submenu.map((item) => (
                       <li key={item.href}>
                         <a
                           href={item.href}
                           onClick={() => setMobileOpen(false)}
                           className={`block py-2 text-[13px] transition-colors ${
-                            item.accent ? "text-primary/80" : "text-on-surface-variant hover:text-on-surface"
+                            item.accent
+                              ? "text-primary/80"
+                              : "text-on-surface-variant hover:text-on-surface"
                           }`}
                         >
                           {item.label}
@@ -463,7 +509,8 @@ export default function Header() {
                   </ul>
                 )}
               </li>
-            ))}
+              );
+            })}
           </ul>
 
           <div className="border-t border-white/10 px-5 py-4">
