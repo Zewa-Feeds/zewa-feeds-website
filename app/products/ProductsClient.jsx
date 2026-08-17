@@ -1044,64 +1044,77 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
         <section className="relative overflow-hidden pt-16 sm:pt-20">
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(68,229,194,0.07) 0%, transparent 70%), linear-gradient(180deg, #06080f 0%, #0b1220 100%)" }} />
 
-          <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-6 sm:pt-8 pb-6 sm:pb-8">
-            {/* Shared fixed height box for BOTH slides so sizes are 100% identical and full */}
-            <div className="relative flex h-[300px] sm:h-[380px] lg:h-[430px] items-center">
-
-              {/* Slide 0 — the range statement */}
-              {heroSlide === 0 && (
-              <div className="w-full animate-fadeIn">
-                <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-center">
-                  <div className="max-w-xl">
-                    <div className="mb-5 flex items-center gap-3">
-                      <div className="h-px w-5 bg-primary" />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary font-[Montserrat]">Our Range</span>
-                    </div>
-                    <h1 className="mb-5 font-[Playfair_Display] text-[42px] leading-[1.0] text-white sm:text-[60px]">
-                      Engineered<br />
-                      <span className="italic text-primary">for the species.</span>
-                    </h1>
-                    <p className="mb-5 text-[15px] sm:text-[16px] leading-relaxed text-white/45 font-[Montserrat]">
-                      Every formula is NABL lab-tested, insect-protein based, and calibrated for a specific species and life stage.
-                    </p>
-                  </div>
-
-                  <div className="flex shrink-0 gap-8 lg:gap-14">
-                    {[
-                      { val: "46%", label: "Max Protein", sub: "in the range" },
-                      { val: "88%", label: "Digestibility", sub: "lab verified" },
-                      { val: "13+", label: "Formulas", sub: "species-specific" },
-                    ].map((s) => (
-                      <div key={s.label} className="flex flex-col gap-1">
-                        <span className="font-[Playfair_Display] text-[38px] sm:text-[48px] leading-none text-primary">{s.val}</span>
-                        <span className="text-[12px] font-semibold text-white/70 font-[Montserrat]">{s.label}</span>
-                        <span className="text-[10px] text-white/25 font-[Montserrat]">{s.sub}</span>
+          {/* Slide 0 — the range statement */}
+          {heroSlide === 0 && (
+            <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-6 sm:pt-8 pb-6 sm:pb-8">
+              <div className="relative flex h-[300px] sm:h-[380px] lg:h-[430px] items-center">
+                <div className="w-full animate-fadeIn">
+                  <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-center">
+                    <div className="max-w-xl">
+                      <div className="mb-5 flex items-center gap-3">
+                        <div className="h-px w-5 bg-primary" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary font-[Montserrat]">Our Range</span>
                       </div>
-                    ))}
+                      <h1 className="mb-5 font-[Playfair_Display] text-[42px] leading-[1.0] text-white sm:text-[60px]">
+                        Engineered<br />
+                        <span className="italic text-primary">for the species.</span>
+                      </h1>
+                      <p className="mb-5 text-[15px] sm:text-[16px] leading-relaxed text-white/45 font-[Montserrat]">
+                        Every formula is NABL lab-tested, insect-protein based, and calibrated for a specific species and life stage.
+                      </p>
+                    </div>
+
+                    <div className="flex shrink-0 gap-8 lg:gap-14">
+                      {[
+                        { val: "46%", label: "Max Protein", sub: "in the range" },
+                        { val: "88%", label: "Digestibility", sub: "lab verified" },
+                        { val: "13+", label: "Formulas", sub: "species-specific" },
+                      ].map((s) => (
+                        <div key={s.label} className="flex flex-col gap-1">
+                          <span className="font-[Playfair_Display] text-[38px] sm:text-[48px] leading-none text-primary">{s.val}</span>
+                          <span className="text-[12px] font-semibold text-white/70 font-[Montserrat]">{s.label}</span>
+                          <span className="text-[10px] text-white/25 font-[Montserrat]">{s.sub}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-              )}
 
-              {/* Slide 1 — the brand banner */}
-              {heroSlide === 1 && (
-              <div className="w-full h-full animate-fadeIn flex items-center justify-center">
-                <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#070d18]">
-                  <Image
-                    src="/banner-products.png"
-                    alt="Discover a diverse range of feeds to nourish every species of fish — Zewa Feeds"
-                    fill
-                    className="object-cover object-center"
-                    sizes="(max-width: 1440px) 100vw, 1440px"
-                    priority
-                  />
-                  <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl pointer-events-none" />
+                {/* Slide dots — bottom right */}
+                <div className="absolute bottom-0 right-0 z-10 flex items-center gap-2">
+                  {[0, 1].map((i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setHeroSlide(i)}
+                      aria-label={i === 0 ? "Show range summary" : "Show brand banner"}
+                      aria-current={heroSlide === i}
+                      className={`h-2 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
+                        heroSlide === i ? "w-6 bg-primary" : "w-2 bg-white/25 hover:bg-white/50"
+                      }`}
+                    />
+                  ))}
                 </div>
               </div>
-              )}
+            </div>
+          )}
 
-              {/* Slide dots — bottom right */}
-              <div className="absolute bottom-0 right-0 z-10 flex items-center gap-2">
+          {/* Slide 1 — Full Bleed Edge-to-Edge Brand Banner (No boxed container restriction) */}
+          {heroSlide === 1 && (
+            <div className="relative w-full h-[280px] sm:h-[380px] md:h-[450px] lg:h-[500px] animate-fadeIn overflow-hidden">
+              <Image
+                src="/banner-products.png"
+                alt="Discover a diverse range of feeds to nourish every species of fish — Zewa Feeds"
+                fill
+                className="object-cover object-center"
+                sizes="100vw"
+                priority
+              />
+              <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-[#06080f]/70 to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#06080f] via-[#06080f]/30 to-transparent pointer-events-none" />
+
+              {/* Slide dots */}
+              <div className="absolute bottom-4 right-6 sm:right-10 lg:right-16 z-10 flex items-center gap-2">
                 {[0, 1].map((i) => (
                   <button
                     key={i}
@@ -1116,7 +1129,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                 ))}
               </div>
             </div>
-          </div>
+          )}
 
           {/* Bottom subtle edge divider */}
           <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.25) 50%, transparent)" }} />
