@@ -141,12 +141,12 @@ export default async function ProductShowcase() {
       <div className="bg-white">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-14 sm:pt-16 pb-24 sm:pb-32">
           {/* Secondary Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
             {SECONDARY.map((p) => (
               <a
                 key={p.slug ?? p.name}
                 href={p.slug ? `/products/${p.slug}` : "/products"}
-                className="group relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                className="group relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.18)] border border-slate-200/70"
                 style={{ background: "linear-gradient(160deg, #0d1726 0%, #0a1219 100%)" }}
               >
                 {/* Glow */}
@@ -154,18 +154,18 @@ export default async function ProductShowcase() {
                   style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor}, transparent)` }} />
 
                 {/* Image well */}
-                <div className="relative aspect-square overflow-hidden bg-white">
+                <div className="relative aspect-square overflow-hidden bg-white p-4 sm:p-6 flex items-center justify-center border-b border-slate-100">
                   {p.image && (
                     <Image
                       src={p.image}
                       alt={p.name}
                       fill
                       sizes="(max-width: 640px) 100vw, 33vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="object-contain p-3 transition-transform duration-500 group-hover:scale-105"
                     />
                   )}
                   {p.badge && (
-                    <span className="absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] text-white z-10"
+                    <span className="absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] text-white z-10 shadow-sm"
                       style={{ background: "#00755f" }}>
                       {p.badge}
                     </span>
@@ -173,20 +173,23 @@ export default async function ProductShowcase() {
                 </div>
 
                 {/* Text */}
-                <div className="px-6 pb-7 flex flex-col gap-2">
-                  <h3 className="font-[Playfair_Display] text-[20px] text-white leading-snug group-hover:text-primary transition-colors duration-200">
-                    {p.name}
-                  </h3>
-                  <p className="text-[12px] text-white/35 font-[Montserrat] leading-relaxed">
-                    {p.tagline}
-                  </p>
-                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.18em] uppercase font-[Montserrat] text-primary/60 mt-2 group-hover:text-primary group-hover:gap-2.5 transition-all duration-200">
+                <div className="p-6 flex flex-col gap-2.5 justify-between flex-1 relative z-10">
+                  <div>
+                    <h3 className="font-[Playfair_Display] text-[20px] text-white font-semibold leading-snug mb-2 group-hover:text-primary transition-colors duration-200">
+                      {p.name}
+                    </h3>
+                    <p className="text-[12.5px] text-white/50 font-[Montserrat] leading-relaxed line-clamp-2">
+                      {p.tagline}
+                    </p>
+                  </div>
+
+                  <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold tracking-[0.18em] uppercase font-[Montserrat] text-primary/70 mt-2 group-hover:text-primary group-hover:gap-2.5 transition-all duration-200">
                     Explore <ArrowIcon />
                   </span>
                 </div>
 
                 <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
-                  style={{ background: "linear-gradient(to right, rgba(68,229,194,0.5), transparent)" }} />
+                  style={{ background: "linear-gradient(to right, rgba(68,229,194,0.7), transparent)" }} />
               </a>
             ))}
           </div>
