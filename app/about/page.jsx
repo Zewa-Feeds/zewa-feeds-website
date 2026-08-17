@@ -279,107 +279,134 @@ export default async function AboutPage() {
           </ul>
         </Section>
 
-        {/* ── TRUST ─────────────────────────────────────────────────── */}
+        {/*
+          ── TRUST ───────────────────────────────────────────────────
+
+          Restructured into a single column plus its own logo band, rather than
+          a two-column split with the logos and the awards stacked in the right
+          half. The claim is "validated by institutions", so the proof reads
+          better across the full width than squeezed beside the copy.
+        */}
         <Section>
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:gap-16">
-            <div>
-              <Eyebrow>{TRUST.eyebrow}</Eyebrow>
-              <h2
-                className="font-display-lg leading-[1.15] text-white"
-                style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
-              >
-                {TRUST.title}
-              </h2>
-              <p className="font-body-md mt-8 max-w-[520px] text-[15.5px] leading-[1.8] text-white/45">
-                {TRUST.body}
-              </p>
+          <div className="max-w-[720px]">
+            <Eyebrow>{TRUST.eyebrow}</Eyebrow>
+            <h2
+              className="font-display-lg leading-[1.15] text-white"
+              style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
+            >
+              {TRUST.title}
+            </h2>
+            <p className="font-body-md mt-8 text-[15.5px] leading-[1.8] text-white/45">
+              {TRUST.body}
+            </p>
 
-              <div className="mt-10 flex gap-12">
-                {TRUST.trialStats.map((stat) => (
-                  <div key={stat.label}>
-                    <div
-                      className="font-display-lg leading-none text-primary"
-                      style={{ fontSize: "clamp(34px, 4vw, 46px)" }}
-                    >
-                      {stat.value}
-                    </div>
-                    <div className="font-body-md mt-3 max-w-[150px] text-[13px] leading-snug text-white/40">
-                      {stat.label}
-                    </div>
+            <div className="mt-10 flex gap-12">
+              {TRUST.trialStats.map((stat) => (
+                <div key={stat.label}>
+                  <div
+                    className="font-display-lg leading-none text-primary"
+                    style={{ fontSize: "clamp(34px, 4vw, 46px)" }}
+                  >
+                    {stat.value}
                   </div>
-                ))}
-              </div>
-              <p className="font-body-md mt-8 text-[12px] text-white/25">
-                Based on studies and trials conducted with leading research institutes. NABL lab certified.
-              </p>
+                  <div className="font-body-md mt-3 max-w-[150px] text-[13px] leading-snug text-white/40">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
             </div>
+            <p className="font-body-md mt-8 text-[12px] text-white/25">
+              Based on studies and trials conducted with leading research institutes. NABL lab certified.
+            </p>
+          </div>
 
-            {/*
-              min-w-0 is required, not cosmetic. A grid item defaults to
-              min-width:auto, so it grows to its content's intrinsic width —
-              the 2500px marquee track stretched this column to 2072px and made
-              the whole page scroll sideways. min-w-0 lets it shrink so the
-              marquee's own overflow-hidden can do its job.
-            */}
-            <div className="min-w-0 lg:pt-16">
-              <p className="font-label-caps mb-6 text-[10px] tracking-[0.2em] text-white/25">
-                BACKED BY
-              </p>
-              {/*
-                Logos rather than a text list: these are the marks a distributor
-                or wholesale buyer recognises, and the section's whole claim is
-                "validated by institutions, not by us".
-              */}
-              {/*
-                No negative margin. Bleeding the row past the section padding
-                widened it beyond the viewport and made the page scroll
-                sideways; the edge fades already imply the row continues.
-              */}
-              <LogoMarquee logos={TRUST.institutionLogos} />
+          {/*
+            Logo band, full width beneath the copy.
 
-              {/* Backers with no logo file supplied — still named, not dropped. */}
-              {TRUST.institutionsTextOnly?.length > 0 && (
-                <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
-                  {TRUST.institutionsTextOnly.map((name) => (
-                    <li key={name} className="font-body-md text-[13px] text-white/40">
-                      {name}
-                    </li>
-                  ))}
-                </ul>
-              )}
+            min-w-0 is required, not cosmetic: a grid or flex item defaults to
+            min-width:auto and grows to its content's intrinsic width, so the
+            2500px marquee track would drag its column open and make the whole
+            page scroll sideways. overflow-hidden cannot cap a block's own width.
+          */}
+          <div className="min-w-0 mt-16 border-t border-white/5 pt-12">
+            <p className="font-label-caps mb-7 text-[10px] tracking-[0.2em] text-white/25">
+              BACKED BY
+            </p>
+            <LogoMarquee logos={TRUST.institutionLogos} />
 
-              <p className="font-label-caps mb-6 mt-12 text-[10px] tracking-[0.2em] text-white/25">
-                RECOGNITION
-              </p>
-              <ul className="space-y-2.5">
-                {TRUST.recognition.map((item) => (
-                  <li key={item} className="flex items-start gap-3">
-                    <svg
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      aria-hidden="true"
-                      className="mt-[3px] h-3.5 w-3.5 shrink-0 text-primary/60"
-                    >
-                      <path
-                        d="M3.5 8.5L6.5 11.5L12.5 5"
-                        stroke="currentColor"
-                        strokeWidth="1.7"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    <span className="font-body-md text-[13.5px] leading-snug text-white/40">
-                      {item}
-                    </span>
+            {/* Backers with no logo file supplied — still named, not dropped. */}
+            {TRUST.institutionsTextOnly?.length > 0 && (
+              <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
+                {TRUST.institutionsTextOnly.map((name) => (
+                  <li key={name} className="font-body-md text-[13px] text-white/40">
+                    {name}
                   </li>
                 ))}
               </ul>
-            </div>
+            )}
           </div>
         </Section>
 
+        {/*
+          ── AWARDS & RECOGNITION ────────────────────────────────────
+
+          Its own section rather than a list tucked under the logos. These are
+          separate claims — who backs the company versus what it has won — and
+          burying the awards in a column made them read as a footnote.
+
+          Cards on the raised surface so each award is a discrete item, and the
+          alternation with the section above is preserved.
+        */}
+        <Section tone="raised" className="border-y border-white/5">
+          <Eyebrow>AWARDS &amp; RECOGNITION</Eyebrow>
+          <h2
+            className="font-display-lg leading-[1.15] text-white"
+            style={{ fontSize: "clamp(26px, 3.2vw, 38px)" }}
+          >
+            Recognised by the people who fund and judge this work.
+          </h2>
+
+          <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {TRUST.recognition.map((item) => (
+              <li
+                key={item}
+                className="flex h-full flex-col gap-4 rounded-xl border border-white/8 bg-white/[0.02] p-6"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                  className="h-6 w-6 shrink-0 text-primary/70"
+                >
+                  <path
+                    d="M12 15a5 5 0 100-10 5 5 0 000 10z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M8.5 14L7 22l5-2.5L17 22l-1.5-8"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span className="font-body-lg text-[14.5px] leading-snug text-white/70">
+                  {item}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Section>
+
         {/* ── RANGE ─────────────────────────────────────────────────── */}
-        <Section tone="raised" className="border-t border-white/5">
+        {/*
+          Base tone, not raised: the Awards section above is raised, and two
+          adjacent raised blocks merge into one continuous panel. The copy here
+          is white either way.
+        */}
+        <Section className="border-t border-white/5">
           <div className="max-w-[560px]">
             <Eyebrow>{RANGE.eyebrow}</Eyebrow>
             <h2

@@ -199,11 +199,14 @@ export default function Header() {
    * Dropdowns open on INTENT, not on the first pixel of hover.
    *
    * Passing over "Products" on the way to "About" used to flash the mega menu
-   * open. A 2s dwell means the menu only appears when someone actually pauses on
-   * it — and the label itself stays a link, so a click navigates immediately
+   * open. A short dwell means the menu only appears when someone actually pauses
+   * on it — and the label itself stays a link, so a click navigates immediately
    * without waiting for the menu.
+   *
+   * 1.5s rather than the original 2s: two seconds still read as the menu being
+   * broken rather than deliberate.
    */
-  const HOVER_OPEN_DELAY_MS = 2000;
+  const HOVER_OPEN_DELAY_MS = 1500;
   const CLOSE_DELAY_MS = 300;
 
   const openTimer = useRef(null);
