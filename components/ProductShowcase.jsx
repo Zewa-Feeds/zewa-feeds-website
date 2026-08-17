@@ -66,21 +66,26 @@ export default async function ProductShowcase() {
   const SECONDARY = products.slice(1, 4).map((p, i) => adapt(p, i + 1));
 
   return (
-    <Reveal id="products" className="bg-[#06080f]">
+    /*
+       White section background. The product cards keep their own dark gradients,
+       so only the eyebrow and the heading sit directly on this surface and needed
+       recolouring — everything inside a card is unaffected.
+    */
+    <Reveal id="products" className="bg-white">
       <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-24 sm:pt-32 pb-24 sm:pb-32">
 
         {/* Section label */}
         <div className="flex items-center gap-3 mb-10 sm:mb-14">
           <div className="w-6 h-px bg-primary" />
-          <span className="text-[10px] font-bold tracking-[0.28em] font-[Montserrat] uppercase text-primary">
+          <span className="text-[10px] font-bold tracking-[0.28em] font-[Montserrat] uppercase" style={{ color: "#00755f" }}>
             The Range
           </span>
         </div>
 
         {/* Section heading */}
-        <h2 className="font-[Playfair_Display] text-[32px] sm:text-[48px] text-white leading-tight mb-12 sm:mb-16">
+        <h2 className="font-[Playfair_Display] text-[32px] sm:text-[48px] leading-tight mb-12 sm:mb-16" style={{ color: "#0b1220" }}>
           Engineered{" "}
-          <span className="italic text-primary">for the species.</span>
+          <span className="italic" style={{ color: "#00755f" }}>for the species.</span>
         </h2>
 
         {/* ── HERO CARD ─────────────────────────────────────────── */}
@@ -217,7 +222,16 @@ export default async function ProductShowcase() {
         <div className="flex items-center justify-center">
           <a
             href="/products"
-            className="group inline-flex items-center gap-3 px-8 py-4 rounded-full border border-primary/30 text-primary text-[11px] font-bold tracking-[0.2em] uppercase font-[Montserrat] hover:bg-primary hover:text-[#00382d] hover:border-primary transition-all duration-250"
+            /*
+             * The brand mint measures 1.59:1 on white — effectively invisible.
+             * #00755f is the accessible green used elsewhere on light surfaces
+             * (5.66:1), and the hover fill inverts to white on that same green.
+             *
+             * Arbitrary Tailwind values rather than inline styles with mouse
+             * handlers: this is a server component, so it cannot carry event
+             * handlers at all.
+             */
+            className="group inline-flex items-center gap-3 rounded-full border border-[#00755f]/35 px-8 py-4 font-[Montserrat] text-[11px] font-bold uppercase tracking-[0.2em] text-[#00755f] transition-all duration-250 hover:border-[#00755f] hover:bg-[#00755f] hover:text-white"
           >
             View All Formulas
             <ArrowIcon />
