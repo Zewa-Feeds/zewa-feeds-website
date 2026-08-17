@@ -323,25 +323,9 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 JPG slides that cover the box edge to edge.
               */}
               <div
-                className="group relative aspect-square overflow-hidden rounded-3xl flex items-center justify-center"
+                className="group relative aspect-square overflow-hidden rounded-3xl flex items-center justify-center bg-white border border-white/10"
                 style={{
-                  /*
-                   * Three cases, one per kind of media:
-                   *
-                   *   PNG cutout  — light panel, so the bottle has something to
-                   *                 sit on and its dark label stays readable.
-                   *   VIDEO       — the PAGE colour. A 16:9 file in a square
-                   *                 frame leaves ~44% empty, and as a white band
-                   *                 that emptiness is the loudest thing on the
-                   *                 slide. Matching #06080f makes it vanish into
-                   *                 the page, so only the video itself reads.
-                   *   JPG slide   — transparent; the artwork covers the box.
-                   */
-                  background: isCutout(active?.url)
-                    ? (presentation.accentBg ?? "#f4f7f6")
-                    : active?.type === "VIDEO"
-                    ? "#06080f"
-                    : "transparent",
+                  background: active?.type === "VIDEO" ? "#06080f" : "#ffffff",
                 }}
               >
                 {active?.type === "VIDEO" ? (
@@ -451,14 +435,12 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                       key={item.url + i}
                       onClick={() => setActiveIndex(i)}
                       type="button"
-                      // Same light fill as the main frame, or dark-inked
-                      // artwork is unreadable at 72px too.
-                      className={`relative shrink-0 w-[72px] h-[72px] rounded-xl overflow-hidden border transition-all duration-200 ${
+                      className={`relative shrink-0 w-[72px] h-[72px] rounded-xl overflow-hidden border transition-all duration-200 bg-white ${
                         i === activeIndex
                           ? "border-primary ring-2 ring-primary/40"
-                          : "border-white/10 hover:border-white/30"
+                          : "border-white/15 hover:border-white/35"
                       }`}
-                      style={{ background: presentation.accentBg ?? "#f4f7f6" }}
+                      style={{ background: "#ffffff" }}
                       aria-label={
                         item.type === "VIDEO" ? "Play product video" : `View image ${i + 1}`
                       }
