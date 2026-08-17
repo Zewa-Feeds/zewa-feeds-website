@@ -111,15 +111,19 @@ export default async function ProductShowcase() {
           {/*
             Image — left 55% on desktop, full width on mobile.
 
-            WHITE WELL, matching the shop grid and the PDP gallery. The pack
-            artwork is dark-on-transparent, so on the dark card it read as a
-            murky silhouette; the listing images are shot on white, and this is
-            the same treatment they get everywhere else on the site.
+            The well is DARK, not white.
 
-            The teal wash is dropped here — it only reads on the dark card and
-            muddies the artwork over white.
+            The listing image fills it edge to edge (object-cover on a 1:1
+            source), so this colour is only ever seen in the gap left when the
+            image cannot cover — and the Betta lead shot is dark navy (#072466),
+            so white showed as a bright band under it rather than blending.
+
+            shrink-0 self-stretch matters too: the card is a flex column, which
+            stretched this well to the card's full 925px height on mobile while
+            aspect-square only sized the image to 350px. That left 575px of bare
+            background below the photo.
           */}
-          <div className="relative w-full lg:w-[55%] aspect-square lg:aspect-auto lg:min-h-[340px] overflow-hidden bg-white">
+          <div className="relative w-full shrink-0 self-stretch lg:w-[55%] aspect-square lg:aspect-auto lg:min-h-[340px] overflow-hidden bg-[#06080f]">
             {HERO.image && (
               <Image
                 src={HERO.image}
