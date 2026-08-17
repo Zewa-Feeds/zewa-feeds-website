@@ -170,3 +170,41 @@
   padding: 0.15em 0.4em;
   border-radius: 4px;
 }
+
+/* ── Logo marquee ──────────────────────────────────────────────────────────
+   The track holds the logo list TWICE and slides by exactly -50%, so the
+   second copy is in the first one's place when the animation restarts. That
+   is what makes the loop seamless — animating to -100% would scroll the whole
+   track off and snap back visibly.
+
+   Paused on hover so a reader can stop on a logo, and reduced to no motion
+   for anyone who has asked the OS for that.
+*/
+@keyframes zewa-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.zewa-marquee-track {
+  animation: zewa-marquee 38s linear infinite;
+  width: max-content;
+}
+
+.zewa-marquee:hover .zewa-marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zewa-marquee-track {
+    animation: none;
+    /* Without the animation the track is twice as wide as it needs to be, so
+       the duplicate copy is hidden and the row simply scrolls by hand. */
+    width: auto;
+  }
+  .zewa-marquee-track > [data-marquee-clone="true"] {
+    display: none;
+  }
+  .zewa-marquee {
+    overflow-x: auto;
+  }
+}

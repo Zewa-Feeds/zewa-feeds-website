@@ -2,6 +2,7 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
+import LogoMarquee from "@/components/LogoMarquee";
 import { catalog } from "@/lib/api";
 import {
   FOUNDER,
@@ -313,17 +314,39 @@ export default async function AboutPage() {
               </p>
             </div>
 
-            <div className="lg:pt-16">
+            {/*
+              min-w-0 is required, not cosmetic. A grid item defaults to
+              min-width:auto, so it grows to its content's intrinsic width —
+              the 2500px marquee track stretched this column to 2072px and made
+              the whole page scroll sideways. min-w-0 lets it shrink so the
+              marquee's own overflow-hidden can do its job.
+            */}
+            <div className="min-w-0 lg:pt-16">
               <p className="font-label-caps mb-6 text-[10px] tracking-[0.2em] text-white/25">
                 BACKED BY
               </p>
-              <ul className="flex flex-wrap gap-x-6 gap-y-3.5">
-                {TRUST.institutions.map((name) => (
-                  <li key={name} className="font-body-md text-[13.5px] text-white/45">
-                    {name}
-                  </li>
-                ))}
-              </ul>
+              {/*
+                Logos rather than a text list: these are the marks a distributor
+                or wholesale buyer recognises, and the section's whole claim is
+                "validated by institutions, not by us".
+              */}
+              {/*
+                No negative margin. Bleeding the row past the section padding
+                widened it beyond the viewport and made the page scroll
+                sideways; the edge fades already imply the row continues.
+              */}
+              <LogoMarquee logos={TRUST.institutionLogos} />
+
+              {/* Backers with no logo file supplied — still named, not dropped. */}
+              {TRUST.institutionsTextOnly?.length > 0 && (
+                <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2">
+                  {TRUST.institutionsTextOnly.map((name) => (
+                    <li key={name} className="font-body-md text-[13px] text-white/40">
+                      {name}
+                    </li>
+                  ))}
+                </ul>
+              )}
 
               <p className="font-label-caps mb-6 mt-12 text-[10px] tracking-[0.2em] text-white/25">
                 RECOGNITION
