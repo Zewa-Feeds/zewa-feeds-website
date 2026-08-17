@@ -211,22 +211,13 @@ function TileVideo({ onVideoEnd }) {
         From md up the frame is wide enough that cover crops very little, and
         full-bleed is the better look, so the old behaviour is kept there.
       */}
-      <div className="relative md:absolute md:inset-0 flex flex-col items-center justify-center gap-4 px-5 pt-8 pb-24 md:gap-0 md:px-0 md:pt-0 md:pb-0">
+      <div className="relative md:absolute md:inset-0 flex flex-col items-center justify-center gap-4 px-2.5 sm:px-5 pt-4 pb-20 md:gap-0 md:px-0 md:pt-0 md:pb-0">
         {/*
-          aspect-video (16/9) as a CLASS, not an inline style: an inline
-          aspect-ratio wins over any breakpoint class, so md:aspect-auto could
-          never restore the full-bleed desktop frame.
+          Increased aspect ratio (4/3) and reduced side padding on mobile (px-2.5)
+          to make the video player larger in both width and height on mobile screens,
+          as requested.
         */}
-        {/*
-          A framed window on mobile: hairline border, rounded corners and a soft
-          drop shadow so the letterboxed clip reads as a deliberate player
-          rather than a video floating on the page background.
-
-          All three are dropped from md up (md:border-0, md:rounded-none,
-          md:shadow-none) where the video is full-bleed and any edge treatment
-          would just cut a line across the slide.
-        */}
-        <div className="relative w-full aspect-video overflow-hidden rounded-2xl border border-white/12 shadow-[0_18px_40px_rgba(0,0,0,0.45)] md:aspect-auto md:h-full md:rounded-none md:border-0 md:shadow-none">
+        <div className="relative w-full aspect-[4/3] sm:aspect-video overflow-hidden rounded-2xl border border-white/12 shadow-[0_18px_40px_rgba(0,0,0,0.45)] md:aspect-auto md:h-full md:rounded-none md:border-0 md:shadow-none">
           <video
             ref={videoRef}
             muted
