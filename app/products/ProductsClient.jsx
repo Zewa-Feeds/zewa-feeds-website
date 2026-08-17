@@ -1086,12 +1086,12 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
               {/* Slide 1 — the brand banner */}
               {heroSlide === 1 && (
               <div className="w-full h-full animate-fadeIn flex items-center justify-center">
-                <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#070d18] flex items-center justify-center">
+                <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-[#070d18]">
                   <Image
                     src="/banner-products.png"
                     alt="Discover a diverse range of feeds to nourish every species of fish — Zewa Feeds"
                     fill
-                    className="object-contain p-1.5 sm:p-3"
+                    className="object-cover object-center"
                     sizes="(max-width: 1440px) 100vw, 1440px"
                     priority
                   />
