@@ -488,6 +488,56 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                   ))}
                 </div>
               )}
+
+              {/* Highlights / Key Benefits shifted to left column under product media */}
+              {highlights.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-white/10 mt-2">
+                  {highlights.slice(0, 6).map((h, i) => (
+                    <div key={i} className="flex items-start gap-2.5">
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      <div>
+                        <div className="text-[13px] font-semibold text-white/85 font-[Montserrat]">
+                          {h.title}
+                        </div>
+                        {h.sub && (
+                          <div className="text-[11px] text-white/35 font-[Montserrat]">{h.sub}</div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {product.benefits?.length > 0 && highlights.length === 0 && (
+                <div className="pt-4 border-t border-white/10 mt-2">
+                  <ul className="grid grid-cols-1 gap-x-8 gap-y-3.5 sm:grid-cols-2">
+                    {product.benefits.map((b) => (
+                      <li key={b} className="flex items-start gap-2.5">
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          className="mt-[3px] shrink-0"
+                          aria-hidden="true"
+                        >
+                          <circle cx="8" cy="8" r="7.25" stroke="rgba(68,229,194,0.35)" />
+                          <path
+                            d="M4.75 8.25L6.9 10.4L11.25 6"
+                            stroke="#44E5C2"
+                            strokeWidth="1.6"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        <span className="text-[13px] leading-[1.45] text-white/70 font-[Montserrat]">
+                          {b}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* ── Buy box ─────────────────────────────────────────────── */}
@@ -647,69 +697,6 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                           : `Add to cart · ${formatInr((pack?.pricePaise ?? 0) * qty)}`}
                 </button>
               </div>
-
-              {/* Highlights */}
-              {highlights.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  {highlights.slice(0, 6).map((h, i) => (
-                    <div key={i} className="flex items-start gap-2.5">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                      <div>
-                        <div className="text-[13px] font-semibold text-white/85 font-[Montserrat]">
-                          {h.title}
-                        </div>
-                        {h.sub && (
-                          <div className="text-[11px] text-white/35 font-[Montserrat]">{h.sub}</div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/*
-                Key benefits (from the CMS).
-
-                These were rounded pills in a flex-wrap row. That works for short
-                tags, but these are full sentences — each pill claimed its own line
-                and the differing widths made a ragged staircase of outlines, with
-                the border drawing more attention than the words.
-
-                Now a two-column checklist: a teal check carries the "benefit"
-                meaning, the text is readable at 13px, and equal columns give a
-                clean left edge. Matches the `highlights` block above, so a
-                product with either data source looks the same.
-              */}
-              {product.benefits?.length > 0 && highlights.length === 0 && (
-                <div className="pt-1">
-                  <ul className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2">
-                    {product.benefits.map((b) => (
-                      <li key={b} className="flex items-start gap-2.5">
-                        <svg
-                          width="15"
-                          height="15"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          className="mt-[3px] shrink-0"
-                          aria-hidden="true"
-                        >
-                          <circle cx="8" cy="8" r="7.25" stroke="rgba(68,229,194,0.35)" />
-                          <path
-                            d="M4.75 8.25L6.9 10.4L11.25 6"
-                            stroke="#44E5C2"
-                            strokeWidth="1.6"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <span className="text-[13px] leading-[1.45] text-white/70 font-[Montserrat]">
-                          {b}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
 
               {/*
                 Mandatory listing declarations.
