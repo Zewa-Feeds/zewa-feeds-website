@@ -27,13 +27,6 @@ function TileWhy() {
       <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-6 pb-24 md:py-0">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16">
         <div className="max-w-2xl">
-          <div className="flex items-center gap-3 mb-5 sm:mb-8">
-            <div className="w-8 h-px bg-primary" />
-            <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
-              BIOLOGICAL SUPREMACY
-            </span>
-          </div>
-
           <h1 className="font-display-lg text-[32px] sm:text-display-lg-mobile md:text-display-lg mb-4 sm:mb-6 leading-[1.08] text-on-surface">
             Your fish is built to{" "}
             <span className="text-primary italic">digest insects.</span>
@@ -155,13 +148,6 @@ function TileProof() {
       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[40%] h-[60%] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-4 pb-24 md:py-8 overflow-y-auto">
-        <div className="flex items-center gap-3 mb-5 sm:mb-8">
-          <div className="w-8 h-px bg-primary" />
-          <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
-            CLINICAL PROOF
-          </span>
-        </div>
-
         {/*
           Single column since the digestion-efficiency chart was removed.
           A lg:grid-cols-2 wrapper would leave the right half of the tile
@@ -226,13 +212,6 @@ function TileVideo({ onVideoEnd }) {
         full-bleed is the better look, so the old behaviour is kept there.
       */}
       <div className="relative md:absolute md:inset-0 flex flex-col items-center justify-center gap-4 px-5 pt-8 pb-24 md:gap-0 md:px-0 md:pt-0 md:pb-0">
-        {/* Mobile-only caption, so it sits with the video rather than adrift. */}
-        <div className="flex w-full items-center gap-3 md:hidden">
-          <div className="h-px w-8 bg-primary" />
-          <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
-            BRAND FILM
-          </span>
-        </div>
         {/*
           aspect-video (16/9) as a CLASS, not an inline style: an inline
           aspect-ratio wins over any breakpoint class, so md:aspect-auto could
@@ -280,23 +259,6 @@ function TileVideo({ onVideoEnd }) {
           </video>
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/50 via-transparent to-transparent pointer-events-none" />
-        </div>
-      </div>
-
-      {/*
-        Label.
-
-        On mobile it is anchored just above the letterboxed video rather than at
-        top-24, where it floated in the empty band with nothing under it. From md
-        up the video is full-bleed again, so it returns to the absolute position
-        it has always had.
-      */}
-      <div className="absolute inset-0 hidden md:flex md:items-start md:justify-start pointer-events-none">
-        <div className="mt-24 ml-8 sm:ml-12 flex items-center gap-3">
-          <div className="h-px w-8 bg-primary" />
-          <span className="font-label-caps text-label-caps text-primary tracking-[0.2em]">
-            BRAND FILM
-          </span>
         </div>
       </div>
     </div>
@@ -363,7 +325,16 @@ export default function Hero() {
         and the slides fill it.
       */}
       <div
-        className="relative md:absolute md:inset-0 overflow-hidden transition-opacity duration-[400ms]"
+        /*
+         * md:top-20, not md:inset-0.
+         *
+         * The header is a fixed 80px bar and the section carries pt-20 to clear
+         * it — but inset-0 positions from the section's own top edge, which
+         * cancelled that padding. On the video slide that put the top 80px of
+         * the film behind the header. Starting the slide area below the header
+         * gives each its own space.
+         */
+        className="relative md:absolute md:inset-x-0 md:bottom-0 md:top-20 overflow-hidden transition-opacity duration-[400ms]"
         style={{ opacity: animating ? 0 : 1 }}
       >
         {current === 0 && <TileWhy />}

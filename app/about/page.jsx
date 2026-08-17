@@ -363,7 +363,7 @@ export default async function AboutPage() {
             className="font-display-lg leading-[1.15] text-white"
             style={{ fontSize: "clamp(26px, 3.2vw, 38px)" }}
           >
-            Recognised by the people who fund and judge this work.
+            Grants, awards and national programmes.
           </h2>
 
           <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
