@@ -281,65 +281,21 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
           </nav>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            {/* ── Gallery ─────────────────────────────────────────────── */}
-            <div className="flex flex-col gap-4">
-              {/*
-                Light frame, not the page's dark surface.
-
-                This defaulted to rgba(68,229,194,0.06) — a barely-tinted teal
-                that reads as near-black over the dark page. Product artwork is
-                designed for print and packaging, so several assets carry dark
-                text on a transparent background; on that frame the text was
-                effectively invisible. A near-white panel is what the artwork
-                expects, and it also makes the bottle photography pop.
-
-                A CMS-supplied accentBg still wins, so a product can override
-                this per-item.
-              */}
-              {/*
-                The frame takes the shape of what it holds.
-
-                Images are 1:1, but the product video is 1920x1080. Forcing 16:9
-                into a square left ~44% of the frame empty above and below the
-                video — letterboxing that no amount of padding fixes, because it
-                is the aspect mismatch itself.
-
-                No background either when the media is full-bleed: a JPG slide or
-                a video fills the box edge to edge, so a panel behind it is never
-                visible. The tint stays for transparent PNG cutouts, which do sit
-                on it.
-              */}
-              {/*
-                The frame is ALWAYS square — it must not resize between slides.
-
-                An aspect-video frame fitted the 1920x1080 video exactly, but the
-                frame then shrank from 588px to 331px whenever you stepped onto
-                it, shifting everything below by 257px. Stable geometry is worth
-                more than filling one slide of five.
-
-                The video is centred instead, with the light panel visible above
-                and below it — which is why the panel stays for video as well as
-                for transparent cutouts, and is dropped only for the full-bleed
-                JPG slides that cover the box edge to edge.
-              */}
+            {/* ── Gallery & Benefits (White Container Card) ────────────────────── */}
+            <div className="flex flex-col gap-6 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-md text-[#0b1220]">
               <div
-                className="group relative aspect-square overflow-hidden rounded-3xl flex items-center justify-center bg-white border border-white/10"
+                className="group relative aspect-square overflow-hidden rounded-2xl flex items-center justify-center border border-slate-200/60"
                 style={{
-                  background: active?.type === "VIDEO" ? "#06080f" : "#ffffff",
+                  background: isCutout(active?.url)
+                    ? (presentation.accentBg ?? "#f4f7f6")
+                    : active?.type === "VIDEO"
+                    ? "#06080f"
+                    : "#ffffff",
                 }}
               >
                 {active?.type === "VIDEO" ? (
-                  /*
-                   * controls + muted + playsInline, and deliberately NOT autoplay:
-                   * a product page that starts making noise is hostile, and iOS
-                   * blocks unmuted autoplay anyway. preload="metadata" fetches
-                   * only the header, not the whole file, so a 100 MB video costs
-                   * nothing until the shopper presses play.
-                   */
                   <video
                     key={active.url}
-                    // React does not reflect `muted` to the DOM attribute, so set
-                    // it on the element itself or the video plays with sound.
                     ref={(el) => {
                       if (el) el.muted = true;
                     }}
@@ -348,12 +304,6 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                     controls
                     playsInline
                     preload="metadata"
-                    /*
-                     * object-contain centres the 16:9 file in the square frame.
-                     * No rounding: the frame behind it is now the page colour,
-                     * so rounded corners would cut into the video itself rather
-                     * than soften an edge against a visible panel.
-                     */
                     className="h-full w-full object-contain"
                   />
                 ) : (
@@ -362,19 +312,6 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                     alt={mediaAlt(active, activeIndex)}
                     width={640}
                     height={640}
-                    /*
-                     * Padding only for transparent cutouts.
-                     *
-                     * Every asset is a 1:1 square, matching this frame, so
-                     * object-contain never crops. But a flat p-10 shrank the
-                     * artwork to 86% of the frame — and the JPG design slides
-                     * ("Key Features", nutrition panels) already carry their
-                     * own margins, so the result looked inset and clipped.
-                     *
-                     * PNGs here are bottle cutouts on transparency, which do
-                     * need breathing room or they touch the frame edge. JPGs
-                     * are full-bleed layouts and should fill it completely.
-                     */
                     className={`h-full w-full object-contain ${
                       isCutout(active?.url) ? "p-10" : "p-0"
                     }`}
@@ -387,23 +324,14 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                   </span>
                 )}
 
-                {/*
-                  Prev / next arrows.
-
-                  Previously the only way through 19 images was the thumbnail
-                  strip, which needs horizontal scrolling to even reach the
-                  later ones. Dark chevrons because the frame is now light.
-
-                  type="button" matters: this sits inside the page, and a bare
-                  <button> in a form context would submit it.
-                */}
+                {/* Prev / next arrows */}
                 {media.length > 1 && (
                   <>
                     <button
                       type="button"
                       onClick={() => step(-1)}
                       aria-label="Previous image"
-                      className="absolute left-3 top-1/2 z-10 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/80 text-[#0b1220] shadow-sm backdrop-blur transition-all hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                      className="absolute left-3 top-1/2 z-10 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/90 text-[#0b1220] shadow-sm backdrop-blur transition-all hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                     >
                       <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                         <path d="M7.5 2L3.5 6L7.5 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -413,21 +341,21 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                       type="button"
                       onClick={() => step(1)}
                       aria-label="Next image"
-                      className="absolute right-3 top-1/2 z-10 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/80 text-[#0b1220] shadow-sm backdrop-blur transition-all hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                      className="absolute right-3 top-1/2 z-10 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/90 text-[#0b1220] shadow-sm backdrop-blur transition-all hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                     >
                       <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                         <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </button>
 
-                    {/* Position readout — 19 thumbnails give no sense of place. */}
-                    <span className="absolute bottom-4 right-4 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-semibold tabular-nums text-white/90 font-[Montserrat]">
+                    <span className="absolute bottom-4 right-4 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-semibold tabular-nums text-white font-[Montserrat]">
                       {activeIndex + 1} / {media.length}
                     </span>
                   </>
                 )}
               </div>
 
+              {/* Thumbnails row */}
               {media.length > 1 && (
                 <div className="flex gap-3 overflow-x-auto pb-1">
                   {media.map((item, i) => (
@@ -435,24 +363,21 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                       key={item.url + i}
                       onClick={() => setActiveIndex(i)}
                       type="button"
-                      className={`relative shrink-0 w-[72px] h-[72px] rounded-xl overflow-hidden border transition-all duration-200 bg-white ${
+                      className={`relative shrink-0 w-[72px] h-[72px] rounded-xl overflow-hidden border transition-all duration-200 ${
                         i === activeIndex
-                          ? "border-primary ring-2 ring-primary/40"
-                          : "border-white/15 hover:border-white/35"
+                          ? "border-[#00755f] ring-2 ring-[#00755f]/30"
+                          : "border-slate-200 hover:border-slate-400"
                       }`}
-                      style={{ background: "#ffffff" }}
+                      style={{ background: presentation.accentBg ?? "#f4f7f6" }}
                       aria-label={
                         item.type === "VIDEO" ? "Play product video" : `View image ${i + 1}`
                       }
                     >
-                      {/* A video thumbnail is its poster frame — never the video. */}
                       <Image
                         src={item.type === "VIDEO" ? (item.posterUrl ?? primaryImage) : item.url}
                         alt={mediaAlt(item, i)}
                         width={72}
                         height={72}
-                        // Same rule as the main frame: pad cutouts, let
-                        // full-bleed slides fill the tile.
                         className={`h-full w-full object-contain ${
                           isCutout(item.url) ? "p-2" : "p-0"
                         }`}
@@ -471,18 +396,18 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 </div>
               )}
 
-              {/* Highlights / Key Benefits moved to left column under images */}
+              {/* Key Benefits / Highlights Checklist */}
               {highlights.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-white/10 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-6 border-t border-slate-200/80">
                   {highlights.slice(0, 6).map((h, i) => (
                     <div key={i} className="flex items-start gap-2.5">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#00755f]" />
                       <div>
-                        <div className="text-[13px] font-semibold text-white/85 font-[Montserrat]">
+                        <div className="text-[13px] font-semibold text-slate-800 font-[Montserrat]">
                           {h.title}
                         </div>
                         {h.sub && (
-                          <div className="text-[11px] text-white/35 font-[Montserrat]">{h.sub}</div>
+                          <div className="text-[11px] text-slate-500 font-[Montserrat]">{h.sub}</div>
                         )}
                       </div>
                     </div>
@@ -491,7 +416,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
               )}
 
               {product.benefits?.length > 0 && highlights.length === 0 && (
-                <div className="pt-4 border-t border-white/10 mt-2">
+                <div className="pt-6 border-t border-slate-200/80">
                   <ul className="grid grid-cols-1 gap-x-8 gap-y-3.5 sm:grid-cols-2">
                     {product.benefits.map((b) => (
                       <li key={b} className="flex items-start gap-2.5">
@@ -503,16 +428,16 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                           className="mt-[3px] shrink-0"
                           aria-hidden="true"
                         >
-                          <circle cx="8" cy="8" r="7.25" stroke="rgba(68,229,194,0.4)" />
+                          <circle cx="8" cy="8" r="7.25" stroke="#00755f" fill="#e6f7f3" />
                           <path
                             d="M4.75 8.25L6.9 10.4L11.25 6"
-                            stroke="#44E5C2"
+                            stroke="#00755f"
                             strokeWidth="1.6"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                         </svg>
-                        <span className="text-[13px] leading-[1.45] text-white/80 font-[Montserrat]">
+                        <span className="text-[13px] leading-[1.45] text-slate-800 font-medium font-[Montserrat]">
                           {b}
                         </span>
                       </li>
