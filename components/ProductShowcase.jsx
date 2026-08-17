@@ -5,8 +5,11 @@ import { catalog } from "@/lib/api";
 /**
  * Homepage range section — driven entirely by the catalogue API.
  *
- * Upper section (heading & hero spotlight card) sits on dark ground (#06080f).
- * Lower section (secondary products & View All CTA) sits on white ground below.
+ * This used to be a hardcoded HERO plus three SECONDARY entries. They named
+ * products by slugs that no longer exist ("betta-bites-f3"), so the homepage
+ * advertised items that could not be bought and linked to 404s. A server
+ * component can await the real catalogue directly, so there is no reason to
+ * carry a second, silently-diverging copy of the product list.
  */
 
 const ACCENTS = [
@@ -44,20 +47,37 @@ function ArrowIcon() {
 }
 
 export default async function ProductShowcase() {
+  /*
+   * Server-side fetch: the markup ships already populated, so there is no
+   * loading flash and no client-side JavaScript for this section.
+   *
+   * On failure the whole section is omitted rather than shown empty or with
+   * invented products — the homepage simply skips the range block.
+   */
   let products = [];
   try {
     products = await catalog.products();
   } catch {
     return null;
   }
-  if (!products || products.length === 0) return null;
+  if (products.length === 0) return null;
 
   const HERO = adapt(products[0], 0);
   const SECONDARY = products.slice(1, 4).map((p, i) => adapt(p, i + 1));
 
   return (
+    /*
+       TWO SURFACES, one section.
+       
+       The heading block keeps the dark ground it always had, and the cards sit
+       on white below it. The id stays on the outer element so /#products still
+       lands on the heading rather than mid-grid.
+       
+       Each half carries the text colours its own background needs: mint and
+       white read on the dark ground, #00755f and #0b1220 on the light one.
+    */
     <Reveal id="products" className="bg-[#06080f]">
-      {/* ── UPPER SECTION: Dark background (#06080f) containing Heading & Hero Spotlight Card ── */}
+      {/* ── Heading block — dark ─────────────────────────────────── */}
       <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-24 sm:pt-32 pb-14 sm:pb-20">
         {/* Section label */}
         <div className="flex items-center gap-3 mb-10 sm:mb-14">
@@ -68,22 +88,41 @@ export default async function ProductShowcase() {
         </div>
 
         {/* Section heading */}
-        <h2 className="font-[Playfair_Display] text-[32px] sm:text-[48px] text-white leading-tight mb-10 sm:mb-14">
+        <h2 className="font-[Playfair_Display] text-[32px] sm:text-[48px] text-white leading-tight">
           Engineered{" "}
           <span className="italic text-primary">for the species.</span>
         </h2>
+      </div>
 
-        {/* ── HERO SPOTLIGHT CARD (Inside Dark Background) ─────────────────── */}
+      {/* ── Cards — white ────────────────────────────────────────── */}
+      <div className="bg-white">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-16 sm:pt-20 pb-24 sm:pb-32">
+
+        {/* ── HERO CARD ─────────────────────────────────────────── */}
         <a
           href={`/products/${HERO.slug}`}
-          className="group relative flex flex-col lg:flex-row items-center gap-0 rounded-2xl overflow-hidden"
+          className="group relative flex flex-col lg:flex-row items-center gap-0 rounded-2xl overflow-hidden mb-5"
           style={{ background: "linear-gradient(135deg, #0d1f2e 0%, #091914 100%)" }}
         >
           {/* Ambient glow */}
           <div className="absolute inset-0 pointer-events-none"
             style={{ background: `radial-gradient(ellipse 60% 70% at 30% 50%, ${HERO.accentColor}, transparent 65%)` }} />
 
-          {/* Image well — left 55% on desktop */}
+          {/*
+            Image — left 55% on desktop, full width on mobile.
+
+            The well is DARK, not white.
+
+            The listing image fills it edge to edge (object-cover on a 1:1
+            source), so this colour is only ever seen in the gap left when the
+            image cannot cover — and the Betta lead shot is dark navy (#072466),
+            so white showed as a bright band under it rather than blending.
+
+            shrink-0 self-stretch matters too: the card is a flex column, which
+            stretched this well to the card's full 925px height on mobile while
+            aspect-square only sized the image to 350px. That left 575px of bare
+            background below the photo.
+          */}
           <div className="relative w-full shrink-0 self-stretch lg:w-[55%] aspect-square lg:aspect-auto lg:min-h-[340px] overflow-hidden bg-[#06080f]">
             {HERO.image && (
               <Image
@@ -135,76 +174,85 @@ export default async function ProductShowcase() {
           <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
             style={{ background: "linear-gradient(to right, rgba(68,229,194,0.7), transparent)" }} />
         </a>
-      </div>
 
-      {/* ── LOWER SECTION: White background containing Secondary Cards & View All CTA ── */}
-      <div className="bg-white">
-        <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-14 sm:pt-16 pb-24 sm:pb-32">
-          {/* Secondary Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-            {SECONDARY.map((p) => (
-              <a
-                key={p.slug ?? p.name}
-                href={p.slug ? `/products/${p.slug}` : "/products"}
-                className="group relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.18)] border border-slate-200/70"
-                style={{ background: "linear-gradient(160deg, #0d1726 0%, #0a1219 100%)" }}
-              >
-                {/* Glow */}
-                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor}, transparent)` }} />
-
-                {/* Image well */}
-                <div className="relative aspect-square overflow-hidden bg-white p-4 sm:p-6 flex items-center justify-center border-b border-slate-100">
-                  {p.image && (
-                    <Image
-                      src={p.image}
-                      alt={p.name}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 33vw"
-                      className="object-contain p-3 transition-transform duration-500 group-hover:scale-105"
-                    />
-                  )}
-                  {p.badge && (
-                    <span className="absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] text-white z-10 shadow-sm"
-                      style={{ background: "#00755f" }}>
-                      {p.badge}
-                    </span>
-                  )}
-                </div>
-
-                {/* Text */}
-                <div className="p-6 flex flex-col gap-2.5 justify-between flex-1 relative z-10">
-                  <div>
-                    <h3 className="font-[Playfair_Display] text-[20px] text-white font-semibold leading-snug mb-2 group-hover:text-primary transition-colors duration-200">
-                      {p.name}
-                    </h3>
-                    <p className="text-[12.5px] text-white/50 font-[Montserrat] leading-relaxed line-clamp-2">
-                      {p.tagline}
-                    </p>
-                  </div>
-
-                  <span className="inline-flex items-center gap-1.5 text-[10.5px] font-bold tracking-[0.18em] uppercase font-[Montserrat] text-primary/70 mt-2 group-hover:text-primary group-hover:gap-2.5 transition-all duration-200">
-                    Explore <ArrowIcon />
-                  </span>
-                </div>
-
-                <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
-                  style={{ background: "linear-gradient(to right, rgba(68,229,194,0.7), transparent)" }} />
-              </a>
-            ))}
-          </div>
-
-          {/* Bottom CTA */}
-          <div className="flex items-center justify-center">
+        {/* ── SECONDARY ROW ─────────────────────────────────────── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-12">
+          {SECONDARY.map((p) => (
             <a
-              href="/products"
-              className="group inline-flex items-center gap-3 rounded-full border border-[#00755f]/35 px-8 py-4 font-[Montserrat] text-[11px] font-bold uppercase tracking-[0.2em] text-[#00755f] transition-all duration-250 hover:border-[#00755f] hover:bg-[#00755f] hover:text-white"
+              key={p.slug ?? p.name}
+              href={p.slug ? `/products/${p.slug}` : "/products"}
+              className="group relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
+              style={{ background: "linear-gradient(160deg, #0d1726 0%, #0a1219 100%)" }}
             >
-              View All Formulas
-              <ArrowIcon />
+              {/* Glow */}
+              <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor}, transparent)` }} />
+
+              {/* Image — white well, same reasoning as the hero card above. */}
+              <div className="relative aspect-square overflow-hidden bg-white">
+                {p.image && (
+                  <Image
+                    src={p.image}
+                    alt={p.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                )}
+                {p.badge && (
+                  <span className="absolute top-4 left-4 text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] text-white z-10"
+                    /*
+                     * #00a882 gave white text 3.03:1 — under the 4.5:1 needed
+                     * for small text, and more obvious now the badge sits on a
+                     * white well. #00755f is the accessible green already used
+                     * in the Science section (5.66:1).
+                     */
+                    style={{ background: "#00755f" }}>
+                    {p.badge}
+                  </span>
+                )}
+              </div>
+
+              {/* Text */}
+              <div className="px-6 pb-7 flex flex-col gap-2">
+                <h3 className="font-[Playfair_Display] text-[20px] text-white leading-snug group-hover:text-primary transition-colors duration-200">
+                  {p.name}
+                </h3>
+                <p className="text-[12px] text-white/35 font-[Montserrat] leading-relaxed">
+                  {p.tagline}
+                </p>
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.18em] uppercase font-[Montserrat] text-primary/60 mt-2 group-hover:text-primary group-hover:gap-2.5 transition-all duration-200">
+                  Explore <ArrowIcon />
+                </span>
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
+                style={{ background: "linear-gradient(to right, rgba(68,229,194,0.5), transparent)" }} />
             </a>
-          </div>
+          ))}
         </div>
+
+        {/* ── BOTTOM CTA ────────────────────────────────────────── */}
+        <div className="flex items-center justify-center">
+          <a
+            href="/products"
+            /*
+             * The brand mint measures 1.59:1 on white — effectively invisible.
+             * #00755f is the accessible green used elsewhere on light surfaces
+             * (5.66:1), and the hover fill inverts to white on that same green.
+             *
+             * Arbitrary Tailwind values rather than inline styles with mouse
+             * handlers: this is a server component, so it cannot carry event
+             * handlers at all.
+             */
+            className="group inline-flex items-center gap-3 rounded-full border border-[#00755f]/35 px-8 py-4 font-[Montserrat] text-[11px] font-bold uppercase tracking-[0.2em] text-[#00755f] transition-all duration-250 hover:border-[#00755f] hover:bg-[#00755f] hover:text-white"
+          >
+            View All Formulas
+            <ArrowIcon />
+          </a>
+        </div>
+
+      </div>
       </div>
     </Reveal>
   );
