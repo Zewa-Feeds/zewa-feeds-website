@@ -67,26 +67,36 @@ export default async function ProductShowcase() {
 
   return (
     /*
-       White section background. The product cards keep their own dark gradients,
-       so only the eyebrow and the heading sit directly on this surface and needed
-       recolouring — everything inside a card is unaffected.
+       TWO SURFACES, one section.
+       
+       The heading block keeps the dark ground it always had, and the cards sit
+       on white below it. The id stays on the outer element so /#products still
+       lands on the heading rather than mid-grid.
+       
+       Each half carries the text colours its own background needs: mint and
+       white read on the dark ground, #00755f and #0b1220 on the light one.
     */
-    <Reveal id="products" className="bg-white">
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-24 sm:pt-32 pb-24 sm:pb-32">
-
+    <Reveal id="products" className="bg-[#06080f]">
+      {/* ── Heading block — dark ─────────────────────────────────── */}
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-24 sm:pt-32 pb-14 sm:pb-20">
         {/* Section label */}
         <div className="flex items-center gap-3 mb-10 sm:mb-14">
           <div className="w-6 h-px bg-primary" />
-          <span className="text-[10px] font-bold tracking-[0.28em] font-[Montserrat] uppercase" style={{ color: "#00755f" }}>
+          <span className="text-[10px] font-bold tracking-[0.28em] font-[Montserrat] uppercase text-primary">
             The Range
           </span>
         </div>
 
         {/* Section heading */}
-        <h2 className="font-[Playfair_Display] text-[32px] sm:text-[48px] leading-tight mb-12 sm:mb-16" style={{ color: "#0b1220" }}>
+        <h2 className="font-[Playfair_Display] text-[32px] sm:text-[48px] text-white leading-tight">
           Engineered{" "}
-          <span className="italic" style={{ color: "#00755f" }}>for the species.</span>
+          <span className="italic text-primary">for the species.</span>
         </h2>
+      </div>
+
+      {/* ── Cards — white ────────────────────────────────────────── */}
+      <div className="bg-white">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-16 sm:pt-20 pb-24 sm:pb-32">
 
         {/* ── HERO CARD ─────────────────────────────────────────── */}
         <a
@@ -238,6 +248,7 @@ export default async function ProductShowcase() {
           </a>
         </div>
 
+      </div>
       </div>
     </Reveal>
   );
