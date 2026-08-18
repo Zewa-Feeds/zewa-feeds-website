@@ -124,25 +124,39 @@ export default async function ProductShowcase() {
                 style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor}, transparent)` }}
               />
 
-              {/* Image well — Black pillow with cyan backdrop glow */}
-              <div className="relative aspect-square overflow-hidden bg-[#070e19] flex items-center justify-center p-4 sm:p-6 border-b border-[#44e5c2]/15">
-                {/* Small cyan backdrop aura behind product pack */}
-                <div
-                  className="absolute inset-0 pointer-events-none z-0"
-                  style={{
-                    background: "radial-gradient(circle at 50% 50%, rgba(68, 229, 194, 0.22) 0%, rgba(68, 229, 194, 0.05) 55%, transparent 75%)",
-                  }}
-                />
+              {/*
+                Image well — the artwork fills it edge to edge.
 
+                Every pack shot is a 1:1 source and the well is aspect-square,
+                so object-cover crops nothing; it just removes the letterbox
+                gap that object-contain left around images whose own
+                background (Betta blue, Koi white) is part of the artwork.
+                Those gaps read as a mismatched frame rather than a bleed.
+
+                The cyan aura sits above the image at low opacity so the well
+                still picks up the section's glow — behind it, a fully opaque
+                pack shot would hide it entirely.
+              */}
+              <div className="relative aspect-square overflow-hidden bg-[#070e19] border-b border-[#44e5c2]/15">
                 {p.image && (
                   <Image
                     src={p.image}
                     alt={p.name}
                     fill
                     sizes="(max-width: 640px) 100vw, 33vw"
-                    className="object-contain p-3 relative z-10 rounded-2xl transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover relative z-0 transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
+
+                <div
+                  className="absolute inset-0 pointer-events-none z-10"
+                  style={{
+                    background: "radial-gradient(circle at 50% 50%, rgba(68, 229, 194, 0.10) 0%, transparent 70%)",
+                  }}
+                />
+
+                {/* Soft bottom blend overlay to transition image into dark card body */}
+                <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0d1726] via-[#0d1726]/40 to-transparent z-10 pointer-events-none" />
               </div>
 
               {/* Text */}
