@@ -3,7 +3,7 @@ import Reveal from "./Reveal";
 import { catalog } from "@/lib/api";
 
 /**
- * Homepage range section — driven by the catalogue API with fallback support.
+ * Homepage range section — driven directly by the catalogue API.
  *
  * Entire Range section sits on dark ground (#06080f).
  * Products feature dark "black pillow" image wells with a soft cyan backdrop aura
@@ -17,39 +17,43 @@ const ACCENTS = [
   "rgba(68,229,194,0.14)",
 ];
 
+// Valid product images from Cloudinary & local bottle assets
 const FALLBACK_PRODUCTS = [
   {
     name: "Zewa Feeds Betta Bites F3",
-    slug: "betta-bites-f3",
+    slug: "betta-bites",
     badge: "HERO FORMULA",
     shortDesc: "Zewa Feeds Betta Bites (F3) deliver 46% insect protein — the highest in the Zewa range — in a 0.6–0.8 mm slow-sinking pellet built exclusively for Betta splendens.",
     proteinPct: 46,
     packs: [{ pack: "20g Bottle" }],
-    images: [{ url: "/images/betta-bites-hero.jpg" }],
+    images: [{ url: "https://res.cloudinary.com/lzydbena/image/upload/v1785740669/zewa/products/zzkpzeizlery8lpeas8c.jpg" }],
   },
   {
     name: "Zewa Feeds Guppy Bites G2",
-    slug: "guppy-bites-g2",
+    slug: "guppy-bites",
     badge: "MICRO PELLET",
     shortDesc: "Zewa Feeds Guppy Bites (G2) are precision-crafted 0.3–0.6 mm slow-sinking micro pellets with 38% insect protein.",
     proteinPct: 38,
     packs: [{ pack: "250g Pouch" }],
-    images: [{ url: "/images/guppy-bites.jpg" }],
+    images: [{ url: "https://res.cloudinary.com/lzydbena/image/upload/v1785738946/zewa/products/kvh6nfiuuqwkeq89ixj4.png" }],
   },
   {
     name: "Zewa Feeds Koi Bites K7",
-    slug: "koi-bites-k7",
+    slug: "koi-bites",
     badge: "GROWTH & COLOUR",
     shortDesc: "Zewa Feeds Koi Bites (K7) are premium 4 mm floating pellets with 32% insect protein, krill meal, and proprietary probiotics.",
     proteinPct: 32,
     packs: [{ pack: "1kg Pouch" }],
-    images: [{ url: "/images/koi-bites.jpg" }],
+    images: [{ url: "https://res.cloudinary.com/lzydbena/image/upload/v1785740602/zewa/products/r9vitexv8su2z8zzdv5v.jpg" }],
   },
 ];
 
 /** API product -> the shape this section renders. */
 function adapt(api, i = 0) {
   const first = (api.packs ?? [])[0];
+  const rawImage = (api.images ?? [])[0]?.url;
+  const imageUrl = rawImage || FALLBACK_PRODUCTS[i % FALLBACK_PRODUCTS.length].images[0].url;
+
   return {
     name: api.name,
     slug: api.slug,
@@ -61,7 +65,7 @@ function adapt(api, i = 0) {
       { val: "0%", label: "Soy Filler" },
       first ? { val: first.pack, label: "Pack" } : null,
     ].filter(Boolean),
-    image: (api.images ?? [])[0]?.url ?? null,
+    image: imageUrl,
     accentColor: ACCENTS[i % ACCENTS.length],
   };
 }
@@ -79,7 +83,7 @@ export default async function ProductShowcase() {
   try {
     products = await catalog.products();
   } catch {
-    // Soft fallback on API network failure
+    // API endpoint unreachable during dev
   }
 
   if (!products || products.length === 0) {
@@ -148,7 +152,7 @@ export default async function ProductShowcase() {
 
               {/* Text */}
               <div className="px-6 pb-7 pt-5 flex flex-col gap-2 relative z-10">
-                <h3 className="font-[Playfair_Display] text-[20px] text-white leading-snug group-hover:text-primary transition-colors duration-200">
+                <h3 className="font-[Playfair_Display] text-[20px] text-[#ffffff] leading-snug group-hover:text-primary transition-colors duration-200">
                   {p.name}
                 </h3>
                 <p className="text-[12px] text-white/45 font-[Montserrat] leading-relaxed line-clamp-2">
