@@ -27,10 +27,16 @@ export default function BlogPage() {
 
         {/* ── HERO ─────────────────────────────────────────────────── */}
         <section className="relative pt-20 overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,#05070d 0%,#0b1623 100%)" }} />
-            <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 70% at 80% 50%, rgba(68,229,194,0.065) 0%, transparent 65%)" }} />
-            <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 40% 50% at 10% 80%, rgba(56,189,248,0.04) 0%, transparent 65%)" }} />
+          <div className="absolute inset-0 pointer-events-none z-0">
+            <Image
+              src="/Banner 3.png"
+              alt="Zewa Knowledge Hub Banner"
+              fill
+              className="object-cover object-center opacity-35"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#05070d] via-[#05070d]/85 to-[#05070d]/50" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#05070d]/80 via-transparent to-[#05070d]" />
           </div>
 
           <div className="relative max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-20 pt-16 pb-16">

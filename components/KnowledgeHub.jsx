@@ -21,16 +21,15 @@ export default function KnowledgeHub() {
       {/* ── Background Science Lab Image ───────────────────────────── */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <Image
-          src="/science-lab-bg.png"
+          src="/Banner 3.png"
           alt="Laboratory research"
           fill
-          className="object-cover object-right opacity-50 mix-blend-screen"
+          className="object-cover object-center opacity-35"
           priority
         />
-        {/* Left side vignette to keep left text crystal clear */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#06080f] via-[#06080f]/80 to-transparent" />
-        {/* Top/bottom edge vignettes */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#06080f] via-transparent to-[#06080f]" />
+        {/* Dark vignettes for text contrast and seamless blending */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#06080f] via-[#06080f]/80 to-[#06080f]/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#06080f]/80 via-transparent to-[#06080f]" />
       </div>
 
       <div className="relative z-10 h-px w-full" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.2) 50%, transparent)" }} />
