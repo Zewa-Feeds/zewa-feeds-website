@@ -52,8 +52,7 @@ export default async function ProductShowcase() {
   }
   if (!products || products.length === 0) return null;
 
-  const HERO = adapt(products[0], 0);
-  const SECONDARY = products.slice(1, 4).map((p, i) => adapt(p, i + 1));
+  const SECONDARY = products.slice(0, 3).map((p, i) => adapt(p, i));
 
   return (
     <Reveal id="products" className="bg-[#06080f]">
@@ -71,84 +70,6 @@ export default async function ProductShowcase() {
           Engineered{" "}
           <span className="italic text-primary">for the species.</span>
         </h2>
-
-        {/* ── HERO SPOTLIGHT CARD ─────────────────────────────────── */}
-        <a
-          href={`/products/${HERO.slug}`}
-          className="group relative flex flex-col lg:flex-row items-center gap-0 rounded-2xl overflow-hidden mb-12 border border-white/8 shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
-          style={{ background: "linear-gradient(135deg, #0b1724 0%, #071310 100%)" }}
-        >
-          {/* Ambient section glow */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: `radial-gradient(ellipse 60% 70% at 30% 50%, ${HERO.accentColor}, transparent 65%)` }}
-          />
-
-          {/* Image well — Black pillow with cyan backdrop glow */}
-          <div className="relative w-full shrink-0 self-stretch lg:w-[55%] aspect-square lg:aspect-auto lg:min-h-[360px] overflow-hidden bg-[#070e19] flex items-center justify-center border-b lg:border-b-0 lg:border-r border-white/8">
-            {/* Soft cyan backdrop aura */}
-            <div
-              className="absolute inset-0 pointer-events-none z-0"
-              style={{
-                background: "radial-gradient(circle at 50% 50%, rgba(68, 229, 194, 0.25) 0%, rgba(68, 229, 194, 0.05) 55%, transparent 78%)",
-              }}
-            />
-
-            {HERO.image && (
-              <Image
-                src={HERO.image}
-                alt={HERO.name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 55vw"
-                className="object-cover relative z-10 transition-transform duration-700 group-hover:scale-105"
-              />
-            )}
-            {HERO.badge && (
-              <span className="absolute top-6 left-6 text-[9px] font-bold px-3 py-1.5 rounded-full tracking-[0.2em] font-[Montserrat] bg-primary text-[#00382d] z-20 shadow-md">
-                {HERO.badge}
-              </span>
-            )}
-          </div>
-
-          {/* Text — right 45% */}
-          <div className="relative z-10 w-full lg:w-[45%] px-8 sm:px-12 py-12 lg:py-16">
-            <p className="text-[10px] font-bold tracking-[0.22em] font-[Montserrat] uppercase text-primary/70 mb-4">
-              Hero Formula
-            </p>
-            <h3 className="font-[Playfair_Display] text-[32px] sm:text-[42px] text-white leading-[1.08] mb-5 group-hover:text-primary transition-colors duration-300">
-              {HERO.name}
-            </h3>
-            <p className="text-[14px] sm:text-[15px] text-white/50 font-[Montserrat] leading-relaxed mb-8 max-w-[380px]">
-              {HERO.description}
-            </p>
-
-            {/* Stat pills */}
-            <div className="flex flex-wrap gap-3 mb-8">
-              {HERO.stats.map((s) => (
-                <div
-                  key={s.label}
-                  className="flex flex-col px-4.5 py-2.5 rounded-xl"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(68,229,194,0.14)" }}
-                >
-                  <span className="font-[Playfair_Display] text-[20px] text-primary leading-none">{s.val}</span>
-                  <span className="text-[9.5px] text-white/40 font-[Montserrat] mt-0.5 tracking-wide">{s.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase font-[Montserrat] text-primary group-hover:gap-3 transition-all duration-200">
-              Explore Formula <ArrowIcon />
-            </span>
-          </div>
-
-          {/* Bottom edge accent line */}
-          <div
-            className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
-            style={{ background: "linear-gradient(to right, rgba(68,229,194,0.7), transparent)" }}
-          />
-        </a>
 
         {/* ── SECONDARY ROW ─────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-14">
