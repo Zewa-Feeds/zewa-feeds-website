@@ -17,13 +17,6 @@ const ACCENTS = [
   "rgba(68,229,194,0.14)",
 ];
 
-// Clean product bottle & pouch cutout PNGs for seamless dark-theme rendering
-const PRODUCT_CUTOUTS = [
-  "/Bottles/Betta/Betta 01.png",
-  "https://res.cloudinary.com/lzydbena/image/upload/v1785738946/zewa/products/kvh6nfiuuqwkeq89ixj4.png",
-  "/Bottles/Cichild/Cichild 01.png",
-];
-
 const FALLBACK_PRODUCTS = [
   {
     name: "Zewa Feeds Betta Bites F3",
@@ -31,7 +24,7 @@ const FALLBACK_PRODUCTS = [
     shortDesc: "Zewa Feeds Betta Bites (F3) deliver 46% insect protein — the highest in the Zewa range — in a 0.6–0.8 mm slow-sinking pellet built exclusively for Betta splendens.",
     proteinPct: 46,
     packs: [{ pack: "20g Bottle" }],
-    images: [{ url: "/Bottles/Betta/Betta 01.png" }],
+    images: [{ url: "https://res.cloudinary.com/lzydbena/image/upload/v1785740669/zewa/products/zzkpzeizlery8lpeas8c.jpg" }],
   },
   {
     name: "Zewa Feeds Guppy Bites G2",
@@ -47,7 +40,7 @@ const FALLBACK_PRODUCTS = [
     shortDesc: "Zewa Feeds Koi Bites (K7) are premium 4 mm floating pellets with 32% insect protein, krill meal, and proprietary probiotics.",
     proteinPct: 32,
     packs: [{ pack: "1kg Pouch" }],
-    images: [{ url: "/Bottles/Cichild/Cichild 01.png" }],
+    images: [{ url: "https://res.cloudinary.com/lzydbena/image/upload/v1785740602/zewa/products/r9vitexv8su2z8zzdv5v.jpg" }],
   },
 ];
 
@@ -55,9 +48,7 @@ const FALLBACK_PRODUCTS = [
 function adapt(api, i = 0) {
   const first = (api.packs ?? [])[0];
   const rawImage = (api.images ?? [])[0]?.url;
-  // Replace JPG marketing banners & white background square photos with clean pouch/bottle PNG cutouts
-  const isSquareBgPhoto = !rawImage || rawImage.endsWith(".jpg") || rawImage.includes("zzkpzeizlery8lpeas8c") || rawImage.includes("r9vitexv8su2z8zzdv5v");
-  const imageUrl = isSquareBgPhoto ? PRODUCT_CUTOUTS[i % PRODUCT_CUTOUTS.length] : rawImage;
+  const imageUrl = rawImage || FALLBACK_PRODUCTS[i % FALLBACK_PRODUCTS.length].images[0].url;
 
   return {
     name: api.name,
