@@ -1074,39 +1074,39 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
       <main className="bg-[#06080f] text-[#dde2f6] min-h-screen">
 
         {/* ── Hero banner ─────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden pt-16 sm:pt-20">
+        <section className="relative overflow-hidden pt-14 sm:pt-20">
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 60% 40%, rgba(68,229,194,0.07) 0%, transparent 70%), linear-gradient(180deg, #06080f 0%, #0b1220 100%)" }} />
 
           {/* Slide 0 — the range statement */}
           {heroSlide === 0 && (
-            <div className="relative mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16 pt-6 sm:pt-8 pb-6 sm:pb-8">
-              <div className="relative flex h-[300px] sm:h-[380px] lg:h-[430px] items-center">
+            <div className="relative mx-auto max-w-[1440px] px-4 sm:px-10 lg:px-16 pt-4 sm:pt-8 pb-6 sm:pb-8">
+              <div className="relative flex min-h-[280px] sm:h-[380px] lg:h-[430px] items-center py-4 sm:py-0">
                 <div className="w-full animate-fadeIn">
-                  <div className="flex flex-col justify-between gap-8 lg:flex-row lg:items-center">
+                  <div className="flex flex-col justify-between gap-6 sm:gap-8 lg:flex-row lg:items-center">
                     <div className="max-w-xl">
-                      <div className="mb-5 flex items-center gap-3">
+                      <div className="mb-3 sm:mb-5 flex items-center gap-3">
                         <div className="h-px w-5 bg-primary" />
                         <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-primary font-[Montserrat]">Our Range</span>
                       </div>
-                      <h1 className="mb-5 font-[Playfair_Display] text-[42px] leading-[1.0] text-white sm:text-[60px]">
+                      <h1 className="mb-3 sm:mb-5 font-[Playfair_Display] text-[30px] sm:text-[60px] leading-[1.05] text-white">
                         Engineered<br />
                         <span className="italic text-primary">for the species.</span>
                       </h1>
-                      <p className="mb-5 text-[15px] sm:text-[16px] leading-relaxed text-white/45 font-[Montserrat]">
+                      <p className="mb-4 sm:mb-5 text-[13.5px] sm:text-[16px] leading-relaxed text-white/45 font-[Montserrat]">
                         Every formula is NABL lab-tested, insect-protein based, and calibrated for a specific species and life stage.
                       </p>
                     </div>
 
-                    <div className="flex shrink-0 gap-8 lg:gap-14">
+                    <div className="flex shrink-0 gap-6 sm:gap-8 lg:gap-14 flex-wrap">
                       {[
                         { val: "46%", label: "Max Protein", sub: "in the range" },
                         { val: "88%", label: "Digestibility", sub: "lab verified" },
                         { val: "13+", label: "Formulas", sub: "species-specific" },
                       ].map((s) => (
-                        <div key={s.label} className="flex flex-col gap-1">
-                          <span className="font-[Playfair_Display] text-[38px] sm:text-[48px] leading-none text-primary">{s.val}</span>
-                          <span className="text-[12px] font-semibold text-white/70 font-[Montserrat]">{s.label}</span>
-                          <span className="text-[10px] text-white/25 font-[Montserrat]">{s.sub}</span>
+                        <div key={s.label} className="flex flex-col gap-0.5 sm:gap-1">
+                          <span className="font-[Playfair_Display] text-[32px] sm:text-[48px] leading-none text-primary">{s.val}</span>
+                          <span className="text-[11px] sm:text-[12px] font-semibold text-white/70 font-[Montserrat]">{s.label}</span>
+                          <span className="text-[9.5px] sm:text-[10px] text-white/25 font-[Montserrat]">{s.sub}</span>
                         </div>
                       ))}
                     </div>
@@ -1114,7 +1114,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                 </div>
 
                 {/* Slide dots — bottom right */}
-                <div className="absolute bottom-0 right-0 z-10 flex items-center gap-2">
+                <div className="absolute bottom-1 right-2 sm:bottom-0 sm:right-0 z-10 flex items-center gap-2">
                   {[0, 1].map((i) => (
                     <button
                       key={i}
@@ -1132,9 +1132,9 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
             </div>
           )}
 
-          {/* Slide 1 — Full Bleed Edge-to-Edge Brand Banner (No boxed container restriction) */}
+          {/* Slide 1 — Full Bleed Edge-to-Edge Brand Banner */}
           {heroSlide === 1 && (
-            <div className="relative w-full h-[280px] sm:h-[380px] md:h-[450px] lg:h-[500px] animate-fadeIn overflow-hidden">
+            <div className="relative w-full h-[200px] sm:h-[380px] md:h-[450px] lg:h-[500px] animate-fadeIn overflow-hidden">
               <Image
                 src="/banner-products.png"
                 alt="Discover a diverse range of feeds to nourish every species of fish — Zewa Feeds"
@@ -1147,7 +1147,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
               <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#06080f] via-[#06080f]/30 to-transparent pointer-events-none" />
 
               {/* Slide dots */}
-              <div className="absolute bottom-4 right-6 sm:right-10 lg:right-16 z-10 flex items-center gap-2">
+              <div className="absolute bottom-4 right-4 sm:right-10 lg:right-16 z-10 flex items-center gap-2">
                 {[0, 1].map((i) => (
                   <button
                     key={i}
@@ -1170,16 +1170,16 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
 
         {/* ── Filter bar ──────────────────────────────────────────────── */}
         <div className="sticky top-20 z-30 bg-[#06080f]/96 backdrop-blur-md border-b border-white/5">
-          <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 flex items-center justify-between gap-4 py-3">
-            <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-10 lg:px-16 flex items-center justify-between gap-3 py-2.5 sm:py-3">
+            <div className="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full sm:w-auto">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => selectCategory(cat)}
-                  className={`shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-[0.08em] uppercase font-[Montserrat] transition-all duration-200 ${
+                  className={`shrink-0 px-3.5 sm:px-4 py-1.5 rounded-full text-[10.5px] sm:text-[11px] font-bold tracking-[0.08em] uppercase font-[Montserrat] transition-all duration-200 ${
                     activeCategory === cat
                       ? "bg-primary text-[#00382d]"
-                      : "text-white/35 hover:text-white/65 hover:bg-white/5"
+                      : "text-white/40 hover:text-white/70 hover:bg-white/5"
                   }`}
                 >
                   {cat}
@@ -1187,7 +1187,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
               ))}
               <button
                 onClick={() => setQuizOpen(true)}
-                className="shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold tracking-[0.08em] uppercase font-[Montserrat] transition-all duration-200 border border-primary/35 text-primary hover:bg-primary/10"
+                className="shrink-0 flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-full text-[10.5px] sm:text-[11px] font-bold tracking-[0.08em] uppercase font-[Montserrat] transition-all duration-200 border border-primary/35 text-primary hover:bg-primary/10"
               >
                 <svg viewBox="0 0 14 14" fill="none" className="w-3 h-3">
                   <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.4"/>
@@ -1197,19 +1197,18 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                 Find My Feed
               </button>
             </div>
-            <span className="shrink-0 text-[11px] text-white/20 font-[Montserrat]">{filtered.length} products</span>
+            <span className="hidden sm:inline-block shrink-0 text-[11px] text-white/20 font-[Montserrat]">{filtered.length} products</span>
           </div>
         </div>
 
         {/* ── Grid ─────────────────────────────────────────────────────── */}
-        <section className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-12 sm:py-16">
+        <section className="max-w-[1440px] mx-auto px-4 sm:px-10 lg:px-16 py-8 sm:py-16">
 
           {/* ── Spotlight rotator ── */}
-          {/* `sp` is null until the catalogue loads, so gate the whole banner. */}
           {sp && (
           <a
             href={`/products/${sp.slug}`}
-            className="block relative overflow-hidden rounded-3xl mb-8 cursor-pointer group"
+            className="block relative overflow-hidden rounded-2xl sm:rounded-3xl mb-8 cursor-pointer group"
             style={{ background: "linear-gradient(135deg, #0d1a2e 0%, #091a18 100%)" }}
           >
             <div
@@ -1218,22 +1217,22 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
             />
 
             <div
-              className="relative flex flex-col sm:flex-row items-center gap-8 sm:gap-0"
+              className="relative flex flex-col sm:flex-row items-center gap-4 sm:gap-0"
               style={{ opacity: fading ? 0 : 1, transform: fading ? "translateY(8px)" : "translateY(0)", transition: "opacity 0.35s ease, transform 0.35s ease" }}
             >
-              <div className="relative w-full sm:w-[38%] flex items-center justify-center py-10 px-8 shrink-0">
+              <div className="relative w-full sm:w-[38%] flex items-center justify-center py-6 sm:py-10 px-4 sm:px-8 shrink-0">
                 <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 55%, ${sp.accent}, transparent 65%)` }} />
                 <Image
                   src={sp.image}
                   alt={sp.name}
                   width={320}
                   height={320}
-                  className="relative z-10 object-contain max-h-[280px] w-auto rounded-2xl"
+                  className="relative z-10 object-contain max-h-[180px] sm:max-h-[280px] w-auto rounded-2xl"
                   style={{ filter: "drop-shadow(0 20px 48px rgba(0,0,0,0.65))" }}
                 />
               </div>
 
-              <div className="flex flex-col justify-center gap-4 flex-1 px-8 sm:px-12 pb-10 sm:py-12 text-center sm:text-left">
+              <div className="flex flex-col justify-center gap-3.5 sm:gap-4 flex-1 px-5 sm:px-12 pb-8 sm:py-12 text-center sm:text-left">
                 <div className="flex items-center gap-2.5 justify-center sm:justify-start">
                   <span className="text-[9px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] bg-primary/15 text-primary border border-primary/30">
                     {sp.badge}
@@ -1241,24 +1240,22 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                   <span className="text-[10px] text-white/30 font-[Montserrat] tracking-[0.15em] uppercase">{sp.category}</span>
                 </div>
 
-                <h2 className="font-[Playfair_Display] text-[30px] sm:text-[40px] text-white leading-tight">{sp.name}</h2>
-                <p className="text-[13px] text-white/40 font-[Montserrat] leading-relaxed max-w-sm mx-auto sm:mx-0">{sp.tagline}</p>
+                <h2 className="font-[Playfair_Display] text-[24px] sm:text-[40px] text-white leading-tight">{sp.name}</h2>
+                <p className="text-[12.5px] sm:text-[13px] text-white/40 font-[Montserrat] leading-relaxed max-w-sm mx-auto sm:mx-0">{sp.tagline}</p>
 
                 <div className="flex items-center gap-5 justify-center sm:justify-start">
                   <div>
-                    {/* String(...) guards against a number slipping through —
-                        a price mismatch should not white-screen the page. */}
-                    <span className="font-[Playfair_Display] text-[30px] text-primary leading-none">₹{String(sp.price ?? "").replace("₹", "")}</span>
+                    <span className="font-[Playfair_Display] text-[26px] sm:text-[30px] text-primary leading-none">₹{String(sp.price ?? "").replace("₹", "")}</span>
                     <span className="text-[11px] text-white/20 line-through font-[Montserrat] ml-2">{sp.mrp}</span>
                   </div>
-                  <div className="w-px h-8 bg-white/10" />
+                  <div className="w-px h-7 sm:h-8 bg-white/10" />
                   <div>
-                    <span className="text-[20px] font-bold text-primary font-[Montserrat] leading-none">{sp.protein}</span>
+                    <span className="text-[18px] sm:text-[20px] font-bold text-primary font-[Montserrat] leading-none">{sp.protein}</span>
                     <span className="text-[10px] text-white/30 font-[Montserrat] ml-1.5">protein</span>
                   </div>
                 </div>
 
-                <div className="flex gap-2 justify-center sm:justify-start">
+                <div className="flex gap-2 justify-center sm:justify-start flex-wrap">
                   {sp.packs.map((p) => (
                     <span key={p} className="text-[10px] px-3 py-1 rounded-full border border-white/10 text-white/35 font-[Montserrat]">{p}</span>
                   ))}
@@ -1272,7 +1269,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                 </div>
               </div>
 
-              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 sm:static sm:translate-x-0 flex sm:flex-col items-center gap-2.5 sm:pr-10">
+              <div className="pb-4 sm:pb-0 flex sm:flex-col items-center justify-center gap-2.5 sm:pr-10">
                 {SPOTLIGHT.map((_, i) => (
                   <button key={i} onClick={(e) => { e.preventDefault(); goTo(i); }} aria-label={`Go to slide ${i + 1}`}>
                     <span className={`block rounded-full transition-all duration-300 ${
@@ -1285,14 +1282,8 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
           </a>
           )}
 
-          {/*
-            Product grid.
-
-            Skeletons while loading, so a hard refresh shows placeholders in the
-            right shape instead of flashing the bundled fallback catalogue and
-            then swapping it out.
-          */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Product grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {loading
               ? Array.from({ length: 6 }).map((_, i) => (
                   <div
@@ -1361,28 +1352,28 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
               style={{ background: "radial-gradient(ellipse, rgba(68,229,194,0.06) 0%, transparent 65%)", filter: "blur(60px)" }} />
           </div>
 
-          <div className="relative max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-28 sm:py-36">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          <div className="relative max-w-[1440px] mx-auto px-4 sm:px-10 lg:px-16 py-16 sm:py-36">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-24 items-center">
 
               {/* Left — copy */}
               <div>
-                <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center gap-3 mb-4 sm:mb-6">
                   <div className="w-5 h-px bg-primary" />
                   <span className="text-[10px] font-bold text-primary tracking-[0.28em] font-[Montserrat] uppercase">Feed Finder</span>
                 </div>
 
-                <h2 className="font-[Playfair_Display] text-[36px] sm:text-[52px] text-white leading-[1.08] mb-6">
+                <h2 className="font-[Playfair_Display] text-[30px] sm:text-[52px] text-white leading-[1.08] mb-4 sm:mb-6">
                   Not sure which<br />
                   <span className="text-primary italic">formula is right?</span>
                 </h2>
 
-                <p className="text-[15px] text-white/40 font-[Montserrat] leading-relaxed mb-10 max-w-[440px]">
+                <p className="text-[13.5px] sm:text-[15px] text-white/40 font-[Montserrat] leading-relaxed mb-8 sm:mb-10 max-w-[440px]">
                   Answer four questions about your fish — species, size, life stage, and feeding goal — and we'll match you to the exact formula built for them.
                 </p>
 
                 <button
                   onClick={() => setQuizOpen(true)}
-                  className="group inline-flex items-center gap-4 px-7 py-4 rounded-full transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+                  className="group inline-flex items-center gap-3.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-full transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
                   style={{ background: "linear-gradient(135deg, #44e5c2 0%, #38d4b4 100%)", color: "#003d2e" }}
                 >
                   <svg viewBox="0 0 18 18" fill="none" className="w-4 h-4 shrink-0">
@@ -1390,17 +1381,17 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                     <path d="M7 7.5C7 6.67 7.895 6 9 6s2 .67 2 1.5c0 .664-.45 1.24-1.1 1.43L9 9.2V10.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
                     <circle cx="9" cy="12.5" r=".7" fill="currentColor"/>
                   </svg>
-                  <span className="text-[12px] font-bold tracking-[0.18em] uppercase font-[Montserrat]">Find My Feed</span>
+                  <span className="text-[11.5px] sm:text-[12px] font-bold tracking-[0.18em] uppercase font-[Montserrat]">Find My Feed</span>
                   <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3 group-hover:translate-x-0.5 transition-transform duration-200">
                     <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </button>
 
-                <p className="mt-5 text-[11px] text-white/20 font-[Montserrat]">Takes less than 60 seconds</p>
+                <p className="mt-4 sm:mt-5 text-[10.5px] sm:text-[11px] text-white/20 font-[Montserrat]">Takes less than 60 seconds</p>
               </div>
 
               {/* Right — 4-step preview cards */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   {
                     step: "01", label: "Fish size", hint: "Small or large?",
@@ -1444,14 +1435,14 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                   <button
                     key={step}
                     onClick={() => setQuizOpen(true)}
-                    className="group flex flex-col gap-3 p-5 rounded-2xl text-left transition-all duration-200 hover:-translate-y-0.5"
+                    className="group flex flex-col gap-3 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 hover:-translate-y-0.5"
                     style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
                     onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(68,229,194,0.06)"; e.currentTarget.style.borderColor = "rgba(68,229,194,0.25)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; }}
                   >
                     <div className="flex items-start justify-between">
                       <span className="text-[9px] font-bold tracking-[0.25em] font-[Montserrat] text-white/15 uppercase">{step}</span>
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center shrink-0"
                         style={{ background: "rgba(68,229,194,0.08)", border: "1px solid rgba(68,229,194,0.12)" }}>
                         {icon}
                       </div>
@@ -1473,13 +1464,13 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
 
         {/* ── Trust strip ─────────────────────────────────────────────── */}
         <section>
-          <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16 py-10">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-10 lg:px-16 py-8 sm:py-10">
           {/* Trust strip */}
           <div className="pt-0 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-[11px] text-white/18 font-[Montserrat] tracking-wide text-center sm:text-left">
               Manufactured at {COMPANY.legalName} · {COMPANY.address.city}, {COMPANY.address.state} · NABL Lab Certified
             </p>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center justify-center sm:justify-end gap-4 sm:gap-6 flex-wrap">
               {TRUST_BADGES.map((b) => (
                 <span key={b.label} className="flex items-center gap-1.5 text-[10px] text-white/25 font-[Montserrat] whitespace-nowrap">
                   <span className="text-primary/50">{b.icon}</span>
