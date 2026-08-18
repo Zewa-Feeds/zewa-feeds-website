@@ -5,7 +5,7 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
-import { formatInr } from "@/lib/api";
+import { formatInr, catalog } from "@/lib/api";
 import { PLACEHOLDER_IMAGE } from "./adapters";
 import { COMPANY } from "@/lib/company";
 
@@ -930,7 +930,37 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
    * with slugs that 404. Saying the catalogue is unavailable is honest;
    * showing a fictional one is not.
    */
-  const PRODUCTS = products;
+  const [items, setItems] = useState(products || []);
+  const [failed, setFailed] = useState(loadFailed);
+
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setItems(products);
+      setFailed(false);
+      return;
+    }
+
+    let isMounted = true;
+    catalog
+      .products()
+      .then((data) => {
+        if (isMounted && data && data.length > 0) {
+          setItems(data.map(adaptProduct));
+          setFailed(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted && (!items || items.length === 0)) {
+          setFailed(true);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [products]);
+
+  const PRODUCTS = items;
   /*
    * Derived per render from the catalogue in hand, so the chips and the grid
    * can never disagree about what exists.
@@ -944,7 +974,6 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
    */
   const activeCategory = CATEGORIES.includes(active) ? active : "All";
   const loading = false;
-  const failed = loadFailed;
   /*
    * NO FALLBACK FOR THE SPOTLIGHT.
    *
