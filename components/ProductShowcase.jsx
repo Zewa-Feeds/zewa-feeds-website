@@ -77,7 +77,7 @@ export default async function ProductShowcase() {
             <a
               key={p.slug ?? p.name}
               href={p.slug ? `/products/${p.slug}` : "/products"}
-              className="group relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 border border-white/8 shadow-[0_10px_30px_rgba(0,0,0,0.35)]"
+              className="group relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 border border-[#44e5c2]/25 hover:border-[#44e5c2]/50 shadow-[0_0_15px_rgba(68,229,194,0.10)] hover:shadow-[0_0_25px_rgba(68,229,194,0.22)]"
               style={{ background: "linear-gradient(160deg, #0d1726 0%, #071018 100%)" }}
             >
               {/* Glow */}
@@ -87,7 +87,7 @@ export default async function ProductShowcase() {
               />
 
               {/* Image well — Black pillow with cyan backdrop glow */}
-              <div className="relative aspect-square overflow-hidden bg-[#070e19] flex items-center justify-center p-4 sm:p-6 border-b border-white/6">
+              <div className="relative aspect-square overflow-hidden bg-[#070e19] flex items-center justify-center p-4 sm:p-6 border-b border-[#44e5c2]/15">
                 {/* Small cyan backdrop aura behind product pack */}
                 <div
                   className="absolute inset-0 pointer-events-none z-0"
