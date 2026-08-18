@@ -62,8 +62,14 @@ export default async function ProductShowcase() {
   }
   if (products.length === 0) return null;
 
-  const HERO = adapt(products[0], 0);
-  const SECONDARY = products.slice(1, 4).map((p, i) => adapt(p, i + 1));
+  /*
+   * Starts at products[0], not [1].
+   *
+   * The first product used to be pulled out as a full-width hero card above
+   * this row. With that card removed, slicing from 1 would have dropped it from
+   * the homepage entirely — the grid now shows the first three products.
+   */
+  const SECONDARY = products.slice(0, 3).map((p, i) => adapt(p, i));
 
   return (
     /*
@@ -97,83 +103,6 @@ export default async function ProductShowcase() {
       {/* ── Cards — white ────────────────────────────────────────── */}
       <div className="bg-white">
       <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-16 sm:pt-20 pb-24 sm:pb-32">
-
-        {/* ── HERO CARD ─────────────────────────────────────────── */}
-        <a
-          href={`/products/${HERO.slug}`}
-          className="group relative flex flex-col lg:flex-row items-center gap-0 rounded-2xl overflow-hidden mb-5"
-          style={{ background: "linear-gradient(135deg, #0d1f2e 0%, #091914 100%)" }}
-        >
-          {/* Ambient glow */}
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ background: `radial-gradient(ellipse 60% 70% at 30% 50%, ${HERO.accentColor}, transparent 65%)` }} />
-
-          {/*
-            Image — left 55% on desktop, full width on mobile.
-
-            The well is DARK, not white.
-
-            The listing image fills it edge to edge (object-cover on a 1:1
-            source), so this colour is only ever seen in the gap left when the
-            image cannot cover — and the Betta lead shot is dark navy (#072466),
-            so white showed as a bright band under it rather than blending.
-
-            shrink-0 self-stretch matters too: the card is a flex column, which
-            stretched this well to the card's full 925px height on mobile while
-            aspect-square only sized the image to 350px. That left 575px of bare
-            background below the photo.
-          */}
-          <div className="relative w-full shrink-0 self-stretch lg:w-[55%] aspect-square lg:aspect-auto lg:min-h-[340px] overflow-hidden bg-[#06080f]">
-            {HERO.image && (
-              <Image
-                src={HERO.image}
-                alt={HERO.name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 55vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-            )}
-            {HERO.badge && (
-              <span className="absolute top-6 left-6 text-[9px] font-bold px-3 py-1.5 rounded-full tracking-[0.2em] font-[Montserrat] bg-primary text-[#00382d]">
-                {HERO.badge}
-              </span>
-            )}
-          </div>
-
-          {/* Text — right 45% */}
-          <div className="relative z-10 w-full lg:w-[45%] px-8 sm:px-12 pb-14 lg:py-20">
-            <p className="text-[10px] font-bold tracking-[0.22em] font-[Montserrat] uppercase text-primary/60 mb-4">
-              Hero Formula
-            </p>
-            <h2 className="font-[Playfair_Display] text-[36px] sm:text-[48px] text-white leading-[1.05] mb-5 group-hover:text-primary transition-colors duration-300">
-              {HERO.name}
-            </h2>
-            <p className="text-[15px] sm:text-[16px] text-white/45 font-[Montserrat] leading-relaxed mb-10 max-w-[380px]">
-              {HERO.description}
-            </p>
-
-            {/* Stat pills */}
-            <div className="flex flex-wrap gap-3 mb-10">
-              {HERO.stats.map((s) => (
-                <div key={s.label} className="flex flex-col px-5 py-3 rounded-xl"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(68,229,194,0.12)" }}>
-                  <span className="font-[Playfair_Display] text-[22px] text-primary leading-none">{s.val}</span>
-                  <span className="text-[10px] text-white/30 font-[Montserrat] mt-0.5 tracking-wide">{s.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <span className="inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] uppercase font-[Montserrat] text-primary group-hover:gap-3 transition-all duration-200">
-              Explore Formula <ArrowIcon />
-            </span>
-          </div>
-
-          {/* Bottom edge accent */}
-          <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
-            style={{ background: "linear-gradient(to right, rgba(68,229,194,0.7), transparent)" }} />
-        </a>
 
         {/* ── SECONDARY ROW ─────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-12">
