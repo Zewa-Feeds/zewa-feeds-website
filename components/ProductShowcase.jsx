@@ -17,21 +17,25 @@ const ACCENTS = [
   "rgba(68,229,194,0.14)",
 ];
 
-// Valid product images from Cloudinary & local bottle assets
+// Clean product bottle & pouch cutout PNGs for seamless dark-theme rendering
+const PRODUCT_CUTOUTS = [
+  "/Bottles/Betta/Betta 01.png",
+  "https://res.cloudinary.com/lzydbena/image/upload/v1785738946/zewa/products/kvh6nfiuuqwkeq89ixj4.png",
+  "/Bottles/Cichild/Cichild 01.png",
+];
+
 const FALLBACK_PRODUCTS = [
   {
     name: "Zewa Feeds Betta Bites F3",
     slug: "betta-bites",
-    badge: "HERO FORMULA",
     shortDesc: "Zewa Feeds Betta Bites (F3) deliver 46% insect protein — the highest in the Zewa range — in a 0.6–0.8 mm slow-sinking pellet built exclusively for Betta splendens.",
     proteinPct: 46,
     packs: [{ pack: "20g Bottle" }],
-    images: [{ url: "https://res.cloudinary.com/lzydbena/image/upload/v1785740669/zewa/products/zzkpzeizlery8lpeas8c.jpg" }],
+    images: [{ url: "/Bottles/Betta/Betta 01.png" }],
   },
   {
     name: "Zewa Feeds Guppy Bites G2",
     slug: "guppy-bites",
-    badge: "MICRO PELLET",
     shortDesc: "Zewa Feeds Guppy Bites (G2) are precision-crafted 0.3–0.6 mm slow-sinking micro pellets with 38% insect protein.",
     proteinPct: 38,
     packs: [{ pack: "250g Pouch" }],
@@ -40,11 +44,10 @@ const FALLBACK_PRODUCTS = [
   {
     name: "Zewa Feeds Koi Bites K7",
     slug: "koi-bites",
-    badge: "GROWTH & COLOUR",
     shortDesc: "Zewa Feeds Koi Bites (K7) are premium 4 mm floating pellets with 32% insect protein, krill meal, and proprietary probiotics.",
     proteinPct: 32,
     packs: [{ pack: "1kg Pouch" }],
-    images: [{ url: "https://res.cloudinary.com/lzydbena/image/upload/v1785740602/zewa/products/r9vitexv8su2z8zzdv5v.jpg" }],
+    images: [{ url: "/Bottles/Cichild/Cichild 01.png" }],
   },
 ];
 
@@ -52,7 +55,9 @@ const FALLBACK_PRODUCTS = [
 function adapt(api, i = 0) {
   const first = (api.packs ?? [])[0];
   const rawImage = (api.images ?? [])[0]?.url;
-  const imageUrl = rawImage || FALLBACK_PRODUCTS[i % FALLBACK_PRODUCTS.length].images[0].url;
+  // Replace JPG marketing banners & white background square photos with clean pouch/bottle PNG cutouts
+  const isSquareBgPhoto = !rawImage || rawImage.endsWith(".jpg") || rawImage.includes("zzkpzeizlery8lpeas8c") || rawImage.includes("r9vitexv8su2z8zzdv5v");
+  const imageUrl = isSquareBgPhoto ? PRODUCT_CUTOUTS[i % PRODUCT_CUTOUTS.length] : rawImage;
 
   return {
     name: api.name,
@@ -124,39 +129,25 @@ export default async function ProductShowcase() {
                 style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor}, transparent)` }}
               />
 
-              {/*
-                Image well — the artwork fills it edge to edge.
+              {/* Image well — Black pillow with cyan backdrop glow */}
+              <div className="relative aspect-square overflow-hidden bg-[#070e19] flex items-center justify-center p-6 border-b border-[#44e5c2]/15">
+                {/* Soft cyan backdrop aura */}
+                <div
+                  className="absolute inset-0 pointer-events-none z-0"
+                  style={{
+                    background: "radial-gradient(circle at 50% 50%, rgba(68, 229, 194, 0.22) 0%, rgba(68, 229, 194, 0.05) 55%, transparent 75%)",
+                  }}
+                />
 
-                Every pack shot is a 1:1 source and the well is aspect-square,
-                so object-cover crops nothing; it just removes the letterbox
-                gap that object-contain left around images whose own
-                background (Betta blue, Koi white) is part of the artwork.
-                Those gaps read as a mismatched frame rather than a bleed.
-
-                The cyan aura sits above the image at low opacity so the well
-                still picks up the section's glow — behind it, a fully opaque
-                pack shot would hide it entirely.
-              */}
-              <div className="relative aspect-square overflow-hidden bg-[#070e19] border-b border-[#44e5c2]/15">
                 {p.image && (
                   <Image
                     src={p.image}
                     alt={p.name}
                     fill
                     sizes="(max-width: 640px) 100vw, 33vw"
-                    className="object-cover relative z-0 transition-transform duration-500 group-hover:scale-105"
+                    className="object-contain p-4 relative z-10 transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
-
-                <div
-                  className="absolute inset-0 pointer-events-none z-10"
-                  style={{
-                    background: "radial-gradient(circle at 50% 50%, rgba(68, 229, 194, 0.10) 0%, transparent 70%)",
-                  }}
-                />
-
-                {/* Soft bottom blend overlay to transition image into dark card body */}
-                <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0d1726] via-[#0d1726]/40 to-transparent z-10 pointer-events-none" />
               </div>
 
               {/* Text */}
