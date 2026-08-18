@@ -75,9 +75,8 @@ export default async function ProductPage({ params }) {
   let product;
   try {
     product = await catalog.product(slug);
-  } catch (err) {
-    if (err.status === 404) notFound();
-    throw err;
+  } catch {
+    notFound();
   }
 
   /*
