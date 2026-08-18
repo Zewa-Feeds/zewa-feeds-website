@@ -120,23 +120,15 @@ export default async function ProductShowcase() {
                 style={{ background: `radial-gradient(ellipse 70% 60% at 50% 30%, ${p.accentColor}, transparent)` }}
               />
 
-              {/* Image well — Black pillow with cyan backdrop glow */}
-              <div className="relative aspect-square overflow-hidden bg-[#070e19] flex items-center justify-center p-6 border-b border-[#44e5c2]/15">
-                {/* Soft cyan backdrop aura */}
-                <div
-                  className="absolute inset-0 pointer-events-none z-0"
-                  style={{
-                    background: "radial-gradient(circle at 50% 50%, rgba(68, 229, 194, 0.22) 0%, rgba(68, 229, 194, 0.05) 55%, transparent 75%)",
-                  }}
-                />
-
+              {/* Image well — fills 100% edge-to-edge to all 4 corners with zero black space */}
+              <div className="relative aspect-square overflow-hidden bg-[#070e19] border-b border-[#44e5c2]/15">
                 {p.image && (
                   <Image
                     src={p.image}
                     alt={p.name}
                     fill
                     sizes="(max-width: 640px) 100vw, 33vw"
-                    className="object-contain p-4 relative z-10 transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover relative z-10 transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
               </div>
