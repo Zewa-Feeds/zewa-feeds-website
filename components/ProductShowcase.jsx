@@ -140,7 +140,7 @@ export default async function ProductShowcase() {
                     alt={p.name}
                     fill
                     sizes="(max-width: 640px) 100vw, 33vw"
-                    className="object-contain p-3 relative z-10 transition-transform duration-500 group-hover:scale-105"
+                    className="object-contain p-3 relative z-10 rounded-2xl transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
               </div>

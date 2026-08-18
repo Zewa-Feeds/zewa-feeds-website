@@ -251,7 +251,7 @@ export default function CartDrawer() {
                         alt={item.name}
                         width={72}
                         height={72}
-                        className="h-full w-full object-contain p-1 drop-shadow-md"
+                        className="h-full w-full object-contain p-1 rounded-xl drop-shadow-md"
                       />
                     ) : (
                       <div className="text-[10px] text-white/20">No image</div>

@@ -199,7 +199,7 @@ function ProductCard({ p }) {
         well with no crop at all.
       */}
       <div
-        className="relative aspect-square overflow-hidden"
+        className="relative aspect-square overflow-hidden rounded-2xl"
         style={{
           // Dark while the (letterboxed) clip plays, so the bands above and
           // below it read as a deliberate frame rather than white gaps.
@@ -215,7 +215,7 @@ function ProductCard({ p }) {
             alt={`${p.name} ${gi + 1}`}
             width={440}
             height={440}
-            className="absolute inset-0 h-full w-full object-cover pointer-events-none"
+            className="absolute inset-0 h-full w-full object-cover pointer-events-none rounded-2xl"
             style={{
               opacity: !showVideo && gi === imgIdx ? 1 : 0,
               transform: !showVideo && gi === imgIdx ? "scale(1.02)" : "scale(1)",
@@ -1195,7 +1195,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                   alt={sp.name}
                   width={320}
                   height={320}
-                  className="relative z-10 object-contain max-h-[280px] w-auto"
+                  className="relative z-10 object-contain max-h-[280px] w-auto rounded-2xl"
                   style={{ filter: "drop-shadow(0 20px 48px rgba(0,0,0,0.65))" }}
                 />
               </div>

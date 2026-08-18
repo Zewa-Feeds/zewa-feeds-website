@@ -90,7 +90,7 @@ export default function OrderSummaryCard({
                       alt={item.name}
                       width={48}
                       height={48}
-                      className="h-full w-full object-contain"
+                      className="h-full w-full object-contain rounded-xl"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-white/20 text-[10px]">No img</div>

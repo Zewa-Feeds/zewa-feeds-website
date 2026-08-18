@@ -312,7 +312,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                     alt={mediaAlt(active, activeIndex)}
                     width={640}
                     height={640}
-                    className={`h-full w-full object-contain ${
+                    className={`h-full w-full object-contain rounded-2xl ${
                       isCutout(active?.url) ? "p-10" : "p-0"
                     }`}
                     priority
@@ -378,7 +378,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                         alt={mediaAlt(item, i)}
                         width={72}
                         height={72}
-                        className={`h-full w-full object-contain ${
+                        className={`h-full w-full object-contain rounded-xl ${
                           isCutout(item.url) ? "p-2" : "p-0"
                         }`}
                       />

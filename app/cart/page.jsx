@@ -83,7 +83,7 @@ export default function CartPage() {
                         alt={item.name}
                         width={72}
                         height={72}
-                        className="object-contain w-full h-full p-2"
+                        className="object-contain w-full h-full p-2 rounded-xl"
                         style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.3))" }}
                       />
                     </div>
