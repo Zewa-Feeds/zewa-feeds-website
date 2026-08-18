@@ -143,11 +143,6 @@ export default async function ProductShowcase() {
                     className="object-contain p-3 relative z-10 transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
-                {p.badge && (
-                  <span className="absolute top-4 left-4 text-[8.5px] font-bold px-2.5 py-1 rounded-full tracking-widest font-[Montserrat] bg-primary text-[#00382d] z-20 shadow-md">
-                    {p.badge}
-                  </span>
-                )}
               </div>
 
               {/* Text */}
