@@ -27,21 +27,14 @@ export default function ClinicalProof() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {proofStats.map((stat, i) => (
             <div
-              key={stat.label}
-              className={`p-7 sm:p-8 flex flex-col justify-between border transition-shadow duration-300 hover:shadow-lg ${
+              key={i}
+              className={`p-7 sm:p-8 flex flex-col justify-center border transition-shadow duration-300 hover:shadow-lg ${
                 i === 0
                   ? "bg-primary border-primary"
                   : "bg-white/5 border-white/8 hover:border-primary/40"
               }`}
             >
-              <span
-                className={`font-label-caps text-label-caps tracking-widest uppercase ${
-                  i === 0 ? "text-on-primary/70" : "text-gray-400"
-                }`}
-              >
-                {stat.label}
-              </span>
-              <div className="mt-8">
+              <div>
                 <div
                   className={`text-[52px] sm:text-[60px] font-display-lg leading-none mb-2 ${
                     i === 0 ? "text-on-primary" : "text-primary"
