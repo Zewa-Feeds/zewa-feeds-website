@@ -199,14 +199,18 @@ function ProductCard({ p }) {
         well with no crop at all.
       */}
       <div
-        className="relative aspect-square overflow-hidden rounded-2xl"
+        className="relative aspect-square overflow-hidden rounded-2xl bg-[#070e19]"
         style={{
-          // Dark while the (letterboxed) clip plays, so the bands above and
-          // below it read as a deliberate frame rather than white gaps.
-          background: showVideo ? "#06080f" : "#ffffff",
           transition: "background-color 0.4s ease",
         }}
       >
+        {/* Soft cyan backdrop aura */}
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{
+            background: "radial-gradient(circle at 50% 50%, rgba(68, 229, 194, 0.22) 0%, rgba(68, 229, 194, 0.05) 55%, transparent 75%)",
+          }}
+        />
         {/* Gallery images — crossfade */}
         {gallery.map((src, gi) => (
           <Image

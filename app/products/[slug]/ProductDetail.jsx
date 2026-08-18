@@ -281,18 +281,19 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
           </nav>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            {/* ── Gallery & Benefits (White Container Card on Left) ────────────────────── */}
-            <div className="flex flex-col gap-6 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-md text-[#0b1220]">
+            {/* ── Gallery & Benefits (Dark Container Card on Left) ────────────────────── */}
+            <div className="flex flex-col gap-6 bg-[#09121f] p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl text-white">
               <div
-                className="group relative aspect-square overflow-hidden rounded-2xl flex items-center justify-center border border-slate-200/60"
-                style={{
-                  background: isCutout(active?.url)
-                    ? (presentation.accentBg ?? "#f4f7f6")
-                    : active?.type === "VIDEO"
-                    ? "#06080f"
-                    : "#ffffff",
-                }}
+                className="group relative aspect-square overflow-hidden rounded-2xl flex items-center justify-center border border-white/10 bg-[#070e19]"
               >
+                {/* Soft cyan backdrop aura */}
+                <div
+                  className="absolute inset-0 pointer-events-none z-0"
+                  style={{
+                    background: "radial-gradient(circle at 50% 50%, rgba(68, 229, 194, 0.22) 0%, rgba(68, 229, 194, 0.05) 55%, transparent 75%)",
+                  }}
+                />
+
                 {active?.type === "VIDEO" ? (
                   <video
                     key={active.url}
@@ -304,7 +305,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                     controls
                     playsInline
                     preload="metadata"
-                    className="h-full w-full object-contain"
+                    className="h-full w-full object-contain relative z-10"
                   />
                 ) : (
                   <Image
@@ -312,14 +313,12 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                     alt={mediaAlt(active, activeIndex)}
                     width={640}
                     height={640}
-                    className={`h-full w-full object-contain rounded-2xl ${
-                      isCutout(active?.url) ? "p-10" : "p-0"
-                    }`}
+                    className="h-full w-full object-cover rounded-2xl relative z-10 p-0"
                     priority
                   />
                 )}
                 {product.badge && (
-                  <span className="absolute top-5 left-5 rounded-full bg-primary px-3 py-1.5 text-[10px] font-bold tracking-[0.16em] text-[#00382d] font-[Montserrat]">
+                  <span className="absolute top-5 left-5 z-20 rounded-full bg-primary px-3 py-1.5 text-[10px] font-bold tracking-[0.16em] text-[#00382d] font-[Montserrat]">
                     {product.badge}
                   </span>
                 )}
@@ -331,7 +330,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                       type="button"
                       onClick={() => step(-1)}
                       aria-label="Previous image"
-                      className="absolute left-3 top-1/2 z-10 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/90 text-[#0b1220] shadow-sm backdrop-blur transition-all hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                      className="absolute left-3 top-1/2 z-20 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-[#070e19]/80 text-white shadow-md backdrop-blur transition-all hover:border-primary/50 hover:bg-[#070e19] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                     >
                       <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                         <path d="M7.5 2L3.5 6L7.5 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -341,14 +340,14 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                       type="button"
                       onClick={() => step(1)}
                       aria-label="Next image"
-                      className="absolute right-3 top-1/2 z-10 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-black/10 bg-white/90 text-[#0b1220] shadow-sm backdrop-blur transition-all hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                      className="absolute right-3 top-1/2 z-20 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-[#070e19]/80 text-white shadow-md backdrop-blur transition-all hover:border-primary/50 hover:bg-[#070e19] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                     >
                       <svg width="14" height="14" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                         <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </button>
 
-                    <span className="absolute bottom-4 right-4 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-semibold tabular-nums text-white font-[Montserrat]">
+                    <span className="absolute bottom-4 right-4 z-20 rounded-full bg-black/60 px-2.5 py-1 text-[10px] font-semibold tabular-nums text-white font-[Montserrat] backdrop-blur-sm border border-white/10">
                       {activeIndex + 1} / {media.length}
                     </span>
                   </>
@@ -363,12 +362,11 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                       key={item.url + i}
                       onClick={() => setActiveIndex(i)}
                       type="button"
-                      className={`relative shrink-0 w-[72px] h-[72px] rounded-xl overflow-hidden border transition-all duration-200 ${
+                      className={`relative shrink-0 w-[72px] h-[72px] rounded-xl overflow-hidden border transition-all duration-200 bg-[#070e19] ${
                         i === activeIndex
-                          ? "border-[#00755f] ring-2 ring-[#00755f]/30"
-                          : "border-slate-200 hover:border-slate-400"
+                          ? "border-primary ring-2 ring-primary/30"
+                          : "border-white/12 hover:border-white/35"
                       }`}
-                      style={{ background: presentation.accentBg ?? "#f4f7f6" }}
                       aria-label={
                         item.type === "VIDEO" ? "Play product video" : `View image ${i + 1}`
                       }
@@ -378,9 +376,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                         alt={mediaAlt(item, i)}
                         width={72}
                         height={72}
-                        className={`h-full w-full object-contain rounded-xl ${
-                          isCutout(item.url) ? "p-2" : "p-0"
-                        }`}
+                        className="h-full w-full object-cover rounded-xl p-0"
                       />
                       {item.type === "VIDEO" && (
                         <span className="absolute inset-0 grid place-items-center bg-black/35">
@@ -398,16 +394,16 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
 
               {/* Key Benefits Checklist */}
               {highlights.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-6 border-t border-slate-200/80">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-6 border-t border-white/10">
                   {highlights.slice(0, 6).map((h, i) => (
                     <div key={i} className="flex items-start gap-2.5">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#00755f]" />
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
                       <div>
-                        <div className="text-[13px] font-semibold text-slate-800 font-[Montserrat]">
+                        <div className="text-[13px] font-semibold text-white/90 font-[Montserrat]">
                           {h.title}
                         </div>
                         {h.sub && (
-                          <div className="text-[11px] text-slate-500 font-[Montserrat]">{h.sub}</div>
+                          <div className="text-[11px] text-white/45 font-[Montserrat]">{h.sub}</div>
                         )}
                       </div>
                     </div>
@@ -416,7 +412,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
               )}
 
               {product.benefits?.length > 0 && highlights.length === 0 && (
-                <div className="pt-6 border-t border-slate-200/80">
+                <div className="pt-6 border-t border-white/10">
                   <ul className="grid grid-cols-1 gap-x-8 gap-y-3.5 sm:grid-cols-2">
                     {product.benefits.map((b) => (
                       <li key={b} className="flex items-start gap-2.5">
@@ -428,16 +424,16 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                           className="mt-[3px] shrink-0"
                           aria-hidden="true"
                         >
-                          <circle cx="8" cy="8" r="7.25" stroke="#00755f" fill="#e6f7f3" />
+                          <circle cx="8" cy="8" r="7.25" stroke="#44e5c2" fill="rgba(68, 229, 194, 0.15)" />
                           <path
                             d="M4.75 8.25L6.9 10.4L11.25 6"
-                            stroke="#00755f"
+                            stroke="#44e5c2"
                             strokeWidth="1.6"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
                         </svg>
-                        <span className="text-[13px] leading-[1.45] text-slate-800 font-medium font-[Montserrat]">
+                        <span className="text-[13px] leading-[1.45] text-white/90 font-medium font-[Montserrat]">
                           {b}
                         </span>
                       </li>
