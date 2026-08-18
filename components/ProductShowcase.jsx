@@ -3,10 +3,11 @@ import Reveal from "./Reveal";
 import { catalog } from "@/lib/api";
 
 /**
- * Homepage range section — driven entirely by the catalogue API.
+ * Homepage range section — driven by the catalogue API with fallback support.
  *
  * Entire Range section sits on dark ground (#06080f).
- * Products feature dark "black pillow" image wells with a soft cyan backdrop aura.
+ * Products feature dark "black pillow" image wells with a soft cyan backdrop aura
+ * and a subtle cyan glowing border.
  */
 
 const ACCENTS = [
@@ -14,6 +15,36 @@ const ACCENTS = [
   "rgba(56,189,248,0.18)",
   "rgba(139,92,246,0.18)",
   "rgba(68,229,194,0.14)",
+];
+
+const FALLBACK_PRODUCTS = [
+  {
+    name: "Zewa Feeds Betta Bites F3",
+    slug: "betta-bites-f3",
+    badge: "HERO FORMULA",
+    shortDesc: "Zewa Feeds Betta Bites (F3) deliver 46% insect protein — the highest in the Zewa range — in a 0.6–0.8 mm slow-sinking pellet built exclusively for Betta splendens.",
+    proteinPct: 46,
+    packs: [{ pack: "20g Bottle" }],
+    images: [{ url: "/images/betta-bites-hero.jpg" }],
+  },
+  {
+    name: "Zewa Feeds Guppy Bites G2",
+    slug: "guppy-bites-g2",
+    badge: "MICRO PELLET",
+    shortDesc: "Zewa Feeds Guppy Bites (G2) are precision-crafted 0.3–0.6 mm slow-sinking micro pellets with 38% insect protein.",
+    proteinPct: 38,
+    packs: [{ pack: "250g Pouch" }],
+    images: [{ url: "/images/guppy-bites.jpg" }],
+  },
+  {
+    name: "Zewa Feeds Koi Bites K7",
+    slug: "koi-bites-k7",
+    badge: "GROWTH & COLOUR",
+    shortDesc: "Zewa Feeds Koi Bites (K7) are premium 4 mm floating pellets with 32% insect protein, krill meal, and proprietary probiotics.",
+    proteinPct: 32,
+    packs: [{ pack: "1kg Pouch" }],
+    images: [{ url: "/images/koi-bites.jpg" }],
+  },
 ];
 
 /** API product -> the shape this section renders. */
@@ -48,9 +79,12 @@ export default async function ProductShowcase() {
   try {
     products = await catalog.products();
   } catch {
-    return null;
+    // Soft fallback on API network failure
   }
-  if (!products || products.length === 0) return null;
+
+  if (!products || products.length === 0) {
+    products = FALLBACK_PRODUCTS;
+  }
 
   const SECONDARY = products.slice(0, 3).map((p, i) => adapt(p, i));
 
