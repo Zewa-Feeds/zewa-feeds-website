@@ -194,63 +194,23 @@ function TileVideo({ onVideoEnd }) {
   }, [onVideoEnd]);
 
   return (
-    <div className="relative md:absolute md:inset-0 bg-[#080e1c]">
-      {/*
-        The film is 2880x1440 — a 2:1 landscape — inside a hero that is 90dvh
-        tall. On a phone that frame is roughly 350x719, so filling it with
-        object-cover cropped away about 76% of the width: viewers saw a narrow
-        vertical strip of the middle, not the shot.
-
-        So on mobile it is letterboxed into a 16:9 window, the way a player
-        shows a landscape clip on a portrait screen. 16:9 rather than the source
-        2:1 deliberately: at full 2:1 the video is only about 25% of the hero
-        height and reads as a thin strip, whereas a 16:9 window still shows
-        ~89% of the frame while occupying a sensible amount of the slide. The
-        crop drops from roughly 76% to 11%.
-
-        From md up the frame is wide enough that cover crops very little, and
-        full-bleed is the better look, so the old behaviour is kept there.
-      */}
-      <div className="relative md:absolute md:inset-0 flex flex-col items-center justify-center gap-4 px-2.5 sm:px-5 pt-4 pb-20 md:gap-0 md:px-0 md:pt-0 md:pb-0">
-        {/*
-          Increased aspect ratio (4/3) and reduced side padding on mobile (px-2.5)
-          to make the video player larger in both width and height on mobile screens,
-          as requested.
-        */}
-        <div className="relative w-full aspect-[4/3] sm:aspect-video overflow-hidden rounded-2xl border border-white/12 shadow-[0_18px_40px_rgba(0,0,0,0.45)] md:aspect-auto md:h-full md:rounded-none md:border-0 md:shadow-none">
-          <video
-            ref={videoRef}
-            muted
-            playsInline
-            preload="metadata"
-            poster="/videos/brand_poster.jpg"
-            /*
-             * cover at both sizes — the 16:9 window is what limits the crop,
-             * not the fit. contain here would refit the 2:1 source by width and
-             * add its own bars inside the window, making the 16:9 framing
-             * pointless: 76% cropped becomes 11%, not 0%.
-             */
-            className="absolute inset-0 h-full w-full object-cover"
-          >
-            {/*
-              Phones get a 1280-wide cut (3.2MB) instead of the 2880x1440
-              master (8.6MB). The video renders about 350px wide on a phone, so
-              the master decoded roughly 8x more pixels than it displayed — that
-              is what made playback stutter.
-
-              Order matters: the browser takes the FIRST source whose type and
-              media both match, so the narrow-viewport entry has to come first.
-              Both files are now +faststart; the master had its moov atom after
-              mdat, so playback could not begin until most of the 8.6MB had
-              downloaded.
-            */}
-            <source src="/videos/brand_video_720.mp4" type="video/mp4" media="(max-width: 767px)" />
-            <source src="/videos/brand_video.webm" type="video/webm" />
-            <source src="/videos/brand_video.mp4" type="video/mp4" />
-          </video>
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/50 via-transparent to-transparent pointer-events-none" />
-        </div>
+    <div className="relative w-full h-full bg-[#080e1c] flex items-center justify-center">
+      {/* Full width, flush edge-to-edge with no border frame or rounded corners */}
+      <div className="relative w-full aspect-video md:aspect-auto md:absolute md:inset-0 overflow-hidden">
+        <video
+          ref={videoRef}
+          muted
+          playsInline
+          preload="metadata"
+          poster="/videos/brand_poster.jpg"
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <source src="/videos/brand_video_720.mp4" type="video/mp4" media="(max-width: 767px)" />
+          <source src="/videos/brand_video.webm" type="video/webm" />
+          <source src="/videos/brand_video.mp4" type="video/mp4" />
+        </video>
+        {/* Soft bottom vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/40 via-transparent to-transparent pointer-events-none" />
       </div>
     </div>
   );
