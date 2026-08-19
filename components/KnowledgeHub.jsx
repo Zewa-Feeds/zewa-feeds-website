@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Reveal from "./Reveal";
 import { ARTICLES as ALL_ARTICLES } from "@/lib/articles";
@@ -16,17 +19,36 @@ const ARTICLES = [...ALL_ARTICLES]
   .slice(0, 3);
 
 export default function KnowledgeHub() {
+  const [hoveredArticle, setHoveredArticle] = useState(null);
+
   return (
     <Reveal id="knowledge" className="relative overflow-hidden bg-[#06080f]">
-      {/* ── Background Science Lab Image ───────────────────────────── */}
+      {/* ── Background Science Lab & Article Cover Images ─────────── */}
       <div className="absolute inset-0 pointer-events-none z-0">
+        {/* Default background image */}
         <Image
           src="/Banner 3.png"
           alt="Laboratory research"
           fill
-          className="object-cover object-center opacity-35"
+          className={`object-cover object-center transition-opacity duration-500 ease-in-out ${
+            hoveredArticle ? "opacity-10" : "opacity-35"
+          }`}
           priority
         />
+
+        {/* Hovered article background images */}
+        {ARTICLES.map((a) => (
+          <Image
+            key={a.slug}
+            src={a.image}
+            alt={a.title}
+            fill
+            className={`object-cover object-center transition-all duration-700 ease-in-out ${
+              hoveredArticle === a.slug ? "opacity-45 scale-105" : "opacity-0 scale-100"
+            }`}
+          />
+        ))}
+
         {/* Dark vignettes for text contrast and seamless blending */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#06080f] via-[#06080f]/80 to-[#06080f]/40" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#06080f]/80 via-transparent to-[#06080f]" />
@@ -62,8 +84,11 @@ export default function KnowledgeHub() {
         </div>
 
         {/* Article list */}
-        <div className="rounded-2xl overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.6)] backdrop-blur-md"
-          style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(8,14,26,0.82)" }}>
+        <div
+          className="rounded-2xl overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.6)] backdrop-blur-md"
+          style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(8,14,26,0.82)" }}
+          onMouseLeave={() => setHoveredArticle(null)}
+        >
 
           {/* Top accent line */}
           <div className="h-px w-full" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.35) 50%, transparent)" }} />
@@ -72,19 +97,20 @@ export default function KnowledgeHub() {
             <a
               key={a.slug}
               href={`/blog/${a.slug}`}
-              className="group flex items-center justify-between gap-6 px-7 py-5 transition-colors duration-150 hover:bg-white/[0.03]"
+              onMouseEnter={() => setHoveredArticle(a.slug)}
+              className="group flex items-center justify-between gap-6 px-7 py-5 transition-colors duration-200 hover:bg-white/[0.05]"
               style={{ borderTop: i > 0 ? "1px solid rgba(255,255,255,0.06)" : undefined }}
             >
               <div className="flex items-center gap-5 min-w-0">
                 {/* Index */}
-                <span className="shrink-0 font-[Playfair_Display] text-[22px] leading-none text-white/10 group-hover:text-primary/25 transition-colors duration-200 w-6 text-right">
+                <span className="shrink-0 font-[Playfair_Display] text-[22px] leading-none text-white/10 group-hover:text-primary/40 transition-colors duration-200 w-6 text-right">
                   {String(i + 1).padStart(2, "0")}
                 </span>
 
                 <div className="min-w-0">
                   {/* Tag + read time */}
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-[8px] font-bold tracking-[0.2em] font-[Montserrat] uppercase text-primary/60">
+                    <span className="text-[8px] font-bold tracking-[0.2em] font-[Montserrat] uppercase text-primary/60 group-hover:text-primary transition-colors duration-200">
                       {a.tag}
                     </span>
                     <span className="text-white/15 text-[8px]">·</span>
@@ -98,7 +124,7 @@ export default function KnowledgeHub() {
               </div>
 
               {/* Arrow */}
-              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 shrink-0 text-white/15 group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-200">
+              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4 shrink-0 text-white/15 group-hover:text-primary group-hover:translate-x-1 transition-all duration-200">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </a>
@@ -124,3 +150,4 @@ export default function KnowledgeHub() {
     </Reveal>
   );
 }
+
