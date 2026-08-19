@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import Image from "next/image";
 
 const SLIDE_DURATION = 5000; // ms before auto-advancing tiles 1 & 2
 
@@ -133,48 +134,25 @@ function TileWhy() {
   );
 }
 
-// ── Tile 2: Proof stats ──────────────────────────────────────────────────────
-function TileProof() {
-  const stats = [
-    { value: "88%", label: "Bio-Digestibility", caption: "Absorbed nutrient profile vs 70% soy meal" },
-    { value: "15%", label: "Faster Growth", caption: "Studies and trials with leading research institutes" },
-    { value: "10%", label: "Less Mortality", caption: "Controlled feeding study result" },
-    { value: "Rich", label: "Colour Vibrancy", caption: "Natural carotenoids, zero synthetic dyes" },
-  ];
-
+// ── Tile 2: Superior Nutrition Banner ─────────────────────────────────────────
+function TileBanner() {
   return (
-    <div className="relative w-full md:h-full flex items-center">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#080e1c] via-[#0a1520] to-[#080e1c]" />
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[40%] h-[60%] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
+    <div className="relative w-full h-full bg-[#051126] flex items-center justify-center overflow-hidden">
+      {/* Ambient gradient matching the banner's oceanic deep blue background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#080e1c] via-[#051126] to-[#080e1c]" />
 
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-4 pb-14 md:py-8 overflow-y-auto">
-        {/*
-          Single column since the digestion-efficiency chart was removed.
-          A lg:grid-cols-2 wrapper would leave the right half of the tile
-          empty, so the four stats now spread across the full width instead.
-        */}
-        <div>
-          <div>
-            <h2 className="font-display-lg text-[22px] sm:text-[32px] md:text-[40px] leading-tight mb-5 sm:mb-8 text-on-surface">
-              The numbers that matter.
-            </h2>
-            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4 lg:gap-6">
-              {stats.map((s) => (
-                <div key={s.label} className="bg-surface-container/60 backdrop-blur-sm p-3 sm:p-5 border border-on-surface/5">
-                  <div className="text-[28px] sm:text-[40px] md:text-[48px] font-display-lg text-primary leading-none mb-1 sm:mb-2">
-                    {s.value}
-                  </div>
-                  <div className="font-label-caps text-[9px] sm:text-label-caps text-on-surface/80 tracking-widest mb-0.5 sm:mb-1">
-                    {s.label}
-                  </div>
-                  <div className="font-body-md text-[10px] sm:text-[12px] text-on-surface/40 leading-snug hidden sm:block">
-                    {s.caption}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+      {/* Responsive banner container */}
+      <div className="relative w-full aspect-[4/3.5] sm:aspect-[16/10] md:aspect-auto md:absolute md:inset-0 flex items-center justify-center p-2 sm:p-4 md:p-6">
+        <Image
+          src="/hero-banner-2.png"
+          alt="The Ultimate Superior Nutrition For Your Fish"
+          fill
+          priority
+          sizes="(max-width: 768px) 100vw, 1440px"
+          className="object-contain object-center drop-shadow-[0_12px_32px_rgba(0,0,0,0.6)]"
+        />
+        {/* Soft edge vignettes for seamless blending */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/50 via-transparent to-[#080e1c]/30 pointer-events-none" />
       </div>
     </div>
   );
@@ -217,7 +195,7 @@ function TileVideo({ onVideoEnd }) {
 }
 
 // ── Main Hero Slider ─────────────────────────────────────────────────────────
-const TILES = ["why", "proof", "video"];
+const TILES = ["why", "banner", "video"];
 
 export default function Hero() {
   const [current, setCurrent] = useState(0);
@@ -289,7 +267,7 @@ export default function Hero() {
         style={{ opacity: animating ? 0 : 1 }}
       >
         {current === 0 && <TileWhy />}
-        {current === 1 && <TileProof />}
+        {current === 1 && <TileBanner />}
         {current === 2 && <TileVideo onVideoEnd={handleVideoEnd} />}
       </div>
 
