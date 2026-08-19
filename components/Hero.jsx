@@ -137,29 +137,13 @@ function TileWhy() {
 // ── Tile 2: Superior Nutrition Banner ─────────────────────────────────────────
 function TileBanner() {
   return (
-    <div className="relative w-full h-full bg-[#080e1c] flex items-center justify-center overflow-hidden">
-      {/* 
-        Responsive picture element:
-        - Desktop loads /hero-banner-desktop.png (1920x1080, 16:9)
-        - Mobile loads /hero-banner-mobile.png (1080x1080, 1:1)
-        - Fallbacks to /hero-aquarium.jpg if custom graphics aren't present
-      */}
-      <picture className="relative w-full h-full flex items-center justify-center">
-        <source media="(min-width: 768px)" srcSet="/hero-banner-desktop.png" />
-        <img
-          src="/hero-banner-mobile.png"
-          onError={(e) => {
-            // Fallback if custom mobile/desktop file hasn't been uploaded yet
-            if (e.currentTarget.src.includes("hero-banner-mobile.png")) {
-              e.currentTarget.src = "/hero-aquarium.jpg";
-            }
-          }}
-          alt="The Ultimate Superior Nutrition For Your Fish"
-          className="w-full h-full object-cover md:object-contain object-center"
-        />
-      </picture>
-      {/* Soft gradient edge overlay for seamless blending */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/40 via-transparent to-[#080e1c]/30 pointer-events-none" />
+    <div className="relative w-full h-full bg-[#091428] flex items-center justify-center overflow-hidden">
+      <img
+        src="/hero-banner-2.jpg"
+        alt="The Ultimate Superior Nutrition For Your Fish"
+        className="w-full h-full object-cover md:object-contain object-center"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/30 via-transparent to-transparent pointer-events-none" />
     </div>
   );
 }
