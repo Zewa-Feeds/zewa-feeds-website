@@ -31,7 +31,7 @@ export default function KnowledgeHub() {
           alt="Laboratory research"
           fill
           className={`object-cover object-center transition-opacity duration-500 ease-in-out ${
-            hoveredArticle ? "opacity-10" : "opacity-35"
+            hoveredArticle ? "opacity-0" : "opacity-35"
           }`}
           priority
         />
