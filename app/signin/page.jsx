@@ -37,8 +37,10 @@ function SignInForm() {
    * is not made on an unknown session.
    */
   useEffect(() => {
-    if (!isLoading && isAuthenticated) router.replace(next);
-  }, [isLoading, isAuthenticated, next, router]);
+    if (!isLoading && isAuthenticated) {
+      window.location.href = next;
+    }
+  }, [isLoading, isAuthenticated, next]);
 
   const setField = (key) => (e) => {
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -57,7 +59,6 @@ function SignInForm() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    // Guard against a double submit racing a slow network.
     if (submitting) return;
 
     const found = validate();
@@ -68,7 +69,7 @@ function SignInForm() {
     setFormError(null);
     try {
       await signIn({ email: form.email.trim(), password: form.password, remember });
-      router.replace(next);
+      window.location.href = next;
     } catch (err) {
       if (err instanceof ApiError && err.fields) {
         setErrors(err.fields);
@@ -83,6 +84,22 @@ function SignInForm() {
       setSubmitting(false);
     }
   };
+
+  if (!isLoading && isAuthenticated) {
+    return (
+      <AuthShell
+        eyebrow="Account"
+        title="Welcome back."
+        subtitle="You are currently signed in."
+      >
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <span className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent mb-4" />
+          <p className="font-[Montserrat] text-[14px] font-bold text-white">Signed in successfully</p>
+          <p className="font-[Montserrat] text-[12.5px] text-white/50 mt-1">Redirecting to your account...</p>
+        </div>
+      </AuthShell>
+    );
+  }
 
   return (
     <AuthShell

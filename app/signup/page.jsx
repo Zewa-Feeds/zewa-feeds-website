@@ -42,8 +42,10 @@ function SignUpForm() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) router.replace(next);
-  }, [isLoading, isAuthenticated, next, router]);
+    if (!isLoading && isAuthenticated) {
+      window.location.href = next;
+    }
+  }, [isLoading, isAuthenticated, next]);
 
   const setField = (key) => (e) => {
     setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -63,8 +65,6 @@ function SignUpForm() {
           ? null
           : "Enter a valid email address.";
       case "phone":
-        // Optional — but if given, it must be a real Indian mobile number, the
-        // same rule the checkout address step applies.
         if (!value.trim()) return null;
         return /^[6-9]\d{9}$/.test(value.trim().replace(/\s+/g, ""))
           ? null
@@ -104,12 +104,10 @@ function SignUpForm() {
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         email: form.email.trim(),
-        // Omit rather than send an empty string — the API treats phone as
-        // optional, but an empty string would fail its format check.
         ...(form.phone.trim() ? { phone: form.phone.trim().replace(/\s+/g, "") } : {}),
         password: form.password,
       });
-      router.replace(next);
+      window.location.href = next;
     } catch (err) {
       if (err instanceof ApiError && err.fields) {
         setErrors((prev) => ({ ...prev, ...err.fields }));
@@ -124,6 +122,22 @@ function SignUpForm() {
       setSubmitting(false);
     }
   };
+
+  if (!isLoading && isAuthenticated) {
+    return (
+      <AuthShell
+        eyebrow="Create account"
+        title="Join Zewa Feeds."
+        subtitle="You are currently signed in."
+      >
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <span className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent mb-4" />
+          <p className="font-[Montserrat] text-[14px] font-bold text-white">Signed in successfully</p>
+          <p className="font-[Montserrat] text-[12.5px] text-white/50 mt-1">Redirecting to your account...</p>
+        </div>
+      </AuthShell>
+    );
+  }
 
   const shown = (key) => (touched[key] ? errors[key] : undefined);
 
