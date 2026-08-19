@@ -11,9 +11,9 @@ import { EASE, FOCUS_RING } from "@/components/checkout/tokens";
  * the same values would drift the moment one of them was tweaked.
  */
 
-/** Panel used for auth cards and account sections. Matches the checkout card with cyan glow edge. */
+/** Panel used for auth cards and account sections. Solid background, no bleed-through. */
 export const PANEL =
-  "rounded-3xl border border-[#44e5c2]/20 bg-[#08101e]/85 backdrop-blur-2xl shadow-[0_16px_48px_rgba(0,0,0,0.5),0_0_25px_rgba(68,229,194,0.06)]";
+  "rounded-3xl border border-white/10 bg-[#09101f] shadow-[0_20px_50px_rgba(0,0,0,0.6)]";
 
 /** Primary action. Mint gradient fill with subtle glow and active scale. */
 export function PrimaryButton({ children, loading = false, className = "", ...props }) {

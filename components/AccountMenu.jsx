@@ -142,10 +142,10 @@ export default function AccountMenu() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+12px)] z-50 w-64 overflow-hidden rounded-2xl border border-[#44e5c2]/30 bg-[#08101e]/98 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_25px_rgba(68,229,194,0.08)] backdrop-blur-2xl"
+          className="absolute right-0 top-[calc(100%+12px)] z-50 w-64 overflow-hidden rounded-2xl border border-white/15 bg-[#09101f] shadow-[0_24px_60px_rgba(0,0,0,0.95)]"
         >
           {/* Header info */}
-          <div className="flex items-center gap-3 border-b border-white/10 px-4 py-4 bg-gradient-to-r from-primary/10 to-transparent">
+          <div className="flex items-center gap-3 border-b border-white/10 px-4 py-4 bg-[#0d1627]">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-primary/20 font-[Montserrat] text-[12px] font-bold text-primary shadow-[0_0_10px_rgba(68,229,194,0.3)]">
               {initials}
             </div>

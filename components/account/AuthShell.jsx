@@ -67,7 +67,7 @@ export default function AuthShell({ eyebrow, title, subtitle, children, footer }
 
           {/* ---- Brand column (desktop only) ---- */}
           <aside className="hidden lg:flex lg:flex-col lg:justify-center">
-            <div className={`${PANEL} relative overflow-hidden p-10 border-[#44e5c2]/25 bg-gradient-to-b from-[#0b1424]/90 to-[#080f1d]/90 shadow-[0_24px_64px_rgba(0,0,0,0.7),0_0_35px_rgba(68,229,194,0.08)]`}>
+            <div className={`${PANEL} relative overflow-hidden p-10 border-white/12 bg-gradient-to-b from-[#0b1426] to-[#081020] shadow-[0_24px_64px_rgba(0,0,0,0.85)]`}>
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary/[0.12] blur-3xl"
