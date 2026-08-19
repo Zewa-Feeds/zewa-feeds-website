@@ -76,17 +76,17 @@ export default function OrdersPage() {
               <li key={order.orderNo}>
                 <a
                   href={`/account/orders/${order.orderNo}`}
-                  className="group block rounded-2xl border border-white/10 bg-gradient-to-b from-[#0b1424]/90 to-[#080f1d]/90 p-5 transition-all duration-200 hover:border-[#44e5c2]/40 hover:shadow-[0_8px_25px_rgba(0,0,0,0.5),0_0_20px_rgba(68,229,194,0.08)] sm:p-6"
+                  className="group block rounded-2xl border border-white/10 bg-[#09101f] p-5 sm:p-6 transition-all duration-200 hover:border-primary/50 hover:bg-[#0d1627] hover:shadow-[0_8px_30px_rgba(0,0,0,0.5),0_0_20px_rgba(68,229,194,0.08)]"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="min-w-0">
+                    <div className="flex flex-col gap-1.5 min-w-0">
                       <div className="flex flex-wrap items-center gap-3">
-                        <span className="font-[Montserrat] text-[14px] font-bold text-white group-hover:text-primary transition-colors">
+                        <span className="font-[Montserrat] text-[15px] font-bold text-white group-hover:text-primary transition-colors">
                           {order.orderNo}
                         </span>
                         <OrderStatusPill status={order.status} label={order.statusLabel} />
                       </div>
-                      <p className="mt-1.5 font-[Montserrat] text-[12px] text-white/45">
+                      <p className="font-[Montserrat] text-[12.5px] text-white/50">
                         Placed {formatOrderDate(order.placedAt)}
                       </p>
                     </div>

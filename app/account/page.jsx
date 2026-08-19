@@ -142,27 +142,34 @@ export default function AccountOverviewPage() {
               }
             />
           ) : (
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-4">
               {recent.map((order) => (
                 <li key={order.orderNo}>
                   <a
                     href={`/account/orders/${order.orderNo}`}
-                    className="group flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 p-4.5 rounded-xl border border-white/8 bg-gradient-to-r from-white/[0.02] to-transparent hover:border-primary/40 hover:bg-primary/[0.04] transition-all duration-200 shadow-sm"
+                    className="group block rounded-2xl border border-white/10 bg-[#09101f] p-5 sm:p-6 transition-all duration-200 hover:border-primary/50 hover:bg-[#0d1627] hover:shadow-[0_8px_30px_rgba(0,0,0,0.5),0_0_20px_rgba(68,229,194,0.08)]"
                   >
-                    <div className="min-w-0">
-                      <p className="font-[Montserrat] text-[14px] font-bold text-white group-hover:text-primary transition-colors">
-                        {order.orderNo}
-                      </p>
-                      <p className="mt-1 truncate font-[Montserrat] text-[12px] text-white/50">
-                        {formatOrderDate(order.placedAt)} ·{" "}
-                        {order.items.length} item{order.items.length === 1 ? "" : "s"}
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-4">
-                      <OrderStatusPill status={order.status} label={order.statusLabel} />
-                      <span className="font-[Montserrat] text-[15px] font-bold text-white">
-                        {formatInr(order.totalPaise)}
-                      </span>
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex flex-col gap-1.5 min-w-0">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="font-[Montserrat] text-[15px] font-bold text-white group-hover:text-primary transition-colors">
+                            {order.orderNo}
+                          </span>
+                          <OrderStatusPill status={order.status} label={order.statusLabel} />
+                        </div>
+                        <p className="font-[Montserrat] text-[12.5px] text-white/50">
+                          Placed {formatOrderDate(order.placedAt)} · {order.items.length} item{order.items.length === 1 ? "" : "s"}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-5">
+                        <span className="font-[Montserrat] text-[17px] font-bold text-white tabular-nums">
+                          {formatInr(order.totalPaise)}
+                        </span>
+                        <span className="font-[Montserrat] text-[12px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                          Details →
+                        </span>
+                      </div>
                     </div>
                   </a>
                 </li>
