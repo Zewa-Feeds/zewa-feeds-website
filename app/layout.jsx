@@ -1,6 +1,7 @@
 import { Montserrat, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cartContext";
+import { AuthProvider } from "@/lib/authContext";
 import CartDrawer from "@/components/CartDrawer";
 
 const montserrat = Montserrat({
@@ -83,10 +84,17 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="font-body-md text-on-surface">
-        <CartProvider>
-          <CartDrawer />
-          {children}
-        </CartProvider>
+        {/*
+          Auth wraps cart, not the other way round: the cart is anonymous and
+          never needs to know who is signed in, while account screens do read
+          the cart. Nesting it this way keeps that dependency one-directional.
+        */}
+        <AuthProvider>
+          <CartProvider>
+            <CartDrawer />
+            {children}
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

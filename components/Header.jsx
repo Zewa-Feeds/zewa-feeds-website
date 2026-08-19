@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { navLinks } from "@/lib/content";
 import { useCart } from "@/lib/cartContext";
+import AccountMenu, { MobileAccountLinks } from "@/components/AccountMenu";
 
 // ── Cart icon ─────────────────────────────────────────────────────────────────
 
@@ -97,6 +98,7 @@ export default function Header() {
 
         {/* Desktop CTAs — uniform across all pages */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
+          <AccountMenu />
           <CartIcon onClick={() => setDrawerOpen(true)} totalItems={totalItems} />
           {!isShopPage ? (
             <a href="/products" className="border border-primary text-primary px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200">
@@ -114,9 +116,14 @@ export default function Header() {
 
         {/* Mobile CTAs — uniform across all pages */}
         <div className="md:hidden flex items-center gap-2">
+          <AccountMenu />
           <CartIcon onClick={() => setDrawerOpen(true)} totalItems={totalItems} />
+          {/*
+            whitespace-nowrap + tighter padding: the account icon now shares this
+            row, and without it "Buy Now" wrapped onto two lines at 390px.
+          */}
           {!isShopPage && (
-            <a href="/products" className="border border-primary text-primary px-4 py-2 font-button text-[12px] uppercase tracking-wider hover:bg-primary hover:text-on-primary transition-all duration-200">
+            <a href="/products" className="whitespace-nowrap border border-primary text-primary px-3 py-2 font-button text-[11px] uppercase tracking-wider hover:bg-primary hover:text-on-primary transition-all duration-200">
               Buy Now
             </a>
           )}
@@ -164,6 +171,15 @@ export default function Header() {
               </li>
             ))}
           </ul>
+
+          {/*
+            Account links in the drawer as well as the header icon.
+            The icon is a 36px target competing with the cart; the drawer is
+            where someone browsing on a phone actually looks for "my orders".
+          */}
+          <div className="border-t border-white/10 px-5 py-2">
+            <MobileAccountLinks onNavigate={() => setMobileOpen(false)} />
+          </div>
 
           <div className="border-t border-white/10 px-5 py-4">
             <a

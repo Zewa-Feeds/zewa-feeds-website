@@ -5,7 +5,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
 import { checkout as checkoutApi, settings as settingsApi, formatInr } from "@/lib/api";
-import { pincodeMatchesState, likelyStateForPincode } from "@/lib/pincode";
+import { pincodeMatchesState, likelyStateForPincode, INDIAN_STATES } from "@/lib/pincode";
+import { useAuth, signInHref } from "@/lib/authContext";
+import { account as accountApi } from "@/lib/api";
 
 import CheckoutBreadcrumbs from "@/components/checkout/CheckoutBreadcrumbs";
 import { FloatingInput, FloatingSelect } from "@/components/checkout/FloatingInput";
@@ -13,14 +15,8 @@ import PaymentMethodSelector from "@/components/checkout/PaymentMethodSelector";
 import OrderSummaryCard from "@/components/checkout/OrderSummaryCard";
 import { CARD, CARD_PAD, CARD_HEADER, STEP_CHIP, SECTION_TITLE, EASE, FOCUS_RING } from "@/components/checkout/tokens";
 
-const STATES = [
-  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
-  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka",
-  "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram",
-  "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu",
-  "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
-  "Delhi", "Jammu & Kashmir", "Ladakh", "Chandigarh", "Puducherry",
-];
+// Shared with the account address book so the two forms cannot drift apart.
+const STATES = INDIAN_STATES;
 
 const STORAGE_FORM_KEY = "zewa_checkout_form_v1";
 
@@ -56,6 +52,17 @@ export default function CheckoutPage() {
   const [statusText, setStatusText] = useState("");
   const [pincodeLoading, setPincodeLoading] = useState(false);
   const [autoDetectedBadge, setAutoDetectedBadge] = useState("");
+
+  /**
+   * Signed-in shortcut.
+   *
+   * The cart is anonymous and stays that way, so signing in mid-checkout never
+   * costs the customer their basket. All this does is save them retyping details
+   * the account already holds.
+   */
+  const { customer, isAuthenticated, isLoading: authLoading } = useAuth();
+  /** True once a prefill has run, so it cannot fight the customer's own edits. */
+  const prefilled = useRef(false);
 
   const idempotencyKey = useRef(
     `chk-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
@@ -128,6 +135,49 @@ export default function CheckoutPage() {
       .getElementById("checkout-root-error")
       ?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [errors._root]);
+
+  /**
+   * Prefill from the account, once.
+   *
+   * Runs only while the fields are still untouched: someone who has started
+   * typing a different delivery address must not have it overwritten when their
+   * profile finally loads. The default address is used when there is one,
+   * otherwise just the name and email.
+   */
+  useEffect(() => {
+    if (authLoading || !isAuthenticated || !customer || prefilled.current) return;
+    prefilled.current = true;
+
+    let cancelled = false;
+    (async () => {
+      let defaultAddress = null;
+      try {
+        const list = await accountApi.addresses();
+        defaultAddress = list.find((a) => a.isDefault) ?? list[0] ?? null;
+      } catch {
+        /* Address book unavailable — fall back to identity fields only. */
+      }
+      if (cancelled) return;
+
+      setForm((f) => ({
+        ...f,
+        firstName: f.firstName || customer.firstName || "",
+        lastName: f.lastName || customer.lastName || "",
+        email: f.email || customer.email || "",
+        phone: f.phone || defaultAddress?.phone || customer.phone || "",
+        address: f.address || (defaultAddress
+          ? [defaultAddress.line1, defaultAddress.line2].filter(Boolean).join(", ")
+          : ""),
+        city: f.city || defaultAddress?.city || "",
+        state: f.state || defaultAddress?.state || "",
+        pincode: f.pincode || defaultAddress?.pincode || "",
+      }));
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, isAuthenticated, customer]);
 
   // Re-price when state or email changes for GST tax calculation
   useEffect(() => {
@@ -694,7 +744,35 @@ export default function CheckoutPage() {
                       Contact Information
                     </h2>
                   </div>
+                  {/* Signed-in customers get a quiet confirmation instead of a prompt. */}
+                  {!authLoading && isAuthenticated && (
+                    <span className="hidden font-[Montserrat] text-[11px] text-primary/70 sm:inline">
+                      Signed in
+                    </span>
+                  )}
                 </div>
+
+                {/*
+                  Offered, never required. Guest checkout stays the default path —
+                  forcing an account at the payment step is one of the most
+                  reliable ways to lose a sale. `next` returns them here with the
+                  cart intact, since the cart lives in the browser either way.
+                */}
+                {!authLoading && !isAuthenticated && (
+                  <a
+                    href={signInHref("/checkout")}
+                    className={`flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/[0.04] px-4 py-3 ${EASE} hover:border-primary/40 hover:bg-primary/[0.07]`}
+                  >
+                    <span className="font-[Montserrat] text-[12.5px] text-white/60">
+                      Have an account?{" "}
+                      <span className="font-semibold text-primary">Sign in</span> to fill this
+                      in automatically.
+                    </span>
+                    <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true">
+                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                )}
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <FloatingInput
