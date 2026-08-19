@@ -34,7 +34,7 @@ export default function KnowledgeHub() {
 
       <div className="relative z-10 h-px w-full" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.2) 50%, transparent)" }} />
 
-      <div className="relative z-10 max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-24 sm:pt-32 pb-24 sm:pb-32">
+      <div className="relative z-10 max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-12 sm:pt-16 pb-24 sm:pb-32">
 
         {/* Header row */}
         <div className="flex items-end justify-between gap-6 mb-10">

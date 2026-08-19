@@ -90,7 +90,7 @@ export default async function ProductShowcase() {
 
   return (
     <Reveal id="products" className="bg-[#06080f]">
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-24 sm:pt-32 pb-24 sm:pb-32">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-10 lg:px-16 pt-24 sm:pt-32 pb-12 sm:pb-16">
         {/* ── Section Header ─────────────────────────────────────── */}
         <div className="flex items-center gap-3 mb-10 sm:mb-14">
           <div className="w-6 h-px bg-primary" />
@@ -106,7 +106,7 @@ export default async function ProductShowcase() {
         </h2>
 
         {/* ── SECONDARY ROW ─────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-14">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
           {SECONDARY.map((p) => (
             <a
               key={p.slug ?? p.name}
@@ -138,7 +138,7 @@ export default async function ProductShowcase() {
                 <h3 className="font-[Playfair_Display] text-[20px] text-[#ffffff] leading-snug group-hover:text-primary transition-colors duration-200">
                   {p.name}
                 </h3>
-                <p className="text-[12px] text-white/45 font-[Montserrat] leading-relaxed line-clamp-2">
+                <p className="text-[12px] text-white/45 font-[Montserrat] leading-relaxed line-clamp-3">
                   {p.tagline}
                 </p>
                 <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.18em] uppercase font-[Montserrat] text-primary/70 mt-2 group-hover:text-primary group-hover:gap-2.5 transition-all duration-200">

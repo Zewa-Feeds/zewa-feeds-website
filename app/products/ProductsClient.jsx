@@ -343,7 +343,7 @@ function ProductCard({ p }) {
         <h3 className="font-[Playfair_Display] text-[19px] text-white leading-snug group-hover:text-primary transition-colors duration-200">
           {p.name}
         </h3>
-        <p className="text-[12px] text-white/35 font-[Montserrat] leading-relaxed line-clamp-2">{p.tagline}</p>
+        <p className="text-[12px] text-white/35 font-[Montserrat] leading-relaxed line-clamp-3">{p.tagline}</p>
       </div>
 
       {/* Price + qty */}
