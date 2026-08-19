@@ -33,14 +33,14 @@ export default function KnowledgeHub() {
             alt={a.title}
             fill
             className={`object-cover object-center transition-all duration-700 ease-in-out ${
-              hoveredArticle === a.slug ? "opacity-45 scale-105" : "opacity-0 scale-100"
+              hoveredArticle === a.slug ? "opacity-85 scale-105" : "opacity-0 scale-100"
             }`}
           />
         ))}
 
-        {/* Dark vignettes for text contrast and seamless blending */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#06080f] via-[#06080f]/80 to-[#06080f]/40" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#06080f]/80 via-transparent to-[#06080f]" />
+        {/* Soft dark vignettes for crisp contrast and clear image visibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#06080f]/90 via-[#06080f]/50 to-[#06080f]/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#06080f]/80 via-[#06080f]/20 to-[#06080f]/90" />
       </div>
 
       <div className="relative z-10 h-px w-full" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.2) 50%, transparent)" }} />
