@@ -342,6 +342,7 @@ function AddressForm({ initial, isNew, onCancel, onSaved }) {
           />
           <FloatingInput
             name="phone"
+            digitsOnly
             type="tel"
             label="Mobile number"
             value={form.phone}
@@ -376,6 +377,7 @@ function AddressForm({ initial, isNew, onCancel, onSaved }) {
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-4">
           <FloatingInput
             name="pincode"
+            digitsOnly
             label="PIN code"
             value={form.pincode}
             onChange={setField("pincode")}

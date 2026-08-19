@@ -126,6 +126,7 @@ export default function ProfilePage() {
 
           <FloatingInput
             name="phone"
+            digitsOnly
             type="tel"
             label="Mobile number"
             value={form.phone}

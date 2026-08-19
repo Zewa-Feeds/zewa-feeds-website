@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FloatingInput } from "@/components/checkout/FloatingInput";
 import { FormMessage, PasswordToggle, PrimaryButton } from "@/components/account/ui";
 import { useAuth, safeNext } from "@/lib/authContext";
-import { ApiError } from "@/lib/api";
+import { account as accountApi, ApiError } from "@/lib/api";
 
 function validatePassword(p) {
   if (!p) return "Enter a password.";
@@ -93,6 +93,43 @@ function AuthDrawerContent() {
   const [signUpErrors, setSignUpErrors] = useState({});
   const [signUpFormError, setSignUpFormError] = useState(null);
   const [signUpSubmitting, setSignUpSubmitting] = useState(false);
+
+  /* Forgot password. The tab previously rendered an input with no value and no
+     onChange — a controlled field frozen at "", so nothing could be typed — and
+     a button that only switched tabs without sending anything. */
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotError, setForgotError] = useState(null);
+  const [forgotFormError, setForgotFormError] = useState(null);
+  const [forgotSubmitting, setForgotSubmitting] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+
+  const submitForgot = async (e) => {
+    e.preventDefault();
+    if (forgotSubmitting) return;
+
+    const email = forgotEmail.trim();
+    if (!email) return setForgotError("Enter your email address.");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return setForgotError("Enter a valid email address.");
+
+    setForgotSubmitting(true);
+    setForgotError(null);
+    setForgotFormError(null);
+    try {
+      await accountApi.forgotPassword(email);
+      // Shown for any accepted address, registered or not — the API answers
+      // identically either way so this cannot become an account-existence probe.
+      setForgotSent(true);
+    } catch (err) {
+      setForgotFormError(
+        err instanceof ApiError
+          ? err.message
+          : "Could not send the reset link. Please try again.",
+      );
+    } finally {
+      setForgotSubmitting(false);
+    }
+  };
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -448,6 +485,7 @@ function AuthDrawerContent() {
               <FloatingInput
                 id="auth-phone"
                 name="phone"
+                digitsOnly
                 type="tel"
                 label="Mobile number (optional)"
                 value={signUpForm.phone}
@@ -509,31 +547,76 @@ function AuthDrawerContent() {
 
           {/* TAB 3: FORGOT PASSWORD */}
           {authDrawerTab === "forgot" && (
-            <div className="flex flex-col gap-4">
-              <p className="font-[Montserrat] text-[13px] text-white/60 leading-relaxed">
-                Enter your email address below and we will send you instructions to reset your password.
-              </p>
+            forgotSent ? (
+              <div className="flex flex-col items-center gap-4 py-4 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/25 bg-primary/[0.07] text-primary">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+                    <path
+                      d="M3 7l9 6 9-6M3 6.5h18v11H3v-11z"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-[Playfair_Display] text-[18px] text-white">Check your inbox</p>
+                  <p className="mt-2 font-[Montserrat] text-[13px] leading-relaxed text-white/50">
+                    If <span className="text-white">{forgotEmail.trim()}</span> has an account,
+                    a link to choose a new password is on its way. It works once and expires in
+                    60 minutes.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotSent(false);
+                    setAuthDrawerTab("signin");
+                  }}
+                  className="mt-1 font-[Montserrat] text-[12.5px] text-white/50 transition-colors hover:text-primary"
+                >
+                  ← Back to Sign In
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={submitForgot} noValidate className="flex flex-col gap-4">
+                <p className="font-[Montserrat] text-[13px] leading-relaxed text-white/60">
+                  Enter your email address below and we will send you instructions to reset your
+                  password.
+                </p>
 
-              <FloatingInput
-                id="auth-email"
-                name="email"
-                type="email"
-                label="Email address"
-                required
-              />
+                {forgotFormError && <FormMessage>{forgotFormError}</FormMessage>}
 
-              <PrimaryButton type="button" onClick={() => setAuthDrawerTab("signin")}>
-                Send Reset Link
-              </PrimaryButton>
+                <FloatingInput
+                  id="auth-email"
+                  name="email"
+                  type="email"
+                  label="Email address"
+                  value={forgotEmail}
+                  onChange={(e) => {
+                    setForgotEmail(e.target.value);
+                    if (forgotError) setForgotError(null);
+                    if (forgotFormError) setForgotFormError(null);
+                  }}
+                  error={forgotError}
+                  autoComplete="email"
+                  required
+                />
 
-              <button
-                type="button"
-                onClick={() => setAuthDrawerTab("signin")}
-                className="mt-2 text-center font-[Montserrat] text-[12.5px] text-white/50 hover:text-primary transition-colors"
-              >
-                ← Back to Sign In
-              </button>
-            </div>
+                <PrimaryButton type="submit" loading={forgotSubmitting}>
+                  {forgotSubmitting ? "Sending" : "Send Reset Link"}
+                </PrimaryButton>
+
+                <button
+                  type="button"
+                  onClick={() => setAuthDrawerTab("signin")}
+                  className="mt-2 text-center font-[Montserrat] text-[12.5px] text-white/50 transition-colors hover:text-primary"
+                >
+                  ← Back to Sign In
+                </button>
+              </form>
+            )
           )}
         </div>
       </aside>

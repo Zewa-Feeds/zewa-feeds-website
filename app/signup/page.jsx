@@ -207,6 +207,7 @@ function SignUpForm() {
 
         <FloatingInput
           name="phone"
+          digitsOnly
           type="tel"
           label="Mobile number"
           value={form.phone}

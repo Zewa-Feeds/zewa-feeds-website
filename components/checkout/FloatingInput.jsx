@@ -80,6 +80,15 @@ export function FloatingInput({
   label,
   value = "",
   onChange,
+  /**
+   * Accept digits only — for phone and PIN-code fields.
+   *
+   * `type="tel"` and `inputMode="numeric"` only hint at a keyboard; both still
+   * accept letters, and on desktop nothing stops someone typing "98abc". The
+   * value is scrubbed here, before the parent's handler reads it, so state can
+   * never hold a character the field is not meant to contain.
+   */
+  digitsOnly = false,
   onBlur,
   error,
   hint,
@@ -105,6 +114,19 @@ export function FloatingInput({
     if (onBlur) onBlur(e);
   };
 
+  /*
+   * Rewrites the DOM node's value before handing the event on, so a controlled
+   * parent stores the cleaned string and React re-renders with it. Mutating the
+   * target is deliberate — cloning a SyntheticEvent does not survive pooling.
+   */
+  const handleChange = (e) => {
+    if (digitsOnly) {
+      const cleaned = e.target.value.replace(/\D/g, "");
+      if (cleaned !== e.target.value) e.target.value = cleaned;
+    }
+    if (onChange) onChange(e);
+  };
+
   return (
     <div className={`relative flex flex-col gap-1 ${className}`}>
       <div className="relative flex items-center">
@@ -124,13 +146,14 @@ export function FloatingInput({
           name={name}
           type={type}
           value={value}
-          onChange={onChange}
+          onChange={handleChange}
           onFocus={() => setIsFocused(true)}
           onBlur={handleBlur}
           disabled={disabled}
           maxLength={maxLength}
           autoComplete={autoComplete}
-          inputMode={inputMode}
+          // digitsOnly implies a numeric keypad unless the caller says otherwise.
+          inputMode={inputMode ?? (digitsOnly ? "numeric" : undefined)}
           placeholder={isFocused ? placeholder : ""}
           aria-invalid={Boolean(error)}
           /*
