@@ -137,62 +137,29 @@ function TileWhy() {
 // ── Tile 2: Superior Nutrition Banner ─────────────────────────────────────────
 function TileBanner() {
   return (
-    <div className="relative w-full md:h-full flex items-center overflow-hidden">
-      {/* Cinematic wide aquarium background */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/hero-aquarium.jpg"
+    <div className="relative w-full h-full bg-[#080e1c] flex items-center justify-center overflow-hidden">
+      {/* 
+        Responsive picture element:
+        - Desktop loads /hero-banner-desktop.png (1920x1080, 16:9)
+        - Mobile loads /hero-banner-mobile.png (1080x1080, 1:1)
+        - Fallbacks to /hero-aquarium.jpg if custom graphics aren't present
+      */}
+      <picture className="relative w-full h-full flex items-center justify-center">
+        <source media="(min-width: 768px)" srcSet="/hero-banner-desktop.png" />
+        <img
+          src="/hero-banner-mobile.png"
+          onError={(e) => {
+            // Fallback if custom mobile/desktop file hasn't been uploaded yet
+            if (e.currentTarget.src.includes("hero-banner-mobile.png")) {
+              e.currentTarget.src = "/hero-aquarium.jpg";
+            }
+          }}
           alt="The Ultimate Superior Nutrition For Your Fish"
-          fill
-          priority
-          sizes="(max-width: 768px) 100vw, 1440px"
-          className="object-cover object-center brightness-[0.65]"
+          className="w-full h-full object-cover md:object-contain object-center"
         />
-        {/* Dark vignettes for high text contrast and seamless edge blending */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#080e1c] via-[#080e1c]/80 to-[#080e1c]/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c] via-transparent to-[#080e1c]/60" />
-      </div>
-
-      {/* Content wrapper */}
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-6 pb-14 md:py-0">
-        <div className="max-w-2xl">
-          <div className="flex items-center gap-3 mb-3 sm:mb-4">
-            <div className="w-5 h-px bg-primary shadow-[0_0_8px_rgba(68,229,194,0.6)]" />
-            <span className="text-[10px] font-bold text-primary tracking-[0.28em] font-[Montserrat] uppercase">
-              SUPERIOR FORMULATION
-            </span>
-          </div>
-
-          <h2 className="font-display-lg text-[30px] sm:text-display-lg-mobile md:text-display-lg mb-4 sm:mb-6 leading-[1.08] text-white">
-            The Ultimate{" "}
-            <span className="text-primary italic">Superior Nutrition</span>
-            <br />
-            For Your Fish.
-          </h2>
-
-          <p className="font-body-lg text-[14.5px] sm:text-body-lg text-white/70 mb-7 sm:mb-10 max-w-lg leading-relaxed">
-            Engineered from ancestral BSF insect protein — 0% soy fillers, near-perfect 88% absorption, and natural carotenoids for striking color.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <a
-              href="/products"
-              className="bg-primary text-on-primary px-8 py-4 font-button text-button uppercase tracking-widest active:scale-95 transition-transform inline-block shadow-[0_0_24px_rgba(68,229,194,0.3)] hover:bg-primary/90"
-            >
-              SEE THE FORMULAS
-            </a>
-            <a
-              href="#science"
-              className="group flex items-center gap-3 font-button text-button text-white/70 hover:text-primary transition-colors duration-300"
-            >
-              <span className="w-10 h-10 rounded-full border border-white/20 group-hover:border-primary flex items-center justify-center transition-colors duration-300">
-                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-              </span>
-              EXPLORE THE SCIENCE
-            </a>
-          </div>
-        </div>
-      </div>
+      </picture>
+      {/* Soft gradient edge overlay for seamless blending */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/40 via-transparent to-[#080e1c]/30 pointer-events-none" />
     </div>
   );
 }
