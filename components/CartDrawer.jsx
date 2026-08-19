@@ -124,6 +124,15 @@ export default function CartDrawer() {
           transform: drawerOpen ? "translateX(0)" : "translateX(100%)",
         }}
         aria-label="Shopping Cart Drawer"
+        /*
+          Closed, this panel is parked off the right edge but still in the DOM
+          so it can slide. Without inert its close button and links stayed in
+          the tab order on every page — a keyboard user tabbing the homepage
+          landed inside an invisible cart. inert removes the subtree from focus
+          and from the accessibility tree.
+        */
+        inert={!drawerOpen}
+        aria-hidden={drawerOpen ? undefined : "true"}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/8 bg-[#080d1a]/80 backdrop-blur-md">

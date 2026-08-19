@@ -20,6 +20,32 @@ function SignInForm() {
   const params = useSearchParams();
   const { signIn, isAuthenticated, isLoading, openAuthDrawer } = useAuth();
 
+  /*
+   * These three were referenced further down but had lost their declarations,
+   * so the component threw `justReset is not defined` on render and the whole
+   * page fell back to "This page couldn't load".
+   *
+   * `next` goes through safeNext because it lands in a location assignment —
+   * an unchecked value there turns this page into an open redirect.
+   */
+  const next = safeNext(params.get("next"));
+  const justReset = params.get("reset") === "1";
+  const justRegistered = params.get("registered") === "1";
+
+  /*
+   * The whole state block had been removed while the JSX below still used every
+   * one of these, so the component threw on render. Restored as it was:
+   * `remember` defaults to true because a storefront session lasting a week is
+   * the friendlier default, and the API honours it by lengthening the token TTL
+   * rather than only how long the browser keeps it.
+   */
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [remember, setRemember] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       openAuthDrawer("signin");
@@ -39,12 +65,12 @@ function SignInForm() {
   };
 
   const validate = () => {
-    const next = {};
-    if (!form.email.trim()) next.email = "Enter your email address.";
+    const found = {};
+    if (!form.email.trim()) found.email = "Enter your email address.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
-      next.email = "Enter a valid email address.";
-    if (!form.password) next.password = "Enter your password.";
-    return next;
+      found.email = "Enter a valid email address.";
+    if (!form.password) found.password = "Enter your password.";
+    return found;
   };
 
   const onSubmit = async (e) => {

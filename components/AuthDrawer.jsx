@@ -247,6 +247,19 @@ function AuthDrawerContent() {
           transform: authDrawerOpen ? "translateX(0)" : "translateX(100%)",
         }}
         aria-label="Account Authentication Drawer"
+        /*
+          The panel stays mounted when closed so it can slide rather than pop,
+          which left a full sign-in form parked off the right edge of every
+          page: still tabbable, still read by screen readers, and still offered
+          to password managers. `inert` takes the whole subtree out of focus
+          order and the accessibility tree while it is closed.
+
+          Passed as a real boolean: React 19 maps inert={true|false} onto the
+          attribute directly, and an empty string is coerced to FALSE — which is
+          how the first attempt at this silently did nothing.
+        */
+        inert={!authDrawerOpen}
+        aria-hidden={authDrawerOpen ? undefined : "true"}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/8 bg-[#080d1a]/90 backdrop-blur-md">
@@ -325,6 +338,7 @@ function AuthDrawerContent() {
               {signInFormError && <FormMessage>{signInFormError}</FormMessage>}
 
               <FloatingInput
+                id="auth-email"
                 name="email"
                 type="email"
                 label="Email address"
@@ -337,6 +351,7 @@ function AuthDrawerContent() {
 
               <div className="relative">
                 <FloatingInput
+                  id="auth-password"
                   name="password"
                   type={showSignInPassword ? "text" : "password"}
                   label="Password"
@@ -397,6 +412,7 @@ function AuthDrawerContent() {
 
               <div className="grid grid-cols-2 gap-3">
                 <FloatingInput
+                  id="auth-firstName"
                   name="firstName"
                   label="First name"
                   value={signUpForm.firstName}
@@ -406,6 +422,7 @@ function AuthDrawerContent() {
                   required
                 />
                 <FloatingInput
+                  id="auth-lastName"
                   name="lastName"
                   label="Last name"
                   value={signUpForm.lastName}
@@ -417,6 +434,7 @@ function AuthDrawerContent() {
               </div>
 
               <FloatingInput
+                id="auth-email"
                 name="email"
                 type="email"
                 label="Email address"
@@ -428,6 +446,7 @@ function AuthDrawerContent() {
               />
 
               <FloatingInput
+                id="auth-phone"
                 name="phone"
                 type="tel"
                 label="Mobile number (optional)"
@@ -440,6 +459,7 @@ function AuthDrawerContent() {
 
               <div className="relative">
                 <FloatingInput
+                  id="auth-password"
                   name="password"
                   type={showSignUpPassword ? "text" : "password"}
                   label="Password"
@@ -457,6 +477,7 @@ function AuthDrawerContent() {
               </div>
 
               <FloatingInput
+                id="auth-confirmPassword"
                 name="confirmPassword"
                 type={showSignUpPassword ? "text" : "password"}
                 label="Confirm password"
@@ -494,6 +515,7 @@ function AuthDrawerContent() {
               </p>
 
               <FloatingInput
+                id="auth-email"
                 name="email"
                 type="email"
                 label="Email address"
