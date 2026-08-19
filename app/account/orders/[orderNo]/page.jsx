@@ -8,6 +8,7 @@ import {
   PAYMENT_TONE,
   formatOrderDateTime,
 } from "@/components/account/orderUi";
+import TrackingPanel from "@/components/account/TrackingPanel";
 import { useAuth } from "@/lib/authContext";
 import { account as accountApi, formatInr, ApiError } from "@/lib/api";
 
@@ -122,6 +123,14 @@ export default function OrderDetailPage({ params }) {
               )}
             </div>
 
+            {/*
+              Tracking sits ABOVE the timeline: once an order is moving, opening
+              the carrier's page is the thing the customer came here to do, and
+              the timeline is history by comparison. Renders nothing until there
+              are shipment details.
+            */}
+            <TrackingPanel fulfilment={order.fulfilment} status={order.status} />
+
             {/* Timeline — the backend already marks which steps are done. */}
             {/*
               `state` is one of done | current | todo | cancelled (see
@@ -179,26 +188,6 @@ export default function OrderDetailPage({ params }) {
               </ol>
             )}
 
-            {order.fulfilment?.trackingNumber && (
-              <div className="mt-6 rounded-2xl border border-white/8 bg-white/[0.02] p-4">
-                <p className="font-[Montserrat] text-[11px] text-white/35">
-                  {order.fulfilment.carrier ?? "Carrier"} ·{" "}
-                  <span className="font-mono text-white/70">
-                    {order.fulfilment.trackingNumber}
-                  </span>
-                </p>
-                {order.fulfilment.trackingUrl && (
-                  <a
-                    href={order.fulfilment.trackingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 inline-block font-[Montserrat] text-[12px] font-semibold text-primary hover:underline"
-                  >
-                    Track shipment →
-                  </a>
-                )}
-              </div>
-            )}
           </AccountCard>
 
           {/* ---- Items ---- */}

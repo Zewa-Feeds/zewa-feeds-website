@@ -113,8 +113,17 @@ export default function OrdersPage() {
                         .join(", ")}
                       {order.items.length > 2 && ` +${order.items.length - 2} more`}
                     </p>
-                    <span className="flex items-center gap-1 font-[Montserrat] text-[11px] font-bold uppercase tracking-[0.14em] text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                      Details →
+                    {/*
+                      A shipped order says so right here, so the customer knows
+                      the tracking link is one tap away without opening every
+                      order to find out. The link itself lives on the detail
+                      page — repeating an external link on a row that is already
+                      a link would nest two competing targets.
+                    */}
+                    <span className="flex shrink-0 items-center gap-1 font-[Montserrat] text-[11px] font-bold uppercase tracking-[0.14em] text-primary transition-opacity">
+                      {order.fulfilment?.trackingNumber || order.fulfilment?.trackingUrl
+                        ? "Track →"
+                        : <span className="opacity-0 group-hover:opacity-100">Details →</span>}
                     </span>
                   </div>
                 </a>
