@@ -58,13 +58,13 @@ function FieldMessage({ id, error, hint }) {
   if (!error && !hint) return null;
 
   return (
-    <div className="min-h-[15px] pl-1">
+    <div className="min-h-[15px] pl-1 mt-1 mb-0.5">
       <p
         id={id}
         className={`text-[11px] font-[Montserrat] ${EASE} ${
           error
             ? "translate-y-0 text-red-400 opacity-100"
-            : "translate-y-0 text-[10px] text-white/35 opacity-100"
+            : "translate-y-0 text-[11px] text-white/45 opacity-100 leading-snug"
         }`}
       >
         {error || hint}

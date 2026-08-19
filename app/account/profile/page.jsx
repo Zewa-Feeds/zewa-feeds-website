@@ -91,19 +91,19 @@ export default function ProfilePage() {
   return (
     <AccountShell title="Profile" subtitle="Your name and contact details.">
       <AccountCard title="Personal details">
-        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-1">
+        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5 sm:gap-6">
           {formError && (
-            <div className="mb-3">
+            <div className="mb-1">
               <FormMessage>{formError}</FormMessage>
             </div>
           )}
           {saved && (
-            <div className="mb-3">
+            <div className="mb-1">
               <FormMessage tone="success">Your details have been saved.</FormMessage>
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 sm:gap-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-4">
             <FloatingInput
               name="firstName"
               label="First name"

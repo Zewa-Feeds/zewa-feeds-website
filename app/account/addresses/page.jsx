@@ -323,14 +323,14 @@ function AddressForm({ initial, isNew, onCancel, onSaved }) {
 
   return (
     <AccountCard title={isNew ? "Add an address" : "Edit address"}>
-      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-1">
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5 sm:gap-6">
         {formError && (
-          <div className="mb-3">
+          <div className="mb-1">
             <FormMessage>{formError}</FormMessage>
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 sm:gap-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-4">
           <FloatingInput
             name="name"
             label="Full name"
@@ -373,7 +373,7 @@ function AddressForm({ initial, isNew, onCancel, onSaved }) {
           autoComplete="address-line2"
         />
 
-        <div className="grid grid-cols-1 gap-1 sm:grid-cols-3 sm:gap-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 sm:gap-4">
           <FloatingInput
             name="pincode"
             label="PIN code"

@@ -83,14 +83,14 @@ export default function SettingsPage() {
           title="Change password"
           description="You'll stay signed in on this device."
         >
-          <form onSubmit={onSubmit} noValidate className="flex flex-col gap-1">
+          <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5 sm:gap-6">
             {formError && (
-              <div className="mb-3">
+              <div className="mb-1">
                 <FormMessage>{formError}</FormMessage>
               </div>
             )}
             {saved && (
-              <div className="mb-3">
+              <div className="mb-1">
                 <FormMessage tone="success">
                   Your password has been changed. We&rsquo;ve emailed you a confirmation.
                 </FormMessage>

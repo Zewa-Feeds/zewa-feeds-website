@@ -142,25 +142,25 @@ export default function AccountOverviewPage() {
               }
             />
           ) : (
-            <ul className="flex flex-col divide-y divide-white/[0.08]">
+            <ul className="flex flex-col gap-3">
               {recent.map((order) => (
                 <li key={order.orderNo}>
                   <a
                     href={`/account/orders/${order.orderNo}`}
-                    className="group flex items-center justify-between gap-4 py-4.5 transition-all duration-200 hover:px-2 rounded-xl hover:bg-white/[0.03]"
+                    className="group flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 p-4.5 rounded-xl border border-white/8 bg-gradient-to-r from-white/[0.02] to-transparent hover:border-primary/40 hover:bg-primary/[0.04] transition-all duration-200 shadow-sm"
                   >
                     <div className="min-w-0">
-                      <p className="font-[Montserrat] text-[13.5px] font-bold text-white group-hover:text-primary transition-colors">
+                      <p className="font-[Montserrat] text-[14px] font-bold text-white group-hover:text-primary transition-colors">
                         {order.orderNo}
                       </p>
-                      <p className="mt-1 truncate font-[Montserrat] text-[11.5px] text-white/45">
+                      <p className="mt-1 truncate font-[Montserrat] text-[12px] text-white/50">
                         {formatOrderDate(order.placedAt)} ·{" "}
                         {order.items.length} item{order.items.length === 1 ? "" : "s"}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-4">
                       <OrderStatusPill status={order.status} label={order.statusLabel} />
-                      <span className="font-[Montserrat] text-[14px] font-bold text-white">
+                      <span className="font-[Montserrat] text-[15px] font-bold text-white">
                         {formatInr(order.totalPaise)}
                       </span>
                     </div>
