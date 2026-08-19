@@ -4,7 +4,7 @@ import { proofStats } from "@/lib/content";
 export default function ClinicalProof() {
   return (
     <Reveal as="section" className="bg-[#080e1c]">
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 py-20 sm:py-28">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 pt-8 pb-16 sm:py-28">
         {/* Header row */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-14">
           <div>

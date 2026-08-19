@@ -24,7 +24,7 @@ function TileWhy() {
         Below lg it stays one column: there is no spare width there, and the
         panel would only push the CTAs off the fold.
       */}
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-6 pb-24 md:py-0">
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-6 pb-14 md:py-0">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16">
         <div className="max-w-2xl">
           <h1 className="font-display-lg text-[32px] sm:text-display-lg-mobile md:text-display-lg mb-4 sm:mb-6 leading-[1.08] text-on-surface">
@@ -147,7 +147,7 @@ function TileProof() {
       <div className="absolute inset-0 bg-gradient-to-br from-[#080e1c] via-[#0a1520] to-[#080e1c]" />
       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[40%] h-[60%] rounded-full bg-primary/5 blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-4 pb-24 md:py-8 overflow-y-auto">
+      <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-4 pb-14 md:py-8 overflow-y-auto">
         {/*
           Single column since the digestion-efficiency chart was removed.
           A lg:grid-cols-2 wrapper would leave the right half of the tile
@@ -268,7 +268,7 @@ export default function Hero() {
    */
   return (
     <section
-      className="relative w-full pt-20 min-h-[26rem] max-h-[100dvh] md:h-[90dvh] md:min-h-[620px] md:max-h-none"
+      className="relative w-full pt-20 max-h-[100dvh] md:h-[90dvh] md:min-h-[620px] md:max-h-none"
     >
       {/*
         Slides are in normal flow on mobile so their height sizes the section;
@@ -328,7 +328,7 @@ export default function Hero() {
       </button>
 
       {/* Slide indicators + scroll cue — stacked in one centred column */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3">
+      <div className="absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 sm:gap-3">
         {/* Pills */}
         <div className="flex items-center gap-2">
         {[0, 1, 2].map((i) => {
