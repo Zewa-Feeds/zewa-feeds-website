@@ -282,9 +282,9 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
             {/* ── Gallery & Benefits (Dark Container Card on Left) ────────────────────── */}
-            <div className="flex flex-col gap-6 bg-[#09121f] p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl text-white">
+            <div className="flex flex-col gap-6 bg-[#09121f] p-6 sm:p-8 rounded-3xl border border-[#44e5c2]/25 hover:border-[#44e5c2]/45 shadow-[0_0_20px_rgba(68,229,194,0.12)] transition-all duration-300 text-white">
               <div
-                className="group relative aspect-square overflow-hidden rounded-2xl flex items-center justify-center border border-white/10 bg-[#070e19]"
+                className="group relative aspect-square overflow-hidden rounded-2xl flex items-center justify-center border border-[#44e5c2]/20 bg-[#070e19]"
               >
                 {/* Soft cyan backdrop aura */}
                 <div
