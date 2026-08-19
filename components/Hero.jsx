@@ -138,11 +138,14 @@ function TileWhy() {
 function TileBanner() {
   return (
     <div className="relative w-full h-full bg-[#091428] flex items-center justify-center overflow-hidden">
-      <img
-        src="/hero-banner-2.jpg"
-        alt="The Ultimate Superior Nutrition For Your Fish"
-        className="w-full h-full object-cover md:object-contain object-center"
-      />
+      <picture className="relative w-full h-full flex items-center justify-center">
+        <source media="(min-width: 768px)" srcSet="/hero-banner-desktop.jpg" />
+        <img
+          src="/hero-banner-mobile.jpg"
+          alt="The Ultimate Superior Nutrition For Your Fish"
+          className="w-full h-full object-cover md:object-contain object-center"
+        />
+      </picture>
       <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/30 via-transparent to-transparent pointer-events-none" />
     </div>
   );
