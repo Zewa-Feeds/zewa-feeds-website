@@ -308,16 +308,16 @@ function SummaryTile({ label, value, href, className = "", error, icon, subtext 
 
 function Detail({ label, value, muted = false, icon }) {
   return (
-    <div className="rounded-2xl border border-white/8 bg-[#09101f] p-4.5">
-      <div className="flex items-center gap-2 mb-2">
+    <div className="flex flex-col justify-between gap-2.5 rounded-2xl border border-white/10 bg-[#09101f] p-5 sm:p-6 transition-all hover:border-primary/30">
+      <div className="flex items-center gap-2">
         {icon}
-        <dt className="font-[Montserrat] text-[10px] font-bold uppercase tracking-[0.18em] text-white/40">
+        <dt className="font-[Montserrat] text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
           {label}
         </dt>
       </div>
       <dd
-        className={`break-words font-[Montserrat] text-[14px] font-semibold ${
-          muted ? "text-white/30" : "text-white/90"
+        className={`break-all font-[Montserrat] text-[14.5px] font-semibold leading-relaxed ${
+          muted ? "text-white/30" : "text-white"
         }`}
       >
         {value}
