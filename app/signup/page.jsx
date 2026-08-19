@@ -23,8 +23,7 @@ import { ApiError } from "@/lib/api";
 function SignUpForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const { signUp, isAuthenticated, isLoading } = useAuth();
-
+  const { signUp, isAuthenticated, isLoading, openAuthDrawer } = useAuth();
   const next = safeNext(params.get("next"));
 
   const [form, setForm] = useState({
@@ -40,6 +39,12 @@ function SignUpForm() {
   const [touched, setTouched] = useState({});
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      openAuthDrawer("signup");
+    }
+  }, [isLoading, isAuthenticated, openAuthDrawer]);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {

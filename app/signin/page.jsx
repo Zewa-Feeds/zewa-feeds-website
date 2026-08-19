@@ -18,24 +18,14 @@ import { ApiError } from "@/lib/api";
 function SignInForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const { signIn, isAuthenticated, isLoading } = useAuth();
+  const { signIn, isAuthenticated, isLoading, openAuthDrawer } = useAuth();
 
-  const next = safeNext(params.get("next"));
-  const justReset = params.get("reset") === "1";
-  const justRegistered = params.get("registered") === "1";
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      openAuthDrawer("signin");
+    }
+  }, [isLoading, isAuthenticated, openAuthDrawer]);
 
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [remember, setRemember] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [formError, setFormError] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  /*
-   * Someone already signed in has no business on this page — bounce them to
-   * wherever they were headed. Waits for `isLoading` to settle so the redirect
-   * is not made on an unknown session.
-   */
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       window.location.href = next;

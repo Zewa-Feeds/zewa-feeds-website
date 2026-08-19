@@ -137,6 +137,18 @@ export function AuthProvider({ children }) {
   }, []);
 
   /** Local patch after a profile save, so the UI updates without a refetch. */
+  const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
+  const [authDrawerTab, setAuthDrawerTab] = useState("signin");
+
+  const openAuthDrawer = useCallback((tab = "signin") => {
+    setAuthDrawerTab(tab);
+    setAuthDrawerOpen(true);
+  }, []);
+
+  const closeAuthDrawer = useCallback(() => {
+    setAuthDrawerOpen(false);
+  }, []);
+
   const applyProfile = useCallback((next) => {
     setCustomer((prev) => (prev ? { ...prev, ...next } : next));
   }, []);
@@ -153,8 +165,27 @@ export function AuthProvider({ children }) {
       completeReset,
       refresh,
       applyProfile,
+      authDrawerOpen,
+      setAuthDrawerOpen,
+      authDrawerTab,
+      setAuthDrawerTab,
+      openAuthDrawer,
+      closeAuthDrawer,
     }),
-    [customer, status, signIn, signUp, signOut, completeReset, refresh, applyProfile],
+    [
+      customer,
+      status,
+      signIn,
+      signUp,
+      signOut,
+      completeReset,
+      refresh,
+      applyProfile,
+      authDrawerOpen,
+      authDrawerTab,
+      openAuthDrawer,
+      closeAuthDrawer,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

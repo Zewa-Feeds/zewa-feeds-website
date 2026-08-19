@@ -3,6 +3,7 @@ import "./globals.css";
 import { CartProvider } from "@/lib/cartContext";
 import { AuthProvider } from "@/lib/authContext";
 import CartDrawer from "@/components/CartDrawer";
+import AuthDrawer from "@/components/AuthDrawer";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -92,6 +93,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <CartProvider>
             <CartDrawer />
+            <AuthDrawer />
             {children}
           </CartProvider>
         </AuthProvider>

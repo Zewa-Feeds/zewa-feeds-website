@@ -80,7 +80,7 @@ const MENU_ITEMS = [
 ];
 
 export default function AccountMenu() {
-  const { customer, status, isAuthenticated, signOut } = useAuth();
+  const { customer, status, isAuthenticated, signOut, openAuthDrawer } = useAuth();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
   const pathname = usePathname();
@@ -111,13 +111,14 @@ export default function AccountMenu() {
 
   if (!isAuthenticated) {
     return (
-      <a
-        href={signInHref(pathname)}
+      <button
+        type="button"
+        onClick={() => openAuthDrawer("signin")}
         aria-label="Sign in to your account"
         className={ICON_CHROME}
       >
         <PersonIcon />
-      </a>
+      </button>
     );
   }
 
@@ -199,21 +200,24 @@ export default function AccountMenu() {
 }
 
 export function MobileAccountLinks({ onNavigate }) {
-  const { customer, status, isAuthenticated, signOut } = useAuth();
+  const { customer, status, isAuthenticated, signOut, openAuthDrawer } = useAuth();
   const pathname = usePathname();
 
   if (status === "loading") return <div className="h-[46px]" aria-hidden="true" />;
 
   if (!isAuthenticated) {
     return (
-      <a
-        href={signInHref(pathname)}
-        onClick={onNavigate}
-        className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 font-button text-[14px] text-primary transition-colors hover:bg-primary/20"
+      <button
+        type="button"
+        onClick={() => {
+          onNavigate?.();
+          openAuthDrawer("signin");
+        }}
+        className="flex w-full items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 font-button text-[14px] text-primary transition-colors hover:bg-primary/20"
       >
         <PersonIcon />
         Sign in / Create account
-      </a>
+      </button>
     );
   }
 
