@@ -23,19 +23,8 @@ export default function KnowledgeHub() {
 
   return (
     <Reveal id="knowledge" className="relative overflow-hidden bg-[#06080f]">
-      {/* ── Background Science Lab & Article Cover Images ─────────── */}
+      {/* ── Background Article Cover Images ─────────── */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        {/* Default background image */}
-        <Image
-          src="/Banner 3.png"
-          alt="Laboratory research"
-          fill
-          className={`object-cover object-center transition-opacity duration-500 ease-in-out ${
-            hoveredArticle ? "opacity-0" : "opacity-35"
-          }`}
-          priority
-        />
-
         {/* Hovered article background images */}
         {ARTICLES.map((a) => (
           <Image
