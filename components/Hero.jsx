@@ -137,16 +137,16 @@ function TileWhy() {
 // ── Tile 2: Superior Nutrition Banner ─────────────────────────────────────────
 function TileBanner() {
   return (
-    <div className="relative w-full h-full bg-[#091428] flex items-center justify-center overflow-hidden">
+    <div className="relative w-full h-full bg-[#080e1c] flex items-center justify-center overflow-hidden">
       <picture className="relative w-full h-full flex items-center justify-center">
         <source media="(min-width: 768px)" srcSet="/hero-banner-desktop.jpg" />
         <img
           src="/hero-banner-mobile.jpg"
           alt="The Ultimate Superior Nutrition For Your Fish"
-          className="w-full h-full object-cover md:object-contain object-center"
+          className="w-full h-full object-cover object-center"
         />
       </picture>
-      <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/30 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/40 via-transparent to-transparent pointer-events-none" />
     </div>
   );
 }
