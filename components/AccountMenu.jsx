@@ -34,10 +34,49 @@ function PersonIcon() {
 }
 
 const MENU_ITEMS = [
-  { href: "/account", label: "My Account" },
-  { href: "/account/orders", label: "Orders" },
-  { href: "/account/profile", label: "Profile" },
-  { href: "/account/addresses", label: "Addresses" },
+  {
+    href: "/account",
+    label: "My Account",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+      </svg>
+    ),
+  },
+  {
+    href: "/account/orders",
+    label: "Orders",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <path d="M16 10a4 4 0 01-8 0" />
+      </svg>
+    ),
+  },
+  {
+    href: "/account/profile",
+    label: "Profile",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+      </svg>
+    ),
+  },
+  {
+    href: "/account/addresses",
+    label: "Addresses",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+        <circle cx="12" cy="10" r="3" />
+      </svg>
+    ),
+  },
 ];
 
 export default function AccountMenu() {
@@ -46,7 +85,6 @@ export default function AccountMenu() {
   const wrapRef = useRef(null);
   const pathname = usePathname();
 
-  /* Close on outside click and on Escape — standard popover behaviour. */
   useEffect(() => {
     if (!open) return;
     const onDown = (e) => {
@@ -61,17 +99,8 @@ export default function AccountMenu() {
     };
   }, [open]);
 
-  /* A navigation should never leave the popover hanging open behind the new page. */
   useEffect(() => setOpen(false), [pathname]);
 
-  /*
-   * While the session is being determined, render the icon in its resting state
-   * as a NON-interactive placeholder.
-   *
-   * The alternative — assuming signed out until proven otherwise — makes the
-   * header visibly change on every page load for signed-in customers. Holding
-   * the same shape means nothing moves; only the behaviour resolves.
-   */
   if (status === "loading") {
     return (
       <div className={`${ICON_CHROME} cursor-default opacity-60`} aria-hidden="true">
@@ -104,36 +133,42 @@ export default function AccountMenu() {
         aria-expanded={open}
         aria-label="Account menu"
         className={`${ICON_CHROME} ${
-          open ? "border-primary/50 text-primary" : ""
+          open ? "border-primary text-primary shadow-[0_0_12px_rgba(68,229,194,0.3)] bg-primary/10" : ""
         } font-[Montserrat] text-[11px] font-bold`}
       >
-        {/* Initials read as "this is *your* account" in a way a generic glyph does not. */}
         {initials}
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+10px)] z-50 w-60 overflow-hidden rounded-2xl border border-white/10 bg-[#090f1d]/97 shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+          className="absolute right-0 top-[calc(100%+12px)] z-50 w-64 overflow-hidden rounded-2xl border border-[#44e5c2]/30 bg-[#08101e]/98 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_25px_rgba(68,229,194,0.08)] backdrop-blur-2xl"
         >
-          <div className="border-b border-white/8 px-4 py-3.5">
-            <p className="truncate font-[Playfair_Display] text-[15px] text-white">
-              {customer?.firstName} {customer?.lastName}
-            </p>
-            <p className="mt-0.5 truncate font-[Montserrat] text-[11px] text-white/35">
-              {customer?.email}
-            </p>
+          {/* Header info */}
+          <div className="flex items-center gap-3 border-b border-white/10 px-4 py-4 bg-gradient-to-r from-primary/10 to-transparent">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-primary/20 font-[Montserrat] text-[12px] font-bold text-primary shadow-[0_0_10px_rgba(68,229,194,0.3)]">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate font-[Playfair_Display] text-[15px] font-medium text-white">
+                {customer?.firstName} {customer?.lastName}
+              </p>
+              <p className="mt-0.5 truncate font-[Montserrat] text-[11px] text-white/45">
+                {customer?.email}
+              </p>
+            </div>
           </div>
 
-          <ul className="py-1.5">
+          <ul className="py-2 px-1.5">
             {MENU_ITEMS.map((item) => (
               <li key={item.href}>
                 <a
                   href={item.href}
                   role="menuitem"
-                  className="block px-4 py-2.5 font-[Montserrat] text-[12.5px] text-white/70 transition-colors hover:bg-white/[0.04] hover:text-primary"
+                  className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 font-[Montserrat] text-[12.5px] text-white/75 transition-all duration-200 hover:bg-primary/10 hover:text-primary"
                 >
-                  {item.label}
+                  <span className="text-white/40 group-hover:text-primary">{item.icon}</span>
+                  <span>{item.label}</span>
                 </a>
               </li>
             ))}
@@ -143,18 +178,17 @@ export default function AccountMenu() {
             <button
               type="button"
               role="menuitem"
-              /*
-                Clears the session and nothing else — deliberately no navigation.
-                On a product or cart page the customer stays where they were, and
-                on an account page AccountShell's guard sends them home. Doing it
-                here as well meant two navigations racing each other.
-              */
               onClick={() => {
                 signOut();
                 setOpen(false);
               }}
-              className="w-full rounded-xl px-2.5 py-2.5 text-left font-[Montserrat] text-[12.5px] text-white/55 transition-colors hover:bg-red-500/[0.07] hover:text-red-400"
+              className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left font-[Montserrat] text-[12.5px] text-white/55 transition-colors hover:bg-red-500/10 hover:text-red-400"
             >
+              <svg viewBox="0 0 24 24" className="h-4 w-4 text-red-400/70" fill="none" stroke="currentColor" strokeWidth="1.75">
+                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
               Sign out
             </button>
           </div>
@@ -164,18 +198,10 @@ export default function AccountMenu() {
   );
 }
 
-/**
- * Account links for the mobile drawer.
- *
- * Mirrors the desktop popover. Rendered as plain rows rather than a nested
- * popover because the drawer is already a menu — a menu inside a menu is a
- * needless second interaction on a touch screen.
- */
 export function MobileAccountLinks({ onNavigate }) {
   const { customer, status, isAuthenticated, signOut } = useAuth();
   const pathname = usePathname();
 
-  /* Hold the row's height while the session resolves, so the drawer does not jump. */
   if (status === "loading") return <div className="h-[46px]" aria-hidden="true" />;
 
   if (!isAuthenticated) {
@@ -183,28 +209,40 @@ export function MobileAccountLinks({ onNavigate }) {
       <a
         href={signInHref(pathname)}
         onClick={onNavigate}
-        className="flex items-center gap-3 py-3.5 font-button text-[14px] text-on-surface transition-colors hover:text-primary"
+        className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 font-button text-[14px] text-primary transition-colors hover:bg-primary/20"
       >
-        <span className="text-primary">
-          <PersonIcon />
-        </span>
+        <PersonIcon />
         Sign in / Create account
       </a>
     );
   }
 
+  const initials =
+    `${customer?.firstName?.[0] ?? ""}${customer?.lastName?.[0] ?? ""}`.toUpperCase() || "A";
+
   return (
-    <div className="flex flex-col">
-      <p className="truncate pb-1 pt-3 font-[Montserrat] text-[11px] text-white/30">
-        {customer?.email}
-      </p>
+    <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+      <div className="flex items-center gap-3 pb-3 border-b border-white/8">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-primary/40 bg-primary/20 font-[Montserrat] text-[11px] font-bold text-primary">
+          {initials}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate font-[Playfair_Display] text-[14px] text-white">
+            {customer?.firstName} {customer?.lastName}
+          </p>
+          <p className="truncate font-[Montserrat] text-[10.5px] text-white/40">
+            {customer?.email}
+          </p>
+        </div>
+      </div>
       {MENU_ITEMS.map((item) => (
         <a
           key={item.href}
           href={item.href}
           onClick={onNavigate}
-          className="border-b border-white/5 py-3 font-button text-[14px] text-on-surface transition-colors last:border-0 hover:text-primary"
+          className="flex items-center gap-3 py-2 font-button text-[13.5px] text-white/80 transition-colors hover:text-primary"
         >
+          <span className="text-white/40">{item.icon}</span>
           {item.label}
         </a>
       ))}
@@ -214,8 +252,13 @@ export function MobileAccountLinks({ onNavigate }) {
           signOut();
           onNavigate?.();
         }}
-        className="py-3 text-left font-button text-[14px] text-white/45 transition-colors hover:text-red-400"
+        className="flex items-center gap-3 pt-2 text-left font-button text-[13.5px] text-red-400/80 transition-colors hover:text-red-400 border-t border-white/8"
       >
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
         Sign out
       </button>
     </div>

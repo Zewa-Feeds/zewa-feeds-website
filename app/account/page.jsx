@@ -61,12 +61,25 @@ export default function AccountOverviewPage() {
             value={orders === null ? null : String(orders.length)}
             href="/account/orders"
             error={loadError}
+            icon={
+              <svg viewBox="0 0 24 24" className="h-5 w-5 text-primary" fill="none" stroke="currentColor" strokeWidth="1.75">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 01-8 0" />
+              </svg>
+            }
           />
           <SummaryTile
             label="Saved addresses"
             value={addressCount === null ? null : String(addressCount)}
             href="/account/addresses"
             error={loadError}
+            icon={
+              <svg viewBox="0 0 24 24" className="h-5 w-5 text-primary" fill="none" stroke="currentColor" strokeWidth="1.75">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            }
           />
           <SummaryTile
             label="Total spent"
@@ -75,13 +88,18 @@ export default function AccountOverviewPage() {
                 ? null
                 : formatInr(
                     orders
-                      // Cancelled orders were never money that left the customer.
                       .filter((o) => o.status !== "CANCELLED")
                       .reduce((sum, o) => sum + (o.totalPaise ?? 0), 0),
                   )
             }
             className="col-span-2 lg:col-span-1"
             error={loadError}
+            icon={
+              <svg viewBox="0 0 24 24" className="h-5 w-5 text-primary" fill="none" stroke="currentColor" strokeWidth="1.75">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <line x1="2" y1="10" x2="22" y2="10" />
+              </svg>
+            }
           />
         </div>
 
@@ -109,14 +127,10 @@ export default function AccountOverviewPage() {
           ) : recent.length === 0 ? (
             <EmptyState
               icon={
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
-                  <path
-                    d="M4 7h16l-1.5 12h-13L4 7zM9 7V5a3 3 0 016 0v2"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
+                <svg viewBox="0 0 24 24" className="h-6 w-6 text-primary" fill="none" stroke="currentColor" strokeWidth="1.75">
+                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <path d="M16 10a4 4 0 01-8 0" />
                 </svg>
               }
               title="No orders yet"
@@ -128,25 +142,25 @@ export default function AccountOverviewPage() {
               }
             />
           ) : (
-            <ul className="flex flex-col divide-y divide-white/[0.06]">
+            <ul className="flex flex-col divide-y divide-white/[0.08]">
               {recent.map((order) => (
                 <li key={order.orderNo}>
                   <a
                     href={`/account/orders/${order.orderNo}`}
-                    className="flex items-center justify-between gap-4 py-4 transition-colors first:pt-0 last:pb-0 hover:opacity-80"
+                    className="group flex items-center justify-between gap-4 py-4.5 transition-all duration-200 hover:px-2 rounded-xl hover:bg-white/[0.03]"
                   >
                     <div className="min-w-0">
-                      <p className="font-[Montserrat] text-[13px] font-semibold text-white">
+                      <p className="font-[Montserrat] text-[13.5px] font-bold text-white group-hover:text-primary transition-colors">
                         {order.orderNo}
                       </p>
-                      <p className="mt-1 truncate font-[Montserrat] text-[11.5px] text-white/35">
+                      <p className="mt-1 truncate font-[Montserrat] text-[11.5px] text-white/45">
                         {formatOrderDate(order.placedAt)} ·{" "}
                         {order.items.length} item{order.items.length === 1 ? "" : "s"}
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-4">
                       <OrderStatusPill status={order.status} label={order.statusLabel} />
-                      <span className="font-[Montserrat] text-[13px] font-semibold text-white">
+                      <span className="font-[Montserrat] text-[14px] font-bold text-white">
                         {formatInr(order.totalPaise)}
                       </span>
                     </div>
@@ -177,28 +191,38 @@ export default function AccountOverviewPage() {
   );
 }
 
-function SummaryTile({ label, value, href, className = "", error }) {
+function SummaryTile({ label, value, href, className = "", error, icon }) {
   const body = (
-    <>
-      <p className="font-[Montserrat] text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">
-        {label}
-      </p>
+    <div className="flex flex-col h-full justify-between gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-[Montserrat] text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
+          {label}
+        </p>
+        {icon && (
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 shadow-[0_0_12px_rgba(68,229,194,0.15)]">
+            {icon}
+          </div>
+        )}
+      </div>
       {error ? (
-        <p className="mt-2.5 font-[Playfair_Display] text-[22px] text-white/25">—</p>
+        <p className="font-[Playfair_Display] text-[24px] text-white/25">—</p>
       ) : value === null ? (
-        <Skeleton className="mt-2.5 h-7 w-16" />
+        <Skeleton className="h-8 w-20" />
       ) : (
-        <p className="mt-2.5 font-[Playfair_Display] text-[26px] leading-none text-white sm:text-[30px]">
+        <p className="font-[Playfair_Display] text-[28px] font-semibold leading-none text-white sm:text-[34px] drop-shadow-[0_0_12px_rgba(255,255,255,0.1)]">
           {value}
         </p>
       )}
-    </>
+    </div>
   );
 
-  const shell = `rounded-2xl border border-white/8 bg-white/[0.02] p-5 ${className}`;
+  const shell = `group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#0b1424]/90 to-[#080f1d]/90 p-6 ${className}`;
 
   return href ? (
-    <a href={href} className={`${shell} transition-colors hover:border-primary/30`}>
+    <a
+      href={href}
+      className={`${shell} transition-all duration-300 hover:-translate-y-1 hover:border-[#44e5c2]/40 hover:shadow-[0_12px_30px_rgba(0,0,0,0.5),0_0_20px_rgba(68,229,194,0.1)]`}
+    >
       {body}
     </a>
   ) : (
@@ -208,13 +232,13 @@ function SummaryTile({ label, value, href, className = "", error }) {
 
 function Detail({ label, value, muted = false }) {
   return (
-    <div>
-      <dt className="font-[Montserrat] text-[10px] font-semibold uppercase tracking-[0.16em] text-white/30">
+    <div className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+      <dt className="font-[Montserrat] text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">
         {label}
       </dt>
       <dd
-        className={`mt-1.5 break-words font-[Montserrat] text-[13.5px] ${
-          muted ? "text-white/25" : "text-white/80"
+        className={`mt-1.5 break-words font-[Montserrat] text-[14px] ${
+          muted ? "text-white/30" : "text-white/90"
         }`}
       >
         {value || "—"}

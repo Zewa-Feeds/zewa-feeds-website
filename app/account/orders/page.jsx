@@ -71,33 +71,33 @@ export default function OrdersPage() {
             }
           />
         ) : (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-4">
             {orders.map((order) => (
               <li key={order.orderNo}>
                 <a
                   href={`/account/orders/${order.orderNo}`}
-                  className="block rounded-2xl border border-white/8 bg-white/[0.02] p-4 transition-all duration-200 hover:border-primary/30 hover:bg-white/[0.04] sm:p-5"
+                  className="group block rounded-2xl border border-white/10 bg-gradient-to-b from-[#0b1424]/90 to-[#080f1d]/90 p-5 transition-all duration-200 hover:border-[#44e5c2]/40 hover:shadow-[0_8px_25px_rgba(0,0,0,0.5),0_0_20px_rgba(68,229,194,0.08)] sm:p-6"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2.5">
-                        <span className="font-[Montserrat] text-[13.5px] font-bold text-white">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="font-[Montserrat] text-[14px] font-bold text-white group-hover:text-primary transition-colors">
                           {order.orderNo}
                         </span>
                         <OrderStatusPill status={order.status} label={order.statusLabel} />
                       </div>
-                      <p className="mt-1.5 font-[Montserrat] text-[11.5px] text-white/35">
+                      <p className="mt-1.5 font-[Montserrat] text-[12px] text-white/45">
                         Placed {formatOrderDate(order.placedAt)}
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <p className="font-[Montserrat] text-[15px] font-bold text-white">
+                      <p className="font-[Montserrat] text-[16px] font-bold text-white">
                         {formatInr(order.totalPaise)}
                       </p>
                       <p
-                        className={`mt-1 font-[Montserrat] text-[11px] font-semibold ${
-                          PAYMENT_TONE[order.paymentStatus] ?? "text-white/35"
+                        className={`mt-1 font-[Montserrat] text-[11px] font-semibold uppercase tracking-[0.08em] ${
+                          PAYMENT_TONE[order.paymentStatus] ?? "text-white/40"
                         }`}
                       >
                         {order.paymentLabel}
@@ -105,15 +105,18 @@ export default function OrdersPage() {
                     </div>
                   </div>
 
-                  {/* Item summary — the first two names, then a count. Enough to
-                      recognise the order without turning the row into a table. */}
-                  <p className="mt-3 truncate border-t border-white/[0.06] pt-3 font-[Montserrat] text-[12px] text-white/45">
-                    {order.items
-                      .slice(0, 2)
-                      .map((i) => `${i.qty}× ${i.productName}`)
-                      .join(", ")}
-                    {order.items.length > 2 && ` +${order.items.length - 2} more`}
-                  </p>
+                  <div className="mt-4 flex items-center justify-between border-t border-white/8 pt-3.5">
+                    <p className="truncate font-[Montserrat] text-[12.5px] text-white/60">
+                      {order.items
+                        .slice(0, 2)
+                        .map((i) => `${i.qty}× ${i.productName}`)
+                        .join(", ")}
+                      {order.items.length > 2 && ` +${order.items.length - 2} more`}
+                    </p>
+                    <span className="flex items-center gap-1 font-[Montserrat] text-[11px] font-bold uppercase tracking-[0.14em] text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                      Details →
+                    </span>
+                  </div>
                 </a>
               </li>
             ))}

@@ -11,22 +11,22 @@ import { EASE, FOCUS_RING } from "@/components/checkout/tokens";
  * the same values would drift the moment one of them was tweaked.
  */
 
-/** Panel used for auth cards and account sections. Matches the checkout card. */
+/** Panel used for auth cards and account sections. Matches the checkout card with cyan glow edge. */
 export const PANEL =
-  "rounded-3xl border border-white/10 bg-[#090f1d]/90 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.36)]";
+  "rounded-3xl border border-[#44e5c2]/20 bg-[#08101e]/85 backdrop-blur-2xl shadow-[0_16px_48px_rgba(0,0,0,0.5),0_0_25px_rgba(68,229,194,0.06)]";
 
-/** Primary action. Mint fill, dark ink — the site's main CTA treatment. */
+/** Primary action. Mint gradient fill with subtle glow and active scale. */
 export function PrimaryButton({ children, loading = false, className = "", ...props }) {
   return (
     <button
       {...props}
       disabled={loading || props.disabled}
-      className={`relative flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 font-[Montserrat] text-[12px] font-bold uppercase tracking-[0.18em] text-on-primary ${EASE} ${FOCUS_RING} hover:bg-primary/90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-55 ${className}`}
+      className={`relative flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#44e5c2] to-[#2bd4b1] px-6 py-3.5 font-[Montserrat] text-[12px] font-bold uppercase tracking-[0.18em] text-[#00382d] shadow-[0_0_20px_rgba(68,229,194,0.25)] ${EASE} ${FOCUS_RING} hover:from-[#52ebd0] hover:to-[#38e0bd] hover:shadow-[0_0_30px_rgba(68,229,194,0.4)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none ${className}`}
     >
       {loading && (
         <span
           aria-hidden="true"
-          className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-on-primary/40 border-t-on-primary motion-reduce:animate-none"
+          className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#00382d]/40 border-t-[#00382d] motion-reduce:animate-none"
         />
       )}
       {children}
@@ -34,47 +34,41 @@ export function PrimaryButton({ children, loading = false, className = "", ...pr
   );
 }
 
-/** Secondary action — outlined, for destructive or lesser choices. */
+/** Secondary action — glassmorphic outlined button for secondary choices. */
 export function GhostButton({ children, className = "", tone = "default", ...props }) {
   const tones = {
-    default: "border-white/15 text-white/70 hover:border-primary/50 hover:text-primary",
-    danger: "border-red-500/30 text-red-400/80 hover:border-red-500/60 hover:text-red-400",
+    default: "border-white/15 bg-white/[0.02] text-white/80 hover:border-primary/50 hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_15px_rgba(68,229,194,0.15)]",
+    danger: "border-red-500/30 bg-red-500/[0.03] text-red-400 hover:border-red-500/60 hover:bg-red-500/10 hover:text-red-300",
   };
   return (
     <button
       {...props}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-2.5 font-[Montserrat] text-[11px] font-semibold uppercase tracking-[0.16em] ${EASE} ${FOCUS_RING} disabled:cursor-not-allowed disabled:opacity-50 ${tones[tone]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-2.5 font-[Montserrat] text-[11px] font-semibold uppercase tracking-[0.16em] transition-all duration-200 ${EASE} ${FOCUS_RING} disabled:cursor-not-allowed disabled:opacity-50 ${tones[tone]} ${className}`}
     >
       {children}
     </button>
   );
 }
 
-/**
- * Form-level message.
- *
- * `role="alert"` on errors so a screen reader announces a failed submit — the
- * visual banner alone leaves non-sighted users with a form that silently did
- * nothing.
- */
+/** Form-level alert / message banner. */
 export function FormMessage({ tone = "error", children }) {
   if (!children) return null;
   const isError = tone === "error";
   return (
     <div
       role={isError ? "alert" : "status"}
-      className={`flex items-start gap-2.5 rounded-xl border px-4 py-3 font-[Montserrat] text-[12px] leading-relaxed ${
+      className={`flex items-start gap-3 rounded-2xl border px-4 py-3.5 font-[Montserrat] text-[12px] leading-relaxed shadow-sm ${
         isError
-          ? "border-red-500/25 bg-red-500/[0.06] text-red-300"
-          : "border-primary/25 bg-primary/[0.06] text-primary"
+          ? "border-red-500/30 bg-red-500/[0.08] text-red-200"
+          : "border-primary/35 bg-primary/[0.08] text-primary"
       }`}
     >
-      <svg viewBox="0 0 20 20" className="mt-[1px] h-3.5 w-3.5 shrink-0" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 20 20" className="mt-[1px] h-4 w-4 shrink-0" fill="none" aria-hidden="true">
         {isError ? (
           <path
             d="M10 6.5v4m0 3h.01M10 2.5l7.5 13h-15l7.5-13z"
             stroke="currentColor"
-            strokeWidth="1.5"
+            strokeWidth="1.6"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -82,7 +76,7 @@ export function FormMessage({ tone = "error", children }) {
           <path
             d="M5 10.5l3.5 3.5L15 7"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -93,11 +87,11 @@ export function FormMessage({ tone = "error", children }) {
   );
 }
 
-/** Small caps section label with the site's mint rule. */
+/** Small caps section label with glowing mint bar. */
 export function EyebrowLabel({ children }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="h-px w-6 bg-primary" />
+      <div className="h-[2px] w-6 rounded-full bg-primary shadow-[0_0_8px_rgba(68,229,194,0.6)]" />
       <span className="font-[Montserrat] text-[10px] font-bold uppercase tracking-[0.28em] text-primary">
         {children}
       </span>
@@ -110,23 +104,23 @@ export function Skeleton({ className = "" }) {
   return (
     <div
       aria-hidden="true"
-      className={`animate-pulse rounded-xl bg-white/[0.06] motion-reduce:animate-none ${className}`}
+      className={`animate-pulse rounded-xl bg-white/[0.08] motion-reduce:animate-none ${className}`}
     />
   );
 }
 
-/** Empty state — icon, line, optional action. */
+/** Empty state — styled icon, text, optional CTA action. */
 export function EmptyState({ icon, title, body, action }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
       {icon && (
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-primary/60">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary shadow-[0_0_20px_rgba(68,229,194,0.15)]">
           {icon}
         </div>
       )}
-      <p className="font-[Playfair_Display] text-[19px] text-white">{title}</p>
+      <p className="font-[Playfair_Display] text-[20px] font-medium text-white">{title}</p>
       {body && (
-        <p className="mt-2 max-w-sm font-[Montserrat] text-[13px] leading-relaxed text-white/40">{body}</p>
+        <p className="mt-2 max-w-sm font-[Montserrat] text-[13px] leading-relaxed text-white/45">{body}</p>
       )}
       {action && <div className="mt-6">{action}</div>}
     </div>

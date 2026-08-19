@@ -26,12 +26,23 @@ export const PAYMENT_TONE = {
   FAILED: "text-red-300",
 };
 
+export const STATUS_DOT = {
+  PENDING: "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]",
+  PROCESSING: "bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]",
+  SHIPPED: "bg-[#44e5c2] shadow-[0_0_8px_rgba(68,229,194,0.6)]",
+  DELIVERED: "bg-[#44e5c2] shadow-[0_0_8px_rgba(68,229,194,0.6)]",
+  CANCELLED: "bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.6)]",
+  RETURNED: "bg-white/40",
+};
+
 export function OrderStatusPill({ status, label }) {
   const tone = STATUS_TONE[status] ?? "border-white/15 bg-white/[0.04] text-white/50";
+  const dot = STATUS_DOT[status] ?? "bg-white/40";
   return (
     <span
-      className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 font-[Montserrat] text-[10px] font-semibold uppercase tracking-[0.1em] ${tone}`}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 font-[Montserrat] text-[10px] font-bold uppercase tracking-[0.12em] ${tone}`}
     >
+      <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
       {label ?? status}
     </span>
   );
