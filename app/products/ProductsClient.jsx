@@ -170,7 +170,7 @@ function ProductCard({ p }) {
   return (
     <a
       href={p.slug ? `/products/${p.slug}` : undefined}
-      className={`group relative flex flex-col rounded-2xl transition-all duration-300 hover:-translate-y-0.5 ${p.slug ? "cursor-pointer" : "cursor-default pointer-events-none"}`}
+      className={`group relative flex flex-col rounded-2xl border border-[#44e5c2]/30 hover:border-[#44e5c2]/55 shadow-[0_0_15px_rgba(68,229,194,0.12)] hover:shadow-[0_0_25px_rgba(68,229,194,0.22)] transition-all duration-300 hover:-translate-y-0.5 ${p.slug ? "cursor-pointer" : "cursor-default pointer-events-none"}`}
       style={{ background: "linear-gradient(160deg, #0d1726 0%, #0a1219 100%)", overflow: "hidden" }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
