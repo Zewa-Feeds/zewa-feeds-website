@@ -23,6 +23,17 @@ const CardIcon = (props) => (
   </svg>
 );
 
+const CashIcon = (props) => (
+  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" {...props}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="1.75"
+      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+    />
+  </svg>
+);
+
 export default function PaymentMethodSelector({
   selectedMethod = "RAZORPAY",
   onSelectMethod,
@@ -33,8 +44,16 @@ export default function PaymentMethodSelector({
       title: "Pay Online",
       description:
         "UPI, cards, netbanking or wallets. You are redirected to Razorpay's secure window to finish payment.",
-      badges: ["UPI", "GPay", "PhonePe", "Cards"],
       icon: CardIcon,
+      disabled: false,
+    },
+    {
+      id: "COD",
+      title: "Cash on Delivery",
+      description: "Pay with cash at the time of delivery to your address.",
+      icon: CashIcon,
+      disabled: true,
+      badge: "Currently Unavailable",
     },
   ];
 
@@ -45,8 +64,46 @@ export default function PaymentMethodSelector({
       className="flex flex-col gap-3"
     >
       {methods.map((method) => {
-        const selected = selectedMethod === method.id;
+        const selected = selectedMethod === method.id && !method.disabled;
         const Icon = method.icon;
+
+        if (method.disabled) {
+          return (
+            <div
+              key={method.id}
+              className="relative block rounded-2xl border border-white/5 bg-[#080d1a]/50 p-5 sm:p-6 opacity-45 cursor-not-allowed select-none"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-start gap-3.5">
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5"
+                  />
+
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-white/40" />
+                      <h3 className="text-[15px] font-semibold tracking-wide text-white/50 font-[Montserrat]">
+                        {method.title}
+                      </h3>
+                    </div>
+                    <p className="mt-1.5 max-w-prose text-[13px] leading-relaxed text-white/30 font-[Montserrat]">
+                      {method.description}
+                    </p>
+                  </div>
+                </div>
+
+                {method.badge && (
+                  <div className="flex shrink-0 items-center pl-8 sm:pl-0">
+                    <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-medium font-[Montserrat] tracking-wider uppercase text-white/40">
+                      {method.badge}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }
 
         return (
           <label
@@ -58,10 +115,7 @@ export default function PaymentMethodSelector({
             } focus-within:ring-2 focus-within:ring-primary/60 focus-within:ring-offset-2 focus-within:ring-offset-[#090f1d]`}
           >
             {/*
-             * A real radio input, visually hidden but focusable: this is what
-             * gives arrow-key navigation, screen-reader announcement and form
-             * semantics for free. `peer` is not used because the styling above
-             * keys off `selected`, which stays in sync with the input.
+             * A real radio input, visually hidden but focusable
              */}
             <input
               type="radio"
@@ -100,19 +154,6 @@ export default function PaymentMethodSelector({
                     {method.description}
                   </p>
                 </div>
-              </div>
-
-              <div className="flex shrink-0 flex-wrap items-center gap-1.5 pl-8 sm:pl-0">
-                {method.badges.map((badge, i) => (
-                  <span
-                    key={badge}
-                    className={`rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold font-[Montserrat] ${
-                      i === 0 ? "text-primary" : "text-white/80"
-                    }`}
-                  >
-                    {badge}
-                  </span>
-                ))}
               </div>
             </div>
 
