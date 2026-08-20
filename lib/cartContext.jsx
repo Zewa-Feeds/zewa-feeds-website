@@ -10,7 +10,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { cart as cartApi } from "@/lib/api";
+import { cart as cartApi, settings as settingsApi } from "@/lib/api";
 
 /**
  * Cart state.
@@ -123,6 +123,26 @@ export function CartProvider({ children }) {
 
   /** Server-validated totals. Null until the first validate call returns. */
   const [quote, setQuote] = useState(null);
+
+  /**
+   * The cart line-up a quote was priced for.
+   *
+   * Without this the UI kept rendering the PREVIOUS quote's totals for the
+   * whole round trip after a quantity change — around a second against a remote
+   * API — so the amount visibly lagged the button that changed it. Comparing
+   * this to the current signature says whether the quote still describes what
+   * is in the cart, and the optimistic totals below cover the gap.
+   */
+  const [quoteSignature, setQuoteSignature] = useState(null);
+
+  /**
+   * Shipping rules, fetched once.
+   *
+   * Only needed so the free-shipping threshold can be applied locally while a
+   * quote is in flight. The server stays authoritative — this just stops the
+   * shipping line sitting on a stale value for a second.
+   */
+  const [shippingRules, setShippingRules] = useState(null);
   const [validating, setValidating] = useState(false);
   const [couponCode, setCouponCode] = useState(null);
 
@@ -137,6 +157,20 @@ export function CartProvider({ children }) {
       /* corrupt payload — start empty rather than crashing the app */
     }
     setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    settingsApi
+      .public()
+      .then((cfg) => {
+        if (!cancelled) setShippingRules(cfg?.shipping ?? null);
+      })
+      // Unavailable: optimistic totals simply omit shipping until a quote lands.
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -162,6 +196,9 @@ export function CartProvider({ children }) {
       }
 
       const seq = ++requestSeq.current;
+      // The line-up being priced, captured before the await so a cart change
+      // mid-flight cannot make this quote look current when it is not.
+      const pricedSignature = items.map((i) => `${i.sku}:${i.qty}`).join(",");
       setValidating(true);
       try {
         const result = await cartApi.validate({
@@ -175,6 +212,7 @@ export function CartProvider({ children }) {
         if (seq !== requestSeq.current) return result;
 
         setQuote(result);
+        setQuoteSignature(pricedSignature);
         dispatch({ type: "RECONCILE", lines: result.lines });
         return result;
       } catch {
@@ -217,22 +255,63 @@ export function CartProvider({ children }) {
     [validate],
   );
 
-  // Local fallback totals, used until the first quote lands.
   const localSubtotalPaise = useMemo(
     () => items.reduce((sum, i) => sum + (i.pricePaise ?? 0) * i.qty, 0),
     [items],
   );
 
+  /** Does the quote still describe what is in the cart right now? */
+  const quoteIsCurrent = Boolean(quote) && quoteSignature === signature;
+
+  /**
+   * Totals shown while the server is still pricing a change.
+   *
+   * Mirrors the server formula exactly (pricing.service.ts): shipping is
+   * assessed on the POST-discount value, so a coupon can drop an order back
+   * below the free-shipping threshold.
+   *
+   * The discount is carried over from the last quote rather than recomputed —
+   * coupon rules live on the server and are not safe to reimplement here. For a
+   * percentage coupon that makes the figure slightly stale for the second it
+   * takes the real quote to arrive; it then corrects itself. Showing a
+   * near-right number immediately beats showing a definitely-wrong one for a
+   * second, which is what the previous behaviour did.
+   */
+  const optimistic = useMemo(() => {
+    const discountPaise = Math.min(quote?.discountPaise ?? 0, localSubtotalPaise);
+    const payable = Math.max(0, localSubtotalPaise - discountPaise);
+
+    const threshold = shippingRules?.freeThresholdPaise ?? quote?.freeShippingThresholdPaise;
+    const rate = shippingRules?.standardRatePaise ?? 0;
+
+    // No rules yet: leave shipping out rather than invent a number.
+    const shippingPaise =
+      items.length === 0 || threshold == null ? 0 : payable >= threshold ? 0 : rate;
+
+    return {
+      subtotalPaise: localSubtotalPaise,
+      discountPaise,
+      shippingPaise,
+      totalPaise: payable + shippingPaise,
+      amountToFreeShippingPaise:
+        threshold == null ? null : Math.max(0, threshold - payable),
+    };
+  }, [items.length, localSubtotalPaise, quote, shippingRules]);
+
+  // Server numbers once they describe the current cart; the estimate until then.
+  const shown = quoteIsCurrent ? quote : optimistic;
+
   const value = {
     items,
     totalItems: items.reduce((sum, i) => sum + i.qty, 0),
 
-    // Server numbers when available, local estimate otherwise.
-    subtotalPaise: quote?.subtotalPaise ?? localSubtotalPaise,
-    discountPaise: quote?.discountPaise ?? 0,
-    shippingPaise: quote?.shippingPaise ?? 0,
-    totalPaise: quote?.totalPaise ?? localSubtotalPaise,
-    amountToFreeShippingPaise: quote?.amountToFreeShippingPaise ?? null,
+    subtotalPaise: shown.subtotalPaise ?? 0,
+    discountPaise: shown.discountPaise ?? 0,
+    shippingPaise: shown.shippingPaise ?? 0,
+    totalPaise: shown.totalPaise ?? localSubtotalPaise,
+    amountToFreeShippingPaise: shown.amountToFreeShippingPaise ?? null,
+    /** True while the figures on screen are an estimate awaiting the server. */
+    pricesPending: !quoteIsCurrent && items.length > 0,
     coupon: quote?.coupon ?? null,
     /** Stock and availability problems, for per-line warnings. */
     issues: quote?.issues ?? [],
@@ -250,6 +329,7 @@ export function CartProvider({ children }) {
     clearCart: () => {
       dispatch({ type: "CLEAR" });
       setQuote(null);
+      setQuoteSignature(null);
       setCouponCode(null);
     },
     validate,
