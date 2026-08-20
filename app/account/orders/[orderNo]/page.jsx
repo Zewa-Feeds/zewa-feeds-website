@@ -25,6 +25,8 @@ export default function OrderDetailPage({ params }) {
   const { isAuthenticated } = useAuth();
 
   const [order, setOrder] = useState(null);
+  const [invoiceBusy, setInvoiceBusy] = useState(false);
+  const [invoiceError, setInvoiceError] = useState(null);
   const [error, setError] = useState(null);
   const [notFound, setNotFound] = useState(false);
 
@@ -47,6 +49,37 @@ export default function OrderDetailPage({ params }) {
       cancelled = true;
     };
   }, [orderNo, isAuthenticated]);
+
+  /**
+   * Download the invoice.
+   *
+   * The PDF arrives as a Blob because the endpoint needs an Authorization
+   * header, so it cannot be a plain link. An object URL is created, clicked,
+   * and revoked immediately — leaving it alive would pin the whole file in
+   * memory for as long as the page stays open.
+   */
+  const downloadInvoice = async () => {
+    if (invoiceBusy) return;
+    setInvoiceBusy(true);
+    setInvoiceError(null);
+    try {
+      const { blob, filename } = await accountApi.invoice(orderNo);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setInvoiceError(
+        err instanceof ApiError ? err.message : "Could not download the invoice.",
+      );
+    } finally {
+      setInvoiceBusy(false);
+    }
+  };
 
   const backButton = (
     <GhostButton onClick={() => (window.location.href = "/account/orders")}>
@@ -117,18 +150,53 @@ export default function OrderDetailPage({ params }) {
                   </span>
                 </div>
 
+                {/*
+                  The invoice chip doubles as the download. The number alone is
+                  not much use to a customer — the document is what they came
+                  for, and hiding it behind a separate button would repeat the
+                  same fact twice.
+                */}
                 {order.invoiceNumber && (
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2.5">
+                  <button
+                    type="button"
+                    onClick={downloadInvoice}
+                    disabled={invoiceBusy}
+                    aria-label={`Download invoice ${order.invoiceNumber} as PDF`}
+                    className="group rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-left transition-all duration-200 hover:border-primary/40 hover:bg-primary/[0.06] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
                     <span className="block font-[Montserrat] text-[10px] font-bold uppercase tracking-[0.14em] text-white/40">
                       Invoice
                     </span>
-                    <span className="mt-0.5 block font-[Montserrat] text-[13px] font-bold text-white/90">
+                    <span className="mt-0.5 flex items-center gap-2 font-[Montserrat] text-[13px] font-bold text-white/90 group-hover:text-primary">
                       {order.invoiceNumber}
+                      {invoiceBusy ? (
+                        <span
+                          className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent motion-reduce:animate-none"
+                          role="status"
+                          aria-label="Preparing"
+                        />
+                      ) : (
+                        <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
+                          <path
+                            d="M8 2v8m0 0L5 7m3 3l3-3M3 12.5h10"
+                            stroke="currentColor"
+                            strokeWidth="1.6"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      )}
                     </span>
-                  </div>
+                  </button>
                 )}
               </div>
             </div>
+
+            {invoiceError && (
+              <div className="mt-4">
+                <FormMessage>{invoiceError}</FormMessage>
+              </div>
+            )}
 
             {/* ---- Tracking Panel ---- */}
             <TrackingPanel fulfilment={order.fulfilment} status={order.status} />
