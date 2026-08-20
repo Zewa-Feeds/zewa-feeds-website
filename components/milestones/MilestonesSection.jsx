@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import Reveal from "@/components/Reveal";
-import MilestoneVertical from "./MilestoneVertical";
-import MilestoneHorizontal from "./MilestoneHorizontal";
+import MilestoneVerticalCinematic from "./MilestoneVerticalCinematic";
+import MilestoneHorizontalCinematic from "./MilestoneHorizontalCinematic";
 
 export default function MilestonesSection() {
-  // View mode switcher: 'both' (default for comparison), 'vertical' (Version A), 'horizontal' (Version B)
+  // View mode switcher: 'both' (default for side-by-side comparison), 'vertical' (Version A), 'horizontal' (Version B)
   const [viewMode, setViewMode] = useState("both");
 
   return (
@@ -24,12 +24,12 @@ export default function MilestonesSection() {
 
             <h2
               className="font-display-lg leading-[1.08] text-white"
-              style={{ fontSize: "clamp(32px, 4.5vw, 56px)" }}
+              style={{ fontSize: "clamp(36px, 5vw, 64px)" }}
             >
               # MILESTONES
             </h2>
             <p className="font-body-md mt-3 max-w-xl text-[15px] leading-relaxed text-white/50">
-              Grants, awards, and national programmes driving our journey in sustainable insect protein and circular aquaculture.
+              A cinematic journey through Zewa's scientific R&amp;D, commercial facility expansion, formulation breakthroughs, and global recognitions (2021 → 2026).
             </p>
           </div>
 
@@ -69,33 +69,33 @@ export default function MilestonesSection() {
         </div>
       </div>
 
-      {/* Render Version A (Vertical Timeline) */}
+      {/* Render Version A (Cinematic Vertical Timeline) */}
       {(viewMode === "both" || viewMode === "vertical") && (
-        <div className="mb-16 border-b border-white/5 pb-12">
+        <div className="mb-20 border-b border-white/5 pb-16">
           {viewMode === "both" && (
-            <div className="mx-auto max-w-[1240px] px-6 sm:px-10 mb-6 flex items-center gap-3">
-              <span className="rounded-full bg-primary/10 border border-primary/30 px-3 py-1 font-label-caps text-[10px] tracking-widest text-primary">
-                VERSION A — VERTICAL TIMELINE
+            <div className="mx-auto max-w-[1240px] px-6 sm:px-10 mb-8 flex items-center gap-3">
+              <span className="rounded-full bg-primary/15 border border-primary/40 px-3.5 py-1 font-label-caps text-[10px] tracking-widest text-primary shadow-[0_0_15px_rgba(68,229,194,0.3)]">
+                VERSION A — CINEMATIC VERTICAL TIMELINE
               </span>
               <div className="h-px flex-1 bg-white/10" />
             </div>
           )}
-          <MilestoneVertical />
+          <MilestoneVerticalCinematic />
         </div>
       )}
 
-      {/* Render Version B (Horizontal Timeline) */}
+      {/* Render Version B (Cinematic Horizontal Timeline) */}
       {(viewMode === "both" || viewMode === "horizontal") && (
         <div>
           {viewMode === "both" && (
-            <div className="mx-auto max-w-[1240px] px-6 sm:px-10 mb-6 flex items-center gap-3">
-              <span className="rounded-full bg-primary/10 border border-primary/30 px-3 py-1 font-label-caps text-[10px] tracking-widest text-primary">
-                VERSION B — HORIZONTAL TIMELINE
+            <div className="mx-auto max-w-[1240px] px-6 sm:px-10 mb-8 flex items-center gap-3">
+              <span className="rounded-full bg-primary/15 border border-primary/40 px-3.5 py-1 font-label-caps text-[10px] tracking-widest text-primary shadow-[0_0_15px_rgba(68,229,194,0.3)]">
+                VERSION B — CINEMATIC HORIZONTAL TIMELINE
               </span>
               <div className="h-px flex-1 bg-white/10" />
             </div>
           )}
-          <MilestoneHorizontal />
+          <MilestoneHorizontalCinematic />
         </div>
       )}
     </Reveal>
