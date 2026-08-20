@@ -242,118 +242,110 @@ export default function Hero() {
       className="relative w-full pt-20 max-h-[100dvh] md:h-[90dvh] md:min-h-[620px] md:max-h-none"
     >
       {/*
-        Slides are in normal flow on mobile so their height sizes the section;
-        absolutely positioned from md up, where the section has a fixed height
-        and the slides fill it.
+        Hero content area: starts below pt-20 header padding.
+        Allows absolute children (arrows, pills, vignette) to align relative to the actual slide canvas.
       */}
-      <div
-        /*
-         * md:top-20, not md:inset-0.
-         *
-         * The header is a fixed 80px bar and the section carries pt-20 to clear
-         * it — but inset-0 positions from the section's own top edge, which
-         * cancelled that padding. On the video slide that put the top 80px of
-         * the film behind the header. Starting the slide area below the header
-         * gives each its own space.
-         */
-        className="relative md:absolute md:inset-x-0 md:bottom-0 md:top-20 overflow-hidden transition-opacity duration-[400ms]"
-        style={{ opacity: animating ? 0 : 1 }}
-      >
-        {current === 0 && <TileWhy />}
-        {current === 1 && <TileBanner />}
-        {current === 2 && <TileVideo onVideoEnd={handleVideoEnd} />}
-      </div>
-
-      {/* Bottom fade + teal accent line separator */}
-      <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10">
-        {/* Dark vignette */}
-        <div className="h-16" style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(8,14,28,0.25) 60%, rgba(8,14,28,0.5) 100%)" }} />
-        {/* Teal accent line */}
-        <div className="h-px w-full" style={{ background: "linear-gradient(to right, transparent 0%, rgba(68,229,194,0.25) 20%, rgba(68,229,194,0.5) 50%, rgba(68,229,194,0.25) 80%, transparent 100%)" }} />
-      </div>
-
-      {/* Left arrow */}
-      <button
-        onClick={prev}
-        aria-label="Previous slide"
-        className="group absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
-      >
-        <div className="w-8 h-8 flex items-center justify-center transition-all duration-250 group-hover:scale-110">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/35 group-hover:text-primary transition-colors duration-250">
-            <path d="M7.5 2L3.5 6L7.5 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+      <div className="relative w-full h-full md:absolute md:inset-x-0 md:bottom-0 md:top-20">
+        <div
+          className="relative w-full h-full overflow-hidden transition-opacity duration-[400ms]"
+          style={{ opacity: animating ? 0 : 1 }}
+        >
+          {current === 0 && <TileWhy />}
+          {current === 1 && <TileBanner />}
+          {current === 2 && <TileVideo onVideoEnd={handleVideoEnd} />}
         </div>
-      </button>
 
-      {/* Right arrow */}
-      <button
-        onClick={next}
-        aria-label="Next slide"
-        className="group absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
-      >
-        <div className="w-8 h-8 flex items-center justify-center transition-all duration-250 group-hover:scale-110">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/35 group-hover:text-primary transition-colors duration-250">
-            <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        {/* Bottom fade + teal accent line separator */}
+        <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10">
+          {/* Dark vignette */}
+          <div className="h-16" style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(8,14,28,0.25) 60%, rgba(8,14,28,0.5) 100%)" }} />
+          {/* Teal accent line */}
+          <div className="h-px w-full" style={{ background: "linear-gradient(to right, transparent 0%, rgba(68,229,194,0.25) 20%, rgba(68,229,194,0.5) 50%, rgba(68,229,194,0.25) 80%, transparent 100%)" }} />
         </div>
-      </button>
 
-      {/* Slide indicators + scroll cue — stacked in one centred column */}
-      <div className="absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 sm:gap-3">
-        {/* Pills */}
-        <div className="flex items-center gap-2">
-        {[0, 1, 2].map((i) => {
-          const isActive = i === current;
-          const isDone = i < current;
-          const isVideo = i === 2;
+        {/* Left arrow */}
+        <button
+          onClick={prev}
+          aria-label="Previous slide"
+          className="group absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
+        >
+          <div className="w-8 h-8 flex items-center justify-center transition-all duration-250 group-hover:scale-110">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/35 group-hover:text-primary transition-colors duration-250">
+              <path d="M7.5 2L3.5 6L7.5 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </button>
 
-          return (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              aria-label={`Go to slide ${i + 1}`}
-              className="group focus:outline-none"
-            >
-              <div
-                className="relative overflow-hidden transition-all duration-300"
-                style={{
-                  width: isActive ? 72 : 24,
-                  height: 3,
-                  borderRadius: 99,
-                  background: isDone
-                    ? "rgba(68,229,194,0.35)"
-                    : "rgba(221,226,246,0.12)",
-                }}
+        {/* Right arrow */}
+        <button
+          onClick={next}
+          aria-label="Next slide"
+          className="group absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20 focus:outline-none"
+        >
+          <div className="w-8 h-8 flex items-center justify-center transition-all duration-250 group-hover:scale-110">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-white/35 group-hover:text-primary transition-colors duration-250">
+              <path d="M4.5 2L8.5 6L4.5 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </button>
+
+        {/* Slide indicators + scroll cue — stacked in one centred column */}
+        <div className="absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 sm:gap-3">
+          {/* Pills */}
+          <div className="flex items-center gap-2">
+          {[0, 1, 2].map((i) => {
+            const isActive = i === current;
+            const isDone = i < current;
+            const isVideo = i === 2;
+
+            return (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className="group focus:outline-none"
               >
-                {isActive && !isVideo && (
-                  <span
-                    key={`fill-${current}`}
-                    className="absolute inset-y-0 left-0 rounded-full bg-primary"
-                    style={{
-                      animation: `slideProgress ${SLIDE_DURATION}ms linear forwards`,
-                    }}
-                  />
-                )}
-                {isActive && isVideo && (
-                  <span className="absolute inset-0 rounded-full bg-primary/50" />
-                )}
-                {isDone && (
-                  <span className="absolute inset-0 rounded-full bg-primary/40" />
-                )}
-              </div>
-            </button>
-          );
-        })}
-        </div>
+                <div
+                  className="relative overflow-hidden transition-all duration-300"
+                  style={{
+                    width: isActive ? 72 : 24,
+                    height: 3,
+                    borderRadius: 99,
+                    background: isDone
+                      ? "rgba(68,229,194,0.35)"
+                      : "rgba(221,226,246,0.12)",
+                  }}
+                >
+                  {isActive && !isVideo && (
+                    <span
+                      key={`fill-${current}`}
+                      className="absolute inset-y-0 left-0 rounded-full bg-primary"
+                      style={{
+                        animation: `slideProgress ${SLIDE_DURATION}ms linear forwards`,
+                      }}
+                    />
+                  )}
+                  {isActive && isVideo && (
+                    <span className="absolute inset-0 rounded-full bg-primary/50" />
+                  )}
+                  {isDone && (
+                    <span className="absolute inset-0 rounded-full bg-primary/40" />
+                  )}
+                </div>
+              </button>
+            );
+          })}
+          </div>
 
-        {/* Scroll cue */}
-        <div className="flex flex-col items-center gap-1" style={{ animation: "scrollBounce 2s ease-in-out infinite" }}>
-          <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="text-white/30">
-            <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="text-primary/35">
-            <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          {/* Scroll cue */}
+          <div className="flex flex-col items-center gap-1" style={{ animation: "scrollBounce 2s ease-in-out infinite" }}>
+            <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="text-white/30">
+              <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <svg width="14" height="8" viewBox="0 0 14 8" fill="none" className="text-primary/35">
+              <path d="M1 1L7 7L13 1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
         </div>
       </div>
 
