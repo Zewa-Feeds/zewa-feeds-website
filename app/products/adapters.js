@@ -103,6 +103,22 @@ export function adaptProduct(api) {
   const image =
     listing?.heroUrl ?? cardImages[0] ?? legacyImages[0] ?? listing?.posterUrl ?? PLACEHOLDER_IMAGE;
 
+  /*
+   * Is that still a video poster rather than a photograph?
+   *
+   * It changes how the card frames it. Photography is shot 1:1 and fills the
+   * square well exactly; a poster is a frame of a 16:9 film, and covering a
+   * square with one crops about 44% of the width — which cut Cichlid C4's
+   * caption off mid-sentence and chopped the pack shots out of both edges.
+   *
+   * The card letterboxes it instead, exactly as it letterboxes the film that
+   * follows, so the hover is a crossfade between two identically framed things
+   * rather than a jump.
+   */
+  const imageIsPoster = Boolean(
+    listing && !listing.heroUrl && !cardImages.length && !legacyImages.length && listing.posterUrl,
+  );
+
   const video = listing?.videoUrl ?? null;
 
   return {
@@ -132,6 +148,8 @@ export function adaptProduct(api) {
      * video but no photograph, so the well is never black before playback.
      */
     poster: listing?.posterUrl ?? null,
+    /** True when `image` above is that poster, so the card frames it as film. */
+    imageIsPoster,
     accentColor: api.presentation?.accent ?? "rgba(68,229,194,0.18)",
     /*
      * Backdrop for the card's image well, matching the PDP gallery.

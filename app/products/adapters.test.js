@@ -94,6 +94,22 @@ describe("card imagery", () => {
     // The poster is a real frame of the product, so it stands in for the photo.
     expect(card.image).toBe(`${CDN}/film.jpg`);
     expect(card.video).toBe(`${CDN}/film.mp4`);
+    // Framed as film, not as photography — a 16:9 poster covering a square well
+    // loses about 44% of its width.
+    expect(card.imageIsPoster).toBe(true);
+  });
+
+  it("does not letterbox a real photograph", () => {
+    const card = adaptProduct(
+      product({
+        listing: {
+          sku: "G2-45G", pack: "45g", heroUrl: `${CDN}/bottle.jpg`, heroAlt: "b",
+          videoUrl: `${CDN}/film.mp4`, posterUrl: `${CDN}/film.jpg`, coverage: "EXACT",
+        },
+        packs: [pack("G2-45G", { items: [item("bottle"), item("film", "VIDEO")] })],
+      }),
+    );
+    expect(card.imageIsPoster).toBe(false);
   });
 
   it("uses the placeholder when there is nothing at all — Hatchery", () => {

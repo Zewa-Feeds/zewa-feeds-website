@@ -223,7 +223,15 @@ function ProductCard({ p }) {
             alt={`${p.name} ${gi + 1}`}
             width={440}
             height={440}
-            className="absolute inset-0 h-full w-full object-cover pointer-events-none rounded-2xl"
+            /*
+              Cover for photography, contain for a video poster. The poster is a
+              frame of a 16:9 film and covering a square well with one crops
+              nearly half its width; the film that follows is letterboxed, so
+              matching it keeps the crossfade from jumping.
+            */
+            className={`absolute inset-0 h-full w-full pointer-events-none rounded-2xl ${
+              p.imageIsPoster ? "object-contain" : "object-cover"
+            }`}
             style={{
               opacity: !showVideo && gi === imgIdx ? 1 : 0,
               transform: !showVideo && gi === imgIdx ? "scale(1.02)" : "scale(1)",
