@@ -19,28 +19,33 @@ const ARTICLES = [...ALL_ARTICLES]
   .slice(0, 3);
 
 export default function KnowledgeHub() {
-  const [hoveredArticle, setHoveredArticle] = useState(null);
+  // Default to the first article's imagery so the section is always visually rich
+  const [hoveredArticle, setHoveredArticle] = useState(ARTICLES[0]?.slug);
 
   return (
     <Reveal id="knowledge" className="relative overflow-hidden bg-[#06080f]">
       {/* ── Background Article Cover Images ─────────── */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        {/* Hovered article background images */}
+        {/* Article background images (focal point aligned toward the right) */}
         {ARTICLES.map((a) => (
           <Image
             key={a.slug}
             src={a.image}
             alt={a.title}
             fill
-            className={`object-cover object-center transition-all duration-700 ease-in-out ${
-              hoveredArticle === a.slug ? "opacity-85 scale-105" : "opacity-0 scale-100"
+            sizes="100vw"
+            className={`object-cover object-[75%_center] transition-all duration-700 ease-in-out ${
+              hoveredArticle === a.slug ? "opacity-90 scale-105" : "opacity-0 scale-100"
             }`}
           />
         ))}
 
-        {/* Soft dark vignettes for crisp contrast and clear image visibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#06080f]/90 via-[#06080f]/50 to-[#06080f]/30" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#06080f]/80 via-[#06080f]/20 to-[#06080f]/90" />
+        {/* Left side text protective gradient: darker & solid on the left for text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#06080f] via-[#06080f]/90 via-45% to-transparent" />
+        {/* Right side subtle vignette: keeps right side image clearly lookable with atmospheric depth */}
+        <div className="absolute inset-0 bg-gradient-to-l from-[#06080f]/60 via-transparent to-transparent" />
+        {/* Top and bottom soft vignettes */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#06080f] via-transparent to-[#06080f]/90" />
       </div>
 
       <div className="relative z-10 h-px w-full" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.2) 50%, transparent)" }} />
@@ -72,11 +77,14 @@ export default function KnowledgeHub() {
           </a>
         </div>
 
-        {/* Article list */}
+        {/* Article list with horizontal gradient glass backdrop */}
         <div
           className="rounded-2xl overflow-hidden shadow-[0_24px_64px_rgba(0,0,0,0.6)] backdrop-blur-md"
-          style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(8,14,26,0.82)" }}
-          onMouseLeave={() => setHoveredArticle(null)}
+          style={{
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "linear-gradient(to right, rgba(8,14,26,0.92) 0%, rgba(8,14,26,0.78) 50%, rgba(8,14,26,0.20) 100%)",
+          }}
+          onMouseLeave={() => setHoveredArticle(ARTICLES[0]?.slug)}
         >
 
           {/* Top accent line */}
