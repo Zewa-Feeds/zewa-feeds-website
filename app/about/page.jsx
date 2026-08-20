@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import LogoMarquee from "@/components/LogoMarquee";
+import MilestonesSection from "@/components/milestones/MilestonesSection";
 import { catalog } from "@/lib/api";
 import {
   FOUNDER,
@@ -347,58 +348,8 @@ export default async function AboutPage() {
           </div>
         </Section>
 
-        {/*
-          ── AWARDS & RECOGNITION ────────────────────────────────────
-
-          Its own section rather than a list tucked under the logos. These are
-          separate claims — who backs the company versus what it has won — and
-          burying the awards in a column made them read as a footnote.
-
-          Cards on the raised surface so each award is a discrete item, and the
-          alternation with the section above is preserved.
-        */}
-        <Section tone="raised" className="border-y border-white/5">
-          <Eyebrow>AWARDS &amp; RECOGNITION</Eyebrow>
-          <h2
-            className="font-display-lg leading-[1.15] text-white"
-            style={{ fontSize: "clamp(26px, 3.2vw, 38px)" }}
-          >
-            Grants, awards and national programmes.
-          </h2>
-
-          <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {TRUST.recognition.map((item) => (
-              <li
-                key={item}
-                className="flex h-full flex-col gap-4 rounded-xl border border-white/8 bg-white/[0.02] p-6"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden="true"
-                  className="h-6 w-6 shrink-0 text-primary/70"
-                >
-                  <path
-                    d="M12 15a5 5 0 100-10 5 5 0 000 10z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M8.5 14L7 22l5-2.5L17 22l-1.5-8"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <span className="font-body-lg text-[14.5px] leading-snug text-white/70">
-                  {item}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Section>
+        {/* ── KEY EVENTS, NATIONAL & INTERNATIONAL RECOGNITION: MILESTONES ── */}
+        <MilestonesSection />
 
         {/* ── RANGE ─────────────────────────────────────────────────── */}
         {/*
