@@ -25,9 +25,20 @@ const IcoLeaf = () => (
   </svg>
 );
 const IcoMakeInIndia = () => (
-  <svg viewBox="0 0 24 16" fill="currentColor" className="w-4 h-3.5 text-primary">
-    <path d="M22.8 4.2c-.3-.4-.7-.6-1.2-.5-.4.1-.8.3-1.1.6-.3-.3-.8-.4-1.3-.4-.5.1-1 .4-1.3.8-.4-.2-.9-.3-1.4-.1-.5.2-.9.5-1.2.9-.5-.2-1.1-.2-1.7.1-.5.3-.9.7-1.1 1.2-.4-.1-.9-.1-1.3.1-.3.2-.6.4-.8.7-.3-.2-.7-.2-1.1-.1-.4.1-.7.3-.9.6-.3-.1-.6-.2-.9-.1-.3.1-.5.3-.8.5-.3-.1-.5-.1-.8.1-.3.1-.5.3-.7.6-.3.1-.4.2-.6.5-.2.3-.3.6-.3 1 0 .2.1.4.2.6.1.2.3.3.4.4.2.2.4.2.6.2.3 0 .5-.1.7-.2.2-.2.4-.3.5-.5.2-.1.4-.1.6-.2.2-.2.3-.3.5-.4.2-.1.4-.1.6-.2.2-.2.3-.3.5-.4.2.1.4.1.6 0 .2-.1.4-.2.5-.4.3.1.5.1.8 0 .3-.1.5-.3.6-.4.3.2.6.2.9.1.3-.1.5-.3.7-.6.4.2.7.2 1.1 0 .3-.2.6-.4.8-.7.4.2.9.2 1.4.1.4-.2.8-.5 1-.9.5.2 1.1.2 1.7-.1.5-.3.9-.7 1.1-1.2.4.1.9.1 1.4-.2.4-.3.8-.7.9-1.2.4.1.7 0 1.1-.2.3-.2.5-.6.6-1 .1-.3 0-.8-.2-1.1zm-1.4 1.4c-.2.2-.5.3-.8.2-.3-.1-.5-.3-.6-.5-.2-.3-.2-.6 0-.9.2-.3.4-.4.7-.5.3-.1.6 0 .8.2.2.2.3.5.3.8 0 .3-.2.5-.4.7z"/>
-    <path d="M3.5 14h1.8v-3H3.5V14zm4 0h1.8v-2.8H7.5V14zm10 0h1.8v-3.5h-1.8V14zm4 0h1.8v-3.2h-1.8V14z"/>
+  <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4 text-primary">
+    {/* Clean geometric Tiger Head / Make in India Icon */}
+    {/* Ears */}
+    <path d="M4.5 6C4 3.8 6 3 7.5 4.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+    <path d="M15.5 6C16 3.8 14 3 12.5 4.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+    {/* Head shape */}
+    <path d="M4.5 6C4 9.5 5 13 7.5 15L10 16.5L12.5 15C15 13 16 9.5 15.5 6C13.8 6.5 12.5 5 10 5C7.5 5 6.2 6.5 4.5 6Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+    {/* Forehead Tiger stripes / Crown */}
+    <path d="M10 5.8V9M8.2 7.2L10 8.5M11.8 7.2L10 8.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+    {/* Eyes & Nose bridge */}
+    <path d="M7 10.2L8.2 9.8M13 10.2L11.8 9.8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+    <path d="M9 13H11L10 14Z" fill="currentColor"/>
+    {/* Whiskers */}
+    <path d="M6 12L3.5 11.5M6 13.2L3.2 13.8M14 12L16.5 11.5M14 13.2L16.8 13.8" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
   </svg>
 );
 
