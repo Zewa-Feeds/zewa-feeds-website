@@ -53,6 +53,21 @@ export async function generateMetadata({ params }) {
     const title = decodeEntities(product.seo?.title || `${product.name} | Zewa Feeds`);
     const description = decodeEntities(product.seo?.description || product.shortDesc);
 
+    /*
+     * The share image comes from the SAME listing presentation the card and the
+     * homepage use.
+     *
+     * It read `product.images[0]` — the first image of ANY pack, in CMS order —
+     * so Cichlid C4, whose default pack is the 45g, was shared to WhatsApp,
+     * Facebook and Google as a 1kg pouch. This is the most widely seen image on
+     * the site and it was the least correct.
+     *
+     * The poster frame stands in for a product with a film and no photograph.
+     * No image at all is better than another pack's: an omitted og:image shows a
+     * link card with no picture, which is honest.
+     */
+    const shareImage = product.listing?.heroUrl ?? product.listing?.posterUrl ?? null;
+
     return {
       title: { absolute: title },
       description,
@@ -60,7 +75,13 @@ export async function generateMetadata({ params }) {
         title,
         description,
         type: "website",
-        ...(product.images?.[0]?.url ? { images: [product.images[0].url] } : {}),
+        ...(shareImage ? { images: [shareImage] } : {}),
+      },
+      twitter: {
+        card: shareImage ? "summary_large_image" : "summary",
+        title,
+        description,
+        ...(shareImage ? { images: [shareImage] } : {}),
       },
       alternates: { canonical: `/products/${slug}` },
     };
@@ -111,14 +132,36 @@ export default async function ProductPage({ params }) {
 
   const prices = offers.map((o) => Number(o.price)).filter(Number.isFinite);
 
+  /*
+   * Structured data leads with the representative pack, not with array order.
+   *
+   * `sku: packs[0].sku` and `image: images[0..6]` were both position accidents:
+   * the first pack in the payload and the first images of any pack. Google
+   * treats the FIRST image as the primary one, so a product could be indexed
+   * under a pack size no customer-facing surface shows.
+   *
+   * The representative image leads; the rest of that pack's gallery follows.
+   * Assets belonging to other packs are excluded rather than reordered — a
+   * shopping result should not illustrate a 45g bottle with a 1kg pouch.
+   */
+  const listing = product.listing ?? null;
+  const repPack = packs.find((k) => k.sku === listing?.sku) ?? null;
+  const repImages = (repPack?.gallery?.items ?? [])
+    .filter((m) => m.type !== "VIDEO")
+    .map((m) => m.url);
+  const schemaImages = [
+    ...(listing?.heroUrl ? [listing.heroUrl] : []),
+    ...repImages.filter((u) => u !== listing?.heroUrl),
+  ].slice(0, 6);
+
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.shortDesc || undefined,
-    sku: packs[0]?.sku,
+    sku: listing?.sku ?? packs[0]?.sku,
     category: product.category || undefined,
-    image: (product.images ?? []).slice(0, 6).map((i) => i.url),
+    image: schemaImages,
     brand: { "@type": "Brand", name: "Zewa Feeds" },
     ...(offers.length === 1
       ? { offers: offers[0] }
