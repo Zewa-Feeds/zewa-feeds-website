@@ -117,51 +117,30 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
   })();
 
   /*
-   * Show only the SELECTED pack's photography, plus shared assets (sku === null:
-   * fish photos, nutrition panels, the product video).
+   * The gallery for the selected pack, decided by the SERVER.
    *
-   * One product sells the same feed as a 45g bottle, a 200g pouch and a 1kg
-   * pouch, each shot separately. Without this filter the gallery mixed all three,
-   * so choosing "45g Bottle" still showed 1kg pouch photos.
+   * This used to be worked out here: filter by SKU, strip an "X2" suffix to find
+   * a multipack's base, and — when the selected pack had no photography — fall
+   * back to the entire gallery. That last rule showed a 1kg pouch to someone who
+   * had chosen a 45g bottle, which is worse than showing them nothing specific.
    *
-   * Falls back to the unfiltered list when the selected pack has no photography
-   * of its own — an empty gallery would be worse than a slightly generic one.
+   * `pack.gallery` now arrives already resolved, with a `coverage` explaining
+   * why it looks the way it does. The same resolver feeds the CMS preview, so
+   * what an operator arranges is what a customer sees.
+   *
+   * The legacy path below is kept for one release: a cached API response from
+   * before this change has no `gallery`, and an empty product page would be a
+   * worse regression than briefly keeping the old behaviour.
    */
-  /*
-   * A multi-pack has no photography of its own — "45g × 2" is two of the same
-   * bottle — so it falls back to its BASE pack: G2-45GX2 -> G2-45G.
-   *
-   * Without this, the filter found nothing for G2-45GX2 and fell back to the
-   * whole unfiltered gallery, so choosing "Pack of 2" showed 200g pouch and 1kg
-   * pouch photos as well.
-   */
-  const baseSku = (sku) => (sku ? sku.replace(/X\d+$/i, "") : sku);
+  const resolved = pack?.gallery ?? null;
 
   const media = (() => {
-    if (!pack?.sku) return allMedia;
+    if (resolved) return resolved.items;
 
-    const wanted = [pack.sku];
-    const base = baseSku(pack.sku);
-    if (base !== pack.sku) wanted.push(base);
-
+    // ---- Legacy fallback (pre-resolver API responses) ----
+    const wanted = pack?.sku ? [pack.sku] : [];
     const forPack = allMedia.filter((m) => !m.sku || wanted.includes(m.sku));
-    // Genuinely no pack-specific photography anywhere — a generic gallery beats
-    // an empty one.
-    if (!forPack.some((m) => m.sku)) return allMedia;
-
-    /*
-     * RESPECT THE CMS ORDER. This used to return [...packSpecific, ...shared],
-     * which reshuffled the whole gallery — so the order an admin arranged in the
-     * Media tab was ignored, and reordering there appeared to do nothing.
-     *
-     * The only adjustment is the LEAD image: if the first item is a shared asset
-     * (a video, or a generic fish photo) the hero would look identical for every
-     * pack, defeating the filter. So the first pack-specific photo is promoted to
-     * the front and everything else keeps its arranged order.
-     */
-    const leadIdx = forPack.findIndex((m) => m.sku);
-    if (leadIdx <= 0) return forPack;
-    return [forPack[leadIdx], ...forPack.filter((_, i) => i !== leadIdx)];
+    return forPack.length > 0 ? forPack : allMedia.filter((m) => !m.sku);
   })();
 
   /**
@@ -192,14 +171,29 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
   const [activeIndex, setActiveIndex] = useState(0);
   const active = media[activeIndex] ?? media[0];
 
+  /*
+   * A pack can now legitimately have nothing to show.
+   *
+   * That was impossible before: when a pack had no photography the old code
+   * returned the whole gallery, so something always rendered — just often the
+   * wrong pack. Removing that fallback makes "no suitable photography" a real
+   * state, and four packs in the current catalogue are in it.
+   *
+   * It has to be handled rather than rendered: <Image> with src={undefined}
+   * throws, which would take the product page down instead of showing a gap.
+   */
+  const galleryEmpty = media.length === 0;
+
   /**
    * Move through the gallery, wrapping at both ends.
    *
    * The `+ length` before the modulo keeps it correct going backwards from 0 —
    * `-1 % n` is -1 in JavaScript, not n-1.
    */
-  const step = (dir) =>
+  const step = (dir) => {
+    if (media.length === 0) return;
     setActiveIndex((i) => (i + dir + media.length) % media.length);
+  };
 
   /*
    * COMING_SOON products are served by the catalogue on purpose (so they can be
@@ -225,6 +219,8 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
     setActivePack(i);
     // The gallery is filtered by pack, so a stale index could point past the end
     // of the new list — or at a different product photo entirely.
+    // Always back to the first item: a stale index from a longer gallery would
+    // otherwise point past the end of a shorter one.
     setActiveIndex(0);
     const nextMax = packs[i]?.maxQty ?? 1;
     setQty((q) => Math.min(q, Math.max(1, nextMax)));
@@ -294,7 +290,31 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                   }}
                 />
 
-                {active?.type === "VIDEO" ? (
+                {/*
+                  Nothing suitable for this pack.
+
+                  Deliberately NOT another pack's photograph, and deliberately
+                  not a generic bottle: a customer choosing a 1kg pouch should
+                  not be shown a 45g bottle and left to assume that is what
+                  arrives. Saying so plainly is the honest option, and the CMS
+                  reports the same gap to whoever can fix it.
+                */}
+                {galleryEmpty ? (
+                  <div className="relative z-10 flex flex-col items-center gap-3 px-8 text-center">
+                    <svg viewBox="0 0 24 24" className="h-9 w-9 text-white/20" fill="none" aria-hidden="true">
+                      <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
+                      <circle cx="8.5" cy="10" r="1.5" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M21 15l-5-4-4.5 4-2-1.5L3 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <p className="font-[Montserrat] text-[13px] text-white/45">
+                      Photography for this pack is on its way.
+                    </p>
+                    <p className="font-[Montserrat] text-[11.5px] leading-relaxed text-white/25">
+                      It&rsquo;s the same feed as the other sizes — we&rsquo;d rather show you
+                      nothing than a picture of a different pack.
+                    </p>
+                  </div>
+                ) : active?.type === "VIDEO" ? (
                   <video
                     key={active.url}
                     ref={(el) => {
