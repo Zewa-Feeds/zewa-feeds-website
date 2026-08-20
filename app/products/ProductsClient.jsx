@@ -24,25 +24,17 @@ const IcoLeaf = () => (
     <path d="M10 17V10M10 10C10 10 7 8 7 6M10 10C10 10 13 8 13 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
   </svg>
 );
-const IcoMapPin = () => (
-  <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
-    <path d="M10 2a5 5 0 0 1 5 5c0 3.5-5 11-5 11S5 10.5 5 7a5 5 0 0 1 5-5z" stroke="currentColor" strokeWidth="1.4"/>
-    <circle cx="10" cy="7" r="1.8" fill="currentColor" opacity=".5"/>
-  </svg>
-);
-const IcoLarva = () => (
-  <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
-    <ellipse cx="10" cy="10" rx="7" ry="4" stroke="currentColor" strokeWidth="1.4"/>
-    <circle cx="4" cy="9" r="1" fill="currentColor" opacity=".5"/>
-    <path d="M6 8.5 Q8 7 10 8.5 Q12 10 14 8.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-    <circle cx="16.5" cy="9.5" r=".8" fill="currentColor"/>
+const IcoMakeInIndia = () => (
+  <svg viewBox="0 0 24 16" fill="currentColor" className="w-4 h-3.5 text-primary">
+    <path d="M22.8 4.2c-.3-.4-.7-.6-1.2-.5-.4.1-.8.3-1.1.6-.3-.3-.8-.4-1.3-.4-.5.1-1 .4-1.3.8-.4-.2-.9-.3-1.4-.1-.5.2-.9.5-1.2.9-.5-.2-1.1-.2-1.7.1-.5.3-.9.7-1.1 1.2-.4-.1-.9-.1-1.3.1-.3.2-.6.4-.8.7-.3-.2-.7-.2-1.1-.1-.4.1-.7.3-.9.6-.3-.1-.6-.2-.9-.1-.3.1-.5.3-.8.5-.3-.1-.5-.1-.8.1-.3.1-.5.3-.7.6-.3.1-.4.2-.6.5-.2.3-.3.6-.3 1 0 .2.1.4.2.6.1.2.3.3.4.4.2.2.4.2.6.2.3 0 .5-.1.7-.2.2-.2.4-.3.5-.5.2-.1.4-.1.6-.2.2-.2.3-.3.5-.4.2-.1.4-.1.6-.2.2-.2.3-.3.5-.4.2.1.4.1.6 0 .2-.1.4-.2.5-.4.3.1.5.1.8 0 .3-.1.5-.3.6-.4.3.2.6.2.9.1.3-.1.5-.3.7-.6.4.2.7.2 1.1 0 .3-.2.6-.4.8-.7.4.2.9.2 1.4.1.4-.2.8-.5 1-.9.5.2 1.1.2 1.7-.1.5-.3.9-.7 1.1-1.2.4.1.9.1 1.4-.2.4-.3.8-.7.9-1.2.4.1.7 0 1.1-.2.3-.2.5-.6.6-1 .1-.3 0-.8-.2-1.1zm-1.4 1.4c-.2.2-.5.3-.8.2-.3-.1-.5-.3-.6-.5-.2-.3-.2-.6 0-.9.2-.3.4-.4.7-.5.3-.1.6 0 .8.2.2.2.3.5.3.8 0 .3-.2.5-.4.7z"/>
+    <path d="M3.5 14h1.8v-3H3.5V14zm4 0h1.8v-2.8H7.5V14zm10 0h1.8v-3.5h-1.8V14zm4 0h1.8v-3.2h-1.8V14z"/>
   </svg>
 );
 
 const TRUST_BADGES = [
   { icon: <IcoMicroscope />, label: "NABL Tested" },
   { icon: <IcoLeaf />, label: "100% Natural" },
-  { icon: <IcoMapPin />, label: "Made in India" },
+  { icon: <IcoMakeInIndia />, label: "Made in India" },
   { icon: <IcoLarva />, label: "Insect Protein" },
 ];
 
@@ -522,13 +514,7 @@ function getResult(answers, products) {
   };
 }
 
-function FindMyFeedQuiz({ onClose, products }) {
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [result, setResult] = useState(null);
-  const [dir, setDir] = useState(1); // 1 = forward, -1 = back
-  const [animating, setAnimating] = useState(false);
-
+function FindMyFeedQuiz({ onClose }) {
   // Lock body scroll while open
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -536,252 +522,88 @@ function FindMyFeedQuiz({ onClose, products }) {
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  const transition = (fn) => {
-    setAnimating(true);
-    setTimeout(() => { fn(); setAnimating(false); }, 240);
-  };
-
-  const choose = (value) => {
-    const next = { ...answers, [QUIZ[step].id]: value };
-    setAnswers(next);
-    setDir(1);
-    if (step < QUIZ.length - 1) {
-      transition(() => setStep(step + 1));
-    } else {
-      transition(() => setResult(getResult(next, products)));
-    }
-  };
-
-  const back = () => {
-    setDir(-1);
-    transition(() => setStep(step - 1));
-  };
-
-  const restart = () => {
-    setDir(-1);
-    transition(() => { setStep(0); setAnswers({}); setResult(null); });
-  };
-
-  const current = QUIZ[step];
-  const progress = result ? 100 : ((step) / QUIZ.length) * 100;
-  const isSpeciesStep = current?.options?.[0]?.img;
-
   return (
     <div
-      className="fixed inset-0 z-[300] flex items-center justify-center"
-      style={{ background: "rgba(3,5,10,0.92)", backdropFilter: "blur(20px)" }}
+      className="fixed inset-0 z-[300] flex items-center justify-center p-4"
+      style={{ background: "rgba(3,5,10,0.85)", backdropFilter: "blur(16px)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      {/* Panel */}
+      {/* Modal Dialog */}
       <div
-        className="relative w-full flex flex-col overflow-hidden"
+        className="relative w-full max-w-[500px] flex flex-col overflow-hidden rounded-3xl p-7 sm:p-9 text-center"
         style={{
-          maxWidth: "560px",
-          maxHeight: "92vh",
-          margin: "0 16px",
-          borderRadius: "28px",
-          background: "linear-gradient(150deg, #0a1828 0%, #071512 100%)",
-          border: "1px solid rgba(255,255,255,0.07)",
-          boxShadow: "0 48px 120px rgba(0,0,0,0.85), 0 0 0 1px rgba(68,229,194,0.04)",
+          background: "linear-gradient(150deg, #0d1a2d 0%, #06111a 100%)",
+          border: "1px solid rgba(68,229,194,0.22)",
+          boxShadow: "0 32px 80px rgba(0,0,0,0.85), 0 0 40px rgba(68,229,194,0.12)",
         }}
       >
-        {/* Gradient top edge */}
-        <div className="absolute top-0 left-0 right-0 h-[1px]"
-          style={{ background: "linear-gradient(to right, transparent 5%, rgba(68,229,194,0.6) 40%, rgba(56,189,248,0.6) 60%, transparent 95%)" }} />
+        {/* Glow & top accent */}
+        <div
+          className="absolute top-0 left-0 right-0 h-[2px]"
+          style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.8) 50%, transparent)" }}
+        />
+        
+        <div
+          className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-40 pointer-events-none rounded-full"
+          style={{ background: "radial-gradient(circle, rgba(68,229,194,0.18) 0%, transparent 70%)", filter: "blur(30px)" }}
+        />
 
-        {/* Ambient glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] pointer-events-none"
-          style={{ background: "radial-gradient(ellipse, rgba(68,229,194,0.07) 0%, transparent 70%)", filter: "blur(40px)" }} />
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5">
+            <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </button>
 
-        {/* ── Header bar ── */}
-        <div className="relative flex items-center justify-between px-8 pt-7 pb-0 shrink-0">
-          <div className="flex items-center gap-3">
-            {/* Zewa wordmark style label */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full"
-              style={{ background: "rgba(68,229,194,0.08)", border: "1px solid rgba(68,229,194,0.18)" }}>
-              <svg viewBox="0 0 14 14" fill="none" className="w-3 h-3 text-primary">
-                <path d="M7 1C4 1 2 3.5 2 6c0 1.8 1 3.3 2.5 4L4 13h6l-.5-3C11 9.3 12 7.8 12 6c0-2.5-2-5-5-5z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
-              </svg>
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase font-[Montserrat] text-primary">Find My Feed</span>
-            </div>
-          </div>
+        {/* Icon / AI chip */}
+        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 shadow-[0_0_20px_rgba(68,229,194,0.2)]">
+          <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-primary">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
+          </svg>
+        </div>
 
-          <button onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-150"
-            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.10)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}>
-            <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5 text-white/40">
-              <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        {/* Eyebrow badge */}
+        <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-primary font-[Montserrat]">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+          Feed Finder · Model In Training
+        </div>
+
+        {/* Heading */}
+        <h3 className="font-[Playfair_Display] text-[24px] sm:text-[28px] font-bold text-white leading-snug mb-3">
+          Coming Soon
+        </h3>
+
+        {/* Exact User Requested Copy */}
+        <p className="text-[14px] sm:text-[15px] leading-relaxed text-white/70 font-[Montserrat] mb-8">
+          This is a new feature, coming soon! While we train our models, please use the chat option below to connect with our expert team.
+        </p>
+
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <a
+            href={COMPANY.phoneHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            className="flex-1 inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-primary text-[#00382d] text-[12px] font-bold tracking-[0.12em] uppercase font-[Montserrat] hover:bg-primary/90 transition-all duration-200 shadow-[0_0_20px_rgba(68,229,194,0.3)]"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+              <path d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.138-3.13C2.41 12.753 2 11.42 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm4 0H9v2h2V9zm4 0h-2v2h2V9z" />
             </svg>
+            Connect With Expert Team
+          </a>
+
+          <button
+            onClick={onClose}
+            className="px-5 py-3.5 rounded-full border border-white/10 bg-white/5 text-white/60 text-[12px] font-semibold tracking-wider uppercase font-[Montserrat] hover:bg-white/10 hover:text-white transition-all duration-200"
+          >
+            Close
           </button>
-        </div>
-
-        {/* ── Progress ── */}
-        <div className="px-8 mt-5 shrink-0">
-          {/* Step dots */}
-          <div className="flex items-center gap-1.5 mb-3">
-            {QUIZ.map((_, i) => (
-              <div key={i} className="rounded-full transition-all duration-500"
-                style={{
-                  height: "3px",
-                  flex: 1,
-                  background: i < step || result ? "rgba(68,229,194,0.9)" : i === step && !result ? "rgba(68,229,194,0.4)" : "rgba(255,255,255,0.08)",
-                }} />
-            ))}
-          </div>
-          {!result && (
-            <p className="text-[10px] font-[Montserrat] text-white/20 tracking-widest">
-              {step + 1} <span className="text-white/10">/ {QUIZ.length}</span>
-            </p>
-          )}
-        </div>
-
-        {/* ── Scrollable body ── */}
-        <div className="flex-1 overflow-y-auto px-8 pb-8 pt-6"
-          style={{
-            opacity: animating ? 0 : 1,
-            transform: animating ? `translateY(${dir > 0 ? "12px" : "-12px"})` : "translateY(0)",
-            transition: "opacity 0.24s ease, transform 0.24s ease",
-          }}>
-
-          {!result ? (
-            <>
-              <h2 className="font-[Playfair_Display] text-[28px] sm:text-[32px] text-white leading-[1.1] mb-2">
-                {current.q}
-              </h2>
-              <p className="text-[12px] text-white/30 font-[Montserrat] leading-relaxed mb-8">{current.sub}</p>
-
-              {/* Options */}
-              <div className={`grid gap-3 ${isSpeciesStep ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-2"}`}>
-                {current.options.map((opt) => (
-                  <button key={opt.value} onClick={() => choose(opt.value)}
-                    className="group relative flex flex-col text-left rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", minHeight: isSpeciesStep ? "auto" : "88px" }}
-                    onMouseEnter={(e) => {
-                      const accent = opt.accent || "#44e5c2";
-                      e.currentTarget.style.background = `${accent}0d`;
-                      e.currentTarget.style.borderColor = `${accent}40`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                      e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
-                    }}>
-
-                    {isSpeciesStep ? (
-                      /* Species card — image top, text below */
-                      <>
-                        <div className="relative flex items-center justify-center py-5"
-                          style={{ background: `radial-gradient(ellipse at 50% 70%, ${opt.accent}18, transparent 70%)` }}>
-                          <Image src={opt.img} alt={opt.label} width={80} height={80}
-                            className="object-contain max-h-[76px] w-auto transition-transform duration-400 group-hover:scale-105"
-                            style={{ filter: `drop-shadow(0 8px 20px ${opt.accent}44)` }} />
-                        </div>
-                        <div className="px-4 pb-4 pt-1 border-t border-white/5">
-                          <p className="text-[13px] font-semibold font-[Montserrat] text-white group-hover:text-primary transition-colors duration-150 leading-none mb-0.5"
-                            style={{ "--hover": opt.accent }}>{opt.label}</p>
-                          <p className="text-[10px] text-white/30 font-[Montserrat]">{opt.sub}</p>
-                        </div>
-                      </>
-                    ) : (
-                      /* Regular card — icon left, text right */
-                      <div className="flex items-center gap-4 px-5 py-4">
-                        <div className="shrink-0 w-11 h-11 rounded-xl flex items-center justify-center"
-                          style={{ background: "rgba(68,229,194,0.08)", border: "1px solid rgba(68,229,194,0.12)", color: "rgba(68,229,194,0.7)" }}>
-                          {opt.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[14px] font-semibold font-[Montserrat] text-white group-hover:text-primary transition-colors duration-150 leading-none mb-1">{opt.label}</p>
-                          <p className="text-[11px] text-white/30 font-[Montserrat] leading-snug">{opt.sub}</p>
-                        </div>
-                        <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3 text-white/15 group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-150 shrink-0">
-                          <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {/* Back */}
-              {step > 0 && (
-                <button onClick={back}
-                  className="mt-6 flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase font-[Montserrat] text-white/20 hover:text-white/50 transition-colors duration-150">
-                  <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
-                    <path d="M8 2L4 6l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  Previous
-                </button>
-              )}
-            </>
-          ) : (
-            /* ── Result ── */
-            <>
-              {/* Product showcase */}
-              <div className="relative rounded-2xl overflow-hidden mb-6"
-                style={{ background: `linear-gradient(135deg, #0d1f2e 0%, #091914 100%)`, border: `1px solid ${result.accent}20` }}>
-
-                {/* Glow bg */}
-                <div className="absolute inset-0 pointer-events-none"
-                  style={{ background: `radial-gradient(ellipse 70% 80% at 50% 50%, ${result.accent}12, transparent 70%)` }} />
-
-                <div className="relative flex items-center gap-6 p-6">
-                  {/* Image */}
-                  <div className="shrink-0 relative w-[100px] h-[100px] flex items-center justify-center">
-                    <div className="absolute inset-0 rounded-full"
-                      style={{ background: `radial-gradient(circle, ${result.accent}22, transparent 70%)` }} />
-                    <Image src={result.image} alt={result.name} width={90} height={90}
-                      className="relative z-10 object-contain max-h-[90px] w-auto"
-                      style={{ filter: `drop-shadow(0 10px 28px ${result.accent}55)` }} />
-                  </div>
-
-                  {/* Text */}
-                  <div className="flex-1 min-w-0">
-                    <span className="inline-block text-[8px] font-bold px-2.5 py-1 rounded-full tracking-[0.22em] uppercase font-[Montserrat] mb-2"
-                      style={{ background: `${result.accent}18`, border: `1px solid ${result.accent}35`, color: result.accent }}>
-                      {result.badge}
-                    </span>
-                    <h3 className="font-[Playfair_Display] text-[22px] text-white leading-none mb-1">{result.name}</h3>
-                    <p className="text-[10px] font-[Montserrat] leading-relaxed" style={{ color: `${result.accent}99` }}>{result.tagline}</p>
-                  </div>
-                </div>
-
-                {/* Stat strip */}
-                <div className="grid grid-cols-3 border-t" style={{ borderColor: `${result.accent}15` }}>
-                  {result.stats.map((s, i) => (
-                    <div key={s.label} className={`flex flex-col items-center py-3 ${i < 2 ? "border-r" : ""}`}
-                      style={{ borderColor: `${result.accent}15` }}>
-                      <span className="font-[Playfair_Display] text-[20px] leading-none" style={{ color: result.accent }}>{s.val}</span>
-                      <span className="text-[9px] font-[Montserrat] mt-0.5 tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.25)" }}>{s.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Why block */}
-              <div className="rounded-xl px-5 py-4 mb-6"
-                style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                <p className="text-[10px] font-bold tracking-[0.2em] uppercase font-[Montserrat] mb-2" style={{ color: "rgba(255,255,255,0.2)" }}>Why this formula</p>
-                <p className="text-[13px] text-white/50 font-[Montserrat] leading-relaxed">{result.why}</p>
-              </div>
-
-              {/* CTAs */}
-              <div className="flex flex-col gap-2.5">
-                <a href={result.href}
-                  className="w-full py-4 rounded-2xl text-[11px] font-bold tracking-[0.2em] uppercase font-[Montserrat] text-center transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
-                  style={{ background: `linear-gradient(135deg, ${result.accent} 0%, ${result.accent}cc 100%)`, color: "#003d2e" }}>
-                  Shop {result.name}
-                </a>
-                <button onClick={restart}
-                  className="w-full py-3.5 rounded-2xl text-[10px] font-bold tracking-[0.2em] uppercase font-[Montserrat] transition-all duration-150"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.3)" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.07)"; e.currentTarget.style.color = "rgba(255,255,255,0.6)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.color = "rgba(255,255,255,0.3)"; }}>
-                  Retake Quiz
-                </button>
-              </div>
-            </>
-          )}
         </div>
       </div>
     </div>
