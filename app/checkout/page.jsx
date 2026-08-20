@@ -8,6 +8,7 @@ import { checkout as checkoutApi, settings as settingsApi, formatInr } from "@/l
 import { pincodeMatchesState, likelyStateForPincode, INDIAN_STATES } from "@/lib/pincode";
 import { useAuth, signInHref } from "@/lib/authContext";
 import { account as accountApi } from "@/lib/api";
+import SavedAddressPicker, { SaveAddressToggle } from "@/components/checkout/SavedAddressPicker";
 
 import CheckoutBreadcrumbs from "@/components/checkout/CheckoutBreadcrumbs";
 import { FloatingInput, FloatingSelect } from "@/components/checkout/FloatingInput";
@@ -63,6 +64,13 @@ export default function CheckoutPage() {
   const { customer, isAuthenticated, isLoading: authLoading } = useAuth();
   /** True once a prefill has run, so it cannot fight the customer's own edits. */
   const prefilled = useRef(false);
+
+  /** The customer's address book, for the picker. Empty for guests. */
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  /** An address id, or "new" when typing one in. */
+  const [selectedAddressId, setSelectedAddressId] = useState("new");
+  /** Ticked by default for guests — it costs them nothing and saves retyping. */
+  const [saveAddress, setSaveAddress] = useState(true);
 
   const idempotencyKey = useRef(
     `chk-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
@@ -150,14 +158,19 @@ export default function CheckoutPage() {
 
     let cancelled = false;
     (async () => {
-      let defaultAddress = null;
+      let list = [];
       try {
-        const list = await accountApi.addresses();
-        defaultAddress = list.find((a) => a.isDefault) ?? list[0] ?? null;
+        list = await accountApi.addresses();
       } catch {
         /* Address book unavailable — fall back to identity fields only. */
       }
       if (cancelled) return;
+
+      const defaultAddress = list.find((a) => a.isDefault) ?? list[0] ?? null;
+      setSavedAddresses(list);
+      // Preselect the default so the common case is one fewer decision. With no
+      // saved addresses the picker does not render and this stays on "new".
+      if (defaultAddress) setSelectedAddressId(defaultAddress.id);
 
       setForm((f) => ({
         ...f,
@@ -178,6 +191,41 @@ export default function CheckoutPage() {
       cancelled = true;
     };
   }, [authLoading, isAuthenticated, customer]);
+
+  /**
+   * Apply a picked address to the form.
+   *
+   * The form stays the single source of truth for what gets submitted — the
+   * picker only writes into it. That keeps one validation path and one payload
+   * shape whether the address was chosen or typed.
+   */
+  const chooseAddress = (id) => {
+    setSelectedAddressId(id);
+    if (id === "new") {
+      // Clear only the address fields; name, email and phone still apply.
+      setForm((f) => ({ ...f, address: "", city: "", state: "", pincode: "" }));
+      setAutoDetectedBadge("");
+      return;
+    }
+
+    const a = savedAddresses.find((x) => x.id === id);
+    if (!a) return;
+
+    const [firstName, ...rest] = (a.name || "").trim().split(/\s+/);
+    setForm((f) => ({
+      ...f,
+      firstName: firstName || f.firstName,
+      lastName: rest.join(" ") || f.lastName,
+      phone: a.phone || f.phone,
+      address: [a.line1, a.line2].filter(Boolean).join(", "),
+      city: a.city ?? "",
+      state: a.state ?? "",
+      pincode: a.pincode ?? "",
+    }));
+    // A stored address has already been through this form's validation.
+    setErrors((e) => ({ ...e, address: "", city: "", state: "", pincode: "" }));
+    setAutoDetectedBadge("");
+  };
 
   // Re-price when state or email changes for GST tax calculation
   useEffect(() => {
@@ -440,6 +488,9 @@ export default function CheckoutPage() {
           paymentMethod: "RAZORPAY",
           couponCode: coupon?.code ?? undefined,
           customerNote: form.notes.trim() || undefined,
+          // Only meaningful for a newly typed address; one picked from the book
+          // is already saved, and the server dedupes anyway.
+          saveAddress: selectedAddressId === "new" && saveAddress,
         },
         idempotencyKey.current,
       );
@@ -859,7 +910,37 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
-                <div className="flex flex-col gap-5">
+                {/*
+                  Saved addresses first, when there are any. Choosing one writes
+                  into the same form the fields below use, so there is one
+                  validation path and one payload either way.
+                */}
+                {savedAddresses.length > 0 && (
+                  <SavedAddressPicker
+                    addresses={savedAddresses}
+                    selectedId={selectedAddressId}
+                    onSelect={chooseAddress}
+                  />
+                )}
+
+                {/*
+                  Kept MOUNTED when a saved address is picked — the fields still
+                  hold the values being submitted, and unmounting would drop the
+                  state validation reads from.
+
+                  Toggled by class, not the `hidden` attribute: `hidden` is a UA
+                  rule and loses to the author-level `display:flex` from these
+                  very classes, so the fields stayed visible underneath the
+                  picker. Swapping flex for Tailwind's `hidden` removes the
+                  competing declaration entirely.
+                */}
+                <div
+                  className={`${
+                    savedAddresses.length > 0 && selectedAddressId !== "new"
+                      ? "hidden"
+                      : "flex"
+                  } flex-col gap-5`}
+                >
                   <FloatingInput
                     id="address"
                     name="address"
@@ -945,6 +1026,19 @@ export default function CheckoutPage() {
                     />
                   </div>
                 </div>
+
+                {/*
+                  Only offered for an address being typed. Re-saving one that
+                  came out of the address book would be a no-op the customer
+                  cannot see the result of.
+                */}
+                {selectedAddressId === "new" && (
+                  <SaveAddressToggle
+                    checked={saveAddress}
+                    onChange={setSaveAddress}
+                    isAuthenticated={isAuthenticated}
+                  />
+                )}
               </div>
 
               {/* SECTION 3: PAYMENT METHOD */}
