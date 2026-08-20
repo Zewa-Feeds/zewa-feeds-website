@@ -31,6 +31,15 @@ const IcoMakeInIndia = () => (
   </svg>
 );
 
+const IcoLarva = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
+    <ellipse cx="10" cy="10" rx="7" ry="4" stroke="currentColor" strokeWidth="1.4"/>
+    <circle cx="4" cy="9" r="1" fill="currentColor" opacity=".5"/>
+    <path d="M6 8.5 Q8 7 10 8.5 Q12 10 14 8.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
+    <circle cx="16.5" cy="9.5" r=".8" fill="currentColor"/>
+  </svg>
+);
+
 const TRUST_BADGES = [
   { icon: <IcoMicroscope />, label: "NABL Tested" },
   { icon: <IcoLeaf />, label: "100% Natural" },
@@ -363,155 +372,6 @@ function ProductCard({ p }) {
       )}
     </a>
   );
-}
-
-// ── Find My Feed quiz ─────────────────────────────────────────────────────────
-
-const QUIZ = [
-  {
-    id: "size",
-    q: "How big is your fish?",
-    sub: "Determines pellet size and protein density needed.",
-    options: [
-      {
-        label: "Small fish",
-        sub: "Under 5 cm — bettas, guppies, tetras",
-        value: "small",
-        icon: (
-          <svg viewBox="0 0 32 32" fill="none" className="w-6 h-6">
-            <ellipse cx="13" cy="16" rx="8" ry="5" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M5 16c-2-2-4-4-4-4s0 4 4 4z" fill="currentColor" opacity=".4"/>
-            <circle cx="18" cy="14.5" r="1" fill="currentColor"/>
-          </svg>
-        ),
-      },
-      {
-        label: "Large fish",
-        sub: "Over 5 cm — cichlids, goldfish, plecos",
-        value: "large",
-        icon: (
-          <svg viewBox="0 0 32 32" fill="none" className="w-6 h-6">
-            <ellipse cx="14" cy="16" rx="11" ry="7" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M3 16c-2-3-2-6-2-6s2 4 2 6z" fill="currentColor" opacity=".4"/>
-            <circle cx="21" cy="13.5" r="1.2" fill="currentColor"/>
-          </svg>
-        ),
-      },
-    ],
-  },
-  {
-    id: "species",
-    q: "Which species?",
-    sub: "Each species has a distinct nutritional fingerprint.",
-    options: [
-      { label: "Betta", sub: "Surface feeder · carnivore", value: "betta", img: "/Bottles/Betta/Betta F3_Front.png", accent: "#44e5c2" },
-      { label: "Cichlid", sub: "Aggressive · high-energy", value: "cichlid", img: "/Bottles/Cichild/Cichild C4_Front.png", accent: "#38bdf8" },
-      { label: "Guppy / Livebearer", sub: "Omnivore · mid-water", value: "guppy", img: "/Bottles/Guppy/Guppy G2_Front.png", accent: "#44e5c2" },
-      { label: "Hatchery / Fry", sub: "Rapid growth · micro nutrition", value: "hatchery", img: "/Bottles/DBSFL/DBSFL 25G.png", accent: "#a78bfa" },
-    ],
-  },
-  {
-    id: "stage",
-    q: "What life stage?",
-    sub: "Fry need dense micro-protein; adults need sustained energy.",
-    options: [
-      {
-        label: "Fry / Juvenile",
-        sub: "0–6 months · rapid development phase",
-        value: "fry",
-        icon: (
-          <svg viewBox="0 0 32 32" fill="none" className="w-6 h-6">
-            <circle cx="16" cy="16" r="6" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M16 10v2M16 20v2M10 16h2M20 16h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-        ),
-      },
-      {
-        label: "Adult",
-        sub: "6 months+ · maintenance & colour",
-        value: "adult",
-        icon: (
-          <svg viewBox="0 0 32 32" fill="none" className="w-6 h-6">
-            <circle cx="16" cy="16" r="9" stroke="currentColor" strokeWidth="1.5"/>
-            <circle cx="16" cy="16" r="4" stroke="currentColor" strokeWidth="1.5"/>
-          </svg>
-        ),
-      },
-    ],
-  },
-  {
-    id: "goal",
-    q: "Primary feeding goal?",
-    sub: "Helps us choose between performance and balanced formulas.",
-    options: [
-      {
-        label: "Max nutrition",
-        sub: "Competition prep · breeding stock",
-        value: "max",
-        icon: (
-          <svg viewBox="0 0 32 32" fill="none" className="w-6 h-6">
-            <path d="M16 4v8M16 4l-3 4M16 4l3 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M8 14h16l-2 10H10L8 14z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-          </svg>
-        ),
-      },
-      {
-        label: "Daily maintenance",
-        sub: "Healthy colour · steady growth",
-        value: "balanced",
-        icon: (
-          <svg viewBox="0 0 32 32" fill="none" className="w-6 h-6">
-            <path d="M6 24l5-6 5 3 5-8 5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <circle cx="26" cy="17" r="2" fill="currentColor" opacity=".4"/>
-          </svg>
-        ),
-      },
-    ],
-  },
-];
-
-/**
- * Pick a recommendation from the LIVE catalogue.
- *
- * The four results here used to be hardcoded, naming products like
- * "Betta Bites F3" whose slugs 404 — so the quiz confidently recommended
- * things nobody could buy. Matching against real products means the quiz can
- * only ever suggest something that exists and is in stock.
- *
- * Matching is deliberately loose (species keyword against name, category and
- * tags): the catalogue is small, and a near-miss recommendation is far better
- * than a dead link. Falls back to the first product, and returns null when the
- * catalogue is empty so the caller can hide the quiz entirely.
- */
-function getResult(answers, products) {
-  if (!products || products.length === 0) return null;
-
-  const { species, stage } = answers;
-  const hay = (p) =>
-    `${p.name} ${p.category ?? ""} ${(p.tags ?? []).join(" ")}`.toLowerCase();
-
-  // Fry and hatchery need the densest feed, whatever it is called.
-  const wants =
-    species === "hatchery" || stage === "fry"
-      ? ["larva", "bsf", "hatch", "fry", "starter"]
-      : [species];
-
-  const match =
-    products.find((p) => wants.some((w) => w && hay(p).includes(w))) ?? products[0];
-
-  return {
-    name: match.name,
-    badge: match === products[0] ? "GREAT MATCH" : "PERFECT MATCH",
-    accent: "#44e5c2",
-    tagline: match.tagline ?? "",
-    why: match.tagline ?? "",
-    image: match.image,
-    href: match.slug ? `/products/${match.slug}` : "/products",
-    stats: [
-      match.protein ? { val: match.protein, label: "Protein" } : null,
-      { val: "0%", label: "Soy" },
-    ].filter(Boolean),
-  };
 }
 
 function FindMyFeedQuiz({ onClose }) {
