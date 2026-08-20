@@ -53,25 +53,57 @@ export function adaptProduct(api) {
   const packLabels = (api.packs ?? []).map((v) => v.pack);
 
   /*
-   * CARD GALLERY = THE BASE PACK ONLY, plus shared assets.
+   * CARD MEDIA COMES FROM THE SERVER, ALREADY DECIDED.
    *
-   * This used to be `api.images.map(...)` — every image of every pack. A product
-   * with a 45g bottle, a 200g pouch and a 1kg pouch put ~20 slides in one card,
-   * including back-of-pack label shots, so hovering cycled through the whole
-   * photo library instead of showing the product.
+   * This used to work it out here: filter `api.media` by the first IN-STOCK
+   * pack's SKU, take the first image, and fall back to the product's first image
+   * of any pack when that came up empty. Two bugs lived in those three lines — a
+   * pack selling out changed which photograph the catalogue showed, and Cichlid
+   * C4's card, which sells the 45g, showed the 1kg pouch.
    *
-   * `api.media` carries a `sku` per asset (null = shared), so the card can show
-   * just the first pack — which is what the card's price and Add-to-Cart refer
-   * to — and the product video.
+   * `api.listing` is the canonical resolver plus the presentation layer, so the
+   * card, the product page and the CMS preview cannot disagree. There is no
+   * cross-pack fallback in it and there must never be one here either.
    */
-  const media = api.media ?? [];
-  const baseSku = first?.sku ?? null;
+  const listing = api.listing ?? null;
 
-  const cardImages = media
-    .filter((m) => m.type !== "VIDEO" && (!m.sku || m.sku === baseSku))
+  /*
+   * The representative pack's gallery, in presentation order.
+   *
+   * Read from `packs[].gallery`, which is resolver output: it contains only what
+   * that pack may legitimately show. Mapping `orderedIds` is not resolution —
+   * it is reading an order the server already decided.
+   */
+  const repPack = (api.packs ?? []).find((k) => k.sku === listing?.sku) ?? null;
+  const galleryItems = repPack?.gallery?.items ?? [];
+  const byId = new Map(galleryItems.map((m) => [m.id, m]));
+  const orderedItems = (repPack?.gallery?.presentation?.orderedIds ?? [])
+    .map((id) => byId.get(id))
+    .filter(Boolean);
+
+  const cardImages = (orderedItems.length ? orderedItems : galleryItems)
+    .filter((m) => m.type !== "VIDEO")
     .map((m) => m.url);
 
-  const video = media.find((m) => m.type === "VIDEO")?.url ?? null;
+  /*
+   * Fallback for a cached response predating `listing`.
+   *
+   * Deliberately NOT the old behaviour: `packs[0].gallery` is still resolver
+   * output, so the worst case is a less-preferred pack, never another pack's
+   * photography. Reinstating `api.images[0]` here would reinstate the bug.
+   */
+  const legacyImages = (api.packs?.[0]?.gallery?.items ?? [])
+    .filter((m) => m.type !== "VIDEO")
+    .map((m) => m.url);
+
+  /*
+   * The still. A product whose only asset is a film shows the poster frame,
+   * which is a real picture of the product rather than a black rectangle.
+   */
+  const image =
+    listing?.heroUrl ?? cardImages[0] ?? legacyImages[0] ?? listing?.posterUrl ?? PLACEHOLDER_IMAGE;
+
+  const video = listing?.videoUrl ?? null;
 
   return {
     name: api.name,
@@ -87,11 +119,19 @@ export function adaptProduct(api) {
     badge: api.badge ?? null,
     badgeColor: "bg-primary text-[#00382d]",
     protein: api.proteinPct ? `${api.proteinPct}%` : null,
-    image: cardImages[0] ?? api.images?.[0]?.url ?? PLACEHOLDER_IMAGE,
+    image,
     // Cap at 4: a card is a glance, not a gallery. The PDP has the full set.
-    gallery: (cardImages.length ? cardImages : (api.images ?? []).map((i) => i.url)).slice(0, 4),
-    /** The card cycles to this after ~3s of hover. Null hides that behaviour. */
+    gallery: (cardImages.length ? cardImages : legacyImages.length ? legacyImages : [image]).slice(
+      0,
+      4,
+    ),
+    /** Plays after ~2s of hover. Null keeps the card on its photograph. */
     video,
+    /**
+     * Poster frame for that film — and the card's still when the product has a
+     * video but no photograph, so the well is never black before playback.
+     */
+    poster: listing?.posterUrl ?? null,
     accentColor: api.presentation?.accent ?? "rgba(68,229,194,0.18)",
     /*
      * Backdrop for the card's image well, matching the PDP gallery.

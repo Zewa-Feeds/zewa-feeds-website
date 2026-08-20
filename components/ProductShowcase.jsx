@@ -47,8 +47,25 @@ const FALLBACK_PRODUCTS = [
 /** API product -> the shape this section renders. */
 function adapt(api, i = 0) {
   const first = (api.packs ?? [])[0];
-  const rawImage = (api.images ?? [])[0]?.url;
-  const imageUrl = rawImage || FALLBACK_PRODUCTS[i % FALLBACK_PRODUCTS.length].images[0].url;
+
+  /*
+   * The SAME representative image the shop grid uses.
+   *
+   * This read `api.images[0]` — the first image of any pack, in CMS order — so
+   * the homepage could introduce a product with a photograph of a pack size the
+   * card and the product page never show. `listing` is the resolver plus the
+   * presentation layer, shared with every other surface.
+   *
+   * The poster frame stands in for a product whose only asset is a film. The
+   * hand-written fallback below survives for the API being unreachable, which is
+   * the case it was written for; it is never used to paper over a product that
+   * genuinely has no suitable photograph.
+   */
+  const imageUrl =
+    api.listing?.heroUrl ||
+    api.listing?.posterUrl ||
+    (api.listing ? null : (api.images ?? [])[0]?.url) ||
+    FALLBACK_PRODUCTS[i % FALLBACK_PRODUCTS.length].images[0].url;
 
   return {
     name: api.name,

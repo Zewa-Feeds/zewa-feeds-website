@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
 import { formatInr, catalog } from "@/lib/api";
+import { useHoverVideo } from "@/lib/useHoverVideo";
 import { PLACEHOLDER_IMAGE } from "./adapters";
 import { COMPANY } from "@/lib/company";
 
@@ -88,7 +89,6 @@ function buildCategories(categories, products) {
 function ProductCard({ p }) {
   const gallery = p.gallery || [p.image];
   const [imgIdx, setImgIdx] = useState(0);
-  const [showVideo, setShowVideo] = useState(false);
   /**
    * Is the image well currently showing its LIGHT treatment?
    *
@@ -110,8 +110,17 @@ function ProductCard({ p }) {
    * anything underneath.
    */
   const autoTimerRef = useRef(null);
-  const videoTimerRef = useRef(null);
-  const videoRef = useRef(null);
+
+  /*
+   * Hover film.
+   *
+   * The timer, the pointer-capability check, the one-video-at-a-time rule and
+   * the cleanup all live in the hook rather than here. They were a bare
+   * setTimeout in this component, which meant every card carried its own copy of
+   * four subtle rules and a leak on unmount.
+   */
+  const hover = useHoverVideo({ src: p.video });
+  const showVideo = hover.playing;
 
   const stopAuto = useCallback(() => {
     clearInterval(autoTimerRef.current);
@@ -127,57 +136,40 @@ function ProductCard({ p }) {
 
   const handleMouseEnter = useCallback(() => {
     /*
-     * VIDEO IS THE SECOND THING SEEN, matching the PDP gallery order
-     * (photo, video, photo…). It used to cycle images every second and only cut
-     * to video after 3s, so the film was the fourth slide — by which point the
-     * cursor has usually moved on.
+     * ORDER: photograph, then film, then the rest of the photography.
      *
-     * With a video: hold the hero for 1.2s, play the video, and do not cycle
-     * stills underneath it. Without one: fall back to cycling images.
+     * With a film the card holds its photograph while the hook waits out the
+     * two seconds, then crosses to the video — and does NOT cycle stills
+     * underneath it, which would change the picture behind a playing film.
+     * Without one, cycling the remaining images is the whole behaviour.
      */
     if (p.video) {
-      videoTimerRef.current = setTimeout(() => {
-        setShowVideo(true);
-        if (videoRef.current) videoRef.current.play().catch(() => {});
-      }, 1200);
+      hover.onEnter();
       return;
     }
     startImageCycle();
-  }, [startImageCycle, p.video]);
+  }, [startImageCycle, p.video, hover]);
 
   const handleMouseLeave = useCallback(() => {
     stopAuto();
-    clearTimeout(videoTimerRef.current);
-    setShowVideo(false);
+    hover.onLeave();
     setImgIdx(0);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-  }, [stopAuto]);
+  }, [stopAuto, hover]);
 
   const goTo = useCallback((dir, e) => {
     e.preventDefault();
     e.stopPropagation();
     stopAuto();
     /*
-     * Stepping the gallery cancels the video. The arrows are now available while
-     * it plays, and without this the still underneath would change invisibly
+     * Stepping the gallery cancels the film. The arrows are available while it
+     * plays, and without this the still underneath would change invisibly
      * behind the video — the click would appear to do nothing.
      */
-    clearTimeout(videoTimerRef.current);
-    setShowVideo(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
+    hover.onLeave();
     setImgIdx((prev) => (prev + dir + gallery.length) % gallery.length);
-  }, [gallery.length, stopAuto]);
+  }, [gallery.length, stopAuto, hover]);
 
-  useEffect(() => () => {
-    clearInterval(autoTimerRef.current);
-    clearTimeout(videoTimerRef.current);
-  }, []);
+  useEffect(() => () => clearInterval(autoTimerRef.current), []);
 
   return (
     <a
@@ -242,7 +234,7 @@ function ProductCard({ p }) {
         ))}
 
         {/*
-          Video — fades in after 3s hover.
+          Video — fades in once it is genuinely playing, after 2s of hover.
 
           CONTAIN, not cover. The photography is 1:1 and fills the square well
           exactly, but the clips are 16:9: covering a square with them crops
@@ -253,16 +245,25 @@ function ProductCard({ p }) {
           duration. Losing the white surround for a few seconds of hover is a
           far smaller cost than showing a truncated caption.
         */}
-        {p.video && (
+        {p.video && hover.canHover && (
           <video
-            ref={videoRef}
-            src={p.video}
-            muted
-            loop
-            playsInline
-            preload="none"
+            {...hover.videoProps}
+            /*
+              No `src` attribute: the hook attaches it once the pointer has
+              stayed for two seconds. With it set here the browser may fetch
+              early regardless of preload="none", and these files are megabytes.
+
+              `poster` still paints a real frame the instant playback begins,
+              so the crossfade never lands on black.
+            */
+            poster={p.poster ?? undefined}
             className="absolute inset-0 w-full h-full object-contain pointer-events-none"
             style={{
+              /*
+                Revealed only when frames are actually on screen — the hook sets
+                this from the `playing` event, not from "we asked it to play".
+                A file that stalls or is refused leaves the photograph in place.
+              */
               opacity: showVideo ? 1 : 0,
               transition: "opacity 0.6s ease",
               zIndex: showVideo ? 10 : 0,

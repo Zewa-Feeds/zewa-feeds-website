@@ -4,6 +4,7 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
+import { PLACEHOLDER_IMAGE } from "@/app/products/adapters";
 import { formatInr } from "@/lib/api";
 
 export default function CartPage() {
@@ -79,7 +80,15 @@ export default function CartPage() {
                     <div className="w-20 h-20 shrink-0 rounded-xl overflow-hidden flex items-center justify-center"
                       style={{ background: item.accentBg || "#1a2235" }}>
                       <Image
-                        src={item.image}
+                        /*
+                          A line can legitimately have no photograph: a pack
+                          whose only asset is a film, or one whose photography
+                          has not been shot yet. next/image throws on a null
+                          src, which would take the whole cart down rather than
+                          show a neutral square — and this is the page someone
+                          is on with money in hand.
+                        */
+                        src={item.image || PLACEHOLDER_IMAGE}
                         alt={item.name}
                         width={72}
                         height={72}

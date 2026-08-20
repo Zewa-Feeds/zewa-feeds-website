@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReviewForm from "@/components/ReviewForm";
 import { useCart } from "@/lib/cartContext";
-import { isCutout } from "@/app/products/adapters";
+import { isCutout, PLACEHOLDER_IMAGE } from "@/app/products/adapters";
 import { discountPct, formatInr } from "@/lib/api";
 import { COMPANY, COMPANY_ADDRESS_LINE } from "@/lib/company";
 
@@ -134,8 +134,30 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
    */
   const resolved = pack?.gallery ?? null;
 
+  /*
+   * The gallery, in the order a customer should meet it.
+   *
+   * `items` is the operator's CMS arrangement; `presentation.orderedIds` is what
+   * to LEAD with — the pack's main image, then the film, then the rest of that
+   * pack's photography, then shared assets. Two questions about the same list,
+   * which is why the server sends both rather than overloading `position`.
+   *
+   * This page used to open at `items[0]`, i.e. whatever sat first in the CMS.
+   * Four products keep their film at position 0, so their product pages opened
+   * on a video — while `isPrimary`, which named the right photograph, was
+   * computed, sent, and never read.
+   */
   const media = (() => {
-    if (resolved) return resolved.items;
+    if (resolved) {
+      const order = resolved.presentation?.orderedIds;
+      if (order?.length) {
+        const byId = new Map(resolved.items.map((m) => [m.id, m]));
+        const ordered = order.map((id) => byId.get(id)).filter(Boolean);
+        // Only trust a complete ordering; a partial one would drop assets.
+        if (ordered.length === resolved.items.length) return ordered;
+      }
+      return resolved.items;
+    }
 
     // ---- Legacy fallback (pre-resolver API responses) ----
     const wanted = pack?.sku ? [pack.sku] : [];
@@ -167,7 +189,14 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
       : `${product.name}, view ${i + 1} of ${media.length}`;
   };
 
-  const primaryImage = media.find((m) => m.type === "IMAGE")?.url ?? media[0]?.url;
+  /*
+   * A still, for anywhere a picture is required: the video's poster fallback,
+   * the thumbnail strip, the cart line this page writes.
+   *
+   * IMAGE only, with no `?? media[0]` fallback. A pack whose only asset is a
+   * film would otherwise hand an .mp4 URL to <img> and to the cart.
+   */
+  const primaryImage = media.find((m) => m.type === "IMAGE")?.url ?? null;
   const [activeIndex, setActiveIndex] = useState(0);
   const active = media[activeIndex] ?? media[0];
 
@@ -217,10 +246,14 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
   /** Switching pack can lower the ceiling, so re-clamp rather than carry a bad qty. */
   const selectPack = (i) => {
     setActivePack(i);
-    // The gallery is filtered by pack, so a stale index could point past the end
-    // of the new list — or at a different product photo entirely.
-    // Always back to the first item: a stale index from a longer gallery would
-    // otherwise point past the end of a shorter one.
+    /*
+     * Back to the top of the NEW pack's gallery, always.
+     *
+     * Index 0 is now that pack's own main image, because the list arrives in
+     * presentation order. Carrying the old index over would show whatever
+     * happened to sit at that position in a different pack's gallery — or point
+     * past the end of a shorter one.
+     */
     setActiveIndex(0);
     const nextMax = packs[i]?.maxQty ?? 1;
     setQty((q) => Math.min(q, Math.max(1, nextMax)));
@@ -241,7 +274,16 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
       pack: pack.pack,
       pricePaise: pack.pricePaise,
       mrpPaise: pack.mrpPaise,
-      image: primaryImage,
+      /*
+       * A still, or the film's poster, or the placeholder — never null and
+       * never an .mp4. The cart, the checkout summary and the confirmation all
+       * render this in an <img>, and a pack whose only asset is a film has no
+       * photograph to give them.
+       */
+      image:
+        primaryImage ??
+        media.find((m) => m.type === "VIDEO")?.posterUrl ??
+        PLACEHOLDER_IMAGE,
       accentBg: presentation.accentBg ?? "#d4f5ed",
       qty,
       // Carried into the cart so the drawer and cart page enforce the same
@@ -329,7 +371,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                   />
                 ) : (
                   <Image
-                    src={active?.url ?? primaryImage}
+                    src={active?.url ?? primaryImage ?? PLACEHOLDER_IMAGE}
                     alt={mediaAlt(active, activeIndex)}
                     width={640}
                     height={640}
@@ -392,7 +434,17 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                       }
                     >
                       <Image
-                        src={item.type === "VIDEO" ? (item.posterUrl ?? primaryImage) : item.url}
+                        /*
+                          A film with no poster in a gallery holding no
+                          photograph leaves nothing to draw. next/image throws
+                          on a null src, which would take the whole product page
+                          down rather than show a grey square.
+                        */
+                        src={
+                          item.type === "VIDEO"
+                            ? (item.posterUrl ?? primaryImage ?? PLACEHOLDER_IMAGE)
+                            : item.url
+                        }
                         alt={mediaAlt(item, i)}
                         width={72}
                         height={72}
