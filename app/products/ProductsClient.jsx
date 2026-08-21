@@ -19,12 +19,18 @@ const IcoMicroscope = () => (
     <path d="M14 9h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
   </svg>
 );
-const IcoLeaf = () => (
-  <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
-    <path d="M10 17C10 17 3 13 3 7a7 7 0 0 1 14 0c0 6-7 10-7 10z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-    <path d="M10 17V10M10 10C10 10 7 8 7 6M10 10C10 10 13 8 13 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+const IcoResearch = () => (
+  <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4 text-primary">
+    {/* Chemistry Beaker with molecular compound */}
+    <path d="M7.5 2.5h5M9 2.5v4.5L5 15.5c-.5.8 0 2 1 2h8c1 0 1.5-1.2 1-2l-4-8.5V2.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M6.5 13h7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+    <circle cx="9" cy="15" r="0.7" fill="currentColor"/>
+    <circle cx="11.5" cy="14" r="0.7" fill="currentColor"/>
+    <circle cx="16" cy="11.5" r="1.5" stroke="currentColor" strokeWidth="1.1"/>
+    <circle cx="16" cy="15.5" r="1.5" stroke="currentColor" strokeWidth="1.1"/>
   </svg>
 );
+
 const IcoMakeInIndia = () => (
   <img
     src="/icons/make-in-india-teal.png"
@@ -34,19 +40,18 @@ const IcoMakeInIndia = () => (
 );
 
 const IcoLarva = () => (
-  <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
-    <ellipse cx="10" cy="10" rx="7" ry="4" stroke="currentColor" strokeWidth="1.4"/>
-    <circle cx="4" cy="9" r="1" fill="currentColor" opacity=".5"/>
-    <path d="M6 8.5 Q8 7 10 8.5 Q12 10 14 8.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-    <circle cx="16.5" cy="9.5" r=".8" fill="currentColor"/>
-  </svg>
+  <img
+    src="/icons/larva-cyan.png"
+    alt="Insect Protein"
+    className="h-3.5 w-auto max-w-[26px] object-contain shrink-0"
+  />
 );
 
 const TRUST_BADGES = [
   { icon: <IcoMicroscope />, label: "NABL Tested" },
-  { icon: <IcoLeaf />, label: "100% Natural" },
+  { icon: <IcoResearch />, label: "Research backed formulation" },
   { icon: <IcoMakeInIndia />, label: "Made in India" },
-  { icon: <IcoLarva />, label: "Insect Protein" },
+  { icon: <IcoLarva />, label: "Based on Insect Protein Formulae" },
 ];
 
 
