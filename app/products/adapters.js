@@ -33,17 +33,24 @@ export const PLACEHOLDER_IMAGE =
 
 export function adaptProduct(api) {
   /*
-   * The pack this card actually sells.
+   * The pack this card represents and sells.
    *
-   * Prefer the first IN-STOCK pack, not simply the first one. A product is
-   * `inStock` when ANY pack is available, so a product whose first pack is sold
-   * out — Koi Bites K7-500G — showed an enabled "+ Add" that put an
-   * unpurchasable SKU in the cart, while its own detail page correctly refused.
-   * Falling back to packs[0] keeps price and imagery sensible when every pack
-   * is gone; `cardInStock` below then disables the button.
+   * The server's `listing.sku` identifies the EFFECTIVE listing variant
+   * (the configured variant if in-stock, or the deterministic in-stock fallback
+   * if sold out).
+   *
+   * For legacy or cached responses lacking `listing`, we fall back to the first
+   * in-stock pack, or packs[0] if all are sold out.
    */
   const packs = api.packs ?? [];
-  const first = packs.find((p) => p.inStock !== false) ?? packs[0];
+  const listing = api.listing ?? null;
+
+  const effectivePack =
+    (listing?.sku ? packs.find((k) => k.sku === listing.sku) : null) ??
+    packs.find((p) => p.inStock !== false) ??
+    packs[0];
+
+  const first = effectivePack;
   /*
    * Whitespace-stripped for tag MATCHING (the filter normalises the same way).
    * `packLabels` keeps the readable form, because these strings are also shown
@@ -55,26 +62,11 @@ export function adaptProduct(api) {
   /*
    * CARD MEDIA COMES FROM THE SERVER, ALREADY DECIDED.
    *
-   * This used to work it out here: filter `api.media` by the first IN-STOCK
-   * pack's SKU, take the first image, and fall back to the product's first image
-   * of any pack when that came up empty. Two bugs lived in those three lines — a
-   * pack selling out changed which photograph the catalogue showed, and Cichlid
-   * C4's card, which sells the 45g, showed the 1kg pouch.
-   *
    * `api.listing` is the canonical resolver plus the presentation layer, so the
    * card, the product page and the CMS preview cannot disagree. There is no
    * cross-pack fallback in it and there must never be one here either.
    */
-  const listing = api.listing ?? null;
-
-  /*
-   * The representative pack's gallery, in presentation order.
-   *
-   * Read from `packs[].gallery`, which is resolver output: it contains only what
-   * that pack may legitimately show. Mapping `orderedIds` is not resolution —
-   * it is reading an order the server already decided.
-   */
-  const repPack = (api.packs ?? []).find((k) => k.sku === listing?.sku) ?? null;
+  const repPack = (api.packs ?? []).find((k) => k.sku === listing?.sku) ?? effectivePack;
   const galleryItems = repPack?.gallery?.items ?? [];
   const byId = new Map(galleryItems.map((m) => [m.id, m]));
   const orderedItems = (repPack?.gallery?.presentation?.orderedIds ?? [])

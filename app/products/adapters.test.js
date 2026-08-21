@@ -160,44 +160,67 @@ describe("card imagery", () => {
   });
 });
 
-describe("imagery is independent of stock", () => {
-  it("keeps the representative photograph when that pack sells out", () => {
-    const build = (fortyFiveInStock) =>
-      adaptProduct(
-        product({
-          listing: {
-            sku: "G2-45G", pack: "45g Bottle", heroUrl: `${CDN}/bottle.jpg`,
-            heroAlt: "b", videoUrl: null, posterUrl: null, coverage: "EXACT",
-          },
-          packs: [
-            pack("G2-45G", { items: [item("bottle")], inStock: fortyFiveInStock }),
-            pack("G2-1KG", { items: [item("pouch")], price: 99900 }),
-          ],
-        }),
-      );
-
-    expect(build(false).image).toBe(build(true).image);
-  });
-
-  it("still prices and sells the first pack a shopper can buy", () => {
+describe("effective listing variant presentation and commerce", () => {
+  it("uses the effective listing variant for both imagery and commerce when in stock", () => {
     const card = adaptProduct(
       product({
         listing: {
           sku: "G2-45G", pack: "45g Bottle", heroUrl: `${CDN}/bottle.jpg`,
-          heroAlt: "b", videoUrl: null, posterUrl: null, coverage: "EXACT",
+          heroAlt: "bottle", videoUrl: null, posterUrl: null, coverage: "EXACT",
         },
         packs: [
-          pack("G2-45G", { items: [item("bottle")], inStock: false }),
-          pack("G2-1KG", { items: [item("pouch")], price: 99900 }),
+          pack("G2-45G", { items: [item("bottle")], inStock: true, price: 24900 }),
+          pack("G2-1KG", { items: [item("pouch")], inStock: true, price: 99900 }),
         ],
       }),
     );
 
-    // Imagery follows the representative; commerce follows availability.
     expect(card.image).toBe(`${CDN}/bottle.jpg`);
+    expect(card.sku).toBe("G2-45G");
+    expect(card.price).toBe(249);
+    expect(card.inStock).toBe(true);
+  });
+
+  it("reflects effective variant fallback when server resolves an in-stock alternative", () => {
+    // Backend presentListing resolved effective variant to G2-1KG because G2-45G was sold out
+    const card = adaptProduct(
+      product({
+        listing: {
+          sku: "G2-1KG", pack: "1kg Pouch", heroUrl: `${CDN}/pouch.jpg`,
+          heroAlt: "pouch", videoUrl: null, posterUrl: null, coverage: "EXACT",
+        },
+        packs: [
+          pack("G2-45G", { items: [item("bottle")], inStock: false, price: 24900 }),
+          pack("G2-1KG", { items: [item("pouch")], inStock: true, price: 99900 }),
+        ],
+      }),
+    );
+
+    expect(card.image).toBe(`${CDN}/pouch.jpg`);
     expect(card.sku).toBe("G2-1KG");
     expect(card.price).toBe(999);
     expect(card.inStock).toBe(true);
+  });
+
+  it("disables the card when all variants are sold out", () => {
+    const card = adaptProduct(
+      product({
+        inStock: false,
+        listing: {
+          sku: "G2-45G", pack: "45g Bottle", heroUrl: `${CDN}/bottle.jpg`,
+          heroAlt: "bottle", videoUrl: null, posterUrl: null, coverage: "EXACT",
+        },
+        packs: [
+          pack("G2-45G", { items: [item("bottle")], inStock: false, price: 24900 }),
+          pack("G2-1KG", { items: [item("pouch")], inStock: false, price: 99900 }),
+        ],
+      }),
+    );
+
+    expect(card.image).toBe(`${CDN}/bottle.jpg`);
+    expect(card.sku).toBe("G2-45G");
+    expect(card.price).toBe(249);
+    expect(card.inStock).toBe(false);
   });
 });
 
