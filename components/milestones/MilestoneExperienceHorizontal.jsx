@@ -43,10 +43,7 @@ const MILESTONES = [
 
 export default function MilestoneExperienceHorizontal() {
   const sliderRef = useRef(null);
-  const trackRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isDraggingTrack, setIsDraggingTrack] = useState(false);
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
   const dragStartX = useRef(0);
   const dragStartScrollLeft = useRef(0);
@@ -54,11 +51,7 @@ export default function MilestoneExperienceHorizontal() {
   // Update progress on scroll
   const handleScroll = useCallback(() => {
     if (!sliderRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
-    const maxScroll = scrollWidth - clientWidth;
-    const progress = maxScroll > 0 ? scrollLeft / maxScroll : 0;
-    setScrollProgress(Math.min(Math.max(progress, 0), 1));
-
+    const { scrollLeft, scrollWidth } = sliderRef.current;
     const cardWidth = scrollWidth / MILESTONES.length;
     const index = Math.round(scrollLeft / cardWidth);
     setCurrentIndex(Math.min(Math.max(index, 0), MILESTONES.length - 1));
@@ -93,41 +86,6 @@ export default function MilestoneExperienceHorizontal() {
     scrollToIndex(Math.min(MILESTONES.length - 1, currentIndex + 1));
   };
 
-  // Track scrub bar dragging/clicking
-  const handleTrackPointerDown = (e) => {
-    setIsDraggingTrack(true);
-    handleTrackScrub(e);
-  };
-
-  const handleTrackScrub = useCallback((e) => {
-    if (!trackRef.current || !sliderRef.current) return;
-    const rect = trackRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const fraction = Math.min(Math.max(x / rect.width, 0), 1);
-    const maxScroll = sliderRef.current.scrollWidth - sliderRef.current.clientWidth;
-    sliderRef.current.scrollLeft = fraction * maxScroll;
-  }, []);
-
-  useEffect(() => {
-    const onPointerMove = (e) => {
-      if (isDraggingTrack) {
-        handleTrackScrub(e);
-      }
-    };
-    const onPointerUp = () => {
-      if (isDraggingTrack) setIsDraggingTrack(false);
-    };
-
-    if (isDraggingTrack) {
-      window.addEventListener("pointermove", onPointerMove);
-      window.addEventListener("pointerup", onPointerUp);
-    }
-    return () => {
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-    };
-  }, [isDraggingTrack, handleTrackScrub]);
-
   // Mouse Drag-to-scroll on slider
   const handleMouseDown = (e) => {
     if (e.button !== 0 || e.target.closest("button") || e.target.closest("a")) return;
@@ -151,22 +109,15 @@ export default function MilestoneExperienceHorizontal() {
   return (
     <div className="relative mx-auto max-w-7xl px-6 py-12 sm:py-16">
       {/* ── HEADER ─────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-6 mb-8">
+      <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-6 mb-8">
         <div>
-          <div className="mb-2 flex items-center gap-2.5">
-            <div className="h-px w-5 bg-primary" />
-            <span className="font-label-caps text-[11px] tracking-[0.2em] text-primary uppercase">
-              Key events, National and International recognitions
-            </span>
-          </div>
-
           <h2 className="font-display-lg text-3xl sm:text-4xl text-white tracking-tight">
             Milestones
           </h2>
         </div>
 
         {/* Left & Right Arrow Navigation */}
-        <div className="flex items-center gap-2 self-end sm:self-auto">
+        <div className="flex items-center gap-2">
           <button
             onClick={handlePrev}
             disabled={currentIndex === 0}
@@ -245,37 +196,6 @@ export default function MilestoneExperienceHorizontal() {
             </div>
           );
         })}
-      </div>
-
-      {/* ── THIN INTERACTIVE DRAG TRACK ──────────────────────────────── */}
-      <div className="mt-6 flex items-center justify-between gap-4">
-        <span className="font-label-caps text-[10px] tracking-widest text-white/30 uppercase">
-          {MILESTONES[currentIndex]?.year} · {currentIndex + 1} of {MILESTONES.length}
-        </span>
-
-        {/* Thin Scrub Track */}
-        <div className="w-48 sm:w-64">
-          <div
-            ref={trackRef}
-            onPointerDown={handleTrackPointerDown}
-            className="relative h-2 w-full cursor-pointer rounded-full py-2 -my-2"
-            title="Click or drag to scrub timeline"
-          >
-            {/* Background thin track */}
-            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className="h-full bg-primary shadow-[0_0_8px_rgba(68,229,194,0.7)] transition-all duration-150"
-                style={{ width: `${scrollProgress * 100}%` }}
-              />
-            </div>
-
-            {/* Draggable thumb pill */}
-            <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-3 w-3 rounded-full bg-primary border-2 border-[#06080f] shadow-[0_0_6px_rgba(68,229,194,0.9)] hover:scale-125 transition-transform"
-              style={{ left: `${scrollProgress * 100}%` }}
-            />
-          </div>
-        </div>
       </div>
     </div>
   );

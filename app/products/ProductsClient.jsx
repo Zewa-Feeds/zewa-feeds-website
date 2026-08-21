@@ -26,21 +26,11 @@ const IcoLeaf = () => (
   </svg>
 );
 const IcoMakeInIndia = () => (
-  <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4 text-primary">
-    {/* Clean geometric Tiger Head / Make in India Icon */}
-    {/* Ears */}
-    <path d="M4.5 6C4 3.8 6 3 7.5 4.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-    <path d="M15.5 6C16 3.8 14 3 12.5 4.2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-    {/* Head shape */}
-    <path d="M4.5 6C4 9.5 5 13 7.5 15L10 16.5L12.5 15C15 13 16 9.5 15.5 6C13.8 6.5 12.5 5 10 5C7.5 5 6.2 6.5 4.5 6Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
-    {/* Forehead Tiger stripes / Crown */}
-    <path d="M10 5.8V9M8.2 7.2L10 8.5M11.8 7.2L10 8.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-    {/* Eyes & Nose bridge */}
-    <path d="M7 10.2L8.2 9.8M13 10.2L11.8 9.8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-    <path d="M9 13H11L10 14Z" fill="currentColor"/>
-    {/* Whiskers */}
-    <path d="M6 12L3.5 11.5M6 13.2L3.2 13.8M14 12L16.5 11.5M14 13.2L16.8 13.8" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-  </svg>
+  <img
+    src="/icons/make-in-india-teal.png"
+    alt="Make in India"
+    className="h-4.5 w-auto max-w-[28px] object-contain shrink-0"
+  />
 );
 
 const IcoLarva = () => (
@@ -801,7 +791,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
 
                     <div className="flex shrink-0 gap-6 sm:gap-8 lg:gap-14 flex-wrap">
                       {[
-                        { val: "46%", label: "Max Protein", sub: "in the range" },
+                        { val: "50%", label: "Max Protein", sub: "in the range" },
                         { val: "88%", label: "Digestibility", sub: "lab verified" },
                         { val: "13+", label: "Formulas", sub: "species-specific" },
                       ].map((s) => (
@@ -865,6 +855,29 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
               </div>
             </div>
           )}
+
+          {/* Saddle Left & Right Navigation Arrows */}
+          <button
+            type="button"
+            onClick={() => setHeroSlide((s) => (s === 0 ? 1 : 0))}
+            aria-label="Previous slide"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 backdrop-blur-md transition-all duration-200 hover:scale-110 hover:border-primary hover:bg-primary/20 hover:text-primary active:scale-95 shadow-lg"
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 sm:h-5 sm:w-5">
+              <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setHeroSlide((s) => (s === 0 ? 1 : 0))}
+            aria-label="Next slide"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 backdrop-blur-md transition-all duration-200 hover:scale-110 hover:border-primary hover:bg-primary/20 hover:text-primary active:scale-95 shadow-lg"
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 sm:h-5 sm:w-5">
+              <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
 
           {/* Bottom subtle edge divider */}
           <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.25) 50%, transparent)" }} />
