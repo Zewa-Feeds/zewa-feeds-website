@@ -139,9 +139,9 @@ function TileBanner() {
   return (
     <div className="relative w-full h-full bg-[#080e1c] flex items-center justify-center overflow-hidden">
       <picture className="relative w-full h-full flex items-center justify-center">
-        <source media="(min-width: 768px)" srcSet="/hero-banner-desktop.jpg" />
+        <source media="(min-width: 768px)" srcSet="/zewa-hero2-desktop-1920x814-text.jpg" />
         <img
-          src="/hero-banner-mobile.jpg"
+          src="/zewa-hero2-mobile-1080x1080-text.jpg"
           alt="The Ultimate Superior Nutrition For Your Fish"
           className="w-full h-full object-cover object-center"
         />

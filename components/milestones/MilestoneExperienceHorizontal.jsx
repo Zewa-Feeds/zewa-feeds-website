@@ -6,51 +6,59 @@ import Image from "next/image";
 const MILESTONES = [
   {
     year: "2021",
-    text: "Incorporation, First Waste to protein pilots",
+    text: "Incorporation, first waste-to-protein pilots",
     index: "01",
-    recognition: "UNDP GIF Winner",
+    recognition: "UNDP Green Innovation Fund Winner",
     image: "/Website_ Milestones/Incorporation& first office.jpg",
-    imageAlt: "Incorporation and first office, 2021",
+    imageAlt: "Incorporation and first waste-to-protein pilots, 2021",
   },
   {
     year: "2022",
-    text: "Commercial plant to produce Insect protein from municipal waste",
+    text: "Commercial plant producing insect protein from municipal waste",
     index: "02",
-    recognition: "EY Climathon Winner",
+    recognition: "EY Climathon Champion · Swachh Technology Challenge Kerala, Nominee",
     image: "/Website_ Milestones/India's first data centric Insect farm 2022.png",
     imageAlt: "India's first data-centric insect farm, 2022",
   },
   {
     year: "2023",
-    text: "Formulation research and field trials",
+    text: "Pivot to formulation science; formulation research and field trials begin",
     index: "03",
-    recognition: "AAGS Biotech Winner",
-    image: "/Website_ Milestones/ICAR IARI.JPG",
-    imageAlt: "ICAR-IARI formulation research and field trials, 2023",
+    recognition: "Australian Government AAGS Winner · KSUM Market Acceleration Grant · ICAR-CIFT MoU signed",
+    image: "/Website_ Milestones/AAGS 2023.jpg",
+    imageAlt: "Australian Government AAGS Winner & formulation trials, 2023",
   },
   {
     year: "2024",
-    text: "Launch of ornamental fish feeds",
+    text: "Facility and team rebuilt; first species-specific SKUs launched",
     index: "04",
-    recognition: "UPJA National Winner",
-    image: "/Website_ Milestones/Zewa Pellet Feeds.jpg",
-    imageAlt: "Launch of ornamental fish feeds, 2024",
+    recognition: "ICAR Pusa Krishi UPJA Winner · AgHub Catalytic Capital Recipient",
+    image: "/Website_ Milestones/ICAR IARI 2024.JPG",
+    imageAlt: "ICAR Pusa Krishi UPJA Winner & species-specific feeds, 2024",
   },
   {
     year: "2025",
-    text: "National expansion of 44+ products",
+    text: "KAU feeding trial validates 2.2× weight gain over imported feed",
     index: "05",
-    recognition: "Temasek Cohort SG",
-    image: "/Website_ Milestones/stock.jpeg",
-    imageAlt: "National expansion of 44+ products across India, 2025",
+    recognition: "Temasek Foundation Ecosphere NextGen Leader · AFTEA Finalist, Singapore",
+    image: "/Website_ Milestones/Product display 2025.jpeg",
+    imageAlt: "KAU feeding trial validation & product display, 2025",
+  },
+  {
+    year: "2025",
+    text: "Research presented at MECOS 4 (SFM-177) & national expansion",
+    index: "06",
+    recognition: "MECOS 4 (SFM-177) Presentation · AFTEA Finalist, Singapore",
+    image: "/Website_ Milestones/Product display 2025_2.jpeg",
+    imageAlt: "MECOS 4 research presentation & national expansion, 2025",
   },
   {
     year: "2026",
-    text: "...Major updates on the way...",
-    index: "06",
-    recognition: "Adani Green Finalist",
-    image: "/Website_ Milestones/AgHub.jpg",
-    imageAlt: "AgHub PJTSAU recognition and future expansion, 2026",
+    text: "44 SKUs across 29 formulations; 500+ outlets in 8 states; Amazon, Flipkart, Blinkit and D2C live; Amazon US Global Selling opened",
+    index: "07",
+    recognition: "Vande Bharatam National Finalist — 56 selected from 26,000+ applications",
+    image: "/Website_ Milestones/Vande Bharatam 2026.webp",
+    imageAlt: "Vande Bharatam National Finalist & global expansion, 2026",
   },
 ];
 
@@ -181,7 +189,7 @@ export default function MilestoneExperienceHorizontal() {
 
           return (
             <div
-              key={m.year}
+              key={`${m.year}-${m.index}`}
               className={`w-[280px] sm:w-[320px] md:w-[340px] shrink-0 snap-start rounded-2xl border p-4 sm:p-5 flex flex-col justify-between transition-all duration-200 shadow-md group ${
                 isActive
                   ? "border-primary/50 bg-[#0c1524] shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
@@ -223,9 +231,9 @@ export default function MilestoneExperienceHorizontal() {
               </div>
 
               {/* Recognition Pill */}
-              <div className="mt-5 pt-3.5 border-t border-white/5 flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                <span className="font-label-caps text-[10px] tracking-wider text-white/50 truncate">
+              <div className="mt-5 pt-3.5 border-t border-white/5 flex items-start gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-1" />
+                <span className="font-label-caps text-[10px] tracking-wider text-white/60 leading-snug">
                   {m.recognition}
                 </span>
               </div>
