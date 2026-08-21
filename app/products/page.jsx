@@ -18,7 +18,7 @@ import { adaptProduct, adaptSpotlight } from "./adapters";
 export const metadata = {
   title: "All Products",
   description:
-    "Insect-protein fish food from Zewa Feeds: slow-sinking pellets, floating pellets, dried BSF larvae and hatchery feeds, formulated by species.",
+    "Insect-protein fish food from Zewa Feeds: slow-sinking granules, bottom dwellers, floating pellets, dried BSF larvae and hatchery feeds, formulated by species.",
   alternates: { canonical: "/products" },
 };
 

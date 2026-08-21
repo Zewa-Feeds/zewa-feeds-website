@@ -57,6 +57,8 @@ const TRUST_BADGES = [
 const CANONICAL_CATEGORY_ORDER = [
   "All",
   "Dried BSF Larvae",
+  "Slow-Sinking Granules",
+  "Slow Sinking Granules",
   "Slow-Sinking Pellets",
   "Slow Sinking Pellets",
   "Bottom Dwellers",
@@ -785,6 +787,14 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
           return p.tags.some((tag) => {
             const t = norm(tag);
             if (size) return sizeToken(tag) === size;
+            if (
+              target.includes("slow") &&
+              (target.includes("granule") || target.includes("pellet")) &&
+              t.includes("slow") &&
+              (t.includes("granule") || t.includes("pellet"))
+            ) {
+              return true;
+            }
             return t === target || t.includes(target) || target.includes(t);
           });
         });
