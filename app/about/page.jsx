@@ -340,9 +340,13 @@ export default async function AboutPage() {
             page scroll sideways. overflow-hidden cannot cap a block's own width.
           */}
           <div className="min-w-0 mt-16 border-t border-white/5 pt-12">
-            <p className="font-label-caps mb-7 text-[10px] tracking-[0.2em] text-white/25">
-              BACKED BY
-            </p>
+            <Eyebrow>BACKED BY</Eyebrow>
+            <h2
+              className="font-display-lg leading-[1.15] text-white mb-8"
+              style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
+            >
+              Backed by leading institutions
+            </h2>
             <LogoMarquee logos={TRUST.institutionLogos} />
 
             {/* Backers with no logo file supplied — still named, not dropped. */}

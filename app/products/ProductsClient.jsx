@@ -12,12 +12,11 @@ import { COMPANY } from "@/lib/company";
 
 // ─── SVG icons ────────────────────────────────────────────────────────────────
 const IcoMicroscope = () => (
-  <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
-    <circle cx="8" cy="7" r="3" stroke="currentColor" strokeWidth="1.4"/>
-    <path d="M8 10v6M5 16h6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    <path d="M11 5l2-2 2 2-2 2-2-2z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
-    <path d="M14 9h2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-  </svg>
+  <img
+    src="/icons/microscope-cyan.png"
+    alt="NABL Tested"
+    className="h-4.5 w-auto max-w-[20px] object-contain shrink-0"
+  />
 );
 const IcoResearch = () => (
   <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4 text-primary">
@@ -55,6 +54,27 @@ const TRUST_BADGES = [
 ];
 
 
+const CANONICAL_CATEGORY_ORDER = [
+  "All",
+  "Dried BSF Larvae",
+  "Slow-Sinking Pellets",
+  "Slow Sinking Pellets",
+  "Bottom Dwellers",
+  "Floating Pellets",
+  "Hatchery Feeds",
+];
+
+function sortCategories(list) {
+  return [...list].sort((a, b) => {
+    const idxA = CANONICAL_CATEGORY_ORDER.indexOf(a);
+    const idxB = CANONICAL_CATEGORY_ORDER.indexOf(b);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return a.localeCompare(b);
+  });
+}
+
 /**
  * Filter chips.
  *
@@ -71,14 +91,18 @@ const TRUST_BADGES = [
  * filters rather than none.
  */
 function buildCategories(categories, products) {
-  if (categories?.length) return ["All", ...categories];
-
-  const seen = [];
-  for (const p of products) {
-    const [category] = p.tags ?? [];
-    if (category && !seen.includes(category)) seen.push(category);
+  let list = [];
+  if (categories?.length) {
+    list = ["All", ...categories];
+  } else {
+    const seen = [];
+    for (const p of products) {
+      const [category] = p.tags ?? [];
+      if (category && !seen.includes(category)) seen.push(category);
+    }
+    list = ["All", ...seen];
   }
-  return ["All", ...seen];
+  return sortCategories(list);
 }
 
 function ProductCard({ p }) {

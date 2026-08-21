@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import Image from "next/image";
 
 const MILESTONES = [
   {
@@ -8,36 +9,48 @@ const MILESTONES = [
     text: "Incorporation, First Waste to protein pilots",
     index: "01",
     recognition: "UNDP GIF Winner",
+    image: "/Website_ Milestones/Incorporation& first office.jpg",
+    imageAlt: "Incorporation and first office, 2021",
   },
   {
     year: "2022",
     text: "Commercial plant to produce Insect protein from municipal waste",
     index: "02",
     recognition: "EY Climathon Winner",
+    image: "/Website_ Milestones/India's first data centric Insect farm 2022.png",
+    imageAlt: "India's first data-centric insect farm, 2022",
   },
   {
     year: "2023",
     text: "Formulation research and field trials",
     index: "03",
     recognition: "AAGS Biotech Winner",
+    image: "/Website_ Milestones/ICAR IARI.JPG",
+    imageAlt: "ICAR-IARI formulation research and field trials, 2023",
   },
   {
     year: "2024",
     text: "Launch of ornamental fish feeds",
     index: "04",
     recognition: "UPJA National Winner",
+    image: "/Website_ Milestones/Zewa Pellet Feeds.jpg",
+    imageAlt: "Launch of ornamental fish feeds, 2024",
   },
   {
     year: "2025",
     text: "National expansion of 44+ products",
     index: "05",
     recognition: "Temasek Cohort SG",
+    image: "/Website_ Milestones/stock.jpeg",
+    imageAlt: "National expansion of 44+ products across India, 2025",
   },
   {
     year: "2026",
     text: "...Major updates on the way...",
     index: "06",
     recognition: "Adani Green Finalist",
+    image: "/Website_ Milestones/AgHub.jpg",
+    imageAlt: "AgHub PJTSAU recognition and future expansion, 2026",
   },
 ];
 
@@ -109,15 +122,24 @@ export default function MilestoneExperienceHorizontal() {
   return (
     <div className="relative mx-auto max-w-7xl px-6 py-12 sm:py-16">
       {/* ── HEADER ─────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-6 mb-8">
+      <div className="flex items-end justify-between gap-4 border-b border-white/10 pb-6 mb-8">
         <div>
-          <h2 className="font-display-lg text-3xl sm:text-4xl text-white tracking-tight">
-            Milestones
+          <div className="mb-4 flex items-center gap-3">
+            <div className="h-px w-6 bg-primary" />
+            <span className="font-label-caps text-label-caps tracking-[0.2em] text-primary">
+              MILESTONES
+            </span>
+          </div>
+          <h2
+            className="font-display-lg leading-[1.15] text-white"
+            style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
+          >
+            Key events, National and International recognitions
           </h2>
         </div>
 
         {/* Left & Right Arrow Navigation */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={handlePrev}
             disabled={currentIndex === 0}
@@ -160,13 +182,27 @@ export default function MilestoneExperienceHorizontal() {
           return (
             <div
               key={m.year}
-              className={`w-[260px] sm:w-[290px] md:w-[310px] shrink-0 snap-start rounded-2xl border p-5 sm:p-6 flex flex-col justify-between transition-all duration-200 shadow-md group ${
+              className={`w-[280px] sm:w-[320px] md:w-[340px] shrink-0 snap-start rounded-2xl border p-4 sm:p-5 flex flex-col justify-between transition-all duration-200 shadow-md group ${
                 isActive
                   ? "border-primary/50 bg-[#0c1524] shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
                   : "border-white/10 bg-[#080e1a]/80 hover:border-white/20 hover:bg-[#0a1220]"
               }`}
             >
               <div>
+                {/* Milestone Image */}
+                {m.image && (
+                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-black/40 border border-white/10 mb-4 group-hover:border-primary/30 transition-colors">
+                    <Image
+                      src={m.image}
+                      alt={m.imageAlt || m.text}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 280px, 340px"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                  </div>
+                )}
+
                 {/* Year Header & Index */}
                 <div className="flex items-baseline justify-between mb-2">
                   <span className="font-display-lg text-2xl sm:text-3xl text-primary leading-none group-hover:scale-105 transition-transform">

@@ -70,6 +70,7 @@ const nav = {
     { label: "All Products", href: "/products" },
     { label: "Dried BSF Larvae", href: "/products?category=Dried+BSF+Larvae" },
     { label: "Slow Sinking Pellets", href: "/products?category=Slow+Sinking+Pellets" },
+    { label: "Bottom Dwellers", href: "/products?category=Bottom+Dwellers" },
     { label: "Floating Pellets", href: "/products?category=Floating+Pellets" },
     { label: "Hatchery Feeds", href: "/products?category=Hatchery+Feeds" },
     { label: "View all products →", href: "/products", accent: true },
