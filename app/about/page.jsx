@@ -181,6 +181,16 @@ export default async function AboutPage() {
               >
                 {STORY.title}
               </h2>
+
+              <div className="mt-8 relative aspect-video w-full overflow-hidden rounded-2xl border border-white/15 bg-black/60 shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
+                <iframe
+                  src="https://www.youtube-nocookie.com/embed/gcnpEOW09k0?rel=0"
+                  title="Zewa Feeds - Our Story"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="absolute inset-0 h-full w-full border-0"
+                />
+              </div>
             </div>
 
             <div className="lg:pt-16">
