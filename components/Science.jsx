@@ -98,7 +98,7 @@ export default function Science() {
               */}
               {[
                 { label: "ZEWA INSECT PROTEIN", pct: 88, value: "88%", color: BAR, strong: true },
-                { label: "SOY MEAL", pct: 70, value: "70%", color: "rgba(11,18,32,0.28)" },
+                { label: "SOY MEAL", pct: 75, value: "75%", color: "rgba(11,18,32,0.28)" },
               ].map((bar) => (
                 <div key={bar.label}>
                   <div className="flex justify-between mb-2.5">
@@ -137,10 +137,10 @@ export default function Science() {
                   className="text-[32px] font-display-lg leading-none mb-2"
                   style={{ color: ACCENT }}
                 >
-                  4.2x
+                  2×
                 </div>
                 <p className="text-[12px] leading-snug" style={{ color: "rgba(11,18,32,0.5)" }}>
-                  More efficient amino acid chain conversion vs soy alternatives.
+                  Less undigested protein leaving the fish, versus conventional soy-based feeds.
                 </p>
               </div>
               <div>
@@ -148,10 +148,10 @@ export default function Science() {
                   className="text-[32px] font-display-lg leading-none mb-2"
                   style={{ color: ACCENT }}
                 >
-                  0%
+                  2
                 </div>
                 <p className="text-[12px] leading-snug" style={{ color: "rgba(11,18,32,0.5)" }}>
-                  Anti-nutritional factors (ANFs) vs common agricultural fillers.
+                  Functional compounds — lauric acid and chitin — that no plant protein or fish meal provides.
                 </p>
               </div>
             </div>

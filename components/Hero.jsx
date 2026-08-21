@@ -90,7 +90,7 @@ function TileWhy() {
               <div className="space-y-7">
                 {[
                   { label: "ZEWA INSECT PROTEIN", pct: 88, value: "88%", strong: true },
-                  { label: "SOY MEAL", pct: 70, value: "70%", strong: false },
+                  { label: "SOY MEAL", pct: 75, value: "75%", strong: false },
                 ].map((bar) => (
                   <div key={bar.label}>
                     <div className="mb-2.5 flex items-baseline justify-between">
