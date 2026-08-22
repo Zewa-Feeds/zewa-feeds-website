@@ -5,11 +5,13 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
     background-color: #080e1c;
     color: #dde2f6;
+    overflow-x: hidden;
   }
 }
 

@@ -14,15 +14,15 @@ function CartIcon({ onClick, totalItems }) {
   return (
     <button
       onClick={onClick}
-      className="relative w-9 h-9 flex items-center justify-center rounded-full border border-white/15 text-white/60 hover:border-primary/50 hover:text-primary transition-all duration-200"
+      className="relative w-8 h-8 sm:w-9 sm:h-9 flex shrink-0 items-center justify-center rounded-full border border-white/15 text-white/60 hover:border-primary/50 hover:text-primary transition-all duration-200"
     >
-      <svg viewBox="0 0 24 24" fill="none" className="w-[18px] h-[18px]">
+      <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4 sm:w-[18px] sm:h-[18px]">
         <path d="M1 1h2.5l1.6 8M5.1 9h14.4l-1.8 8H6.9L5.1 9z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         <circle cx="9" cy="20.5" r="1" fill="currentColor" />
         <circle cx="17" cy="20.5" r="1" fill="currentColor" />
       </svg>
       {totalItems > 0 && (
-        <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-primary text-[#00382d] text-[9px] font-bold font-[Montserrat] flex items-center justify-center leading-none">
+        <span className="absolute -top-1 -right-1 min-w-[15px] sm:min-w-[16px] h-3.5 sm:h-4 px-0.5 rounded-full bg-primary text-[#00382d] text-[8px] sm:text-[9px] font-bold font-[Montserrat] flex items-center justify-center leading-none">
           {totalItems > 9 ? "9+" : totalItems}
         </span>
       )}
@@ -62,21 +62,21 @@ export default function Header() {
         scrolled ? "glass-nav" : "bg-surface/50 backdrop-blur-md"
       } shadow-2xl shadow-black/20`}
     >
-      <div className="flex justify-between items-center w-full max-w-[1440px] mx-auto px-8 h-full">
+      <div className="flex justify-between items-center w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 h-full">
 
         {/* Logo + beta flag */}
-        <Link href="/" className="flex shrink-0 items-center gap-2.5">
+        <Link href="/" className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
           <Image
             src="/logo-transparent.png"
             alt="Zewa Feeds"
             width={130}
             height={130}
-            className="h-[72px] w-auto object-contain brightness-0 invert"
+            className="h-[46px] sm:h-[58px] md:h-[72px] w-auto object-contain brightness-0 invert"
             priority
           />
           <span
             title="This site is still being tested. Orders are live, but you may hit rough edges."
-            className="rounded-full border border-[#d4793a]/40 bg-[#d4793a]/12 px-2 py-[3px] text-[9px] font-bold uppercase tracking-[0.14em] text-[#d4793a]"
+            className="rounded-full border border-[#d4793a]/40 bg-[#d4793a]/12 px-1.5 sm:px-2 py-[2px] sm:py-[3px] text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.14em] text-[#d4793a]"
           >
             Beta
           </span>
@@ -124,9 +124,9 @@ export default function Header() {
         </div>
 
         {/* Mobile CTAs — uniform across all pages */}
-        <div className="md:hidden flex items-center gap-2">
+        <div className="md:hidden flex items-center gap-1.5 sm:gap-2 shrink-0">
           {!isShopPage && (
-            <Link href="/products" className="whitespace-nowrap border border-primary text-primary px-3 py-2 font-button text-[11px] uppercase tracking-wider hover:bg-primary hover:text-on-primary transition-all duration-200">
+            <Link href="/products" className="whitespace-nowrap border border-primary text-primary px-2.5 sm:px-3 py-1.5 sm:py-2 font-button text-[10px] sm:text-[11px] uppercase tracking-wider hover:bg-primary hover:text-on-primary transition-all duration-200">
               Buy Now
             </Link>
           )}
@@ -139,14 +139,14 @@ export default function Header() {
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-on-surface transition-colors hover:bg-white/10"
+            className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg text-on-surface transition-colors hover:bg-white/10 shrink-0"
           >
             {mobileOpen ? (
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <svg width="18" height="18" className="sm:w-5 sm:h-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
               </svg>
             ) : (
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <svg width="18" height="18" className="sm:w-5 sm:h-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
               </svg>
             )}

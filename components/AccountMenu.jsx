@@ -17,11 +17,11 @@ import { useAuth, signInHref } from "@/lib/authContext";
  */
 
 const ICON_CHROME =
-  "relative flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/60 transition-all duration-200 hover:border-primary/50 hover:text-primary";
+  "relative flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full border border-white/15 text-white/60 transition-all duration-200 hover:border-primary/50 hover:text-primary";
 
 function PersonIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-[18px] w-[18px]" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 sm:h-[18px] sm:w-[18px]" aria-hidden="true">
       <circle cx="12" cy="8" r="3.4" stroke="currentColor" strokeWidth="1.5" />
       <path
         d="M4.8 20c.6-3.5 3.6-5.6 7.2-5.6s6.6 2.1 7.2 5.6"
@@ -135,7 +135,7 @@ export default function AccountMenu() {
         aria-label="Account menu"
         className={`${ICON_CHROME} ${
           open ? "border-primary text-primary shadow-[0_0_12px_rgba(68,229,194,0.3)] bg-primary/10" : ""
-        } font-[Montserrat] text-[11px] font-bold`}
+        } font-[Montserrat] text-[10px] sm:text-[11px] font-bold`}
       >
         {initials}
       </button>
