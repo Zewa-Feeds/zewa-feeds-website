@@ -4,30 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useCart } from "@/lib/cartContext";
-import { formatInr, catalog } from "@/lib/api";
-
-const SUGGESTED_FALLBACKS = [
-  {
-    sku: "ZEWA-INSECTA-PRO-250G",
-    name: "Insecta Pro XL",
-    pack: "250g Pack",
-    pricePaise: 42000,
-    mrpPaise: 48000,
-    image: "/Bottles/Betta/Betta 01.png",
-    accentBg: "#121b2d",
-    maxQty: 10,
-  },
-  {
-    sku: "ZEWA-MARINE-VITALITY-100G",
-    name: "Marine Vitality",
-    pack: "100g Pack",
-    pricePaise: 35000,
-    mrpPaise: 40000,
-    image: "/Bottles/Flowerhorn/FH 01.png",
-    accentBg: "#152033",
-    maxQty: 10,
-  },
-];
+import { formatInr } from "@/lib/api";
 
 export default function CartDrawer() {
   const {
@@ -45,31 +22,6 @@ export default function CartDrawer() {
   const pathname = usePathname();
   const isShopPage = pathname === "/products" || pathname.startsWith("/products/");
   const [removingSku, setRemovingSku] = useState(null);
-  const [upsellItems, setUpsellItems] = useState(SUGGESTED_FALLBACKS);
-
-  // Fetch catalog spotlights for suggested products upsell
-  useEffect(() => {
-    catalog
-      .spotlights()
-      .then((data) => {
-        if (data && data.length > 0) {
-          const mapped = data.map((p) => ({
-            sku: p.sku || p.slug || p.id,
-            name: p.name,
-            pack: p.pack || p.variant || "Standard Pack",
-            pricePaise: p.pricePaise || 42000,
-            mrpPaise: p.mrpPaise,
-            image: p.imageUrl || p.image || "/Bottles/Betta/Betta 01.png",
-            accentBg: "#121b2d",
-            maxQty: p.availableStock || 10,
-          }));
-          setUpsellItems(mapped);
-        }
-      })
-      .catch(() => {
-        /* fallback stays */
-      });
-  }, []);
 
   // Lock body scroll when drawer is open
   useEffect(() => {
@@ -95,11 +47,6 @@ export default function CartDrawer() {
       setRemovingSku(null);
     }, 200);
   };
-
-  // Filter upsell items to exclude products already in cart
-  const filteredUpsell = upsellItems.filter(
-    (upsell) => !items.some((cartItem) => cartItem.sku === upsell.sku),
-  );
 
   return (
     <>
