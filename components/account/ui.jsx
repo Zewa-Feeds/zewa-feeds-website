@@ -134,28 +134,33 @@ export function EmptyState({ icon, title, body, action }) {
  * order so keyboard users move field → field → submit rather than being
  * interrupted by a control they mostly do not want.
  */
-export function PasswordToggle({ visible, onToggle }) {
+export function PasswordToggle({ visible, onToggle, className = "" }) {
   return (
     <button
       type="button"
       tabIndex={-1}
       onClick={onToggle}
       aria-label={visible ? "Hide password" : "Show password"}
-      className={`absolute right-3 top-[26px] z-10 -translate-y-1/2 rounded-lg p-1.5 text-white/35 ${EASE} hover:text-primary`}
+      className={`absolute right-3 top-[26px] z-20 -translate-y-1/2 flex items-center justify-center rounded-lg p-1.5 text-white/70 transition-all duration-200 hover:bg-white/10 hover:text-primary active:scale-95 focus:outline-none focus-visible:ring-1 focus-visible:ring-primary ${className}`}
     >
       {visible ? (
-        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" aria-hidden="true">
           <path
             d="M3 3l18 18M10.6 10.7a2 2 0 002.8 2.8M9.4 5.2A9.6 9.6 0 0112 5c5 0 9 4.5 9 7a12 12 0 01-2.4 3.3M6.2 6.7A12.3 12.3 0 003 12c0 2.5 4 7 9 7a9.9 9.9 0 003.4-.6"
-            stroke="currentColor"
-            strokeWidth="1.6"
+            strokeWidth="1.8"
             strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </svg>
       ) : (
-        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true">
-          <path d="M3 12s3.6-7 9-7 9 7 9 7-3.6 7-9 7-9-7-9-7z" stroke="currentColor" strokeWidth="1.6" />
-          <circle cx="12" cy="12" r="2.6" stroke="currentColor" strokeWidth="1.6" />
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" aria-hidden="true">
+          <path
+            d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle cx="12" cy="12" r="3" strokeWidth="1.8" />
         </svg>
       )}
     </button>

@@ -497,7 +497,7 @@ function AuthDrawerContent() {
 
               <div className="relative">
                 <FloatingInput
-                  id="auth-password"
+                  id="auth-signup-password"
                   name="password"
                   type={showSignUpPassword ? "text" : "password"}
                   label="Password"
