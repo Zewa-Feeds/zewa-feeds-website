@@ -830,7 +830,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
 
                     <div className="flex shrink-0 gap-6 sm:gap-8 lg:gap-14 flex-wrap">
                       {[
-                        { val: "50%", label: "Max Protein", sub: "in the range" },
+                        { val: "48%", label: "Max Protein", sub: "in the range" },
                         { val: "88%", label: "Digestibility", sub: "lab verified" },
                         { val: "13+", label: "Formulas", sub: "species-specific" },
                       ].map((s) => (

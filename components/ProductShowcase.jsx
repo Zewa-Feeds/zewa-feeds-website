@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Reveal from "./Reveal";
 import { catalog } from "@/lib/api";
+import { selectFeatured } from "@/lib/featured";
 
 /**
  * Homepage range section — driven directly by the catalogue API.
@@ -67,6 +68,17 @@ function adapt(api, i = 0) {
     (api.listing ? null : (api.images ?? [])[0]?.url) ||
     FALLBACK_PRODUCTS[i % FALLBACK_PRODUCTS.length].images[0].url;
 
+  /*
+   * The pack this card stands for — the EFFECTIVE listing variant, the same
+   * one that chose the photograph above, not `packs[0]`.
+   *
+   * Array order and merchandising order are different things: Koi's first pack
+   * is the 500g, while its Main Listing Variant is the 1kg the card is
+   * actually showing. Reading position 0 here described one pack with the
+   * other's photograph.
+   */
+  const representative = (api.packs ?? []).find((k) => k.sku === api.listing?.sku) ?? first;
+
   return {
     name: api.name,
     slug: api.slug,
@@ -76,7 +88,7 @@ function adapt(api, i = 0) {
     stats: [
       api.proteinPct ? { val: `${api.proteinPct}%`, label: "Protein" } : null,
       { val: "0%", label: "Soy Filler" },
-      first ? { val: first.pack, label: "Pack" } : null,
+      representative ? { val: representative.pack, label: "Pack" } : null,
     ].filter(Boolean),
     image: imageUrl,
     accentColor: ACCENTS[i % ACCENTS.length],
@@ -103,7 +115,11 @@ export default async function ProductShowcase() {
     products = FALLBACK_PRODUCTS;
   }
 
-  const SECONDARY = products.slice(0, 3).map((p, i) => adapt(p, i));
+  /*
+   * Which three, and in what order — see lib/featured.js. This was
+   * `products.slice(0, 3)`, i.e. whichever three sorted first alphabetically.
+   */
+  const SECONDARY = selectFeatured(products).map((p, i) => adapt(p, i));
 
   return (
     <Reveal id="products" className="bg-[#06080f]">

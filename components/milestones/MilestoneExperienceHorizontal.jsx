@@ -9,9 +9,9 @@ const MILESTONES = [
     points: [
       "Incorporation",
       "First waste-to-protein pilots",
+      "UNDP Green Innovation Fund Winner",
     ],
     index: "01",
-    recognition: "UNDP Green Innovation Fund Winner",
     image: "/Website_ Milestones/Incorporation& first office.jpg",
     imageAlt: "Incorporation and first waste-to-protein pilots, 2021",
   },
@@ -19,9 +19,9 @@ const MILESTONES = [
     year: "2022",
     points: [
       "Commercial plant producing insect protein from municipal waste",
+      "EY Climathon Champion · Swachh Technology Challenge Kerala, Nominee",
     ],
     index: "02",
-    recognition: "EY Climathon Champion · Swachh Technology Challenge Kerala, Nominee",
     image: "/Website_ Milestones/India's first data centric Insect farm 2022.png",
     imageAlt: "India's first data-centric insect farm, 2022",
   },
@@ -30,9 +30,9 @@ const MILESTONES = [
     points: [
       "Pivot to formulation science",
       "Formulation research and field trials begin",
+      "Australian Government AAGS Winner · KSUM Market Acceleration Grant · ICAR-CIFT MoU signed",
     ],
     index: "03",
-    recognition: "Australian Government AAGS Winner · KSUM Market Acceleration Grant · ICAR-CIFT MoU signed",
     image: "/Website_ Milestones/AAGS 2023.jpg",
     imageAlt: "Australian Government AAGS Winner & formulation trials, 2023",
   },
@@ -41,9 +41,9 @@ const MILESTONES = [
     points: [
       "Facility and team rebuilt",
       "First species-specific SKUs launched",
+      "ICAR Pusa Krishi UPJA Winner · AgHub Catalytic Capital Recipient",
     ],
     index: "04",
-    recognition: "ICAR Pusa Krishi UPJA Winner · AgHub Catalytic Capital Recipient",
     image: "/Website_ Milestones/ICAR IARI 2024.JPG",
     imageAlt: "ICAR Pusa Krishi UPJA Winner & species-specific feeds, 2024",
   },
@@ -51,9 +51,9 @@ const MILESTONES = [
     year: "2025",
     points: [
       "KAU feeding trial validates 2.2× weight gain over imported feed",
+      "Temasek Foundation Ecosphere NextGen Leader · AFTEA Finalist, Singapore",
     ],
     index: "05",
-    recognition: "Temasek Foundation Ecosphere NextGen Leader · AFTEA Finalist, Singapore",
     image: "/Website_ Milestones/Product display 2025.jpeg",
     imageAlt: "KAU feeding trial validation & product display, 2025",
   },
@@ -62,9 +62,10 @@ const MILESTONES = [
     points: [
       "Research presented at MECOS 4 (SFM-177)",
       "National expansion",
+      "Amazon, Flipkart, Blinkit and D2C live",
+      "AFTEA Finalist, Singapore",
     ],
     index: "06",
-    recognition: "MECOS 4 (SFM-177) Presentation · AFTEA Finalist, Singapore",
     image: "/Website_ Milestones/Product display 2025_2.jpeg",
     imageAlt: "MECOS 4 research presentation & national expansion, 2025",
   },
@@ -73,11 +74,11 @@ const MILESTONES = [
     points: [
       "44 SKUs across 29 formulations",
       "500+ outlets in 8 states",
-      "Amazon, Flipkart, Blinkit and D2C live",
       "Amazon US Global Selling opened",
+      "KSIDC Scale up Support",
+      "Vande Bharatam National Finalist — 56 selected from 26,000+ applications",
     ],
     index: "07",
-    recognition: "Vande Bharatam National Finalist — 56 selected from 26,000+ applications",
     image: "/Website_ Milestones/Vande Bharatam 2026.webp",
     imageAlt: "Vande Bharatam National Finalist & global expansion, 2026",
   },
@@ -211,7 +212,7 @@ export default function MilestoneExperienceHorizontal() {
           return (
             <div
               key={`${m.year}-${m.index}`}
-              className={`w-[280px] sm:w-[320px] md:w-[340px] shrink-0 snap-start rounded-2xl border p-4 sm:p-5 flex flex-col justify-between transition-all duration-200 shadow-md group ${
+              className={`w-[280px] sm:w-[320px] md:w-[340px] shrink-0 snap-start rounded-2xl border p-4 sm:p-5 flex flex-col transition-all duration-200 shadow-md group ${
                 isActive
                   ? "border-primary/50 bg-[#0c1524] shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
                   : "border-white/10 bg-[#080e1a]/80 hover:border-white/20 hover:bg-[#0a1220]"
@@ -262,14 +263,6 @@ export default function MilestoneExperienceHorizontal() {
                     {m.text}
                   </p>
                 )}
-              </div>
-
-              {/* Recognition Pill */}
-              <div className="mt-5 pt-3.5 border-t border-white/5 flex items-start gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-1" />
-                <span className="font-label-caps text-[10px] tracking-wider text-white/60 leading-snug">
-                  {m.recognition}
-                </span>
               </div>
             </div>
           );

@@ -204,3 +204,78 @@ export function adaptSpotlight(api) {
  * JPEG. Shared so the card grid and the PDP cannot drift apart on this.
  */
 export const isCutout = (url) => /\.png(\?|$)/i.test(url ?? "");
+
+/**
+ * Same pack written two ways — "1kg", " 1KG " — is still one pack size.
+ *
+ * Grouping is done on this normalised form so a stray capital or a double
+ * space does not make two identical packs look distinct (and so escape
+ * disambiguation that they need).
+ */
+const packKey = (pack) =>
+  String(pack ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+
+/**
+ * The part of `sku` that its same-sized siblings do not share.
+ *
+ * SKUs here are dash-separated — H1-1KG, F3-45GX2 — so comparing segment by
+ * segment isolates the one that varies: "H1" out of H1-1KG when the siblings
+ * are H2-1KG and H3-1KG. That is deliberately weaker than slicing at a fixed
+ * offset or matching a prefix pattern, both of which would turn a naming
+ * convention into a rendering rule. When the segments do not line up at all,
+ * the whole SKU is returned rather than a misleading fragment.
+ */
+function distinguishingSkuPart(sku, siblingSkus) {
+  const parts = String(sku ?? "").split("-");
+  const siblings = siblingSkus.map((s) => String(s ?? "").split("-"));
+  const differing = parts.filter((part, i) => siblings.some((other) => other[i] !== part));
+  return differing.join("-") || String(sku ?? "");
+}
+
+/**
+ * Customer-facing labels for a product's pack selector, one per pack.
+ *
+ * `pack` is a net quantity, and a net quantity does not always identify what
+ * you are buying. Hatch'E is three different feeds — H1, H2 and H3, three
+ * particle sizes for three larval stages — each sold as a 1kg bag, so the
+ * selector offered "1kg · ₹1,250" three times over and nothing on the page
+ * said which stage a customer had picked.
+ *
+ * The variant model has no display-name field: `sku` and `pack` are all there
+ * is, and the stage is recorded only in the SKU. So the qualifier is derived
+ * from the SKU — and only where it is needed. A pack whose net quantity is
+ * unique within its product keeps exactly the label it has today, which is why
+ * this changes Hatch'E and no other product in the catalogue.
+ *
+ * PRESENTATION ONLY. The SKU sent to Add to Cart, the net-quantity declaration
+ * in the product & seller information block, the cart line the server prices
+ * back, and the CMS's own labels are all untouched — this decides the text on
+ * a button and nothing else.
+ */
+export function packOptionLabels(packs = []) {
+  const list = packs ?? [];
+
+  const counts = new Map();
+  for (const p of list) {
+    const key = packKey(p?.pack);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  return list.map((p, i) => {
+    const label = String(p?.pack ?? "").trim();
+    const key = packKey(p?.pack);
+    // Unambiguous on its own — leave it exactly as the CMS wrote it.
+    if ((counts.get(key) ?? 0) < 2) return label;
+
+    const siblings = list
+      .filter((other, j) => j !== i && packKey(other?.pack) === key)
+      .map((other) => other?.sku);
+    const qualifier = distinguishingSkuPart(p?.sku, siblings);
+
+    if (!qualifier) return label;
+    return label ? `${qualifier} — ${label}` : qualifier;
+  });
+}

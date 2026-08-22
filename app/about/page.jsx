@@ -212,8 +212,8 @@ export default async function AboutPage() {
 
         {/* ── WHY ZEWA EXISTS ───────────────────────────────────────── */}
         <Section tone="raised" className="border-y border-white/5">
-          <div className="mx-auto max-w-[760px] text-center">
-            <div className="mb-7 flex items-center justify-center gap-3">
+          <div className="mx-auto max-w-[760px] text-left sm:text-center">
+            <div className="mb-7 flex items-center justify-start sm:justify-center gap-3">
               <div className="h-px w-6 bg-primary" />
               <span className="font-label-caps text-label-caps tracking-[0.2em] text-primary">
                 {WHY.eyebrow}
@@ -225,7 +225,7 @@ export default async function AboutPage() {
             >
               {WHY.title}
             </h2>
-            <p className="font-body-md mx-auto mt-8 max-w-[620px] text-[15.5px] leading-[1.8] text-white/45">
+            <p className="font-body-md mx-0 sm:mx-auto mt-8 max-w-[620px] text-[15.5px] leading-[1.8] text-white/45">
               {WHY.body}
             </p>
           </div>
@@ -505,7 +505,7 @@ export default async function AboutPage() {
               className="font-display-lg leading-[1.15] text-white"
               style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
             >
-              Feed built on evidence, not marketing.
+              Feed built on evidence, not marketing
             </h2>
             <p className="font-body-md mx-auto mt-6 max-w-[460px] text-[15px] leading-relaxed text-white/40">
               Explore the range, or read the research behind every formulation.

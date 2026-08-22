@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReviewForm from "@/components/ReviewForm";
 import { useCart } from "@/lib/cartContext";
-import { isCutout, PLACEHOLDER_IMAGE } from "@/app/products/adapters";
+import { isCutout, packOptionLabels, PLACEHOLDER_IMAGE } from "@/app/products/adapters";
 import { discountPct, formatInr } from "@/lib/api";
 import { COMPANY, COMPANY_ADDRESS_LINE } from "@/lib/company";
 
@@ -97,6 +97,19 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
   const [tab, setTab] = useState("description");
 
   const pack = packs[activePack];
+
+  /*
+   * Button text for the pack selector, one per pack.
+   *
+   * Not `p.pack` directly: Hatch'E's H1, H2 and H3 are three different feeds
+   * all sold as a 1kg bag, so the selector rendered the same "1kg" three
+   * times. `packOptionLabels` adds the distinguishing part of the SKU to packs
+   * that share a net quantity and leaves every other product's labels alone.
+   * Presentation only — `pack` itself, and everything derived from it below,
+   * is unchanged.
+   */
+  const packLabels = packOptionLabels(packs);
+
   const presentation = product.presentation ?? {};
   const gallery = presentation.gallery ?? [];
   const highlights = presentation.highlights ?? [];
@@ -569,7 +582,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                         }`}
                       >
                         <div className="text-[14px] font-semibold text-white font-[Montserrat]">
-                          {p.pack}
+                          {packLabels[i] || p.pack}
                         </div>
                         <div className="text-[12px] text-white/45 font-[Montserrat]">
                           {formatInr(p.pricePaise)}
