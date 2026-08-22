@@ -20,7 +20,7 @@ const MILESTONES = [
     points: [
       "Commercial plant producing insect protein from municipal waste",
       "EY Climathon Champion",
-      "Swachh Technology Challenge Kerala, Nominee",
+      "Swachh Technology Challenge, Kerala Nominee",
     ],
     index: "02",
     image: "/Website_ Milestones/India's first data centric Insect farm 2022.png",
