@@ -19,7 +19,8 @@ const MILESTONES = [
     year: "2022",
     points: [
       "Commercial plant producing insect protein from municipal waste",
-      "EY Climathon Champion · Swachh Technology Challenge Kerala, Nominee",
+      "EY Climathon Champion",
+      "Swachh Technology Challenge Kerala, Nominee",
     ],
     index: "02",
     image: "/Website_ Milestones/India's first data centric Insect farm 2022.png",
@@ -30,7 +31,9 @@ const MILESTONES = [
     points: [
       "Pivot to formulation science",
       "Formulation research and field trials begin",
-      "Australian Government AAGS Winner · KSUM Market Acceleration Grant · ICAR-CIFT MoU signed",
+      "Australian Government AAGS Winner",
+      "KSUM Market Acceleration Grant",
+      "ICAR-CIFT MoU signed",
     ],
     index: "03",
     image: "/Website_ Milestones/AAGS 2023.jpg",
@@ -41,7 +44,8 @@ const MILESTONES = [
     points: [
       "Facility and team rebuilt",
       "First species-specific SKUs launched",
-      "ICAR Pusa Krishi UPJA Winner · AgHub Catalytic Capital Recipient",
+      "ICAR Pusa Krishi UPJA Winner",
+      "AgHub Catalytic Capital Recipient",
     ],
     index: "04",
     image: "/Website_ Milestones/ICAR IARI 2024.JPG",
@@ -51,7 +55,8 @@ const MILESTONES = [
     year: "2025",
     points: [
       "KAU feeding trial validates 2.2× weight gain over imported feed",
-      "Temasek Foundation Ecosphere NextGen Leader · AFTEA Finalist, Singapore",
+      "Temasek Foundation Ecosphere NextGen Leader",
+      "AFTEA Finalist, Singapore",
     ],
     index: "05",
     image: "/Website_ Milestones/Product display 2025.jpeg",
@@ -63,7 +68,6 @@ const MILESTONES = [
       "Research presented at MECOS 4 (SFM-177)",
       "National expansion",
       "Amazon, Flipkart, Blinkit and D2C live",
-      "AFTEA Finalist, Singapore",
     ],
     index: "06",
     image: "/Website_ Milestones/Product display 2025_2.jpeg",
