@@ -143,7 +143,7 @@ function TileBanner() {
         <img
           src="/zewa-hero2-mobile-1080x1080-text.jpg"
           alt="The Ultimate Superior Nutrition For Your Fish"
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-center md:object-contain md:object-[center_35%]"
         />
       </picture>
       <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/40 via-transparent to-transparent pointer-events-none" />
