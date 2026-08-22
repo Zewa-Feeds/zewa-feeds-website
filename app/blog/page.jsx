@@ -26,18 +26,7 @@ export default function BlogPage() {
       <main className="bg-[#05070d] text-[#dde2f6] min-h-screen overflow-x-hidden">
 
         {/* ── HERO ─────────────────────────────────────────────────── */}
-        <section className="relative pt-20 overflow-hidden">
-          <div className="absolute inset-0 pointer-events-none z-0">
-            <Image
-              src="/Banner 3.png"
-              alt="Zewa Knowledge Hub Banner"
-              fill
-              className="object-cover object-center opacity-35"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#05070d] via-[#05070d]/85 to-[#05070d]/50" />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#05070d]/80 via-transparent to-[#05070d]" />
-          </div>
+        <section className="relative pt-20 overflow-hidden bg-[#05070d]">
 
           <div className="relative max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-20 pt-16 pb-16">
             <div className="flex items-center gap-3 mb-10">

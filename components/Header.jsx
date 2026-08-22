@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { navLinks } from "@/lib/content";
 import { useCart } from "@/lib/cartContext";
 import AccountMenu, { MobileAccountLinks } from "@/components/AccountMenu";
@@ -46,12 +47,14 @@ export default function Header() {
   }, []);
 
   const isActive = (href) => {
-    if (href === "/") return pathname === "/";
-    return pathname.startsWith(href.split("#")[0]) && href.split("#")[0] !== "/";
+    if (!pathname) return false;
+    const current = pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+    const target = href.split("#")[0];
+    if (target === "/" || target === "") return current === "/";
+    return current === target || current.startsWith(`${target}/`);
   };
 
-  const isShopPage = pathname === "/products" || pathname.startsWith("/products/") || pathname === "/cart" || pathname === "/checkout";
-  const showCart = isShopPage || totalItems > 0;
+  const isShopPage = pathname === "/products" || pathname?.startsWith("/products/") || pathname === "/cart" || pathname === "/checkout";
 
   return (
     <header
@@ -62,7 +65,7 @@ export default function Header() {
       <div className="flex justify-between items-center w-full max-w-[1440px] mx-auto px-8 h-full">
 
         {/* Logo + beta flag */}
-        <a href="/" className="flex shrink-0 items-center gap-2.5">
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <Image
             src="/logo-transparent.png"
             alt="Zewa Feeds"
@@ -77,35 +80,41 @@ export default function Header() {
           >
             Beta
           </span>
-        </a>
+        </Link>
 
         {/* Nav */}
         <nav className="hidden md:flex gap-8 items-center">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className={
-                isActive(link.href)
-                  ? "text-primary font-bold border-b-2 border-primary pb-1 font-button text-button"
-                  : "text-on-surface-variant hover:text-on-surface transition-colors font-button text-button"
-              }
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.label}
+                href={link.href}
+                className={`relative py-1 font-button text-button transition-colors duration-200 ${
+                  active
+                    ? "text-primary font-bold drop-shadow-[0_0_12px_rgba(68,229,194,0.4)]"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+              >
+                {link.label}
+                {active && (
+                  <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-primary rounded-full shadow-[0_0_8px_rgba(68,229,194,0.8)]" />
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Desktop CTAs — uniform across all pages */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
           {!isShopPage ? (
-            <a href="/products" className="border border-primary text-primary px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200">
+            <Link href="/products" className="border border-primary text-primary px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200">
               Buy Now
-            </a>
+            </Link>
           ) : (
-            <a href="/products" className="border border-primary/40 text-primary/80 px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:border-primary hover:text-primary active:scale-95 transition-all duration-200">
+            <Link href="/products" className="border border-primary/40 text-primary/80 px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:border-primary hover:text-primary active:scale-95 transition-all duration-200">
               Shop All
-            </a>
+            </Link>
           )}
           <button className="border border-primary/35 text-primary/55 px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:border-primary hover:text-primary hover:bg-primary/8 active:scale-95 transition-all duration-200">
             Find a Dealer
@@ -117,9 +126,9 @@ export default function Header() {
         {/* Mobile CTAs — uniform across all pages */}
         <div className="md:hidden flex items-center gap-2">
           {!isShopPage && (
-            <a href="/products" className="whitespace-nowrap border border-primary text-primary px-3 py-2 font-button text-[11px] uppercase tracking-wider hover:bg-primary hover:text-on-primary transition-all duration-200">
+            <Link href="/products" className="whitespace-nowrap border border-primary text-primary px-3 py-2 font-button text-[11px] uppercase tracking-wider hover:bg-primary hover:text-on-primary transition-all duration-200">
               Buy Now
-            </a>
+            </Link>
           )}
           <CartIcon onClick={() => setDrawerOpen(true)} totalItems={totalItems} />
           <AccountMenu />
@@ -153,19 +162,27 @@ export default function Header() {
           className="md:hidden absolute left-0 right-0 top-20 z-50 max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-white/10 bg-surface backdrop-blur-xl shadow-2xl shadow-black/40"
         >
           <ul className="flex flex-col px-5 py-4">
-            {navLinks.map((link) => (
-              <li key={link.label} className="border-b border-white/5 last:border-0">
-                <a
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`block py-3.5 font-button text-[14px] transition-colors ${
-                    isActive(link.href) ? "text-primary" : "text-on-surface hover:text-primary"
-                  }`}
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            {navLinks.map((link) => {
+              const active = isActive(link.href);
+              return (
+                <li key={link.label} className="border-b border-white/5 last:border-0">
+                  <Link
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`flex items-center justify-between py-3.5 font-button text-[14px] transition-colors ${
+                      active
+                        ? "text-primary font-bold drop-shadow-[0_0_8px_rgba(68,229,194,0.3)]"
+                        : "text-on-surface hover:text-primary"
+                    }`}
+                  >
+                    <span>{link.label}</span>
+                    {active && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_6px_rgba(68,229,194,0.9)]" />
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
           {/*
@@ -178,17 +195,18 @@ export default function Header() {
           </div>
 
           <div className="border-t border-white/10 px-5 py-4">
-            <a
+            <Link
               href="/products"
               onClick={() => setMobileOpen(false)}
               className="block bg-primary py-3 text-center font-button text-button uppercase tracking-widest text-on-primary"
             >
               Shop All Products
-            </a>
+            </Link>
           </div>
         </nav>
       )}
     </header>
   );
 }
+
 
