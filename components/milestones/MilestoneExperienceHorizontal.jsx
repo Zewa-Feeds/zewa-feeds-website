@@ -6,7 +6,10 @@ import Image from "next/image";
 const MILESTONES = [
   {
     year: "2021",
-    text: "Incorporation, first waste-to-protein pilots",
+    points: [
+      "Incorporation",
+      "First waste-to-protein pilots",
+    ],
     index: "01",
     recognition: "UNDP Green Innovation Fund Winner",
     image: "/Website_ Milestones/Incorporation& first office.jpg",
@@ -14,7 +17,9 @@ const MILESTONES = [
   },
   {
     year: "2022",
-    text: "Commercial plant producing insect protein from municipal waste",
+    points: [
+      "Commercial plant producing insect protein from municipal waste",
+    ],
     index: "02",
     recognition: "EY Climathon Champion · Swachh Technology Challenge Kerala, Nominee",
     image: "/Website_ Milestones/India's first data centric Insect farm 2022.png",
@@ -22,7 +27,10 @@ const MILESTONES = [
   },
   {
     year: "2023",
-    text: "Pivot to formulation science; formulation research and field trials begin",
+    points: [
+      "Pivot to formulation science",
+      "Formulation research and field trials begin",
+    ],
     index: "03",
     recognition: "Australian Government AAGS Winner · KSUM Market Acceleration Grant · ICAR-CIFT MoU signed",
     image: "/Website_ Milestones/AAGS 2023.jpg",
@@ -30,7 +38,10 @@ const MILESTONES = [
   },
   {
     year: "2024",
-    text: "Facility and team rebuilt; first species-specific SKUs launched",
+    points: [
+      "Facility and team rebuilt",
+      "First species-specific SKUs launched",
+    ],
     index: "04",
     recognition: "ICAR Pusa Krishi UPJA Winner · AgHub Catalytic Capital Recipient",
     image: "/Website_ Milestones/ICAR IARI 2024.JPG",
@@ -38,7 +49,9 @@ const MILESTONES = [
   },
   {
     year: "2025",
-    text: "KAU feeding trial validates 2.2× weight gain over imported feed",
+    points: [
+      "KAU feeding trial validates 2.2× weight gain over imported feed",
+    ],
     index: "05",
     recognition: "Temasek Foundation Ecosphere NextGen Leader · AFTEA Finalist, Singapore",
     image: "/Website_ Milestones/Product display 2025.jpeg",
@@ -46,7 +59,10 @@ const MILESTONES = [
   },
   {
     year: "2025",
-    text: "Research presented at MECOS 4 (SFM-177) & national expansion",
+    points: [
+      "Research presented at MECOS 4 (SFM-177)",
+      "National expansion",
+    ],
     index: "06",
     recognition: "MECOS 4 (SFM-177) Presentation · AFTEA Finalist, Singapore",
     image: "/Website_ Milestones/Product display 2025_2.jpeg",
@@ -54,7 +70,12 @@ const MILESTONES = [
   },
   {
     year: "2026",
-    text: "44 SKUs across 29 formulations; 500+ outlets in 8 states; Amazon, Flipkart, Blinkit and D2C live; Amazon US Global Selling opened",
+    points: [
+      "44 SKUs across 29 formulations",
+      "500+ outlets in 8 states",
+      "Amazon, Flipkart, Blinkit and D2C live",
+      "Amazon US Global Selling opened",
+    ],
     index: "07",
     recognition: "Vande Bharatam National Finalist — 56 selected from 26,000+ applications",
     image: "/Website_ Milestones/Vande Bharatam 2026.webp",
@@ -202,7 +223,7 @@ export default function MilestoneExperienceHorizontal() {
                   <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-black/40 border border-white/10 mb-4 group-hover:border-primary/30 transition-colors">
                     <Image
                       src={m.image}
-                      alt={m.imageAlt || m.text}
+                      alt={m.imageAlt || (m.points ? m.points.join(", ") : m.text || "")}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                       sizes="(max-width: 640px) 280px, 340px"
@@ -224,10 +245,23 @@ export default function MilestoneExperienceHorizontal() {
                 {/* Accent rule */}
                 <div className="h-0.5 w-6 bg-primary/40 group-hover:w-10 group-hover:bg-primary transition-all duration-200 mb-3.5" />
 
-                {/* Exact Milestone Copy */}
-                <p className="font-body-md text-[13.5px] sm:text-[14px] text-white/85 leading-relaxed">
-                  {m.text}
-                </p>
+                {/* Milestone Points as Separate Bullets */}
+                {Array.isArray(m.points) && m.points.length > 0 ? (
+                  <ul className="space-y-2 mt-1">
+                    {m.points.map((point, pIdx) => (
+                      <li key={pIdx} className="flex items-start gap-2.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-1.5 shadow-[0_0_6px_rgba(68,229,194,0.6)]" />
+                        <span className="font-body-md text-[13.5px] sm:text-[14px] text-white/85 leading-relaxed">
+                          {point}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="font-body-md text-[13.5px] sm:text-[14px] text-white/85 leading-relaxed">
+                    {m.text}
+                  </p>
+                )}
               </div>
 
               {/* Recognition Pill */}
