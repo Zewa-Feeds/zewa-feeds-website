@@ -35,16 +35,23 @@ import { SITE_URL } from "@/lib/site";
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    // Was just "Zewa Feeds" — no category, keyword or location.
-    default: "Insect Protein Fish Food & BSF Larvae | Zewa Feeds India",
+    default: "Zewa Feeds | Species-Specific Insect Protein Fish Food",
     template: "%s | Zewa Feeds",
+  },
+  icons: {
+    icon: [
+      { url: "/icon.png" },
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    apple: [{ url: "/apple-icon.png" }],
   },
   // 137 chars. The previous copy ran to 162 and truncated in results.
   description:
     "Lab-verified insect-protein fish food from Zewa Feeds India. 88% pepsin digestibility, NABL-tested, formulated by species and life stage.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Insect Protein Fish Food & BSF Larvae | Zewa Feeds India",
+    title: "Zewa Feeds | Species-Specific Insect Protein Fish Food",
     description:
       "Lab-verified insect-protein fish food. 88% pepsin digestibility, NABL-tested, formulated by species and life stage.",
     url: SITE_URL,
@@ -68,7 +75,7 @@ export const metadata = {
   twitter: {
     // Was "summary", which shows a thumbnail rather than a banner.
     card: "summary_large_image",
-    title: "Insect Protein Fish Food & BSF Larvae | Zewa Feeds India",
+    title: "Zewa Feeds | Species-Specific Insect Protein Fish Food",
     description:
       "Lab-verified insect-protein fish food. 88% pepsin digestibility, NABL-tested.",
     images: ["/Banner 3.png"],

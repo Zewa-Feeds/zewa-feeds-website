@@ -11,6 +11,10 @@ import { describe, expect, it, vi } from "vitest";
 
 const products = vi.fn();
 vi.mock("@/lib/api", () => ({ catalog: { products: () => products() } }));
+vi.mock("next/font/google", () => ({
+  Montserrat: () => ({ variable: "montserrat-var" }),
+  Playfair_Display: () => ({ variable: "playfair-var" }),
+}));
 
 const { default: sitemap } = await import("./sitemap");
 const { default: robots } = await import("./robots");
@@ -372,5 +376,38 @@ describe("query parameters", () => {
   it("keeps no query-string URL in the sitemap", async () => {
     products.mockResolvedValue(CATALOGUE);
     for (const entry of await sitemap()) expect(entry.url).not.toContain("?");
+  });
+});
+
+describe("homepage metadata and favicon configuration", () => {
+  it("defines the exact homepage title and brand template", async () => {
+    const { metadata } = await import("./layout");
+    expect(metadata.title.default).toBe(
+      "Zewa Feeds | Species-Specific Insect Protein Fish Food",
+    );
+    expect(metadata.title.template).toBe("%s | Zewa Feeds");
+    expect(metadata.openGraph.title).toBe(
+      "Zewa Feeds | Species-Specific Insect Protein Fish Food",
+    );
+    expect(metadata.twitter.title).toBe(
+      "Zewa Feeds | Species-Specific Insect Protein Fish Food",
+    );
+  });
+
+  it("configures standard and Apple touch icons for cross-browser support", async () => {
+    const { metadata } = await import("./layout");
+    const icons = metadata.icons;
+    expect(icons).toBeDefined();
+    expect(icons.icon).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ url: "/icon.png" }),
+        expect.objectContaining({ url: "/favicon.png", type: "image/png" }),
+      ]),
+    );
+    expect(icons.apple).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ url: "/apple-icon.png" }),
+      ]),
+    );
   });
 });
