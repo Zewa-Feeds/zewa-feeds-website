@@ -128,7 +128,7 @@ describe("Checkout Payment UX & Loading State", () => {
     expect(script).not.toBeNull();
   });
 
-  it("shows immediate loading banner, disables submit button, and smooth scrolls to top when Pay Online is clicked", async () => {
+  it("transitions immediately to full-screen payment loading state and locks viewport when Pay Online is clicked", async () => {
     let resolvePlace;
     placeMock.mockReturnValue(
       new Promise((res) => {
@@ -149,21 +149,17 @@ describe("Checkout Payment UX & Loading State", () => {
       fireEvent.click(payButton);
     });
 
-    // 1. Immediate loading banner at the top
-    const loadingBanner = container.querySelector("#checkout-payment-loading");
-    expect(loadingBanner).not.toBeNull();
-    expect(loadingBanner.textContent).toContain("Preparing secure payment");
+    // 1. Full-screen payment processing overlay is immediately active
+    expect(screen.getByRole("heading", { name: /Processing Your Payment/i })).toBeDefined();
+    expect(screen.getByText(/Initializing secure checkout…/i)).toBeDefined();
+    expect(screen.getByText(/Please do not close or refresh this window/i)).toBeDefined();
 
-    // 2. Button is disabled and in busy state
-    expect(payButton.getAttribute("disabled")).not.toBeNull();
-    expect(payButton.getAttribute("aria-busy")).toBe("true");
+    // 2. The standard checkout form is completely unmounted / unavailable
+    expect(screen.queryByRole("heading", { name: /Complete Your Order/i })).toBeNull();
 
-    // 3. Scrolled to top
+    // 3. Viewport reset and body scroll locked
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" });
-
-    // 4. Duplicate click is prevented
-    fireEvent.click(payButton);
-    expect(placeMock).toHaveBeenCalledTimes(1);
+    expect(document.body.style.overflow).toBe("hidden");
 
     // Mock Razorpay instance
     let rzpHandler;
@@ -190,7 +186,7 @@ describe("Checkout Payment UX & Loading State", () => {
     expect(window.Razorpay).toHaveBeenCalledTimes(1);
   });
 
-  it("clears loading state and displays error if checkoutApi.place fails", async () => {
+  it("restores the checkout form cleanly if payment initialization fails", async () => {
     placeMock.mockRejectedValue(new Error("Unable to connect to payment server."));
 
     let container;
@@ -206,15 +202,11 @@ describe("Checkout Payment UX & Loading State", () => {
       fireEvent.click(payButton);
     });
 
-    // Loading banner is cleared
-    const loadingBanner = container.querySelector("#checkout-payment-loading");
-    expect(loadingBanner).toBeNull();
-
-    // Error banner is shown
+    // Full-screen loading overlay is dismissed, form is restored with error banner
+    expect(screen.queryByRole("heading", { name: /Processing Your Payment/i })).toBeNull();
+    expect(screen.getByRole("heading", { name: /Complete Your Order/i })).toBeDefined();
     expect(screen.getByText("Unable to connect to payment server.")).toBeDefined();
-
-    // Button is re-enabled
-    expect(payButton.getAttribute("disabled")).toBeNull();
+    expect(document.body.style.overflow).toBe("");
   });
 
   it("transitions directly to success screen when payment succeeds and signature verifies", async () => {

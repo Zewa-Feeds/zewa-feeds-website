@@ -506,7 +506,8 @@ export default function CheckoutPage() {
 
     setErrors({});
     setIsSubmittingPayment(true);
-    setStatusText("Preparing secure payment…");
+    setStatusText("Initializing secure checkout…");
+    setStep("paying");
     resetScrollAndLock();
 
     try {
@@ -559,8 +560,6 @@ export default function CheckoutPage() {
         setStatusText(
           `Test mode — payment confirms automatically in ${result.payment.autoConfirmInSeconds ?? 30}s…`,
         );
-        setStep("paying");
-        if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
         const paid = await pollUntilPaid(result.orderNo, form.email.trim());
         unlockScroll();
         setIsSubmittingPayment(false);
@@ -576,12 +575,12 @@ export default function CheckoutPage() {
         return;
       }
 
-      setStatusText("Opening secure payment…");
+      setStatusText("Opening payment gateway…");
       const { outcome, message } = await openRazorpay(result, form, async (payload) => {
         await checkoutApi.confirm(result.orderNo, payload);
       });
 
-      // Immediately enter payment-processing state so the old checkout form never flashes
+      // Immediately keep user in paying/processing state so the checkout form never flashes back
       setStep("paying");
 
       if (outcome === "paid") {
@@ -834,27 +833,38 @@ export default function CheckoutPage() {
     );
   }
 
-  // ---- PAYING / PROCESSING SCREEN --------------------------------------------
+  // ---- PAYING / PROCESSING FULL-SCREEN STATE ----------------------------------
   if (step === "paying") {
     return (
       <>
         <Header />
         <main className="flex min-h-screen items-center justify-center bg-[#060913] px-6 pt-28 pb-20">
-          <div className="flex flex-col items-center gap-6 text-center rounded-3xl border border-white/10 bg-[#090f1d] p-10 sm:p-14 shadow-[0_16px_48px_rgba(0,0,0,0.5)] max-w-md w-full">
+          <div className="flex flex-col items-center gap-7 text-center rounded-3xl border border-white/10 bg-[#090f1d] p-10 sm:p-14 shadow-[0_20px_60px_rgba(0,0,0,0.6)] max-w-lg w-full">
             <div className="relative flex items-center justify-center">
-              <div className="h-16 w-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-              <div className="absolute h-8 w-8 rounded-full bg-primary/20 animate-ping" />
+              <div className="h-20 w-20 rounded-full border-4 border-primary/20 border-t-primary animate-spin shadow-[0_0_24px_rgba(68,229,194,0.3)]" />
+              <div className="absolute h-10 w-10 rounded-full bg-primary/20 animate-ping" />
+              <div className="absolute flex items-center justify-center">
+                <svg className="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
             </div>
             <div>
-              <h3 className="font-[Playfair_Display] text-[24px] font-bold text-white">
-                Processing your payment
-              </h3>
-              <p className="mt-2 text-[14px] text-white/75 font-[Montserrat] leading-relaxed">
-                {statusText || "Checking your payment status securely…"}
+              <span className="inline-block rounded-full bg-primary/10 border border-primary/25 px-3.5 py-1 text-[10.5px] font-bold uppercase tracking-widest text-primary font-[Montserrat] mb-3">
+                Secure Checkout
+              </span>
+              <h2 className="font-[Playfair_Display] text-[26px] sm:text-[30px] font-bold text-white leading-snug">
+                Processing Your Payment
+              </h2>
+              <p className="mt-2.5 text-[14px] text-white/75 font-[Montserrat] leading-relaxed">
+                {statusText || "Connecting to secure payment gateway…"}
               </p>
-              <p className="mt-4 text-[12px] text-white/40 font-[Montserrat]">
-                Please don&apos;t close or refresh this page.
-              </p>
+              <div className="mt-6 flex items-center justify-center gap-2 rounded-xl border border-white/6 bg-white/2 py-2.5 px-4 text-[12px] text-white/40 font-[Montserrat]">
+                <svg className="h-3.5 w-3.5 text-primary/70 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Please do not close or refresh this window</span>
+              </div>
             </div>
             {placed?.payment?.simulated && (
               <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5">
