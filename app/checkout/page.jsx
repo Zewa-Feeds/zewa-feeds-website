@@ -42,6 +42,7 @@ export default function CheckoutPage() {
   const [touched, setTouched] = useState({});
   const [step, setStep] = useState("form"); // form | paying | success | failed
   const [placed, setPlaced] = useState(null);
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
   /**
    * Why the payment did not go through, for the failure screen.
    *
@@ -129,6 +130,18 @@ export default function CheckoutPage() {
         setPaymentMethod("RAZORPAY");
       });
   }, []);
+
+  // Preload Razorpay Checkout SDK script on checkout mount so it is warm in cache before user clicks Pay Online
+  useEffect(() => {
+    if (typeof window === "undefined" || window.Razorpay) return;
+    const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+    if (existing) return;
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
 
   /*
    * Bring a checkout-level failure into view.
@@ -442,7 +455,9 @@ export default function CheckoutPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e?.preventDefault) e.preventDefault();
+    if (isSubmittingPayment || validating) return;
+
     const errs = validateForm();
     if (Object.keys(errs).length) {
       setErrors(errs);
@@ -460,14 +475,18 @@ export default function CheckoutPage() {
     }
 
     setErrors({});
-    setStep("paying");
-    setStatusText("Securing & placing your order…");
+    setIsSubmittingPayment(true);
+    setStatusText("Preparing secure payment…");
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    }
 
     try {
       const fresh = await validate({ state: form.state, email: form.email });
       const blocking = (fresh?.issues ?? []).filter((i) => i.sku !== "__coupon__");
       if (blocking.length > 0) {
         setErrors({ _root: blocking[0].message });
+        setIsSubmittingPayment(false);
         setStep("form");
         return;
       }
@@ -500,7 +519,9 @@ export default function CheckoutPage() {
       if (!result.payment.required) {
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
+        setIsSubmittingPayment(false);
         setStep("success");
+        if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
         return;
       }
 
@@ -508,11 +529,15 @@ export default function CheckoutPage() {
         setStatusText(
           `Test mode — payment confirms automatically in ${result.payment.autoConfirmInSeconds ?? 30}s…`,
         );
+        setStep("paying");
+        if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
         const paid = await pollUntilPaid(result.orderNo, form.email.trim());
+        setIsSubmittingPayment(false);
         if (paid) {
           clearCart();
           sessionStorage.removeItem(STORAGE_FORM_KEY);
           setStep("success");
+          if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
         } else {
           setErrors({ _root: "Payment was not confirmed in time. Please contact support." });
           setStep("form");
@@ -520,14 +545,18 @@ export default function CheckoutPage() {
         return;
       }
 
+      setStatusText("Opening secure payment…");
       const { outcome, message } = await openRazorpay(result, form, async (payload) => {
         await checkoutApi.confirm(result.orderNo, payload);
       });
+
+      setIsSubmittingPayment(false);
 
       if (outcome === "paid") {
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         setStep("success");
+        if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
         return;
       }
 
@@ -543,15 +572,19 @@ export default function CheckoutPage() {
       if (outcome === "failed" || outcome === "unavailable") {
         setFailure({ orderNo: result.orderNo, reason: message });
         setStep("failed");
+        if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
         return;
       }
 
       setStatusText("Checking whether your payment went through…");
+      setStep("paying");
+      if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       const paid = await pollUntilPaid(result.orderNo, form.email.trim(), 30_000);
       if (paid) {
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         setStep("success");
+        if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       } else {
         setFailure({
           orderNo: result.orderNo,
@@ -559,10 +592,13 @@ export default function CheckoutPage() {
             "We didn't receive confirmation of your payment. If money left your account it will be confirmed shortly — please check before paying again.",
         });
         setStep("failed");
+        if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       }
     } catch (err) {
+      setIsSubmittingPayment(false);
       setErrors(err.fields ?? { _root: err.message });
       setStep("form");
+      if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
     }
   };
 
@@ -758,6 +794,31 @@ export default function CheckoutPage() {
               Complete Your Order
             </h1>
           </div>
+
+          {/* Secure Payment Initializing Banner */}
+          {isSubmittingPayment && (
+            <div
+              id="checkout-payment-loading"
+              role="status"
+              aria-live="polite"
+              className="mb-8 flex items-center gap-4 rounded-2xl border border-primary/40 bg-primary/10 p-5 text-white shadow-[0_0_30px_rgba(68,229,194,0.15)] animate-pulse"
+            >
+              <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/20 text-primary">
+                <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                  <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />
+                </svg>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-[Playfair_Display] text-[17px] font-bold text-white tracking-wide">
+                  {statusText || "Preparing secure payment…"}
+                </span>
+                <span className="font-[Montserrat] text-[12.5px] text-white/70">
+                  Connecting to Razorpay. Please do not refresh or close this window.
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Global Root Errors */}
           {/*
@@ -1080,8 +1141,8 @@ export default function CheckoutPage() {
               <div className="flex flex-col gap-3">
                 <button
                   type="submit"
-                  disabled={validating || !fulfillable}
-                  aria-busy={validating}
+                  disabled={validating || isSubmittingPayment || !fulfillable}
+                  aria-busy={validating || isSubmittingPayment}
                   className={`group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-primary py-4 text-[13px] font-bold uppercase tracking-[0.2em] text-[#00382d] font-[Montserrat] shadow-[0_4px_28px_rgba(68,229,194,0.35)] sm:py-5 ${EASE} hover:bg-primary/90 hover:shadow-[0_6px_34px_rgba(68,229,194,0.45)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:bg-primary ${FOCUS_RING}`}
                 >
                   {/*
@@ -1093,7 +1154,7 @@ export default function CheckoutPage() {
                     className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden"
                   />
 
-                  {validating ? (
+                  {isSubmittingPayment || validating ? (
                     <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                       <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />
@@ -1111,7 +1172,9 @@ export default function CheckoutPage() {
                   )}
 
                   <span className="relative">
-                    {validating
+                    {isSubmittingPayment
+                      ? "Preparing secure payment…"
+                      : validating
                       ? "Validating prices..."
                       : !fulfillable
                       ? "Fix cart issues to continue"
@@ -1168,12 +1231,20 @@ export default function CheckoutPage() {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={validating || !fulfillable}
-            aria-busy={validating}
+            disabled={validating || isSubmittingPayment || !fulfillable}
+            aria-busy={validating || isSubmittingPayment}
             className={`flex shrink-0 items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-[#00382d] font-[Montserrat] ${EASE} hover:bg-primary/90 active:scale-[0.98] disabled:opacity-40 ${FOCUS_RING}`}
           >
-            <span>{validating ? "Checking..." : !fulfillable ? "Fix cart" : "Pay Online"}</span>
-            {validating ? (
+            <span>
+              {isSubmittingPayment
+                ? "Preparing..."
+                : validating
+                ? "Checking..."
+                : !fulfillable
+                ? "Fix cart"
+                : "Pay Online"}
+            </span>
+            {isSubmittingPayment || validating ? (
               <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                 <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />
@@ -1236,9 +1307,17 @@ export default function CheckoutPage() {
  */
 async function openRazorpay(result, form, onSuccess) {
   const loaded = await new Promise((resolve) => {
-    if (window.Razorpay) return resolve(true);
+    if (typeof window !== "undefined" && window.Razorpay) return resolve(true);
+    const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+    if (existing) {
+      if (window.Razorpay) return resolve(true);
+      existing.addEventListener("load", () => resolve(true), { once: true });
+      existing.addEventListener("error", () => resolve(false), { once: true });
+      return;
+    }
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
     script.onload = () => resolve(true);
     script.onerror = () => resolve(false);
     document.body.appendChild(script);
