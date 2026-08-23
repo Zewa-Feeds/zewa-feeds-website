@@ -9,6 +9,7 @@ import {
   formatOrderDateTime,
 } from "@/components/account/orderUi";
 import TrackingPanel from "@/components/account/TrackingPanel";
+import CancelOrderModal from "@/components/account/CancelOrderModal";
 import { useAuth } from "@/lib/authContext";
 import { account as accountApi, formatInr, ApiError } from "@/lib/api";
 
@@ -29,6 +30,10 @@ export default function OrderDetailPage({ params }) {
   const [invoiceError, setInvoiceError] = useState(null);
   const [error, setError] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelBusy, setCancelBusy] = useState(false);
+  const [cancelError, setCancelError] = useState(null);
+  const [cancelSuccess, setCancelSuccess] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -78,6 +83,58 @@ export default function OrderDetailPage({ params }) {
       );
     } finally {
       setInvoiceBusy(false);
+    }
+  };
+
+  /**
+   * Confirm cancellation.
+   *
+   * `cancelBusy` guards the ACTION, not just the button: a double-click, a
+   * retried request or a second tab all funnel through here, and the server's
+   * already-cancelled path is idempotent besides.
+   *
+   * The response is the full updated order, so the page re-renders from
+   * server truth rather than a locally patched status — which is what keeps
+   * the timeline, the refund line and the button state consistent.
+   */
+  const confirmCancel = async (reason) => {
+    if (cancelBusy) return;
+    setCancelBusy(true);
+    setCancelError(null);
+    try {
+      const updated = await accountApi.cancelOrder(orderNo, { reason });
+      /*
+       * Swap the page to the cancelled view FIRST, then hold the modal on a
+       * short confirmation. By the time it dismisses, what is underneath
+       * already shows CANCELLED, the refund line and the reason — so the
+       * customer is never looking at a stale page wondering whether it worked.
+       */
+      setOrder(updated);
+      setCancelSuccess(true);
+      window.setTimeout(() => {
+        setCancelOpen(false);
+        setCancelSuccess(false);
+      }, 1400);
+    } catch (err) {
+      /*
+       * A 409 means the order moved on while the modal was open — shipped by
+       * ops, most likely. The server writes that message for the customer, so
+       * it is shown as-is; anything else gets a neutral fallback rather than
+       * an internal string.
+       */
+      setCancelError(
+        err instanceof ApiError && err.message
+          ? err.message
+          : "We couldn't cancel this order just now. Please try again.",
+      );
+      /* Re-read so the page reflects whatever the true state now is. */
+      try {
+        setOrder(await accountApi.order(orderNo));
+      } catch {
+        /* leave the existing view in place */
+      }
+    } finally {
+      setCancelBusy(false);
     }
   };
 
@@ -198,6 +255,73 @@ export default function OrderDetailPage({ params }) {
               </div>
             )}
 
+            {/*
+              ---- Refund state on a cancelled order ----
+
+              Without this the page shows "Cancelled" beside "Payment
+              successful", which reads as a bug. Cancelling does not refund —
+              that is a separate step someone performs — so the honest line is
+              that the refund is on its way, not that it is done.
+            */}
+            {order.refundState && order.refundState !== "none" && (
+              <div
+                className={`mt-4 rounded-2xl border px-4 py-3 font-[Montserrat] text-[12.5px] leading-relaxed ${
+                  order.refundState === "processed"
+                    ? "border-emerald-400/25 bg-emerald-400/[0.07] text-emerald-300/90"
+                    : "border-amber-400/25 bg-amber-400/[0.07] text-amber-200/90"
+                }`}
+              >
+                {order.refundState === "processed"
+                  ? "Refund processed — the amount has been returned to your original payment method."
+                  : order.refundState === "partial"
+                    ? "Partial refund processed. Contact us if you have any questions about the balance."
+                    : "Refund pending — your cancellation has been received. Our team will process the refund to your original payment method. Once processed, it may take 5–7 working days to reflect."}
+              </div>
+            )}
+
+            {/*
+              ---- Cancel action ----
+
+              `canCancel` comes from the server, which applies the same
+              predicate the cancel endpoint enforces with, so the button cannot
+              drift from what is actually permitted. The endpoint re-checks on
+              arrival regardless — a page open since before dispatch is not
+              permission to cancel.
+            */}
+            {order.canCancel ? (
+              <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-white/8 pt-5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCancelError(null);
+                    setCancelSuccess(false);
+                    setCancelOpen(true);
+                  }}
+                  disabled={cancelBusy}
+                  className="rounded-full border border-red-400/30 px-5 py-2.5 font-[Montserrat] text-[11.5px] font-bold uppercase tracking-[0.16em] text-red-300/90 transition-all hover:border-red-400/60 hover:bg-red-500/10 hover:text-red-200 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60"
+                >
+                  {cancelBusy ? "Cancelling…" : "Cancel order"}
+                </button>
+                <span className="font-[Montserrat] text-[12px] text-white/35">
+                  You can cancel until this order is dispatched.
+                </span>
+              </div>
+            ) : (
+              /*
+                Explain the absence. A button that silently disappears once an
+                order ships looks broken; naming the reason and pointing at
+                support is the difference between a dead end and an answer.
+                Not shown for cancelled orders — the status pill already says
+                so, and repeating it is noise.
+              */
+              order.cancelBlockedReason &&
+              order.status !== "CANCELLED" && (
+                <p className="mt-5 border-t border-white/8 pt-5 font-[Montserrat] text-[12.5px] leading-relaxed text-white/40">
+                  {order.cancelBlockedReason}
+                </p>
+              )
+            )}
+
             {/* ---- Tracking Panel ---- */}
             <TrackingPanel fulfilment={order.fulfilment} status={order.status} />
 
@@ -273,6 +397,18 @@ export default function OrderDetailPage({ params }) {
                     );
                   })}
                 </ol>
+
+                {/*
+                  The reason, under the timeline it belongs to. Shown only when
+                  one was recorded — cancellation reasons are optional for the
+                  customer, and an empty "Reason:" line is worse than none.
+                */}
+                {order.status === "CANCELLED" && order.cancelReason && (
+                  <p className="mt-6 rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3 font-[Montserrat] text-[12.5px] leading-relaxed text-white/50">
+                    <span className="text-white/35">Reason: </span>
+                    {order.cancelReason}
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -370,6 +506,16 @@ export default function OrderDetailPage({ params }) {
           </div>
         </div>
       )}
+
+      <CancelOrderModal
+        order={order}
+        open={cancelOpen}
+        busy={cancelBusy}
+        success={cancelSuccess}
+        error={cancelError}
+        onClose={() => setCancelOpen(false)}
+        onConfirm={confirmCancel}
+      />
     </AccountShell>
   );
 }
