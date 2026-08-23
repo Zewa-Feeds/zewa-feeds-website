@@ -158,8 +158,8 @@ describe("Checkout Payment UX & Loading State", () => {
     expect(payButton.getAttribute("disabled")).not.toBeNull();
     expect(payButton.getAttribute("aria-busy")).toBe("true");
 
-    // 3. Smooth scrolled to top
-    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "smooth" });
+    // 3. Scrolled to top
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "instant" });
 
     // 4. Duplicate click is prevented
     fireEvent.click(payButton);
@@ -215,5 +215,195 @@ describe("Checkout Payment UX & Loading State", () => {
 
     // Button is re-enabled
     expect(payButton.getAttribute("disabled")).toBeNull();
+  });
+
+  it("transitions directly to success screen when payment succeeds and signature verifies", async () => {
+    placeMock.mockResolvedValue({
+      orderNo: "27ZFO001",
+      payment: {
+        required: true,
+        publicKey: "rzp_test_key",
+        amountPaise: 29900,
+        gatewayOrderId: "order_rzp_123",
+      },
+    });
+    confirmMock.mockResolvedValue({ orderNo: "27ZFO001", paymentStatus: "PAID" });
+
+    let rzpHandler;
+    window.Razorpay = vi.fn().mockImplementation((opts) => {
+      rzpHandler = opts.handler;
+      return {
+        open: vi.fn().mockImplementation(() => {
+          // simulate user paying immediately in modal
+          setTimeout(() => {
+            rzpHandler({
+              razorpay_payment_id: "pay_123",
+              razorpay_signature: "sig_123",
+            });
+          }, 10);
+        }),
+        on: vi.fn(),
+      };
+    });
+
+    let container;
+    await act(async () => {
+      const rendered = render(<CheckoutPage />);
+      container = rendered.container;
+    });
+
+    fillValidForm(container);
+
+    const payButton = screen.getAllByRole("button", { name: /Pay Online/i })[0];
+    await act(async () => {
+      fireEvent.click(payButton);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Thank you for your order!/i)).toBeDefined();
+      expect(screen.getByText("27ZFO001")).toBeDefined();
+      expect(mockCart.clearCart).toHaveBeenCalled();
+    });
+  });
+
+  it("transitions directly to failure screen when bank declines payment", async () => {
+    placeMock.mockResolvedValue({
+      orderNo: "27ZFO002",
+      payment: {
+        required: true,
+        publicKey: "rzp_test_key",
+        amountPaise: 29900,
+        gatewayOrderId: "order_rzp_456",
+      },
+    });
+
+    window.Razorpay = vi.fn().mockImplementation((opts) => {
+      let failCb;
+      return {
+        open: vi.fn().mockImplementation(() => {
+          setTimeout(() => {
+            if (failCb) {
+              failCb({ error: { description: "Insufficient balance in account." } });
+            }
+          }, 0);
+        }),
+        on: vi.fn().mockImplementation((event, cb) => {
+          if (event === "payment.failed") failCb = cb;
+        }),
+        close: vi.fn(),
+      };
+    });
+
+    let container;
+    await act(async () => {
+      const rendered = render(<CheckoutPage />);
+      container = rendered.container;
+    });
+
+    fillValidForm(container);
+
+    const payButton = screen.getAllByRole("button", { name: /Pay Online/i })[0];
+    await act(async () => {
+      fireEvent.click(payButton);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/Your payment didn't go through/i)).toBeDefined();
+      expect(screen.getByText("Insufficient balance in account.")).toBeDefined();
+      expect(screen.getByText("27ZFO002")).toBeDefined();
+    });
+  });
+
+  it("restores active form cleanly when user dismisses modal without paying", async () => {
+    placeMock.mockResolvedValue({
+      orderNo: "27ZFO003",
+      payment: {
+        required: true,
+        publicKey: "rzp_test_key",
+        amountPaise: 29900,
+        gatewayOrderId: "order_rzp_789",
+      },
+    });
+    statusMock.mockResolvedValue({ paymentStatus: "UNPAID", status: "PENDING" });
+
+    window.Razorpay = vi.fn().mockImplementation((opts) => {
+      return {
+        open: vi.fn().mockImplementation(() => {
+          setTimeout(() => {
+            opts.modal.ondismiss();
+          }, 0);
+        }),
+        on: vi.fn(),
+      };
+    });
+
+    let container;
+    await act(async () => {
+      const rendered = render(<CheckoutPage />);
+      container = rendered.container;
+    });
+
+    fillValidForm(container);
+
+    const payButton = screen.getAllByRole("button", { name: /Pay Online/i })[0];
+    await act(async () => {
+      fireEvent.click(payButton);
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Processing your payment/i)).toBeNull();
+      expect(screen.getByRole("heading", { name: /Complete Your Order/i })).toBeDefined();
+      expect(payButton.getAttribute("disabled")).toBeNull();
+    });
+  });
+
+  it("handles delayed UPI confirmation by transitioning to pending confirmation state", async () => {
+    vi.useFakeTimers();
+    placeMock.mockResolvedValue({
+      orderNo: "27ZFO004",
+      payment: {
+        required: true,
+        publicKey: "rzp_test_key",
+        amountPaise: 29900,
+        gatewayOrderId: "order_rzp_upi",
+      },
+    });
+    statusMock.mockResolvedValue({ paymentStatus: "UNPAID", status: "PENDING" });
+
+    window.Razorpay = vi.fn().mockImplementation((opts) => {
+      return {
+        open: vi.fn().mockImplementation(() => {
+          opts.handler({
+            razorpay_payment_id: "pay_upi_123",
+            razorpay_signature: "sig_upi_123",
+          });
+        }),
+        on: vi.fn(),
+      };
+    });
+    confirmMock.mockRejectedValue(new Error("Network timeout during confirm."));
+
+    let container;
+    await act(async () => {
+      const rendered = render(<CheckoutPage />);
+      container = rendered.container;
+    });
+
+    fillValidForm(container);
+
+    const payButton = screen.getAllByRole("button", { name: /Pay Online/i })[0];
+    await act(async () => {
+      fireEvent.click(payButton);
+    });
+
+    for (let i = 0; i < 16; i++) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2500);
+      });
+    }
+
+    expect(screen.getByText(/Payment Confirmation Pending/i)).toBeDefined();
+    expect(screen.getByText("27ZFO004")).toBeDefined();
+    vi.useRealTimers();
   });
 });

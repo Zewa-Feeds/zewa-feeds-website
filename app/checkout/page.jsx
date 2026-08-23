@@ -426,32 +426,62 @@ export default function CheckoutPage() {
     if (problem) setCouponError(problem.message);
   };
 
+  const resetScrollAndLock = () => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = "hidden";
+    }
+  };
+
+  const unlockScroll = () => {
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = "";
+    }
+  };
+
+  // Cleanup scroll lock on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof document !== "undefined") {
+        document.body.style.overflow = "";
+      }
+    };
+  }, []);
+
   /**
-   * Wait for the webhook to mark the order paid.
+   * Wait for the webhook or backend to confirm the order paid.
    *
-   * Only used when the outcome is genuinely unknown — the customer closed the
-   * modal, or our confirm call failed after Razorpay took the money. A declined
-   * payment never reaches here, so the wait is short: 30s is long enough for a
-   * webhook round trip, and a counter that climbs past two minutes reads as a
-   * frozen page rather than as progress.
+   * Only used when the outcome is in-flight or delayed — e.g. slow UPI or
+   * webhook settling.
    *
    * Stops early on a terminal payment state instead of waiting out the clock.
+   * Uses truthful status messages without fake countdowns or "checking with your bank".
    */
-  const pollUntilPaid = async (orderNo, email, timeoutMs = 30_000) => {
+  const pollUntilPaid = async (orderNo, email, timeoutMs = 35_000) => {
     const started = Date.now();
     while (Date.now() - started < timeoutMs) {
-      await new Promise((r) => setTimeout(r, 3000));
+      await new Promise((r) => setTimeout(r, 2500));
+      const elapsed = Date.now() - started;
       try {
         const status = await checkoutApi.status(orderNo, email);
         if (status.paymentStatus === "PAID") return true;
         if (status.status === "CANCELLED" || status.paymentStatus === "FAILED") return false;
       } catch {
-        /* transient — keep waiting */
+        /* transient network error — keep polling */
       }
-      const left = Math.max(0, Math.ceil((timeoutMs - (Date.now() - started)) / 1000));
-      setStatusText(`Checking with your bank… ${left}s remaining`);
+      if (elapsed < 12_000) {
+        setStatusText("Confirming your payment…");
+      } else {
+        setStatusText(
+          "Payment confirmation is taking a little longer than usual. We're checking securely…",
+        );
+      }
     }
-    return false;
+    return "pending";
   };
 
   const handleSubmit = async (e) => {
@@ -477,14 +507,13 @@ export default function CheckoutPage() {
     setErrors({});
     setIsSubmittingPayment(true);
     setStatusText("Preparing secure payment…");
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-    }
+    resetScrollAndLock();
 
     try {
       const fresh = await validate({ state: form.state, email: form.email });
       const blocking = (fresh?.issues ?? []).filter((i) => i.sku !== "__coupon__");
       if (blocking.length > 0) {
+        unlockScroll();
         setErrors({ _root: blocking[0].message });
         setIsSubmittingPayment(false);
         setStep("form");
@@ -519,6 +548,7 @@ export default function CheckoutPage() {
       if (!result.payment.required) {
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
+        unlockScroll();
         setIsSubmittingPayment(false);
         setStep("success");
         if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -532,8 +562,9 @@ export default function CheckoutPage() {
         setStep("paying");
         if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
         const paid = await pollUntilPaid(result.orderNo, form.email.trim());
+        unlockScroll();
         setIsSubmittingPayment(false);
-        if (paid) {
+        if (paid === true) {
           clearCart();
           sessionStorage.removeItem(STORAGE_FORM_KEY);
           setStep("success");
@@ -550,11 +581,14 @@ export default function CheckoutPage() {
         await checkoutApi.confirm(result.orderNo, payload);
       });
 
-      setIsSubmittingPayment(false);
+      // Immediately enter payment-processing state so the old checkout form never flashes
+      setStep("paying");
 
       if (outcome === "paid") {
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
+        unlockScroll();
+        setIsSubmittingPayment(false);
         setStep("success");
         if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
         return;
@@ -562,39 +596,68 @@ export default function CheckoutPage() {
 
       /*
        * A declined payment is final — stop now.
-       *
-       * Polling here was the bug behind the endless "Confirming payment with
-       * bank… 118s" counter: the bank had already said no, so no amount of
-       * waiting would change the answer. Only an ambiguous close (the customer
-       * shut the modal, or our confirm call failed after Razorpay took the
-       * money) is worth waiting on, because the webhook may still settle it.
        */
       if (outcome === "failed" || outcome === "unavailable") {
+        unlockScroll();
+        setIsSubmittingPayment(false);
         setFailure({ orderNo: result.orderNo, reason: message });
         setStep("failed");
         if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
         return;
       }
 
-      setStatusText("Checking whether your payment went through…");
-      setStep("paying");
-      if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      const paid = await pollUntilPaid(result.orderNo, form.email.trim(), 30_000);
-      if (paid) {
+      if (outcome === "dismissed") {
+        // Customer dismissed or closed modal. Check once if payment succeeded via webhook
+        setStatusText("Checking payment status securely…");
+        try {
+          const check = await checkoutApi.status(result.orderNo, form.email.trim());
+          if (
+            check.paymentStatus === "PAID" ||
+            check.status === "PROCESSING" ||
+            check.status === "SHIPPED"
+          ) {
+            clearCart();
+            sessionStorage.removeItem(STORAGE_FORM_KEY);
+            unlockScroll();
+            setIsSubmittingPayment(false);
+            setStep("success");
+            if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+            return;
+          }
+        } catch {
+          /* ignore */
+        }
+        // Clean dismissal: restore form cleanly with all user inputs intact
+        unlockScroll();
+        setIsSubmittingPayment(false);
+        setStep("form");
+        return;
+      }
+
+      setStatusText("Confirming your payment…");
+      const pollResult = await pollUntilPaid(result.orderNo, form.email.trim(), 35_000);
+      unlockScroll();
+      setIsSubmittingPayment(false);
+      if (pollResult === true) {
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         setStep("success");
         if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      } else {
+      } else if (pollResult === false) {
         setFailure({
           orderNo: result.orderNo,
           reason:
-            "We didn't receive confirmation of your payment. If money left your account it will be confirmed shortly — please check before paying again.",
+            "Payment could not be confirmed. Please check your bank or retry checkout.",
         });
         setStep("failed");
         if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      } else {
+        // Pending state (e.g. slow UPI or delayed gateway webhook)
+        setStep("pending");
+        if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       }
     } catch (err) {
+      unlockScroll();
       setIsSubmittingPayment(false);
       setErrors(err.fields ?? { _root: err.message });
       setStep("form");
@@ -623,8 +686,8 @@ export default function CheckoutPage() {
                 Thank you for your order!
               </h1>
               <p className="mt-3 text-[14px] leading-relaxed text-white/60 font-[Montserrat]">
-                Order <span className="font-mono font-semibold text-primary">{placed.orderNo}</span> has been received.
-                Payment is verified and your package is being prepared for express dispatch.
+                Order <span className="font-mono font-semibold text-primary">{placed.orderNo}</span> has been confirmed.
+                Payment is verified and your items are being prepared for dispatch.
               </p>
             </div>
 
@@ -720,19 +783,79 @@ export default function CheckoutPage() {
     );
   }
 
+  // ---- PAYMENT CONFIRMATION PENDING (SLOW UPI / GATEWAY SETTLEMENT) ---------
+  if (step === "pending" && placed) {
+    return (
+      <>
+        <Header />
+        <main className="flex min-h-screen items-center justify-center bg-[#060913] px-6 pb-20 pt-28">
+          <div className="flex w-full max-w-lg flex-col items-center gap-7 text-center rounded-3xl border border-white/10 bg-[#090f1d] p-8 sm:p-12 shadow-[0_16px_48px_rgba(0,0,0,0.5)]">
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full border-2 border-amber-400/40 bg-amber-400/10 shadow-[0_0_32px_rgba(251,191,36,0.2)]">
+              <svg viewBox="0 0 24 24" fill="none" className="h-12 w-12 text-amber-400" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+                <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+              </svg>
+            </div>
+
+            <div>
+              <span className="mb-3 inline-block rounded-full border border-amber-400/30 bg-amber-400/15 px-3.5 py-1 text-[11px] font-bold uppercase tracking-widest text-amber-300 font-[Montserrat]">
+                Payment Confirmation Pending
+              </span>
+              <h1 className="font-[Playfair_Display] text-[32px] sm:text-[38px] font-bold leading-tight text-white">
+                Verifying your transaction
+              </h1>
+              <p className="mt-3 text-[14px] leading-relaxed text-white/70 font-[Montserrat]">
+                Order <span className="font-mono font-semibold text-primary">{placed.orderNo}</span> has been received.
+                We are waiting for final confirmation from the payment gateway.
+              </p>
+              <p className="mt-4 rounded-xl border border-white/8 bg-white/3 p-4 text-[12.5px] leading-relaxed text-white/50 font-[Montserrat]">
+                If money left your account, your order will automatically be confirmed once the gateway confirms receipt. Please do not initiate another payment for this order.
+              </p>
+            </div>
+
+            <div className="flex w-full flex-col gap-3.5 pt-2 sm:flex-row">
+              <a
+                href={`/orders/track?orderNo=${placed.orderNo}&email=${encodeURIComponent(form.email)}`}
+                className="flex-1 rounded-2xl bg-primary py-4 text-center text-[12px] font-bold uppercase tracking-[0.18em] text-[#00382d] font-[Montserrat] shadow-[0_4px_20px_rgba(68,229,194,0.3)] transition-all duration-200 hover:bg-primary/90"
+              >
+                Track Order Status
+              </a>
+              <a
+                href="/products"
+                className="flex-1 rounded-2xl border border-white/15 bg-white/5 py-4 text-center text-[12px] font-bold uppercase tracking-[0.18em] text-white/70 font-[Montserrat] transition-all duration-200 hover:border-white/30 hover:bg-white/10 hover:text-white"
+              >
+                Continue Shopping
+              </a>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
   // ---- PAYING / PROCESSING SCREEN --------------------------------------------
   if (step === "paying") {
     return (
       <>
         <Header />
-        <main className="flex min-h-screen items-center justify-center bg-[#060913] px-6 pt-28">
+        <main className="flex min-h-screen items-center justify-center bg-[#060913] px-6 pt-28 pb-20">
           <div className="flex flex-col items-center gap-6 text-center rounded-3xl border border-white/10 bg-[#090f1d] p-10 sm:p-14 shadow-[0_16px_48px_rgba(0,0,0,0.5)] max-w-md w-full">
             <div className="relative flex items-center justify-center">
               <div className="h-16 w-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
               <div className="absolute h-8 w-8 rounded-full bg-primary/20 animate-ping" />
             </div>
-            <h3 className="font-[Playfair_Display] text-[24px] font-bold text-white">Processing Checkout</h3>
-            <p className="text-[14px] text-white/60 font-[Montserrat] leading-relaxed">{statusText}</p>
+            <div>
+              <h3 className="font-[Playfair_Display] text-[24px] font-bold text-white">
+                Processing your payment
+              </h3>
+              <p className="mt-2 text-[14px] text-white/75 font-[Montserrat] leading-relaxed">
+                {statusText || "Checking your payment status securely…"}
+              </p>
+              <p className="mt-4 text-[12px] text-white/40 font-[Montserrat]">
+                Please don&apos;t close or refresh this page.
+              </p>
+            </div>
             {placed?.payment?.simulated && (
               <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-2.5">
                 <p className="text-[11px] text-amber-300 font-[Montserrat]">
@@ -1364,12 +1487,11 @@ async function openRazorpay(result, form, onSuccess) {
           finish({ outcome: "paid" });
         } catch (err) {
           /*
-           * Razorpay took the money but our confirm call failed. Do NOT tell
-           * the customer the payment failed — the webhook is authoritative and
-           * will settle the order, so fall through to polling.
+           * Razorpay took the money but our confirm call had a network issue.
+           * Fall through to background status polling / pending confirmation.
            */
           finish({
-            outcome: "dismissed",
+            outcome: "in_flight",
             message: err?.message || "Payment received — confirming with our server.",
           });
         }
@@ -1403,6 +1525,12 @@ async function openRazorpay(result, form, onSuccess) {
       });
     });
 
+    // Ensure the page viewport is definitively at scrollY = 0 before opening Razorpay
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
     rzp.open();
   });
 }

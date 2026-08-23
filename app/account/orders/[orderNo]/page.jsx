@@ -263,7 +263,16 @@ export default function OrderDetailPage({ params }) {
               that is a separate step someone performs — so the honest line is
               that the refund is on its way, not that it is done.
             */}
-            {order.refundState && order.refundState !== "none" && (
+            {order.status === "CANCELLED" && order.paymentMethod === "COD" && (
+              <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 font-[Montserrat] text-[12.5px] leading-relaxed text-white/70">
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-white/40 mb-1">
+                  Refund Status: No refund required
+                </span>
+                No payment was collected, so there is no refund to process.
+              </div>
+            )}
+
+            {order.refundState && order.refundState !== "none" && order.paymentMethod !== "COD" && (
               <div
                 className={`mt-4 rounded-2xl border px-4 py-3 font-[Montserrat] text-[12.5px] leading-relaxed ${
                   order.refundState === "processed"
@@ -271,8 +280,20 @@ export default function OrderDetailPage({ params }) {
                     : "border-amber-400/25 bg-amber-400/[0.07] text-amber-200/90"
                 }`}
               >
+                <span
+                  className={`block text-[11px] font-bold uppercase tracking-wider mb-1 ${
+                    order.refundState === "processed" ? "text-emerald-300" : "text-amber-300"
+                  }`}
+                >
+                  Refund Status:{" "}
+                  {order.refundState === "processed"
+                    ? "Refund Completed"
+                    : order.refundState === "partial"
+                      ? "Partially Refunded"
+                      : "Refund Pending"}
+                </span>
                 {order.refundState === "processed"
-                  ? "Refund processed — the amount has been returned to your original payment method."
+                  ? "Refund processed — the amount has been returned to your original payment method. Depending on your bank, it may take 5–7 working days to reflect."
                   : order.refundState === "partial"
                     ? "Partial refund processed. Contact us if you have any questions about the balance."
                     : "Refund pending — your cancellation has been received. Our team will process the refund to your original payment method. Once processed, it may take 5–7 working days to reflect."}
