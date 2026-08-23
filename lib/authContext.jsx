@@ -109,10 +109,12 @@ export function AuthProvider({ children }) {
   }, []);
 
   const signUp = useCallback(async (payload) => {
-    const me = await accountApi.register(payload);
-    setCustomer(me);
-    setStatus("authenticated");
-    return me;
+    const res = await accountApi.register(payload);
+    if (res?.accessToken || res?.id) {
+      setCustomer(res);
+      setStatus("authenticated");
+    }
+    return res;
   }, []);
 
   const completeReset = useCallback(async (payload) => {

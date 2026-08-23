@@ -45,6 +45,10 @@ function SignInForm() {
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isUnverified, setIsUnverified] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+  const [resending, setResending] = useState(false);
+  const [resendStatus, setResendStatus] = useState(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -62,6 +66,7 @@ function SignInForm() {
     setForm((f) => ({ ...f, [key]: e.target.value }));
     if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined }));
     if (formError) setFormError(null);
+    if (isUnverified) setIsUnverified(false);
   };
 
   const validate = () => {
@@ -83,11 +88,17 @@ function SignInForm() {
 
     setSubmitting(true);
     setFormError(null);
+    setIsUnverified(false);
+    setResendStatus(null);
     try {
       await signIn({ email: form.email.trim(), password: form.password, remember });
       window.location.href = next;
     } catch (err) {
-      if (err instanceof ApiError && err.fields) {
+      if (err instanceof ApiError && err.code === "EMAIL_UNVERIFIED") {
+        setIsUnverified(true);
+        setUnverifiedEmail(err.details?.email || form.email.trim());
+        setFormError("Please verify your email address before signing in.");
+      } else if (err instanceof ApiError && err.fields) {
         setErrors(err.fields);
         setFormError(err.message);
       } else {
@@ -98,6 +109,22 @@ function SignInForm() {
         );
       }
       setSubmitting(false);
+    }
+  };
+
+  const handleResend = async () => {
+    const targetEmail = unverifiedEmail || form.email.trim();
+    if (!targetEmail || resending) return;
+    setResending(true);
+    setResendStatus(null);
+    try {
+      const { account: accountApi } = await import("@/lib/api");
+      await accountApi.resendVerification(targetEmail);
+      setResendStatus("A new verification link has been sent to your email.");
+    } catch {
+      setResendStatus("Could not resend link right now. Please try again in a moment.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -149,7 +176,26 @@ function SignInForm() {
         )}
         {formError && (
           <div className="mb-3">
-            <FormMessage>{formError}</FormMessage>
+            <FormMessage tone={isUnverified ? "warning" : "error"}>{formError}</FormMessage>
+          </div>
+        )}
+
+        {isUnverified && (
+          <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 space-y-2.5">
+            <p className="text-[12.5px] text-amber-200 font-[Montserrat] leading-relaxed">
+              We sent a verification link to <strong className="text-white">{unverifiedEmail}</strong>. Didn&apos;t receive it?
+            </p>
+            {resendStatus && (
+              <p className="text-[12px] text-primary font-[Montserrat]">{resendStatus}</p>
+            )}
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="text-[12px] font-bold uppercase tracking-wider text-primary hover:underline disabled:opacity-50"
+            >
+              {resending ? "Sending link…" : "Resend Verification Email"}
+            </button>
           </div>
         )}
 

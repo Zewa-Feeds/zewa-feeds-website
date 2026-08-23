@@ -704,6 +704,32 @@ export default function CheckoutPage() {
                 Explore Products
               </a>
             </div>
+
+            {!isAuthenticated && (
+              <div className="mt-2 w-full rounded-2xl border border-white/10 bg-white/3 p-5 text-left">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-[Playfair_Display] text-[17px] font-bold text-white">
+                      Create an account
+                    </h3>
+                    <p className="mt-1 font-[Montserrat] text-[12px] leading-relaxed text-white/55">
+                      Save your details for faster checkout next time, track all your orders in one place, and unlock member benefits.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-white/8 pt-4">
+                  <span className="font-[Montserrat] text-[11.5px] text-white/40">
+                    Optional — your order is safely placed and confirmed.
+                  </span>
+                  <a
+                    href={`/signup?email=${encodeURIComponent(form.email)}&next=${encodeURIComponent(`/orders/track?orderNo=${placed.orderNo}&email=${encodeURIComponent(form.email)}`)}`}
+                    className="shrink-0 rounded-xl bg-primary/15 border border-primary/30 px-4 py-2.5 text-center text-[11px] font-bold uppercase tracking-wider text-primary font-[Montserrat] transition-all hover:bg-primary/25 hover:text-white"
+                  >
+                    Create Account
+                  </a>
+                </div>
+              </div>
+            )}
           </div>
         </main>
         <Footer />
@@ -1004,19 +1030,22 @@ export default function CheckoutPage() {
                   cart intact, since the cart lives in the browser either way.
                 */}
                 {!authLoading && !isAuthenticated && (
-                  <a
-                    href={signInHref("/checkout")}
-                    className={`flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/[0.04] px-4 py-3 ${EASE} hover:border-primary/40 hover:bg-primary/[0.07]`}
-                  >
-                    <span className="font-[Montserrat] text-[12.5px] text-white/60">
-                      Have an account?{" "}
-                      <span className="font-semibold text-primary">Sign in</span> to fill this
-                      in automatically.
-                    </span>
-                    <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true">
-                      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </a>
+                  <div className="flex flex-col gap-2 rounded-2xl border border-primary/20 bg-primary/[0.04] p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="inline-block rounded-full bg-primary/15 border border-primary/30 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary font-[Montserrat]">
+                        Checkout as guest
+                      </span>
+                      <a
+                        href={signInHref("/checkout")}
+                        className="font-[Montserrat] text-[12px] font-bold text-primary hover:underline"
+                      >
+                        Sign in / Create account &rarr;
+                      </a>
+                    </div>
+                    <p className="font-[Montserrat] text-[12px] leading-relaxed text-white/60">
+                      Sign in to unlock coupons, order history, faster checkout and member benefits.
+                    </p>
+                  </div>
                 )}
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">

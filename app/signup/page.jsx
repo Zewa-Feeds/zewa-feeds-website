@@ -40,11 +40,16 @@ function SignUpForm() {
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const [verificationPending, setVerificationPending] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
+  const [resendStatus, setResendStatus] = useState(null);
+  const [resending, setResending] = useState(false);
+
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (!isLoading && !isAuthenticated && !verificationPending) {
       openAuthDrawer("signup");
     }
-  }, [isLoading, isAuthenticated, openAuthDrawer]);
+  }, [isLoading, isAuthenticated, verificationPending, openAuthDrawer]);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -105,13 +110,19 @@ function SignUpForm() {
     setSubmitting(true);
     setFormError(null);
     try {
-      await signUp({
+      const res = await signUp({
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         email: form.email.trim(),
         ...(form.phone.trim() ? { phone: form.phone.trim().replace(/\s+/g, "") } : {}),
         password: form.password,
       });
+      if (res?.pendingVerification) {
+        setRegisteredEmail(form.email.trim());
+        setVerificationPending(true);
+        setSubmitting(false);
+        return;
+      }
       window.location.href = next;
     } catch (err) {
       if (err instanceof ApiError && err.fields) {
@@ -127,6 +138,85 @@ function SignUpForm() {
       setSubmitting(false);
     }
   };
+
+  const handleResend = async () => {
+    if (resending || !registeredEmail) return;
+    setResending(true);
+    setResendStatus(null);
+    try {
+      const { account: accountApi } = await import("@/lib/api");
+      await accountApi.resendVerification(registeredEmail);
+      setResendStatus("A new verification link has been sent to your email.");
+    } catch (err) {
+      setResendStatus("Could not resend link right now. Please try again in a moment.");
+    } finally {
+      setResending(false);
+    }
+  };
+
+  if (verificationPending) {
+    return (
+      <AuthShell
+        eyebrow="Verification Required"
+        title="Check your email"
+        subtitle="We sent a verification link to your email address."
+        footer={
+          <>
+            Already verified?{" "}
+            <a
+              href={`/signin${next !== "/account" ? `?next=${encodeURIComponent(next)}` : ""}`}
+              className="font-semibold text-primary hover:underline"
+            >
+              Sign in
+            </a>
+          </>
+        }
+      >
+        <div className="flex flex-col items-center gap-6 py-4 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-primary shadow-[0_0_24px_rgba(68,229,194,0.2)]">
+            <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+
+          <div className="space-y-2">
+            <p className="font-[Montserrat] text-[15px] text-white">
+              We emailed a confirmation link to:
+            </p>
+            <p className="font-mono text-[14px] font-semibold text-primary break-all">
+              {registeredEmail}
+            </p>
+            <p className="font-[Montserrat] text-[12.5px] leading-relaxed text-white/50 pt-2">
+              Click the link in the message to activate your account. The link is single-use and valid for 24 hours.
+            </p>
+          </div>
+
+          {resendStatus && (
+            <div className="w-full rounded-xl border border-primary/25 bg-primary/10 p-3 text-[12.5px] text-primary font-[Montserrat]">
+              {resendStatus}
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3 w-full pt-2">
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resending}
+              className="w-full rounded-xl border border-white/15 bg-white/5 py-3 text-[12px] font-bold uppercase tracking-[0.16em] text-white/80 font-[Montserrat] transition-all hover:border-white/30 hover:bg-white/10 hover:text-white disabled:opacity-50"
+            >
+              {resending ? "Sending link…" : "Resend Verification Email"}
+            </button>
+            <a
+              href={`/signin${next !== "/account" ? `?next=${encodeURIComponent(next)}` : ""}`}
+              className="w-full rounded-xl bg-primary py-3 text-center text-[12px] font-bold uppercase tracking-[0.16em] text-[#00382d] font-[Montserrat] shadow-[0_4px_16px_rgba(68,229,194,0.25)] transition-all hover:bg-primary/90"
+            >
+              Go to Sign In
+            </a>
+          </div>
+        </div>
+      </AuthShell>
+    );
+  }
 
   if (!isLoading && isAuthenticated) {
     return (
