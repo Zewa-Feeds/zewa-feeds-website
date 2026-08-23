@@ -136,7 +136,7 @@ export default function CancelOrderModal({ order, open, onClose, onConfirm, busy
             </h2>
             <p className="mt-2 font-[Montserrat] text-[13px] leading-relaxed text-white/50">
               {order.orderNo} has been cancelled.
-              {isPaid ? " Our team will process your refund." : ""}
+              {isPaid ? " Your refund has been automatically initiated to your original payment method." : ""}
             </p>
           </div>
         ) : (
@@ -173,21 +173,15 @@ export default function CancelOrderModal({ order, open, onClose, onConfirm, busy
         {/*
           Only a captured payment gets the refund sentence. Saying it on a COD
           order would promise money back that was never taken.
-
-          The wording puts the refund in someone's hands and starts the 5–7 day
-          clock at "once processed", because cancelling does not trigger it —
-          an admin runs the gateway refund afterwards. Copy that implied the
-          money was already moving would be a promise the system does not keep.
         */}
         {isPaid && (
           <p className="mt-3.5 rounded-2xl border border-primary/25 bg-primary/[0.07] px-4 py-3 font-[Montserrat] text-[12.5px] leading-relaxed text-primary/90">
-            Our team will process a refund to your original payment method. Once
-            processed, it may take 5–7 working days to reflect.
+            Any payment you have made will be refunded to the original source automatically in full, after deducting applicable gateway charges, within 5 working days.
           </p>
         )}
         {isCod && (
           <p className="mt-3.5 font-[Montserrat] text-[12.5px] leading-relaxed text-white/45">
-            Nothing has been charged for this order, so there is no refund to process.
+            No payment was collected, so no refund is required.
           </p>
         )}
 

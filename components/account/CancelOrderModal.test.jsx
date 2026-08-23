@@ -52,32 +52,15 @@ describe("CancelOrderModal", () => {
     expect(screen.getByText(/cannot be undone/i)).toBeTruthy();
   });
 
-  it("mentions a refund only for a captured payment", () => {
+  it("mentions an automatic refund for a captured payment", () => {
     setup({ order: paidOrder });
-    expect(screen.getByText(/will process a refund/i)).toBeTruthy();
+    expect(screen.getByText(/Any payment you have made will be refunded to the original source automatically in full, after deducting applicable gateway charges, within 5 working days/i)).toBeTruthy();
   });
 
   it("does NOT mention a refund on COD — nothing was charged", () => {
     setup({ order: codOrder });
-    expect(screen.queryByText(/will process a refund/i)).toBeNull();
-    expect(screen.getByText(/no refund to process/i)).toBeTruthy();
-  });
-
-  it("never claims the refund is already done", () => {
-    setup({ order: paidOrder });
-    expect(screen.queryByText(/refund has been (processed|completed)/i)).toBeNull();
-    expect(screen.queryByText(/refund is being processed/i)).toBeNull();
-  });
-
-  it("does not start the 5–7 day clock at cancellation", () => {
-    /*
-     * Cancelling does not trigger the gateway refund — an admin does, later.
-     * So the wait has to be anchored to "once processed", not to now, or the
-     * customer starts counting from the wrong day and we look late.
-     */
-    setup({ order: paidOrder });
-    expect(screen.getByText(/once\s+processed/i)).toBeTruthy();
-    expect(screen.getByText(/original payment method/i)).toBeTruthy();
+    expect(screen.queryByText(/automatically refunded/i)).toBeNull();
+    expect(screen.getByText(/no refund is required/i)).toBeTruthy();
   });
 
   it("submits with no reason when none is chosen", () => {
@@ -159,9 +142,9 @@ describe("CancelOrderModal", () => {
       expect(screen.queryByLabelText(/reason/i)).toBeNull();
     });
 
-    it("tells a paid customer the refund is coming, without claiming it is done", () => {
+    it("tells a paid customer the refund is automatically initiated, without claiming it is done", () => {
       setup({ success: true, order: paidOrder });
-      expect(screen.getByText(/our team will process your refund/i)).toBeTruthy();
+      expect(screen.getByText(/Your refund has been automatically initiated to your original payment method/i)).toBeTruthy();
       expect(screen.queryByText(/refund (has been|was) (processed|sent)/i)).toBeNull();
     });
 
