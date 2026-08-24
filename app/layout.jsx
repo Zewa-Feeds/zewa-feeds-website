@@ -35,7 +35,7 @@ import { SITE_URL } from "@/lib/site";
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Zewa Feeds | Species-Specific Insect Protein Fish Food",
+    default: "Zewa Feeds",
     template: "%s | Zewa Feeds",
   },
   icons: {

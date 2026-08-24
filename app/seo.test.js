@@ -382,9 +382,7 @@ describe("query parameters", () => {
 describe("homepage metadata and favicon configuration", () => {
   it("defines the exact homepage title and brand template", async () => {
     const { metadata } = await import("./layout");
-    expect(metadata.title.default).toBe(
-      "Zewa Feeds | Species-Specific Insect Protein Fish Food",
-    );
+    expect(metadata.title.default).toBe("Zewa Feeds");
     expect(metadata.title.template).toBe("%s | Zewa Feeds");
     expect(metadata.openGraph.title).toBe(
       "Zewa Feeds | Species-Specific Insect Protein Fish Food",
