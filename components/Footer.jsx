@@ -94,7 +94,7 @@ const nav = {
   Company: [
     { label: "Find Nearest Dealer", href: "#", soon: true },
     { label: "Become a Distributor", href: "#", soon: true },
-    { label: "Download Catalogue", href: "#", soon: true },
+    { label: "Download Catalogue", href: "/zewa-product-catalogue.pdf", download: "Zewa-Product-Catalogue.pdf", target: "_blank" },
     { label: "About Us", href: "/about" },
   ],
 };
@@ -188,6 +188,9 @@ export default function Footer() {
                     <li key={link.label}>
                       <a
                         href={link.href}
+                        target={link.target || (link.href.endsWith(".pdf") ? "_blank" : undefined)}
+                        rel={link.target === "_blank" || link.href.endsWith(".pdf") ? "noopener noreferrer" : undefined}
+                        download={link.download}
                         className={`text-[13.5px] leading-none transition-colors duration-150 font-normal no-underline ${
                           link.accent
                             ? "text-primary/70 hover:text-primary"
