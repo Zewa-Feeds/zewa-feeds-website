@@ -15,10 +15,13 @@ export default function OrderSummaryCard({
   totalPaise = 0,
   amountToFreeShippingPaise,
   coupon,
+  coupons = [],
+  freeShippingFromCoupon = false,
   couponInput,
   onCouponInputChange,
   couponError,
   onSubmitCoupon,
+  onRemoveCoupon,
   paymentMethod,
   config,
   validating,
@@ -247,18 +250,42 @@ export default function OrderSummaryCard({
             </p>
           )}
 
-          {coupon && (
-            <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-[11px] text-primary font-[Montserrat]">
-              <div className="flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          {/*
+            Every promotion the SERVER applied, not what was typed. A code the
+            backend refused never appears here, so the list can't imply a
+            discount that isn't in the total.
+          */}
+          {coupons.map((c) => (
+            <div
+              key={c.code}
+              className="flex items-center justify-between gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-[11px] text-primary font-[Montserrat]"
+            >
+              <div className="flex min-w-0 items-center gap-1.5">
+                <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
-                <span>
-                  <strong className="font-bold">{coupon.code}</strong> applied ({coupon.discountLabel})
+                <span className="truncate">
+                  <strong className="font-bold">{c.code}</strong> applied ({c.discountLabel})
+                  {c.automatic && (
+                    <span className="ml-1.5 text-[9.5px] uppercase tracking-wider text-primary/60">
+                      auto
+                    </span>
+                  )}
                 </span>
               </div>
+              {/* An automatic promotion has no code to remove — the shop applied it. */}
+              {!c.automatic && onRemoveCoupon && (
+                <button
+                  type="button"
+                  onClick={() => onRemoveCoupon(c.code)}
+                  aria-label={`Remove ${c.code}`}
+                  className="shrink-0 rounded-md px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-primary/70 transition-colors hover:bg-primary/15 hover:text-primary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+                >
+                  Remove
+                </button>
+              )}
             </div>
-          )}
+          ))}
         </form>
 
         {/* Pricing Breakdown */}
@@ -272,7 +299,11 @@ export default function OrderSummaryCard({
             <div className="flex justify-between text-primary">
               <span className="flex items-center gap-1">
                 <span>Discount</span>
-                {coupon && <span className="text-[10px] bg-primary/15 px-1.5 py-0.5 rounded">({coupon.code})</span>}
+                {coupons.length > 0 && (
+                  <span className="text-[10px] bg-primary/15 px-1.5 py-0.5 rounded">
+                    ({coupons.map((c) => c.code).join(", ")})
+                  </span>
+                )}
               </span>
               <span className="font-semibold tabular-nums">− {formatInr(discountPaise)}</span>
             </div>
@@ -291,6 +322,12 @@ export default function OrderSummaryCard({
             {stateSelected ? (
               <span className={shippingPaise === 0 ? "font-bold text-primary uppercase" : "font-semibold text-white/80 tabular-nums"}>
                 {shippingPaise === 0 ? "FREE" : formatInr(shippingPaise)}
+                {/* Say WHY it is free when a coupon did it, not just that it is. */}
+                {shippingPaise === 0 && freeShippingFromCoupon && (
+                  <span className="ml-1.5 text-[9.5px] normal-case tracking-wider text-primary/60">
+                    via coupon
+                  </span>
+                )}
               </span>
             ) : amountToFreeShippingPaise === 0 ? (
               <span className="font-bold text-primary uppercase">FREE</span>

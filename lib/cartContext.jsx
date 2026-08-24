@@ -144,7 +144,14 @@ export function CartProvider({ children }) {
    */
   const [shippingRules, setShippingRules] = useState(null);
   const [validating, setValidating] = useState(false);
-  const [couponCode, setCouponCode] = useState(null);
+  /*
+   * Applied codes, oldest first.
+   *
+   * Order matters and is the customer's intent, not a rule: when two coupons
+   * cannot combine, the backend keeps the one already on the cart and refuses
+   * the newcomer. Whether they MAY combine is never decided here.
+   */
+  const [couponCodes, setCouponCodes] = useState([]);
 
   // Guards against a slow earlier response overwriting a newer one.
   const requestSeq = useRef(0);
@@ -189,7 +196,7 @@ export function CartProvider({ children }) {
    * possibly-stale state.
    */
   const validate = useCallback(
-    async ({ code = couponCode, email, state } = {}) => {
+    async ({ codes = couponCodes, email, state } = {}) => {
       if (items.length === 0) {
         setQuote(null);
         return null;
@@ -203,7 +210,7 @@ export function CartProvider({ children }) {
       try {
         const result = await cartApi.validate({
           lines: items.map((i) => ({ sku: i.sku, qty: i.qty })),
-          couponCode: code ?? undefined,
+          couponCodes: codes,
           email,
           state,
         });
@@ -224,7 +231,7 @@ export function CartProvider({ children }) {
         if (seq === requestSeq.current) setValidating(false);
       }
     },
-    [items, couponCode],
+    [items, couponCodes],
   );
 
   // Signature of the line-up, so the effect below fires on real changes only.
@@ -240,19 +247,45 @@ export function CartProvider({ children }) {
     const timer = setTimeout(() => void validate(), 300);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated, signature, couponCode]);
+  }, [hydrated, signature, couponCodes.join(",")]);
 
   const addToCart = (item) => {
     dispatch({ type: "ADD", item });
     setDrawerOpen(true);
   };
 
+  /**
+   * Add a code and re-price.
+   *
+   * The server decides whether it may join what is already applied; this only
+   * asks. A code the backend refuses stays out of `couponCodes`, so the cart
+   * never shows a coupon that is not actually reducing the total.
+   */
   const applyCoupon = useCallback(
     async (code) => {
-      setCouponCode(code || null);
-      return validate({ code: code || null });
+      const next = String(code || "").toUpperCase().trim();
+      if (!next) return null;
+      if (couponCodes.includes(next)) return validate({ codes: couponCodes });
+
+      const attempted = [...couponCodes, next];
+      const result = await validate({ codes: attempted });
+
+      // Keep it only if the server actually applied it.
+      const accepted = (result?.coupons ?? []).some((c) => c.code === next);
+      setCouponCodes(accepted ? attempted : couponCodes);
+      return result;
     },
-    [validate],
+    [couponCodes, validate],
+  );
+
+  /** Remove one code and re-price — this is what frees a blocked coupon's slot. */
+  const removeCoupon = useCallback(
+    async (code) => {
+      const next = couponCodes.filter((c) => c !== code);
+      setCouponCodes(next);
+      return validate({ codes: next });
+    },
+    [couponCodes, validate],
   );
 
   const localSubtotalPaise = useMemo(
@@ -313,6 +346,10 @@ export function CartProvider({ children }) {
     /** True while the figures on screen are an estimate awaiting the server. */
     pricesPending: !quoteIsCurrent && items.length > 0,
     coupon: quote?.coupon ?? null,
+    /** Every promotion the server applied, including automatic ones. */
+    coupons: quote?.coupons ?? [],
+    /** True when a promotion waived shipping, so the UI can say why it is ₹0. */
+    freeShippingFromCoupon: quote?.freeShippingFromCoupon ?? false,
     /** Stock and availability problems, for per-line warnings. */
     issues: quote?.issues ?? [],
     deliveryText: quote?.deliveryText ?? null,
@@ -331,11 +368,12 @@ export function CartProvider({ children }) {
       dispatch({ type: "CLEAR" });
       setQuote(null);
       setQuoteSignature(null);
-      setCouponCode(null);
+      setCouponCodes([]);
     },
     validate,
     applyCoupon,
-    couponCode,
+    removeCoupon,
+    couponCodes,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

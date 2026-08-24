@@ -24,8 +24,9 @@ const STORAGE_FORM_KEY = "zewa_checkout_form_v1";
 export default function CheckoutPage() {
   const {
     items, subtotalPaise, discountPaise, shippingPaise, totalPaise,
-    amountToFreeShippingPaise, coupon, issues, fulfillable, validating,
-    validate, applyCoupon, clearCart, setQty, removeFromCart, quote,
+    amountToFreeShippingPaise, coupon, coupons, freeShippingFromCoupon,
+    issues, fulfillable, validating,
+    validate, applyCoupon, removeCoupon, couponCodes, clearCart, setQty, removeFromCart, quote,
   } = useCart();
 
   const [config, setConfig] = useState(null);
@@ -250,6 +251,30 @@ export default function CheckoutPage() {
     }
   }, [form.state, form.email, validate]);
 
+  /*
+   * Re-price when the customer signs in or out.
+   *
+   * Eligibility can depend on who they are — first-order offers, promotions for
+   * named customers, per-customer limits — so a discount quoted while signed out
+   * may not survive signing in, and vice versa. Without this the totals on
+   * screen would silently disagree with what checkout charges.
+   */
+  const lastAuthRef = useRef(null);
+  useEffect(() => {
+    if (authLoading) return;
+    const identity = isAuthenticated ? (customer?.email ?? "in") : "out";
+    if (lastAuthRef.current === identity) return;
+    // Skip the very first run — the mount effect has already priced the cart.
+    const isFirst = lastAuthRef.current === null;
+    lastAuthRef.current = identity;
+    if (isFirst) return;
+    void validate({
+      state: form.state?.trim() || undefined,
+      email: form.email || customer?.email || undefined,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, isAuthenticated, customer?.email]);
+
   // Auto-detect City and State from 6-digit Pincode
   const handlePincodeLookup = useCallback(async (pin) => {
     if (pin.length !== 6) return;
@@ -425,9 +450,27 @@ export default function CheckoutPage() {
   const submitCoupon = async (e) => {
     e.preventDefault();
     setCouponError("");
-    const result = await applyCoupon(couponInput.trim().toUpperCase());
-    const problem = result?.issues?.find((i) => i.sku === "__coupon__");
+    const code = couponInput.trim().toUpperCase();
+    const result = await applyCoupon(code);
+
+    /*
+     * Report the failure for THIS code, not just any coupon problem on the
+     * cart — with stacking there can be several, and showing another coupon's
+     * message under the input would be actively misleading.
+     *
+     * The message is the server's, verbatim. The storefront never decides why a
+     * coupon was refused, only where to display the reason.
+     */
+    const problem = (result?.issues ?? []).find(
+      (i) => i.sku === "__coupon__" && (i.couponCode === code || !i.couponCode),
+    );
     if (problem) setCouponError(problem.message);
+    else setCouponInput("");
+  };
+
+  const dropCoupon = async (code) => {
+    setCouponError("");
+    await removeCoupon(code);
   };
 
   const resetScrollAndLock = () => {
@@ -539,7 +582,9 @@ export default function CheckoutPage() {
             pincode: form.pincode.trim(),
           },
           paymentMethod: "RAZORPAY",
-          couponCode: coupon?.code ?? undefined,
+          // Every code the server accepted. It re-evaluates eligibility and
+          // stacking from scratch — this is a request, not an instruction.
+          couponCodes: couponCodes,
           customerNote: form.notes.trim() || undefined,
           // Only meaningful for a newly typed address; one picked from the book
           // is already saved, and the server dedupes anyway.
@@ -1362,10 +1407,13 @@ export default function CheckoutPage() {
                 totalPaise={totalPaise}
                 amountToFreeShippingPaise={amountToFreeShippingPaise}
                 coupon={coupon}
+                coupons={coupons}
+                freeShippingFromCoupon={freeShippingFromCoupon}
                 couponInput={couponInput}
                 onCouponInputChange={setCouponInput}
                 couponError={couponError}
                 onSubmitCoupon={submitCoupon}
+                onRemoveCoupon={dropCoupon}
                 paymentMethod={paymentMethod}
                 config={config}
                 validating={validating}
