@@ -279,3 +279,94 @@ export function packOptionLabels(packs = []) {
     return label ? `${qualifier} — ${label}` : qualifier;
   });
 }
+
+/**
+ * Canonical nutrient display order as per Zewa Feeds specification:
+ * 1. Crude Protein (min)
+ * 2. Crude Fat (min)
+ * 3. Crude Fiber (max)
+ * 4. Moisture (max)
+ * 5. Ash (max)
+ * 6. Calcium (min)
+ * 7. Phosphorus (min)
+ * Followed by any custom nutrient fields.
+ */
+export const CANONICAL_NUTRIENTS = [
+  {
+    label: "Crude Protein (min)",
+    aliases: ["protein", "crudeprotein", "crude_protein", "crude protein", "crude protein (min)"],
+    fallback: (nutrition, proteinPct) => (proteinPct ? `${proteinPct}%` : null),
+  },
+  {
+    label: "Crude Fat (min)",
+    aliases: ["fat", "crudefat", "crude_fat", "crude fat", "crude fat (min)"],
+  },
+  {
+    label: "Crude Fiber (max)",
+    aliases: [
+      "fiber",
+      "fibre",
+      "crudefiber",
+      "crudefibre",
+      "crude_fiber",
+      "crude_fibre",
+      "crude fiber",
+      "crude fibre",
+      "crude fiber (max)",
+      "crude fibre (max)",
+    ],
+  },
+  {
+    label: "Moisture (max)",
+    aliases: ["moisture", "moisture (max)"],
+  },
+  {
+    label: "Ash (max)",
+    aliases: ["ash", "ash (max)"],
+  },
+  {
+    label: "Calcium (min)",
+    aliases: ["calcium", "calcium (min)"],
+  },
+  {
+    label: "Phosphorus (min)",
+    aliases: ["phosphorus", "phosphorous", "phosphorus (min)", "phosphorous (min)"],
+  },
+];
+
+export function getSortedNutritionEntries(nutrition = {}, proteinPct = null) {
+  const norm = (s) => String(s || "").toLowerCase().replace(/[\s_()\-–]/g, "");
+  const remaining = { ...(nutrition || {}) };
+  const result = [];
+
+  for (const item of CANONICAL_NUTRIENTS) {
+    let matchedVal = null;
+    for (const key of Object.keys(remaining)) {
+      if (item.aliases.some((alias) => norm(alias) === norm(key))) {
+        matchedVal = remaining[key];
+        delete remaining[key];
+        break;
+      }
+    }
+    if (!matchedVal && item.fallback) {
+      matchedVal = item.fallback(nutrition, proteinPct);
+    }
+    if (matchedVal) {
+      result.push([item.label, matchedVal]);
+    }
+  }
+
+  // Append any additional custom nutrients
+  for (const [key, val] of Object.entries(remaining)) {
+    if (val) {
+      const formattedKey = key
+        .replace(/([A-Z])/g, " $1")
+        .replace(/_/g, " ")
+        .trim();
+      const capitalized = formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
+      result.push([capitalized, val]);
+    }
+  }
+
+  return result;
+}

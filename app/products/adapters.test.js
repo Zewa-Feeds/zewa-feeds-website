@@ -6,7 +6,7 @@
  * that were wrong on the live site, not invented edge cases.
  */
 import { describe, expect, it } from "vitest";
-import { adaptProduct, PLACEHOLDER_IMAGE } from "./adapters";
+import { adaptProduct, getSortedNutritionEntries, PLACEHOLDER_IMAGE } from "./adapters";
 
 const CDN = "https://res.cloudinary.com/x";
 
@@ -235,5 +235,52 @@ describe("older cached responses", () => {
       }),
     );
     expect(card.image).toBe(PLACEHOLDER_IMAGE);
+  });
+});
+
+describe("canonical nutrients table order", () => {
+  it("strictly sorts nutrients into the exact 7-item order specified", () => {
+    const rawNutrition = {
+      phosphorus: "0.7%",
+      ash: "6%",
+      moisture: "<5%",
+      calcium: "20%",
+      fiber: "5%",
+      fat: "30%",
+      protein: "40%",
+    };
+
+    const sorted = getSortedNutritionEntries(rawNutrition, 40);
+
+    expect(sorted).toEqual([
+      ["Crude Protein (min)", "40%"],
+      ["Crude Fat (min)", "30%"],
+      ["Crude Fiber (max)", "5%"],
+      ["Moisture (max)", "<5%"],
+      ["Ash (max)", "6%"],
+      ["Calcium (min)", "20%"],
+      ["Phosphorus (min)", "0.7%"],
+    ]);
+  });
+
+  it("handles aliases like fibre, crude_protein, etc., and falls back to proteinPct", () => {
+    const rawNutrition = {
+      fat: "12%",
+      fibre: "3%",
+      moisture: "8%",
+      ash: "9%",
+      astaxanthin: "50 ppm",
+    };
+
+    const sorted = getSortedNutritionEntries(rawNutrition, 42);
+
+    expect(sorted).toEqual([
+      ["Crude Protein (min)", "42%"],
+      ["Crude Fat (min)", "12%"],
+      ["Crude Fiber (max)", "3%"],
+      ["Moisture (max)", "8%"],
+      ["Ash (max)", "9%"],
+      ["Astaxanthin", "50 ppm"],
+    ]);
   });
 });

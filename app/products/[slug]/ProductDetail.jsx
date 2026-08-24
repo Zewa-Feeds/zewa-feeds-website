@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReviewForm from "@/components/ReviewForm";
 import { useCart } from "@/lib/cartContext";
-import { isCutout, packOptionLabels, PLACEHOLDER_IMAGE } from "@/app/products/adapters";
+import { getSortedNutritionEntries, isCutout, packOptionLabels, PLACEHOLDER_IMAGE } from "@/app/products/adapters";
 import { discountPct, formatInr } from "@/lib/api";
 import { COMPANY, COMPANY_ADDRESS_LINE } from "@/lib/company";
 
@@ -760,34 +760,37 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 />
               )}
 
-              {tab === "nutrition" && (
-                <div className="w-full max-w-none">
-                  <div className="mb-4 flex items-baseline gap-3">
-                    <span className="font-[Playfair_Display] text-[30px] text-primary">
-                      {product.proteinPct}%
-                    </span>
-                    <span className="text-[13px] text-white/45 font-[Montserrat]">
-                      insect protein
-                    </span>
+              {tab === "nutrition" && (() => {
+                const nutritionEntries = getSortedNutritionEntries(product.nutrition, product.proteinPct);
+                return (
+                  <div className="w-full max-w-none">
+                    <div className="mb-4 flex items-baseline gap-3">
+                      <span className="font-[Playfair_Display] text-[30px] text-primary">
+                        {product.proteinPct}%
+                      </span>
+                      <span className="text-[13px] text-white/45 font-[Montserrat]">
+                        insect protein
+                      </span>
+                    </div>
+                    {nutritionEntries.length > 0 ? (
+                      <dl className="divide-y divide-white/6 max-w-md">
+                        {nutritionEntries.map(([label, value]) => (
+                          <div key={label} className="flex justify-between py-3">
+                            <dt className="text-[13px] text-white/45 font-[Montserrat]">
+                              {label}
+                            </dt>
+                            <dd className="text-[13px] text-white/85 font-[Montserrat]">{value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    ) : (
+                      <p className="text-[13px] text-white/35 font-[Montserrat]">
+                        Full nutritional analysis coming soon.
+                      </p>
+                    )}
                   </div>
-                  {Object.keys(product.nutrition ?? {}).length > 0 ? (
-                    <dl className="divide-y divide-white/6 max-w-md">
-                      {Object.entries(product.nutrition).map(([key, value]) => (
-                        <div key={key} className="flex justify-between py-3">
-                          <dt className="text-[13px] capitalize text-white/45 font-[Montserrat]">
-                            {key}
-                          </dt>
-                          <dd className="text-[13px] text-white/85 font-[Montserrat]">{value}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  ) : (
-                    <p className="text-[13px] text-white/35 font-[Montserrat]">
-                      Full nutritional analysis coming soon.
-                    </p>
-                  )}
-                </div>
-              )}
+                );
+              })()}
 
               {tab === "feeding" && (
                 <div className="w-full max-w-none flex flex-col gap-5">
