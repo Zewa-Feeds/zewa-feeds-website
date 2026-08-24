@@ -318,6 +318,7 @@ export function CartProvider({ children }) {
     deliveryText: quote?.deliveryText ?? null,
     quote,
     validating,
+    freeShippingThresholdPaise: quote?.freeShippingThresholdPaise ?? shippingRules?.freeThresholdPaise ?? null,
     /** True when everything in the cart can actually be bought. */
     fulfillable: (quote?.issues ?? []).filter((i) => i.sku !== "__coupon__").length === 0,
 

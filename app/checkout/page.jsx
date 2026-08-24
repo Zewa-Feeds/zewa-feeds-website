@@ -25,7 +25,7 @@ export default function CheckoutPage() {
   const {
     items, subtotalPaise, discountPaise, shippingPaise, totalPaise,
     amountToFreeShippingPaise, coupon, issues, fulfillable, validating,
-    validate, applyCoupon, clearCart, setQty, removeFromCart,
+    validate, applyCoupon, clearCart, setQty, removeFromCart, quote,
   } = useCart();
 
   const [config, setConfig] = useState(null);
@@ -240,11 +240,15 @@ export default function CheckoutPage() {
     setAutoDetectedBadge("");
   };
 
-  // Re-price when state or email changes for GST tax calculation
+  // Re-price when state changes for state-wise shipping & tax calculation
+  const lastPricedStateRef = useRef("");
   useEffect(() => {
-    if (form.state) void validate({ state: form.state, email: form.email || undefined });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.state]);
+    const trimmed = form.state?.trim() || "";
+    if (trimmed !== lastPricedStateRef.current) {
+      lastPricedStateRef.current = trimmed;
+      void validate({ state: trimmed || undefined, email: form.email || undefined });
+    }
+  }, [form.state, form.email, validate]);
 
   // Auto-detect City and State from 6-digit Pincode
   const handlePincodeLookup = useCallback(async (pin) => {
@@ -1365,6 +1369,10 @@ export default function CheckoutPage() {
                 paymentMethod={paymentMethod}
                 config={config}
                 validating={validating}
+                stateSelected={Boolean(form.state && form.state.trim())}
+                deliveryText={quote?.deliveryText}
+                deliveryNote={quote?.deliveryNote}
+                chargeableWeightKg={quote?.chargeableWeightKg}
                 setQty={setQty}
                 removeFromCart={removeFromCart}
               />

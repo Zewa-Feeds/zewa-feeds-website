@@ -22,6 +22,10 @@ export default function OrderSummaryCard({
   paymentMethod,
   config,
   validating,
+  stateSelected = false,
+  deliveryText,
+  deliveryNote,
+  chargeableWeightKg,
   setQty,
   removeFromCart,
 }) {
@@ -274,12 +278,40 @@ export default function OrderSummaryCard({
             </div>
           )}
 
-          <div className="flex justify-between text-white/50">
-            <span>Shipping</span>
-            <span className={shippingPaise === 0 ? "font-bold text-primary uppercase" : "font-semibold text-white/80 tabular-nums"}>
-              {shippingPaise === 0 ? "FREE" : formatInr(shippingPaise)}
+          <div className="flex justify-between items-center text-white/50">
+            <span className="flex items-center gap-1.5">
+              <span>Shipping</span>
+              {validating && (
+                <span className="inline-flex items-center gap-1 text-[10.5px] text-primary/80 font-normal animate-pulse">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />
+                  Updating…
+                </span>
+              )}
             </span>
+            {stateSelected ? (
+              <span className={shippingPaise === 0 ? "font-bold text-primary uppercase" : "font-semibold text-white/80 tabular-nums"}>
+                {shippingPaise === 0 ? "FREE" : formatInr(shippingPaise)}
+              </span>
+            ) : amountToFreeShippingPaise === 0 ? (
+              <span className="font-bold text-primary uppercase">FREE</span>
+            ) : (
+              <span className="text-[11.5px] text-white/40 italic font-normal">Select state</span>
+            )}
           </div>
+
+          {/* State-dependent Delivery Estimate */}
+          {deliveryText && stateSelected && (
+            <div className="rounded-lg border border-white/5 bg-white/[0.025] px-3 py-2 text-[11px] font-[Montserrat]">
+              <p className="font-medium text-primary/90">{deliveryText}</p>
+              {deliveryNote && <p className="text-[10px] text-white/35 italic mt-0.5">{deliveryNote}</p>}
+            </div>
+          )}
+
+          {!stateSelected && (
+            <p className="text-[10.5px] text-white/35 font-[Montserrat] italic">
+              Enter your state to calculate shipping & delivery
+            </p>
+          )}
 
           <div className="my-2 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
