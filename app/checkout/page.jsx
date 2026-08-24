@@ -754,6 +754,10 @@ export default function CheckoutPage() {
               </a>
             </div>
 
+            <p className="text-[12.5px] leading-relaxed text-white/50 font-[Montserrat] max-w-md">
+              Thank you for your order. Every pack replaces extractive protein with insect protein — a small shift toward feed that&apos;s functional, proven and sustainable.
+            </p>
+
             {!isAuthenticated && (
               <div className="mt-2 w-full rounded-2xl border border-white/10 bg-white/3 p-5 text-left">
                 <div className="flex items-start justify-between gap-3">
@@ -901,6 +905,10 @@ export default function CheckoutPage() {
                 Continue Shopping
               </a>
             </div>
+
+            <p className="mt-2 text-[12.5px] leading-relaxed text-white/50 font-[Montserrat] max-w-md">
+              Thank you for your order. Every pack replaces extractive protein with insect protein — a small shift toward feed that&apos;s functional, proven and sustainable.
+            </p>
           </div>
         </main>
         <Footer />
