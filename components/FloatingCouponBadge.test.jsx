@@ -33,11 +33,11 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("FloatingCouponBadge", () => {
-  it("renders the circular floating coupon badge with 'Unlock 10% Off'", () => {
+  it("renders the clean circular floating coupon badge with 'Unlock 10% Off'", () => {
     render(<FloatingCouponBadge />);
     expect(screen.getByLabelText("Unlock 10% Off Coupon")).toBeDefined();
-    expect(screen.getByText("10%")).toBeDefined();
-    expect(screen.getByText("FLAT")).toBeDefined();
+    expect(screen.getByText("Unlock")).toBeDefined();
+    expect(screen.getByText("10% Off")).toBeDefined();
   });
 
   it("does not render when pathname is /checkout", () => {
