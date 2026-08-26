@@ -4,6 +4,7 @@ import { CartProvider } from "@/lib/cartContext";
 import { AuthProvider } from "@/lib/authContext";
 import CartDrawer from "@/components/CartDrawer";
 import AuthDrawer from "@/components/AuthDrawer";
+import FloatingCouponBadge from "@/components/FloatingCouponBadge";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -101,6 +102,7 @@ export default function RootLayout({ children }) {
           <CartProvider>
             <CartDrawer />
             <AuthDrawer />
+            <FloatingCouponBadge />
             {children}
           </CartProvider>
         </AuthProvider>
