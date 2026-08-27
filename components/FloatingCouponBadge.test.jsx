@@ -33,11 +33,60 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("FloatingCouponBadge", () => {
-  it("renders the clean circular floating coupon badge with 'Unlock 10% Off'", () => {
+  it("exports PROMO_CODE as SPECIAL10", () => {
+    expect(PROMO_CODE).toBe("SPECIAL10");
+  });
+
+  it("renders the clean circular floating coupon badge with 'Unlock 10% Off' on /products", () => {
     render(<FloatingCouponBadge />);
     expect(screen.getByLabelText("Unlock 10% Off Coupon")).toBeDefined();
     expect(screen.getByText("Unlock")).toBeDefined();
     expect(screen.getByText("10% Off")).toBeDefined();
+    const aside = screen.getByLabelText("Promotional Discount");
+    expect(aside.className).toContain("opacity-100");
+  });
+
+  it("starts hidden on homepage until customer scrolls down to products section", () => {
+    mockPathname = "/";
+    let productsTop = 2000;
+    const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = function () {
+      if (this.id === "products") {
+        return {
+          top: productsTop,
+          bottom: productsTop + 500,
+          left: 0,
+          right: 1000,
+          width: 1000,
+          height: 500,
+        };
+      }
+      return originalGetBoundingClientRect.call(this);
+    };
+
+    try {
+      const { container } = render(
+        <div>
+          <div id="hero" style={{ height: "1000px" }}>Hero</div>
+          <FloatingCouponBadge />
+          <div id="products">Products Section</div>
+        </div>
+      );
+
+      const aside = screen.getByLabelText("Promotional Discount");
+      // Initially hidden before scrolling to products
+      expect(aside.className).toContain("opacity-0");
+
+      // Simulate scrolling down so products section enters viewport
+      productsTop = 200;
+      act(() => {
+        fireEvent.scroll(window);
+      });
+
+      expect(aside.className).toContain("opacity-100");
+    } finally {
+      Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+    }
   });
 
   it("does not render when pathname is /checkout", () => {
