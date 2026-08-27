@@ -46,7 +46,7 @@ describe("FloatingCouponBadge", () => {
     expect(aside.className).toContain("opacity-100");
   });
 
-  it("starts hidden on homepage until customer scrolls down to products section", () => {
+  it("starts hidden on homepage, reveals at products section, and hides when scrolling back to hero", () => {
     mockPathname = "/";
     let productsTop = 2000;
     const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
@@ -74,16 +74,22 @@ describe("FloatingCouponBadge", () => {
       );
 
       const aside = screen.getByLabelText("Promotional Discount");
-      // Initially hidden before scrolling to products
+      // 1. Initially hidden on hero
       expect(aside.className).toContain("opacity-0");
 
-      // Simulate scrolling down so products section enters viewport
+      // 2. Scroll down to products section -> reveals
       productsTop = 200;
       act(() => {
         fireEvent.scroll(window);
       });
-
       expect(aside.className).toContain("opacity-100");
+
+      // 3. Scroll back up to hero -> hides again
+      productsTop = 2000;
+      act(() => {
+        fireEvent.scroll(window);
+      });
+      expect(aside.className).toContain("opacity-0");
     } finally {
       Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
     }

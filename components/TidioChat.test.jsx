@@ -90,6 +90,18 @@ describe("TidioChat", () => {
       // After scrolling: style block should set opacity 1 and call tidio API show
       expect(style.textContent).toContain("opacity: 1");
       expect(window.tidioChatApi.show).toHaveBeenCalled();
+
+      // Scroll back up to hero: style block should set opacity 0 again
+      heroTop = 0;
+      heroBottom = 800;
+      Object.defineProperty(window, "scrollY", { value: 0, writable: true });
+
+      act(() => {
+        fireEvent.scroll(window);
+      });
+
+      expect(style.textContent).toContain("opacity: 0");
+      expect(window.tidioChatApi.hide).toHaveBeenCalled();
     } finally {
       Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
     }

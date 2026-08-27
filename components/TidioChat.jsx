@@ -31,74 +31,45 @@ export default function TidioChat() {
       return;
     }
 
-    const checkVisibility = () => {
+    const updateVisibility = () => {
       const heroEl = document.getElementById("hero");
       if (heroEl) {
         const rect = heroEl.getBoundingClientRect();
-        // Hide while hero is prominently in view; reveal once user scrolls past hero
+        // Hide while hero is in view; reveal only once user scrolls past hero
         const threshold = Math.max(heroEl.offsetHeight - 200, 200);
-        if (window.scrollY > threshold || rect.bottom <= 200) {
-          setVisible(true);
-          return true;
-        }
-      } else if (window.scrollY > 200) {
-        // Fallback for pages without #hero section
-        setVisible(true);
-        return true;
-      }
-      return false;
-    };
-
-    if (checkVisibility()) {
-      try {
-        window.tidioChatApi?.show?.();
-        window.tidioChatApi?.display?.(true);
-      } catch {
-        /* ignore */
-      }
-      return;
-    }
-
-    let observer = null;
-    const heroEl = document.getElementById("hero");
-    if (typeof IntersectionObserver !== "undefined" && heroEl) {
-      observer = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          // When hero leaves the top viewport
-          if (!entry.isIntersecting || entry.boundingClientRect.bottom <= 200) {
-            setVisible(true);
-            try {
-              window.tidioChatApi?.show?.();
-              window.tidioChatApi?.display?.(true);
-            } catch {
-              /* ignore */
-            }
-            if (observer) observer.disconnect();
-          }
-        },
-        { threshold: [0, 0.1, 0.2] }
-      );
-      observer.observe(heroEl);
-    }
-
-    const handleScroll = () => {
-      if (checkVisibility()) {
+        const isPastHero = window.scrollY > threshold || rect.bottom <= 200;
+        setVisible(isPastHero);
         try {
-          window.tidioChatApi?.show?.();
-          window.tidioChatApi?.display?.(true);
-        } catch {
-          /* ignore */
-        }
-        if (observer) observer.disconnect();
+          if (isPastHero) {
+            window.tidioChatApi?.show?.();
+            window.tidioChatApi?.display?.(true);
+          } else {
+            window.tidioChatApi?.hide?.();
+            window.tidioChatApi?.display?.(false);
+          }
+        } catch {}
+      } else {
+        // Fallback for pages without #hero section
+        const isPastTop = window.scrollY > 200;
+        setVisible(isPastTop);
+        try {
+          if (isPastTop) {
+            window.tidioChatApi?.show?.();
+            window.tidioChatApi?.display?.(true);
+          } else {
+            window.tidioChatApi?.hide?.();
+            window.tidioChatApi?.display?.(false);
+          }
+        } catch {}
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    updateVisibility();
+
+    window.addEventListener("scroll", updateVisibility, { passive: true });
 
     return () => {
-      if (observer) observer.disconnect();
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", updateVisibility);
     };
   }, [mounted, pathname]);
 

@@ -32,7 +32,7 @@ export default function FloatingCouponBadge() {
     }
   }, []);
 
-  // Scroll detection: reveal when customer scrolls down and reaches products section
+  // Scroll detection: reveal when customer reaches products section, hide when scrolling back to hero
   useEffect(() => {
     if (!mounted || dismissed) return;
 
@@ -47,52 +47,25 @@ export default function FloatingCouponBadge() {
       return;
     }
 
-    const checkVisibility = () => {
+    const updateVisibility = () => {
       const productsEl = document.getElementById("products");
       if (productsEl) {
         const rect = productsEl.getBoundingClientRect();
-        // Visible when top of products section reaches near viewport
-        if (rect.top <= window.innerHeight * 0.85) {
-          setVisible(true);
-          return true;
-        }
-      } else if (window.scrollY > 400) {
+        // Visible only when user has scrolled down to products section
+        const isReached = rect.top <= window.innerHeight * 0.85;
+        setVisible(isReached);
+      } else {
         // Fallback for pages without #products section
-        setVisible(true);
-        return true;
-      }
-      return false;
-    };
-
-    if (checkVisibility()) return;
-
-    let observer = null;
-    const productsEl = document.getElementById("products");
-    if (typeof IntersectionObserver !== "undefined" && productsEl) {
-      observer = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          if (entry.isIntersecting || entry.boundingClientRect.top <= window.innerHeight * 0.85) {
-            setVisible(true);
-            if (observer) observer.disconnect();
-          }
-        },
-        { threshold: 0.05, rootMargin: "0px 0px -50px 0px" }
-      );
-      observer.observe(productsEl);
-    }
-
-    const handleScroll = () => {
-      if (checkVisibility() && observer) {
-        observer.disconnect();
+        setVisible(window.scrollY > 400);
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    updateVisibility();
+
+    window.addEventListener("scroll", updateVisibility, { passive: true });
 
     return () => {
-      if (observer) observer.disconnect();
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", updateVisibility);
     };
   }, [mounted, dismissed, pathname]);
 
