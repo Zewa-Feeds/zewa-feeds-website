@@ -238,6 +238,7 @@ export default function Hero() {
    */
   return (
     <section
+      id="hero"
       className="relative w-full pt-20 max-h-[100dvh] md:h-[90dvh] md:min-h-[620px] md:max-h-none"
     >
       {/*

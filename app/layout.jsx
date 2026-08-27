@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/authContext";
 import CartDrawer from "@/components/CartDrawer";
 import AuthDrawer from "@/components/AuthDrawer";
 import FloatingCouponBadge from "@/components/FloatingCouponBadge";
+import TidioChat from "@/components/TidioChat";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -103,6 +104,7 @@ export default function RootLayout({ children }) {
             <CartDrawer />
             <AuthDrawer />
             <FloatingCouponBadge />
+            <TidioChat />
             {children}
           </CartProvider>
         </AuthProvider>
