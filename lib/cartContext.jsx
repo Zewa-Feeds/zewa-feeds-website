@@ -160,6 +160,8 @@ export function CartProvider({ children }) {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) dispatch({ type: "INIT", items: JSON.parse(stored) });
+      const storedCoupons = localStorage.getItem("zewa_applied_coupons");
+      if (storedCoupons) setCouponCodes(JSON.parse(storedCoupons));
     } catch {
       /* corrupt payload — start empty rather than crashing the app */
     }
@@ -184,10 +186,11 @@ export function CartProvider({ children }) {
     if (!hydrated) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      localStorage.setItem("zewa_applied_coupons", JSON.stringify(couponCodes));
     } catch {
       /* quota or private mode — the cart just won't persist */
     }
-  }, [items, hydrated]);
+  }, [items, couponCodes, hydrated]);
 
   /**
    * Re-price against the backend.
@@ -265,9 +268,19 @@ export function CartProvider({ children }) {
     async (code) => {
       const next = String(code || "").toUpperCase().trim();
       if (!next) return null;
-      if (couponCodes.includes(next)) return validate({ codes: couponCodes });
+      if (couponCodes.includes(next)) {
+        if (items.length === 0) return { staged: true, codes: couponCodes };
+        return validate({ codes: couponCodes });
+      }
 
       const attempted = [...couponCodes, next];
+
+      // If cart is empty, stage the coupon code so it activates as soon as items are added.
+      if (items.length === 0) {
+        setCouponCodes(attempted);
+        return { staged: true, codes: attempted };
+      }
+
       const result = await validate({ codes: attempted });
 
       // Keep it only if the server actually applied it.
@@ -275,7 +288,7 @@ export function CartProvider({ children }) {
       setCouponCodes(accepted ? attempted : couponCodes);
       return result;
     },
-    [couponCodes, validate],
+    [items.length, couponCodes, validate],
   );
 
   /** Remove one code and re-price — this is what frees a blocked coupon's slot. */

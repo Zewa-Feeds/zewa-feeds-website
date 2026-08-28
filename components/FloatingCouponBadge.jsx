@@ -118,13 +118,13 @@ export default function FloatingCouponBadge() {
     setApplyMessage("");
     try {
       await applyCoupon(PROMO_CODE);
-      setApplyMessage("Coupon applied to your cart!");
+      setApplyMessage("SPECIAL10 applied to your cart!");
       setTimeout(() => {
         setModalOpen(false);
         setDrawerOpen(true);
       }, 600);
     } catch {
-      setApplyMessage("Applied code to cart.");
+      setApplyMessage("SPECIAL10 applied to your cart!");
       setTimeout(() => {
         setModalOpen(false);
         setDrawerOpen(true);
@@ -143,14 +143,14 @@ export default function FloatingCouponBadge() {
       {/* ── Circular Floating Badge at bottom-left ── */}
       <aside
         aria-label="Promotional Discount"
-        className={`fixed bottom-5 left-5 sm:bottom-6 sm:left-6 z-40 select-none transition-all duration-500 ease-out ${
+        className={`fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 select-none transition-all duration-500 ease-out ${
           visible
             ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
             : "opacity-0 translate-y-8 scale-90 pointer-events-none"
         }`}
       >
         <div className="relative">
-          {/* Circular Button */}
+          {/* Circular Button — sized h-14 w-14 (56px) on mobile, 60px on desktop to match Tidio bubble */}
           <button
             type="button"
             onClick={(e) => {
@@ -160,12 +160,12 @@ export default function FloatingCouponBadge() {
             aria-label="Unlock 10% Off Coupon"
             tabIndex={visible ? 0 : -1}
             style={{ borderRadius: "9999px" }}
-            className="flex h-16 w-16 sm:h-[70px] sm:w-[70px] flex-col items-center justify-center bg-white text-neutral-900 shadow-[0_8px_30px_rgba(0,0,0,0.35)] ring-1 ring-black/10 hover:shadow-[0_12px_36px_rgba(0,0,0,0.45)] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
+            className="flex h-14 w-14 sm:h-[60px] sm:w-[60px] flex-col items-center justify-center bg-white text-neutral-900 shadow-[0_8px_30px_rgba(0,0,0,0.35)] ring-1 ring-black/10 hover:shadow-[0_12px_36px_rgba(0,0,0,0.45)] hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer"
           >
-            <span className="text-[11px] sm:text-[12px] font-medium leading-tight text-neutral-600 font-[Montserrat]">
+            <span className="text-[10px] sm:text-[11px] font-medium leading-tight text-neutral-600 font-[Montserrat]">
               Unlock
             </span>
-            <span className="text-[13px] sm:text-[14px] font-extrabold leading-tight text-black font-[Montserrat] tracking-tight">
+            <span className="text-[12px] sm:text-[13px] font-extrabold leading-tight text-black font-[Montserrat] tracking-tight">
               10% Off
             </span>
           </button>
@@ -181,13 +181,13 @@ export default function FloatingCouponBadge() {
             title="Dismiss offer"
             tabIndex={visible ? 0 : -1}
             style={{ borderRadius: "9999px" }}
-            className="absolute -top-2 -right-2 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center bg-[#090f1d] text-white/90 border border-white/30 shadow-lg hover:bg-black hover:text-white hover:scale-110 active:scale-95 transition-all duration-150 cursor-pointer z-30 ring-1 ring-white/10"
+            className="absolute -top-1.5 -right-1.5 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center bg-[#090f1d] text-white/90 border border-white/30 shadow-lg hover:bg-black hover:text-white hover:scale-110 active:scale-95 transition-all duration-150 cursor-pointer z-30 ring-1 ring-white/10"
           >
             <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              className="w-3 h-3 sm:w-3.5 sm:h-3.5"
+              className="w-2.5 h-2.5 sm:w-3 sm:h-3"
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"

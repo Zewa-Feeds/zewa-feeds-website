@@ -174,7 +174,7 @@ describe("FloatingCouponBadge", () => {
     });
 
     expect(cart.applyCoupon).toHaveBeenCalledWith(PROMO_CODE);
-    expect(screen.getByText(/Coupon applied to your cart/i)).toBeDefined();
+    expect(screen.getByText(/applied to your cart/i)).toBeDefined();
 
     act(() => {
       vi.advanceTimersByTime(800);

@@ -35,7 +35,7 @@ export default function TidioChat() {
       const heroEl = document.getElementById("hero");
       if (heroEl) {
         const rect = heroEl.getBoundingClientRect();
-        // Hide while hero is in view; reveal only once user scrolls past hero
+        // Hide while hero is in view; reveal once user scrolls past hero
         const threshold = Math.max(heroEl.offsetHeight - 200, 200);
         const isPastHero = window.scrollY > threshold || rect.bottom <= 200;
         setVisible(isPastHero);
@@ -49,17 +49,11 @@ export default function TidioChat() {
           }
         } catch {}
       } else {
-        // Fallback for pages without #hero section
-        const isPastTop = window.scrollY > 200;
-        setVisible(isPastTop);
+        // On pages without #hero (e.g. /products, /about, /cart), chat is available
+        setVisible(true);
         try {
-          if (isPastTop) {
-            window.tidioChatApi?.show?.();
-            window.tidioChatApi?.display?.(true);
-          } else {
-            window.tidioChatApi?.hide?.();
-            window.tidioChatApi?.display?.(false);
-          }
+          window.tidioChatApi?.show?.();
+          window.tidioChatApi?.display?.(true);
         } catch {}
       }
     };
@@ -116,10 +110,10 @@ export default function TidioChat() {
       <Script
         id="tidio-chat-script"
         src={`//code.tidio.co/${TIDIO_PUBLIC_KEY}.js`}
-        strategy="lazyOnload"
+        strategy="afterInteractive"
         onReady={handleTidioReady}
       />
-      {/* Safely hide Tidio container only when not visible to prevent blocking screen clicks */}
+      {/* Safely hide Tidio container only when on hero section to prevent blocking screen clicks */}
       {!visible && (
         <style>{`
           #tidio-chat, #tidio-chat-iframe {
