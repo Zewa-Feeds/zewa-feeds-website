@@ -33,6 +33,10 @@ vi.mock("next/image", () => ({
 const cart = {
   items: [],
   subtotalPaise: 0,
+  discountPaise: 0,
+  totalPaise: 0,
+  couponCodes: [],
+  coupons: [],
   totalItems: 0,
   amountToFreeShippingPaise: 0,
   drawerOpen: false,
@@ -40,6 +44,7 @@ const cart = {
   removeFromCart: vi.fn(),
   setQty: vi.fn(),
   addToCart: vi.fn(),
+  removeCoupon: vi.fn(),
 };
 
 vi.mock("@/lib/cartContext", () => ({ useCart: () => cart }));
@@ -63,6 +68,10 @@ beforeEach(() => {
   Object.assign(cart, {
     items: [],
     subtotalPaise: 0,
+    discountPaise: 0,
+    totalPaise: 0,
+    couponCodes: [],
+    coupons: [],
     totalItems: 0,
     amountToFreeShippingPaise: 0,
     drawerOpen: false,
@@ -70,6 +79,7 @@ beforeEach(() => {
   cart.setDrawerOpen.mockClear();
   cart.removeFromCart.mockClear();
   cart.setQty.mockClear();
+  cart.removeCoupon.mockClear();
 });
 
 afterEach(cleanup);
@@ -155,5 +165,20 @@ describe("the drawer itself is unchanged", () => {
     render(<CartDrawer />);
     const panel = screen.getByLabelText("Shopping Cart Drawer");
     expect(panel.getAttribute("aria-hidden")).toBeNull();
+  });
+
+  it("renders coupon tags and discount line when coupons are applied", () => {
+    cart.drawerOpen = true;
+    cart.items = [LINE];
+    cart.totalItems = 2;
+    cart.subtotalPaise = 37000;
+    cart.discountPaise = 3700;
+    cart.totalPaise = 33300;
+    cart.couponCodes = ["SPECIAL10"];
+    cart.coupons = [{ code: "SPECIAL10", percent: 10, discountPaise: 3700 }];
+    render(<CartDrawer />);
+
+    expect(screen.getAllByText("SPECIAL10").length).toBeGreaterThan(0);
+    expect(screen.getByText("- ₹37")).toBeDefined();
   });
 });

@@ -10,6 +10,12 @@ export default function CartDrawer() {
   const {
     items,
     subtotalPaise,
+    discountPaise,
+    totalPaise,
+    coupon,
+    coupons,
+    couponCodes,
+    removeCoupon,
     totalItems,
     amountToFreeShippingPaise,
     drawerOpen,
@@ -296,14 +302,79 @@ export default function CartDrawer() {
         {/* STICKY ACTION FOOTER */}
         {items.length > 0 && (
           <div className="border-t border-white/10 bg-[#080d1a]/95 backdrop-blur-xl px-6 py-5 space-y-4 shadow-[0_-8px_32px_rgba(0,0,0,0.4)]">
+            {/* Applied Coupons List / Tags */}
+            {(couponCodes || []).length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-0.5">
+                {(couponCodes || []).map((code) => {
+                  const appliedInfo = (coupons || []).find((c) => c.code === code) || coupon;
+                  const discountLabel = appliedInfo?.discountPaise
+                    ? `- ${formatInr(appliedInfo.discountPaise)}`
+                    : appliedInfo?.percent
+                    ? `${appliedInfo.percent}% off`
+                    : code === "SPECIAL10"
+                    ? "10% off"
+                    : "Applied";
+
+                  return (
+                    <div
+                      key={code}
+                      className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-1.5 text-[11px] font-semibold text-primary font-[Montserrat]"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                      <span>
+                        <strong className="tracking-wide">{code}</strong> ({discountLabel})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeCoupon(code)}
+                        className="ml-1 text-primary/70 hover:text-red-400 transition-colors"
+                        title="Remove coupon"
+                        aria-label={`Remove coupon ${code}`}
+                      >
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Price Summary Breakdown */}
             <div className="flex flex-col gap-1.5 text-[13px] font-[Montserrat]">
-              <div className="flex items-baseline justify-between">
-                <span className="text-white/50 text-[13px]">Subtotal</span>
-                <span className="font-[Playfair_Display] text-[24px] font-bold text-white tabular-nums">
+              <div className="flex items-baseline justify-between text-white/60">
+                <span className="text-[13px]">Subtotal</span>
+                <span className="text-[15px] text-white tabular-nums">
                   {formatInr(subtotalPaise)}
                 </span>
               </div>
+
+              {discountPaise > 0 && (
+                <div className="flex items-baseline justify-between text-emerald-400">
+                  <span className="text-[13px] flex items-center gap-1.5">
+                    <span>Discount</span>
+                    {couponCodes[0] && (
+                      <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+                        {couponCodes[0]}
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-[15px] font-semibold tabular-nums">
+                    - {formatInr(discountPaise)}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-baseline justify-between pt-1 border-t border-white/8">
+                <span className="text-white/80 font-semibold text-[14px]">Total</span>
+                <span className="font-[Playfair_Display] text-[24px] font-bold text-primary tabular-nums">
+                  {formatInr(totalPaise > 0 ? totalPaise : Math.max(0, subtotalPaise - discountPaise))}
+                </span>
+              </div>
+
               <p className="text-[10px] text-white/30 font-normal">
                 Taxes and shipping calculated at checkout
               </p>
@@ -316,7 +387,7 @@ export default function CartDrawer() {
                 onClick={() => setDrawerOpen(false)}
                 className="group relative flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-center text-[12px] font-bold uppercase tracking-[0.18em] text-[#00382d] font-[Montserrat] transition-all duration-300 hover:bg-primary/90 active:scale-[0.99] shadow-[0_4px_24px_rgba(68,229,194,0.35)]"
               >
-                <span>Checkout · {formatInr(subtotalPaise)}</span>
+                <span>Checkout · {formatInr(totalPaise > 0 ? totalPaise : Math.max(0, subtotalPaise - discountPaise))}</span>
                 <svg
                   className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
                   fill="none"

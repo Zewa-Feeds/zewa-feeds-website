@@ -35,9 +35,8 @@ export default function TidioChat() {
       const heroEl = document.getElementById("hero");
       if (heroEl) {
         const rect = heroEl.getBoundingClientRect();
-        // Hide while hero is in view; reveal once user scrolls past hero
-        const threshold = Math.max(heroEl.offsetHeight - 200, 200);
-        const isPastHero = window.scrollY > threshold || rect.bottom <= 200;
+        // Hide while at top of hero; reveal once user scrolls down
+        const isPastHero = window.scrollY > 150 || rect.bottom <= 250;
         setVisible(isPastHero);
         try {
           if (isPastHero) {
@@ -109,7 +108,7 @@ export default function TidioChat() {
     <>
       <Script
         id="tidio-chat-script"
-        src={`//code.tidio.co/${TIDIO_PUBLIC_KEY}.js`}
+        src={`https://code.tidio.co/${TIDIO_PUBLIC_KEY}.js`}
         strategy="afterInteractive"
         onReady={handleTidioReady}
       />

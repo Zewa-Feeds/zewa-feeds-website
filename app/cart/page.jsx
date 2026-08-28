@@ -154,6 +154,12 @@ export default function CartPage() {
                     <span className="text-white/40">Subtotal ({totalItems} items)</span>
                     <span className="text-white">{formatInr(subtotalPaise)}</span>
                   </div>
+                  {discountPaise > 0 && (
+                    <div className="flex justify-between text-emerald-400">
+                      <span>Discount</span>
+                      <span className="font-semibold">- {formatInr(discountPaise)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-white/40">Shipping</span>
                     <span className={shipping === 0 ? "text-primary" : "text-white"}>
