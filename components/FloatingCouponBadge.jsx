@@ -80,7 +80,10 @@ export default function FloatingCouponBadge() {
   }, [modalOpen]);
 
   const handleDismiss = useCallback((e) => {
-    e.stopPropagation();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setDismissed(true);
     try {
       sessionStorage.setItem(COUPON_STORAGE_KEY, "true");
@@ -150,7 +153,10 @@ export default function FloatingCouponBadge() {
           {/* Circular Button */}
           <button
             type="button"
-            onClick={() => setModalOpen(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setModalOpen(true);
+            }}
             aria-label="Unlock 10% Off Coupon"
             tabIndex={visible ? 0 : -1}
             style={{ borderRadius: "9999px" }}
@@ -168,17 +174,20 @@ export default function FloatingCouponBadge() {
           <button
             type="button"
             onClick={handleDismiss}
+            onPointerDown={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
             aria-label="Dismiss discount badge"
             title="Dismiss offer"
             tabIndex={visible ? 0 : -1}
             style={{ borderRadius: "9999px" }}
-            className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center bg-[#090f1d] text-white/70 border border-white/25 shadow-md hover:bg-black hover:text-white hover:scale-110 active:scale-90 transition-all duration-150 cursor-pointer z-10"
+            className="absolute -top-2 -right-2 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center bg-[#090f1d] text-white/90 border border-white/30 shadow-lg hover:bg-black hover:text-white hover:scale-110 active:scale-95 transition-all duration-150 cursor-pointer z-30 ring-1 ring-white/10"
           >
             <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              className="w-2.5 h-2.5"
+              className="w-3 h-3 sm:w-3.5 sm:h-3.5"
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"

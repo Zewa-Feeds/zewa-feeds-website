@@ -74,9 +74,10 @@ describe("TidioChat", () => {
         </div>
       );
 
-      // Initially on hero: style block should set opacity 0
-      const style = container.querySelector("style");
-      expect(style.textContent).toContain("opacity: 0");
+      // Initially on hero: style block should contain display: none
+      let style = container.querySelector("style");
+      expect(style).not.toBeNull();
+      expect(style.textContent).toContain("display: none");
 
       // Simulate user scrolling down past hero
       heroTop = -700;
@@ -87,11 +88,12 @@ describe("TidioChat", () => {
         fireEvent.scroll(window);
       });
 
-      // After scrolling: style block should set opacity 1 and call tidio API show
-      expect(style.textContent).toContain("opacity: 1");
+      // After scrolling: style block is removed and tidio API show is called
+      style = container.querySelector("style");
+      expect(style).toBeNull();
       expect(window.tidioChatApi.show).toHaveBeenCalled();
 
-      // Scroll back up to hero: style block should set opacity 0 again
+      // Scroll back up to hero: style block with display: none is restored and tidio API hide is called
       heroTop = 0;
       heroBottom = 800;
       Object.defineProperty(window, "scrollY", { value: 0, writable: true });
@@ -100,7 +102,9 @@ describe("TidioChat", () => {
         fireEvent.scroll(window);
       });
 
-      expect(style.textContent).toContain("opacity: 0");
+      style = container.querySelector("style");
+      expect(style).not.toBeNull();
+      expect(style.textContent).toContain("display: none");
       expect(window.tidioChatApi.hide).toHaveBeenCalled();
     } finally {
       Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;

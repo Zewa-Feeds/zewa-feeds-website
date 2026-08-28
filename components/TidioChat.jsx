@@ -119,16 +119,15 @@ export default function TidioChat() {
         strategy="lazyOnload"
         onReady={handleTidioReady}
       />
-      {/* Global styling overlay ensuring smooth transition and hiding before scroll */}
-      <style>{`
-        #tidio-chat, #tidio-chat-iframe, div[id^="tidio-chat"] {
-          opacity: ${visible ? "1" : "0"} !important;
-          pointer-events: ${visible ? "auto" : "none"} !important;
-          transform: ${visible ? "translateY(0) scale(1)" : "translateY(24px) scale(0.9)"} !important;
-          transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
-          transform-origin: bottom right !important;
-        }
-      `}</style>
+      {/* Safely hide Tidio container only when not visible to prevent blocking screen clicks */}
+      {!visible && (
+        <style>{`
+          #tidio-chat, #tidio-chat-iframe {
+            display: none !important;
+            pointer-events: none !important;
+          }
+        `}</style>
+      )}
     </>
   );
 }
