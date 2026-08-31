@@ -95,6 +95,9 @@ function reducer(state, action) {
             mrpPaise: line.mrpPaise,
             image: line.imageUrl ?? i.image,
             availableStock: line.availableStock,
+            /* The server's own answer for what this pack weighs, so the
+               estimate below can reuse it instead of guessing. */
+            weightGrams: line.weightGrams ?? i.weightGrams ?? null,
             /*
              * The real ceiling for every quantity stepper.
              *
@@ -143,6 +146,20 @@ export function CartProvider({ children }) {
    * shipping line sitting on a stale value for a second.
    */
   const [shippingRules, setShippingRules] = useState(null);
+  /**
+   * The delivery state the cart is being priced for.
+   *
+   * STICKY, and that is the point. `validate` takes the state as an argument,
+   * but the debounced re-price that runs on every cart change calls it with no
+   * arguments — so a quantity change on the checkout page re-priced with no
+   * state at all, and the server, having no place of supply, returned shipping
+   * of ₹0. The total silently dropped until something else happened to re-price
+   * with the address again.
+   *
+   * Remembering the last state means a cart change re-prices for the same
+   * destination, and the estimate below knows whether to use the Kerala rate.
+   */
+  const lastStateRef = useRef(null);
   const [validating, setValidating] = useState(false);
   /*
    * Applied codes, oldest first.
@@ -205,6 +222,10 @@ export function CartProvider({ children }) {
         return null;
       }
 
+      // An explicit state wins and is remembered; otherwise reuse the last one.
+      if (state !== undefined) lastStateRef.current = state || null;
+      const effectiveState = state !== undefined ? state : (lastStateRef.current ?? undefined);
+
       const seq = ++requestSeq.current;
       // The line-up being priced, captured before the await so a cart change
       // mid-flight cannot make this quote look current when it is not.
@@ -215,7 +236,7 @@ export function CartProvider({ children }) {
           lines: items.map((i) => ({ sku: i.sku, qty: i.qty })),
           couponCodes: codes,
           email,
-          state,
+          state: effectiveState,
         });
 
         // A newer request has started — discard this stale response.
@@ -310,35 +331,47 @@ export function CartProvider({ children }) {
   const quoteIsCurrent = Boolean(quote) && quoteSignature === signature;
 
   /**
-   * Totals shown while the server is still pricing a change.
+   * Figures shown while the server is still pricing a change.
    *
-   * Mirrors the server formula exactly (pricing.service.ts): shipping is
-   * assessed on the POST-discount value, so a coupon can drop an order back
-   * below the free-shipping threshold.
-   *
-   * The discount is carried over from the last quote rather than recomputed —
-   * coupon rules live on the server and are not safe to reimplement here. For a
-   * percentage coupon that makes the figure slightly stale for the second it
-   * takes the real quote to arrive; it then corrects itself. Showing a
-   * near-right number immediately beats showing a definitely-wrong one for a
-   * second, which is what the previous behaviour did.
+   * Only what the client can know EXACTLY lives here. The subtotal is a sum of
+   * prices already in hand. The discount is carried over from the last quote
+   * rather than recomputed, because coupon rules live on the server and are not
+   * safe to reimplement. Shipping is not computed at all — see below.
    */
   const optimistic = useMemo(() => {
     const discountPaise = Math.min(quote?.discountPaise ?? 0, localSubtotalPaise);
     const payable = Math.max(0, localSubtotalPaise - discountPaise);
 
     const threshold = shippingRules?.freeThresholdPaise ?? quote?.freeShippingThresholdPaise;
-    const rate = shippingRules?.standardRatePaise ?? 0;
 
-    // No rules yet: leave shipping out rather than invent a number.
-    const shippingPaise =
-      items.length === 0 || threshold == null ? 0 : payable >= threshold ? 0 : rate;
+    /*
+     * ── SHIPPING IS THE SERVER'S ANSWER, OR IT IS NOTHING ────────────────────
+     * `null` means "not known yet", and that is deliberate.
+     *
+     * This used to fill the gap with `shippingRules.standardRatePaise` — a flat
+     * ₹60 — for every cart regardless of weight, slab or destination. That is a
+     * legacy fallback rate, not the weight-slab charge, so a ₹185 Kerala order
+     * displayed ₹60 and then corrected to ₹22.50 once the quote landed.
+     *
+     * Reimplementing the slab formula here would fix the number and create a
+     * second source of truth that can drift from pricing.service.ts. So the
+     * client computes NO shipping at all: it shows the server's figure when the
+     * quote still describes this cart, and a pending dash when it does not.
+     *
+     * The one exception is the free-shipping THRESHOLD, which is a comparison
+     * against the subtotal rather than a weight calculation — the client already
+     * knows the subtotal exactly, so it can say FREE without guessing.
+     */
+    const qualifiesFree = threshold != null && threshold > 0 && payable >= threshold;
+    const shippingPaise = items.length === 0 ? 0 : qualifiesFree ? 0 : null;
 
     return {
       subtotalPaise: localSubtotalPaise,
       discountPaise,
       shippingPaise,
-      totalPaise: payable + shippingPaise,
+      // Unknown shipping means an unknown total; a total that silently omits
+      // shipping is just a different wrong number.
+      totalPaise: shippingPaise === null ? null : payable + shippingPaise,
       amountToFreeShippingPaise:
         threshold == null ? null : Math.max(0, threshold - payable),
     };
@@ -353,8 +386,10 @@ export function CartProvider({ children }) {
 
     subtotalPaise: shown.subtotalPaise ?? 0,
     discountPaise: shown.discountPaise ?? 0,
-    shippingPaise: shown.shippingPaise ?? 0,
-    totalPaise: shown.totalPaise ?? localSubtotalPaise,
+    /** Paise, or NULL while a fresh quote is pending. Never a guessed number. */
+    shippingPaise: shown.shippingPaise ?? null,
+    /** Paise, or NULL while shipping is still unknown. */
+    totalPaise: shown.totalPaise ?? null,
     amountToFreeShippingPaise: shown.amountToFreeShippingPaise ?? null,
     /** True while the figures on screen are an estimate awaiting the server. */
     pricesPending: !quoteIsCurrent && items.length > 0,

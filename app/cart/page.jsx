@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
 import { PLACEHOLDER_IMAGE } from "@/app/products/adapters";
-import { formatInr } from "@/lib/api";
+import { formatInr, formatInrPending } from "@/lib/api";
 
 export default function CartPage() {
   const {
@@ -162,14 +162,16 @@ export default function CartPage() {
                   )}
                   <div className="flex justify-between">
                     <span className="text-white/40">Shipping</span>
+                    {/* null = the server has not priced this cart yet. A dash is
+                        honest; a stand-in figure would not be. */}
                     <span className={shipping === 0 ? "text-primary" : "text-white"}>
-                      {shipping === 0 ? "FREE" : formatInr(shipping)}
+                      {shipping === null ? "—" : shipping === 0 ? "FREE" : formatInr(shipping)}
                     </span>
                   </div>
                   <div className="h-px bg-white/6" />
                   <div className="flex justify-between items-baseline">
                     <span className="text-white/60 font-semibold">Total</span>
-                    <span className="font-[Playfair_Display] text-[26px] text-white">{formatInr(total)}</span>
+                    <span className="font-[Playfair_Display] text-[26px] text-white">{formatInrPending(total)}</span>
                   </div>
                 </div>
 

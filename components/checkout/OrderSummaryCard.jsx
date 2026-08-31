@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { formatInr } from "@/lib/api";
+import { formatInr, formatInrPending } from "@/lib/api";
 import { CARD, EASE } from "./tokens";
 import { lineMax } from "@/lib/cartContext";
 
@@ -11,8 +11,9 @@ export default function OrderSummaryCard({
   issues = [],
   subtotalPaise = 0,
   discountPaise = 0,
-  shippingPaise = 0,
-  totalPaise = 0,
+  /** null while the server re-prices; 0 genuinely means free. */
+  shippingPaise = null,
+  totalPaise = null,
   amountToFreeShippingPaise,
   coupon,
   coupons = [],
@@ -319,7 +320,13 @@ export default function OrderSummaryCard({
                 </span>
               )}
             </span>
-            {stateSelected ? (
+            {shippingPaise === null && stateSelected ? (
+              /* The cart changed and the server has not re-priced it yet. The
+                 weight-slab charge is the server's to compute, so show a dash
+                 rather than a stand-in that would only be corrected a moment
+                 later — which is exactly what the flat legacy rate used to do. */
+              <span className="font-semibold text-white/40 tabular-nums">—</span>
+            ) : stateSelected ? (
               <span className={shippingPaise === 0 ? "font-bold text-primary uppercase" : "font-semibold text-white/80 tabular-nums"}>
                 {shippingPaise === 0 ? "FREE" : formatInr(shippingPaise)}
                 {/* Say WHY it is free when a coupon did it, not just that it is. */}
@@ -371,7 +378,7 @@ export default function OrderSummaryCard({
             </div>
 
             <span className="shrink-0 font-[Playfair_Display] text-[28px] font-bold tracking-tight tabular-nums text-white">
-              {formatInr(totalPaise)}
+              {formatInrPending(totalPaise)}
             </span>
           </div>
         </div>

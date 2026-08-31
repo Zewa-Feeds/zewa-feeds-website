@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
-import { checkout as checkoutApi, settings as settingsApi, formatInr } from "@/lib/api";
+import { checkout as checkoutApi, settings as settingsApi, formatInr, formatInrPending } from "@/lib/api";
 import { pincodeMatchesState, likelyStateForPincode, INDIAN_STATES } from "@/lib/pincode";
 import { useAuth, signInHref } from "@/lib/authContext";
 import { account as accountApi } from "@/lib/api";
@@ -1360,7 +1360,7 @@ export default function CheckoutPage() {
               <div className="flex flex-col gap-3">
                 <button
                   type="submit"
-                  disabled={validating || isSubmittingPayment || !fulfillable}
+                  disabled={validating || isSubmittingPayment || !fulfillable || totalPaise === null}
                   aria-busy={validating || isSubmittingPayment}
                   className={`group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-primary py-4 text-[13px] font-bold uppercase tracking-[0.2em] text-[#00382d] font-[Montserrat] shadow-[0_4px_28px_rgba(68,229,194,0.35)] sm:py-5 ${EASE} hover:bg-primary/90 hover:shadow-[0_6px_34px_rgba(68,229,194,0.45)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:bg-primary ${FOCUS_RING}`}
                 >
@@ -1397,6 +1397,8 @@ export default function CheckoutPage() {
                       ? "Validating prices..."
                       : !fulfillable
                       ? "Fix cart issues to continue"
+                      : totalPaise === null
+                      ? "Calculating total…"
                       : `Pay Online · ${formatInr(totalPaise)}`}
                   </span>
                 </button>
@@ -1450,14 +1452,14 @@ export default function CheckoutPage() {
               Total Amount
             </span>
             <span className="truncate font-[Playfair_Display] text-[20px] font-bold tabular-nums text-white">
-              {formatInr(totalPaise)}
+              {formatInrPending(totalPaise)}
             </span>
           </div>
 
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={validating || isSubmittingPayment || !fulfillable}
+            disabled={validating || isSubmittingPayment || !fulfillable || totalPaise === null}
             aria-busy={validating || isSubmittingPayment}
             className={`flex shrink-0 items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-[#00382d] font-[Montserrat] ${EASE} hover:bg-primary/90 active:scale-[0.98] disabled:opacity-40 ${FOCUS_RING}`}
           >
