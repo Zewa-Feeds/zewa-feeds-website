@@ -42,7 +42,7 @@ import { CartProvider, useCart } from "./cartContext";
 const STANDARD_RATE_PAISE = 6000;
 
 /** A quote as the backend returns it, with the server's weight-slab shipping. */
-function quote({ unitPricePaise = 18500, qty = 1, shippingPaise = 2250 } = {}) {
+function quote({ unitPricePaise = 18500, qty = 1, shippingPaise = 4500 } = {}) {
   const subtotalPaise = unitPricePaise * qty;
   return {
     lines: [{
@@ -62,7 +62,7 @@ function quote({ unitPricePaise = 18500, qty = 1, shippingPaise = 2250 } = {}) {
 
 const wrapper = ({ children }) => <CartProvider>{children}</CartProvider>;
 
-async function seed({ qty = 1, unitPricePaise = 18500, shippingPaise = 2250, state = "Kerala" } = {}) {
+async function seed({ qty = 1, unitPricePaise = 18500, shippingPaise = 4500, state = "Kerala" } = {}) {
   validate.mockResolvedValue(quote({ qty, unitPricePaise, shippingPaise }));
   const { result } = renderHook(() => useCart(), { wrapper });
   await act(async () => {
@@ -76,21 +76,21 @@ beforeEach(() => { validate.mockReset(); localStorage.clear(); });
 afterEach(() => { vi.clearAllMocks(); });
 
 describe("the shipping figure the cart reports", () => {
-  it("is the server's weight-slab amount — ₹22.50 for 1 × 45g to Kerala", async () => {
-    const result = await seed({ shippingPaise: 2250 });
-    await waitFor(() => expect(result.current.shippingPaise).toBe(2250));
-    expect(result.current.totalPaise).toBe(18500 + 2250);
+  it("is the server's weight-slab amount — ₹45 for 1 × 45g (1 slab) to Kerala", async () => {
+    const result = await seed({ shippingPaise: 4500 });
+    await waitFor(() => expect(result.current.shippingPaise).toBe(4500));
+    expect(result.current.totalPaise).toBe(18500 + 4500);
   });
 
-  it("is ₹45 for 10 × 45g to Kerala, exactly as the server priced it", async () => {
-    // 450g + 100g = 550g -> 1000g slab -> 1.0 × ₹45
-    const result = await seed({ qty: 10, unitPricePaise: 4000, shippingPaise: 4500 });
-    await waitFor(() => expect(result.current.shippingPaise).toBe(4500));
+  it("is ₹90 for 10 × 45g (2 slabs) to Kerala, exactly as the server priced it", async () => {
+    // 450g + 100g = 550g -> 2 slabs (1000g) -> 2 × ₹45 = ₹90
+    const result = await seed({ qty: 10, unitPricePaise: 4000, shippingPaise: 9000 });
+    await waitFor(() => expect(result.current.shippingPaise).toBe(9000));
   });
 
   it("becomes NULL — never the flat rate — once the cart no longer matches the quote", async () => {
-    const result = await seed({ shippingPaise: 2250 });
-    await waitFor(() => expect(result.current.shippingPaise).toBe(2250));
+    const result = await seed({ shippingPaise: 4500 });
+    await waitFor(() => expect(result.current.shippingPaise).toBe(4500));
 
     validate.mockImplementation(() => new Promise(() => {})); // quote never arrives
     await act(async () => { result.current.setQty("F3-45G", 2); });
@@ -103,7 +103,7 @@ describe("the shipping figure the cart reports", () => {
   });
 
   it("never reports the legacy flat rate, in any state of the cart", async () => {
-    const result = await seed({ shippingPaise: 2250 });
+    const result = await seed({ shippingPaise: 4500 });
     validate.mockImplementation(() => new Promise(() => {}));
 
     for (const qty of [2, 3, 4]) {
@@ -115,7 +115,7 @@ describe("the shipping figure the cart reports", () => {
   it("still shows FREE immediately once the subtotal clears the threshold", async () => {
     // The threshold is a subtotal comparison, not a weight calculation, so the
     // client can answer it without guessing. ₹185 × 3 = ₹555 > ₹499.
-    const result = await seed({ shippingPaise: 2250 });
+    const result = await seed({ shippingPaise: 4500 });
     validate.mockImplementation(() => new Promise(() => {}));
 
     await act(async () => { result.current.setQty("F3-45G", 3); });
@@ -123,7 +123,7 @@ describe("the shipping figure the cart reports", () => {
   });
 
   it("keeps the subtotal exact while shipping is pending", async () => {
-    const result = await seed({ shippingPaise: 2250 });
+    const result = await seed({ shippingPaise: 4500 });
     validate.mockImplementation(() => new Promise(() => {}));
 
     await act(async () => { result.current.setQty("F3-45G", 2); });

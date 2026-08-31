@@ -143,8 +143,8 @@ describe("Address-Aware Shipping Checkout Flow", () => {
     validateMock.mockResolvedValue({
       lines: [],
       subtotalPaise: 30000,
-      shippingPaise: 2250, // ₹22.50
-      totalPaise: 32250,
+      shippingPaise: 4500, // ₹45.00
+      totalPaise: 34500,
       deliveryDays: 2,
       deliveryText: "Estimated delivery: 2 days*",
       deliveryNote: "*Rural areas may take 1 additional day.",
@@ -183,8 +183,8 @@ describe("Address-Aware Shipping Checkout Flow", () => {
     validateMock.mockResolvedValue({
       lines: [],
       subtotalPaise: 30000,
-      shippingPaise: 3500, // ₹35.00
-      totalPaise: 33500,
+      shippingPaise: 7000, // ₹70.00
+      totalPaise: 37000,
       deliveryDays: 4,
       deliveryText: "Estimated delivery: 4 days*",
       deliveryNote: "*Rural areas may take 1 additional day.",

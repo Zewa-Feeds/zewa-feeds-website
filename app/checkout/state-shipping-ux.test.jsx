@@ -20,8 +20,8 @@ describe("Weight-based Shipping & State Delivery Checkout UX", () => {
     ],
     subtotalPaise: 30000,
     discountPaise: 0,
-    shippingPaise: 3500, // ₹35 for Outside Kerala 0.5kg slab
-    totalPaise: 33500, // ₹335
+    shippingPaise: 7000, // ₹70 for Outside Kerala 0.5kg slab
+    totalPaise: 37000, // ₹370
     amountToFreeShippingPaise: 69900,
     coupon: null,
     couponInput: "",
@@ -53,8 +53,8 @@ describe("Weight-based Shipping & State Delivery Checkout UX", () => {
     render(<OrderSummaryCard {...baseProps} />);
 
     expect(screen.getByText("Shipping")).toBeTruthy();
-    expect(screen.getByText("₹35")).toBeTruthy();
-    expect(screen.getByText("₹335")).toBeTruthy();
+    expect(screen.getByText("₹70")).toBeTruthy();
+    expect(screen.getByText("₹370")).toBeTruthy();
     expect(screen.getByText("Estimated delivery: 4 days*")).toBeTruthy();
     expect(screen.getByText("*Rural areas may take 1 additional day.")).toBeTruthy();
   });
@@ -64,8 +64,8 @@ describe("Weight-based Shipping & State Delivery Checkout UX", () => {
 
     expect(screen.getByText(/Updating…/)).toBeTruthy();
     // Existing values still remain visible to prevent layout shift
-    expect(screen.getByText("₹35")).toBeTruthy();
-    expect(screen.getByText("₹335")).toBeTruthy();
+    expect(screen.getByText("₹70")).toBeTruthy();
+    expect(screen.getByText("₹370")).toBeTruthy();
   });
 
   it("renders 'FREE' shipping when shippingPaise is 0", () => {
