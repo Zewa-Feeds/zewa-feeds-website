@@ -9,14 +9,11 @@ import { formatInr, formatInrPending } from "@/lib/api";
 
 export default function CartPage() {
   const {
-    items, subtotalPaise, discountPaise, shippingPaise, totalPaise,
+    items, subtotalPaise, discountPaise, totalPaise,
     amountToFreeShippingPaise, freeShippingThresholdPaise, totalItems, removeFromCart, setQty, clearCart,
   } = useCart();
 
-  // Shipping and totals are the server's — the free-shipping threshold lives in
-  // CMS settings (§13), so hardcoding it here would drift.
-  const shipping = shippingPaise;
-  const total = totalPaise;
+  const total = totalPaise > 0 ? totalPaise : Math.max(0, subtotalPaise - discountPaise);
 
   return (
     <>
@@ -160,14 +157,6 @@ export default function CartPage() {
                       <span className="font-semibold">- {formatInr(discountPaise)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span className="text-white/40">Shipping</span>
-                    {/* null = the server has not priced this cart yet. A dash is
-                        honest; a stand-in figure would not be. */}
-                    <span className={shipping === 0 ? "text-primary" : "text-white"}>
-                      {shipping === null ? "—" : shipping === 0 ? "FREE" : formatInr(shipping)}
-                    </span>
-                  </div>
                   <div className="h-px bg-white/6" />
                   <div className="flex justify-between items-baseline">
                     <span className="text-white/60 font-semibold">Total</span>
