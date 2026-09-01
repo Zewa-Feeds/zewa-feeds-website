@@ -69,11 +69,18 @@ describe("CartPage Dynamic Free Shipping Badge", () => {
     expect(screen.getByText("Free shipping above ₹499")).toBeTruthy();
   });
 
-  it("renders 'Free shipping on all orders' when threshold is 0", () => {
+  it("shows NO free-shipping badge when the threshold is 0", () => {
+    /*
+     * 0 means the threshold is DISABLED, not that everything ships free. This
+     * used to advertise "Free shipping on all orders" — which the storefront
+     * showed above a ₹150 shipping line once the threshold was switched off.
+     * Free shipping now comes only from the ZEWA1 first-order coupon.
+     */
     mockCartState.freeShippingThresholdPaise = 0;
     render(<CartPage />);
 
-    expect(screen.getByText("Free shipping on all orders")).toBeTruthy();
+    expect(screen.queryByText("Free shipping on all orders")).toBeNull();
+    expect(screen.queryByText(/Free shipping above/i)).toBeNull();
   });
 
   it("does not render a free shipping badge when threshold is null/unavailable", () => {

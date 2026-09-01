@@ -204,21 +204,25 @@ export default function OrderSummaryCard({
           })}
         </div>
 
-        {/* Free Shipping Progress Indicator */}
-        {amountToFreeShippingPaise !== null && amountToFreeShippingPaise !== undefined && (
+        {/*
+          Free shipping is announced only when a COUPON actually granted it.
+
+          This used to key off `amountToFreeShippingPaise === 0` and a spend
+          threshold. With the threshold disabled (0) the server returns
+          `max(0, 0 - payable)` — which is 0 — so the card cheerfully claimed
+          "You unlocked FREE Express Shipping!" directly above a ₹150 shipping
+          line. Free shipping now comes from ZEWA1 (first order only), and the
+          only trustworthy signal for it is the server saying a promotion waived
+          the charge.
+        */}
+        {freeShippingFromCoupon && (
           <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
-            {amountToFreeShippingPaise > 0 ? (
-              <p className="text-[11px] text-white/80 font-[Montserrat]">
-                Add <span className="font-bold text-primary">{formatInr(amountToFreeShippingPaise)}</span> more to unlock <span className="font-bold text-primary">FREE Shipping</span>!
-              </p>
-            ) : (
-              <p className="text-[11px] text-primary font-semibold font-[Montserrat] flex items-center gap-1.5">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>You unlocked FREE Express Shipping!</span>
-              </p>
-            )}
+            <p className="text-[11px] text-primary font-semibold font-[Montserrat] flex items-center gap-1.5">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Free shipping applied to your first order.</span>
+            </p>
           </div>
         )}
 
@@ -336,7 +340,10 @@ export default function OrderSummaryCard({
                   </span>
                 )}
               </span>
-            ) : amountToFreeShippingPaise === 0 ? (
+            ) : freeShippingFromCoupon ? (
+              /* Before a state is picked, only a coupon can justify saying FREE.
+                 This previously read `amountToFreeShippingPaise === 0`, which a
+                 disabled (0) threshold satisfies for every cart. */
               <span className="font-bold text-primary uppercase">FREE</span>
             ) : (
               <span className="text-[11.5px] text-white/40 italic font-normal">Select state</span>

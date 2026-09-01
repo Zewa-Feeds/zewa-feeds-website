@@ -178,11 +178,12 @@ export default function CartPage() {
                 <div className="pt-4 border-t border-white/6 flex flex-col gap-2.5">
                   {[
                     { text: "Secure checkout", svg: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /> },
-                    ...(freeShippingThresholdPaise !== null && freeShippingThresholdPaise !== undefined
+                    /* A threshold of 0 means free shipping is DISABLED, not that
+                       every order ships free — so the badge is shown only when a
+                       real threshold is configured. */
+                    ...(freeShippingThresholdPaise > 0
                       ? [{
-                          text: freeShippingThresholdPaise > 0
-                            ? `Free shipping above ${formatInr(freeShippingThresholdPaise)}`
-                            : "Free shipping on all orders",
+                          text: `Free shipping above ${formatInr(freeShippingThresholdPaise)}`,
                           svg: <path d="M1 3h15v11H1zM16 8h4l3 3v3h-7V8zM5.5 17a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM18.5 17a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />,
                         }]
                       : []),

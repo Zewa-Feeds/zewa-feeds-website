@@ -17,7 +17,7 @@ export default function CartDrawer() {
     couponCodes,
     removeCoupon,
     totalItems,
-    amountToFreeShippingPaise,
+    freeShippingFromCoupon,
     drawerOpen,
     setDrawerOpen,
     removeFromCart,
@@ -130,20 +130,18 @@ export default function CartDrawer() {
           </button>
         </div>
 
-        {/* Free Shipping Progress Indicator (if items in cart) */}
-        {items.length > 0 && amountToFreeShippingPaise !== null && amountToFreeShippingPaise !== undefined && (
+        {/*
+          Announced only when a coupon actually waived the charge — see the note
+          in OrderSummaryCard. A spend threshold of 0 means free shipping is
+          DISABLED, not that everyone has earned it.
+        */}
+        {items.length > 0 && freeShippingFromCoupon && (
           <div className="bg-[#091122] px-6 py-3 border-b border-white/6 flex items-center gap-3">
             <svg className="w-4 h-4 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             <p className="text-[11px] text-white/80 font-[Montserrat] leading-snug">
-              {amountToFreeShippingPaise > 0 ? (
-                <>
-                  Add <strong className="text-primary font-bold">{formatInr(amountToFreeShippingPaise)}</strong> more to unlock <strong className="text-primary font-bold">FREE Express Delivery</strong>
-                </>
-              ) : (
-                <span className="text-primary font-semibold">Unlocked FREE Express Delivery across India!</span>
-              )}
+              <span className="text-primary font-semibold">Free shipping applied to your first order.</span>
             </p>
           </div>
         )}
