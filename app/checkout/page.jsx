@@ -4,7 +4,13 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
-import { checkout as checkoutApi, settings as settingsApi, formatInr, formatInrPending } from "@/lib/api";
+import {
+  checkout as checkoutApi,
+  settings as settingsApi,
+  offers as offersApi,
+  formatInr,
+  formatInrPending,
+} from "@/lib/api";
 import { pincodeMatchesState, likelyStateForPincode, INDIAN_STATES } from "@/lib/pincode";
 import { useAuth, signInHref } from "@/lib/authContext";
 import { account as accountApi } from "@/lib/api";
@@ -39,6 +45,8 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState("RAZORPAY");
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState("");
+  /** Confirmation of what the applied code was worth, from the server. */
+  const [couponSuccess, setCouponSuccess] = useState("");
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [step, setStep] = useState("form"); // form | paying | success | failed
@@ -117,6 +125,21 @@ export default function CheckoutPage() {
       /* ignore */
     }
   }, [form]);
+
+  /*
+   * Advertised offer codes. Purely informational — a shopper still has to apply
+   * one, and the server re-validates it. A failure here is silent: not knowing
+   * what is on offer must never block checking out.
+   */
+  const [availableOffers, setAvailableOffers] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    offersApi
+      .list()
+      .then((list) => { if (!cancelled) setAvailableOffers(list ?? []); })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, []);
 
   // Fetch payment config on mount
   useEffect(() => {
@@ -450,6 +473,7 @@ export default function CheckoutPage() {
   const submitCoupon = async (e) => {
     e.preventDefault();
     setCouponError("");
+    setCouponSuccess("");
     const code = couponInput.trim().toUpperCase();
     const result = await applyCoupon(code);
 
@@ -464,12 +488,32 @@ export default function CheckoutPage() {
     const problem = (result?.issues ?? []).find(
       (i) => i.sku === "__coupon__" && (i.couponCode === code || !i.couponCode),
     );
-    if (problem) setCouponError(problem.message);
-    else setCouponInput("");
+    if (problem) {
+      setCouponError(problem.message);
+      setCouponSuccess("");
+      return;
+    }
+
+    setCouponInput("");
+    /*
+     * Confirm what the code was actually worth, using the SERVER's figure for
+     * this promotion — "applied" alone leaves the shopper to hunt for the
+     * change in the totals. A free-shipping perk has no discount amount, so it
+     * says what it did instead of "you saved ₹0".
+     */
+    const applied = (result?.coupons ?? []).find((c) => c.code === code);
+    if (applied) {
+      setCouponSuccess(
+        applied.discountPaise > 0
+          ? `Coupon ${code} applied. You saved ${formatInr(applied.discountPaise)}.`
+          : `Coupon ${code} applied. ${applied.discountLabel}.`,
+      );
+    }
   };
 
   const dropCoupon = async (code) => {
     setCouponError("");
+    setCouponSuccess("");
     await removeCoupon(code);
   };
 
@@ -1419,9 +1463,12 @@ export default function CheckoutPage() {
                 coupon={coupon}
                 coupons={coupons}
                 freeShippingFromCoupon={freeShippingFromCoupon}
+                availableOffers={availableOffers}
+                appliedCodes={(coupons ?? []).map((c) => c.code)}
                 couponInput={couponInput}
                 onCouponInputChange={setCouponInput}
                 couponError={couponError}
+                couponSuccess={couponSuccess}
                 onSubmitCoupon={submitCoupon}
                 onRemoveCoupon={dropCoupon}
                 paymentMethod={paymentMethod}

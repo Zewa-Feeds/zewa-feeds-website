@@ -18,9 +18,14 @@ export default function OrderSummaryCard({
   coupon,
   coupons = [],
   freeShippingFromCoupon = false,
+  /** Publicly advertised codes, from the server's opt-in list. */
+  availableOffers = [],
+  /** Codes the server has already applied, so they are not offered again. */
+  appliedCodes = [],
   couponInput,
   onCouponInputChange,
   couponError,
+  couponSuccess,
   onSubmitCoupon,
   onRemoveCoupon,
   paymentMethod,
@@ -245,6 +250,52 @@ export default function OrderSummaryCard({
               {couponApplying ? "Applying..." : "Apply"}
             </button>
           </div>
+
+          {/*
+            Offers the shop is advertising, straight from the server's opt-in
+            list. A shopper cannot use a code they have never heard of, and
+            listing them here beats hoping they saw an Instagram story. Private
+            referral and influencer codes are excluded server-side, so nothing
+            personal is ever published by this panel.
+          */}
+          {availableOffers.length > 0 && !couponApplying && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+              <span className="text-[10.5px] uppercase tracking-wider text-white/35 font-[Montserrat]">
+                Available:
+              </span>
+              {availableOffers.map((offer) => {
+                const alreadyOn = appliedCodes.includes(offer.code);
+                return (
+                  <button
+                    key={offer.code}
+                    type="button"
+                    disabled={alreadyOn}
+                    onClick={() => onCouponInputChange(offer.code)}
+                    title={
+                      offer.minOrderPaise > 0
+                        ? `${offer.discountLabel} on orders over ${formatInr(offer.minOrderPaise)}`
+                        : offer.discountLabel
+                    }
+                    className="rounded-lg border border-primary/25 bg-primary/[0.07] px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-primary/90 font-[Montserrat] transition-all hover:bg-primary/15 hover:border-primary/50 disabled:opacity-40 disabled:cursor-default"
+                  >
+                    {offer.code}
+                    <span className="ml-1 font-normal normal-case tracking-normal text-primary/60">
+                      {offer.discountLabel}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {couponSuccess && !couponError && (
+            <p className="text-[11px] text-primary font-[Montserrat] flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>{couponSuccess}</span>
+            </p>
+          )}
 
           {couponError && (
             <p className="text-[11px] text-red-400 font-[Montserrat] flex items-center gap-1">
