@@ -392,7 +392,12 @@ function ProductCard({ p }) {
       <div className="px-5 pb-5">
         {p.price ? (
           <>
-            <div className="flex items-baseline gap-2 mt-3">
+            {p.packLabel && (
+              <span className="text-[10px] font-bold text-white/40 tracking-[0.1em] font-[Montserrat] uppercase">
+                {p.packLabel}
+              </span>
+            )}
+            <div className="flex items-baseline gap-2 mt-1">
               <span className="font-[Playfair_Display] text-[24px] text-white">
                 ₹{p.price.toLocaleString("en-IN")}
               </span>
