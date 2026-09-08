@@ -88,6 +88,24 @@ export default function OrderSummaryCard({
         </button>
       </div>
 
+      {/*
+        MOBILE-ONLY copy of the advertised offers, OUTSIDE the accordion.
+
+        Everything below is collapsed by default on a phone, and the sticky pay
+        bar means a shopper can check out without ever opening it — so an offer
+        living inside the accordion was one a customer could never see. This
+        copy sits above the fold on mobile regardless of the toggle; the one
+        inside is desktop-only, so exactly one renders at any width.
+      */}
+      <div className="lg:hidden pt-4">
+        <AvailableOffers
+          offers={availableOffers}
+          appliedCodes={appliedCodes}
+          onSelect={onCouponInputChange}
+          disabled={couponApplying}
+        />
+      </div>
+
       {/* Main Content Area (Always visible on LG+, collapsible on Mobile) */}
       <div className={`flex flex-col gap-6 pt-5 ${isMobileOpen ? "block" : "hidden lg:flex"}`}>
         {/* Line Items List */}
@@ -258,12 +276,14 @@ export default function OrderSummaryCard({
             in front of them to confirm with Apply. The cart page shares this
             same list but applies on tap — see components/AvailableOffers.jsx.
           */}
-          <AvailableOffers
-            offers={availableOffers}
-            appliedCodes={appliedCodes}
-            onSelect={onCouponInputChange}
-            disabled={couponApplying}
-          />
+          <div className="hidden lg:block">
+            <AvailableOffers
+              offers={availableOffers}
+              appliedCodes={appliedCodes}
+              onSelect={onCouponInputChange}
+              disabled={couponApplying}
+            />
+          </div>
 
           {couponSuccess && !couponError && (
             <p className="text-[11px] text-primary font-[Montserrat] flex items-center gap-1">
