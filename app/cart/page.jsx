@@ -1,19 +1,119 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CartCouponPanel from "@/components/CartCouponPanel";
 import { useCart } from "@/lib/cartContext";
 import { PLACEHOLDER_IMAGE } from "@/app/products/adapters";
-import { formatInr, formatInrPending } from "@/lib/api";
+import { formatInr, formatInrPending, offers as offersApi } from "@/lib/api";
 
 export default function CartPage() {
   const {
     items, subtotalPaise, discountPaise, totalPaise,
     amountToFreeShippingPaise, freeShippingThresholdPaise, totalItems, removeFromCart, setQty, clearCart,
+    /*
+     * Defaulted because the cart page renders from whatever the provider gives
+     * it, and a caller that predates coupons (or a test double) supplies
+     * neither list. Reading `.map` off undefined here would take down the whole
+     * cart over a promotion panel.
+     */
+    coupons = [], couponCodes = [], applyCoupon, removeCoupon,
   } = useCart();
 
   const total = totalPaise > 0 ? totalPaise : Math.max(0, subtotalPaise - discountPaise);
+
+  /*
+   * Advertised codes, from the server's opt-in list. Purely informational: the
+   * shopper still applies one and the server re-validates it. A failure here is
+   * silent — not knowing what is on offer must never break the cart.
+   */
+  const [availableOffers, setAvailableOffers] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    offersApi
+      .list()
+      .then((list) => { if (!cancelled) setAvailableOffers(list ?? []); })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
+  }, []);
+
+  const [couponInput, setCouponInput] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [couponSuccess, setCouponSuccess] = useState("");
+  const [couponApplying, setCouponApplying] = useState(false);
+
+  /**
+   * Apply one code and report what the server made of it.
+   *
+   * Failure messages are the server's, verbatim — the storefront never decides
+   * why a coupon was refused, only where to show the reason. The final `else`
+   * matters: `applyCoupon` resolves to null when the network is down, and
+   * without it a dead connection would silently clear the input as if the code
+   * had worked.
+   */
+  const submitCoupon = async (rawCode) => {
+    const code = String(rawCode || "").trim().toUpperCase();
+    if (!code || couponApplying) return;
+
+    setCouponError("");
+    setCouponSuccess("");
+    setCouponApplying(true);
+    try {
+      const result = await applyCoupon?.(code);
+
+      // The problem for THIS code — with stacking there can be several, and
+      // another coupon's message under the input would be actively misleading.
+      const problem = (result?.issues ?? []).find(
+        (i) => i.sku === "__coupon__" && (i.couponCode === code || !i.couponCode),
+      );
+      if (problem) {
+        setCouponError(problem.message);
+        return;
+      }
+
+      const applied = (result?.coupons ?? []).find((c) => c.code === code);
+      if (applied) {
+        setCouponInput("");
+        setCouponSuccess(
+          applied.discountPaise > 0
+            ? `Coupon ${code} applied. You saved ${formatInr(applied.discountPaise)}.`
+            : `Coupon ${code} applied. ${applied.discountLabel}.`,
+        );
+      } else {
+        setCouponError("Could not apply that code just now. Please try again.");
+      }
+    } finally {
+      setCouponApplying(false);
+    }
+  };
+
+  const dropCoupon = async (code) => {
+    setCouponError("");
+    setCouponSuccess("");
+    await removeCoupon?.(code);
+  };
+
+  /*
+   * Declared once, mounted twice at different breakpoints (see below). All the
+   * state it reads lives here in the page, so the two mounts stay in lockstep
+   * and only the visible one is ever interactive.
+   */
+  const couponPanel = (
+    <CartCouponPanel
+      couponInput={couponInput}
+      onCouponInputChange={setCouponInput}
+      onSubmit={submitCoupon}
+      availableOffers={availableOffers}
+      appliedCodes={couponCodes}
+      coupons={coupons}
+      onRemoveCoupon={removeCoupon ? dropCoupon : undefined}
+      applying={couponApplying}
+      error={couponError}
+      success={couponSuccess}
+    />
+  );
 
   return (
     <>
@@ -59,6 +159,21 @@ export default function CartPage() {
 
               {/* Items list */}
               <div className="lg:col-span-2 flex flex-col gap-4">
+                {/*
+                  MOBILE mount of the coupon panel.
+
+                  On a phone the Order Summary sits below every line in the
+                  cart, so the offers inside it were only reachable by scrolling
+                  past the whole order — a shopper never learned the shop ran
+                  promotions at all. Putting the panel above the items surfaces
+                  them immediately, and keeps the code entry, the offer list and
+                  the resulting message together rather than splitting the
+                  action from its feedback.
+                */}
+                <div className="lg:hidden rounded-2xl bg-white/3 border border-white/6 p-4">
+                  {couponPanel}
+                </div>
+
                 {/* Free shipping notice */}
                 {amountToFreeShippingPaise > 0 && (
                   <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/8 border border-primary/20">
@@ -145,6 +260,14 @@ export default function CartPage() {
               {/* Order summary */}
               <div className="lg:sticky lg:top-28 rounded-2xl bg-white/3 border border-white/6 p-6 flex flex-col gap-5">
                 <h2 className="font-[Playfair_Display] text-[20px] text-white">Order Summary</h2>
+
+                {/*
+                  DESKTOP mount. Coupons sit above the totals so applying one
+                  visibly moves the numbers underneath it. On mobile this is
+                  hidden and the copy above the item list is shown instead —
+                  see the note there.
+                */}
+                <div className="hidden lg:block">{couponPanel}</div>
 
                 <div className="flex flex-col gap-3 text-[13px] font-[Montserrat]">
                   <div className="flex justify-between">
