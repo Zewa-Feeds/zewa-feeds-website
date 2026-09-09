@@ -107,6 +107,12 @@ function buildCategories(categories, products) {
   return sortCategories(list);
 }
 
+/** "20g Bottle" -> "20g", "1kg Pouch" -> "1kg" — the container word adds noise, the size doesn't. */
+function sizeOnly(packLabel) {
+  if (!packLabel) return null;
+  return packLabel.replace(/\s*(bottle|pouch|jar|box|pack)\s*$/i, "").trim() || null;
+}
+
 function ProductCard({ p }) {
   const gallery = p.gallery || [p.image];
   const [imgIdx, setImgIdx] = useState(0);
@@ -392,16 +398,16 @@ function ProductCard({ p }) {
       <div className="px-5 pb-5">
         {p.price ? (
           <>
-            {p.packLabel && (
-              <span className="text-[10px] font-bold text-white/40 tracking-[0.1em] font-[Montserrat] uppercase">
-                {p.packLabel}
-              </span>
-            )}
-            <div className="flex items-baseline gap-2 mt-1">
+            <div className="flex items-baseline gap-2 mt-3">
               <span className="font-[Playfair_Display] text-[24px] text-white">
                 ₹{p.price.toLocaleString("en-IN")}
               </span>
               <span className="text-[11px] text-white/20 line-through font-[Montserrat]">{p.mrp}</span>
+              {sizeOnly(p.packLabel) && (
+                <span className="ml-auto rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary font-[Montserrat] uppercase tracking-wide">
+                  {sizeOnly(p.packLabel)}
+                </span>
+              )}
             </div>
             <QtyButton product={p} />
           </>
