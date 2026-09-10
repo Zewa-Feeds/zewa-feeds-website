@@ -404,7 +404,7 @@ function ProductCard({ p }) {
               </span>
               <span className="text-[11px] text-white/20 line-through font-[Montserrat]">{p.mrp}</span>
               {sizeOnly(p.packLabel) && (
-                <span className="ml-auto rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary font-[Montserrat] uppercase tracking-wide">
+                <span className="ml-auto rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary font-[Montserrat] tracking-wide">
                   {sizeOnly(p.packLabel)}
                 </span>
               )}
