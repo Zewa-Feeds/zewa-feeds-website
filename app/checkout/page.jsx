@@ -20,6 +20,8 @@ import CheckoutBreadcrumbs from "@/components/checkout/CheckoutBreadcrumbs";
 import { FloatingInput, FloatingSelect } from "@/components/checkout/FloatingInput";
 import PaymentMethodSelector from "@/components/checkout/PaymentMethodSelector";
 import OrderSummaryCard from "@/components/checkout/OrderSummaryCard";
+import CoinsPanel from "@/components/checkout/CoinsPanel";
+import { useCoins } from "@/lib/useCoins";
 import { CARD, CARD_PAD, CARD_HEADER, STEP_CHIP, SECTION_TITLE, EASE, FOCUS_RING } from "@/components/checkout/tokens";
 
 // Shared with the account address book so the two forms cannot drift apart.
@@ -72,6 +74,18 @@ export default function CheckoutPage() {
    * the account already holds.
    */
   const { customer, isAuthenticated, isLoading: authLoading } = useAuth();
+
+  /*
+   * Zewa Coins (ZSOP004 §10.1).
+   *
+   * The hook owns the reservation lifecycle and fails invisibly: if loyalty is
+   * unavailable, `quote` is null, the panel renders nothing, and checkout
+   * proceeds at full price. Nothing below needs a guard for that case.
+   */
+  // `couponCodes` is passed so a coupon carrying `blocksCoins` hides the box and
+  // refuses the hold (ZSOP004 §4) — and so applying or removing a code re-quotes
+  // exactly as a quantity change does.
+  const coins = useCoins({ items, isAuthenticated, couponCodes });
   /** True once a prefill has run, so it cannot fight the customer's own edits. */
   const prefilled = useRef(false);
 
@@ -629,6 +643,9 @@ export default function CheckoutPage() {
           // Every code the server accepted. It re-evaluates eligibility and
           // stacking from scratch — this is a request, not an instruction.
           couponCodes: couponCodes,
+          // The KEY, not an amount — the server holds the authoritative
+          // reservation and decides how many coins it is worth (§4.3).
+          coinCartKey: coins.applied > 0 ? coins.cartKey : undefined,
           customerNote: form.notes.trim() || undefined,
           // Only meaningful for a newly typed address; one picked from the book
           // is already saved, and the server dedupes anyway.
@@ -1489,6 +1506,17 @@ export default function CheckoutPage() {
                 chargeableWeightKg={quote?.chargeableWeightKg}
                 setQty={setQty}
                 removeFromCart={removeFromCart}
+                coinsSlot={
+                  <CoinsPanel
+                    quote={coins.quote}
+                    applied={coins.applied}
+                    onApply={coins.apply}
+                    onRemove={coins.remove}
+                    busy={coins.busy}
+                    notice={coins.notice}
+                  />
+                }
+                coinDiscountPaise={coins.discountPaise}
               />
             </div>
           </div>
