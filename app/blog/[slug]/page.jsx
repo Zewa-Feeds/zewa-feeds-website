@@ -189,7 +189,7 @@ export default function ArticlePage() {
       <main className="bg-[#05070d] text-[#dde2f6] min-h-screen">
 
         {/* ── HERO ─────────────────────────────────────────────────── */}
-        <section className="relative flex flex-col overflow-hidden pt-20 min-h-[600px] sm:min-h-[580px]">
+        <section className="relative flex flex-col overflow-hidden pt-20 min-h-[600px] sm:min-h-[660px]">
           {/* Hero image */}
           <div className="absolute inset-0">
             <Image
@@ -219,7 +219,7 @@ export default function ArticlePage() {
           </div>
 
           {/* Title block */}
-          <div className="relative z-10 mt-auto w-full max-w-[860px] mx-auto px-6 sm:px-10 pt-24 pb-8 sm:pt-0 sm:pb-20">
+          <div className="relative z-10 mt-auto w-full max-w-[860px] mx-auto px-6 sm:px-10 pt-24 pb-8 sm:pt-32 sm:pb-12">
             {/* Tag + meta row */}
             <div className="flex flex-wrap items-center gap-3 mb-7">
               <span className="text-[9px] font-bold px-3 py-1.5 rounded-full tracking-[0.2em] font-[Montserrat] border backdrop-blur-sm"
