@@ -22,7 +22,7 @@ const QUOTE = {
 
 describe("§10.1 The box is hidden where the specification says hide it", () => {
   it("renders nothing when the server returns no quote", () => {
-    // Holdout, negative balance, kill switch off, or a loyalty error — all of
+    // Negative balance, kill switch off, or a loyalty error — all of
     // which the server reports as a null quote so there is no client branch to
     // get wrong.
     const { container } = render(<CoinsPanel quote={null} />);

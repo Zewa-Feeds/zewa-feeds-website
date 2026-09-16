@@ -22,10 +22,6 @@ import { account as accountApi } from "@/lib/api";
  *   `negative: true`; this screen shows the neutral line the specification
  *   dictates rather than a minus sign, "which reads as a bug".
  *
- *   Holdout customers see no coin surface at all (§13.5) — the API returns
- *   `holdout` and the page renders nothing coin-related, so the control group
- *   stays uncontaminated.
- *
  *   The vocabulary is fixed (§10.3): "Zewa Coins", and "unlock" — never
  *   cashback, wallet, points, rewards, credits, mature or vest.
  */
@@ -93,24 +89,6 @@ export default function CoinsPage() {
   }
 
   const loading = !balance && !loadError;
-
-  /*
-   * §13.5: holdout customers see "no coin surface anywhere". Rendering an empty
-   * coins page would still tell them the programme exists, so the whole screen
-   * becomes a plain not-available state.
-   */
-  if (balance?.holdout) {
-    return (
-      <AccountShell title="Zewa Coins" subtitle="Rewards on your orders.">
-        <AccountCard>
-          <EmptyState
-            title="Not available on your account"
-            body="Zewa Coins are not currently available on this account."
-          />
-        </AccountCard>
-      </AccountShell>
-    );
-  }
 
   return (
     <AccountShell

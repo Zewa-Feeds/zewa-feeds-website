@@ -41,8 +41,8 @@ export default function OrderSummaryCard({
   /**
    * The Zewa Coins control (ZSOP004 §10.1), passed in rather than imported so
    * this card stays presentational and the reservation lifecycle lives with the
-   * checkout page. Null when the box must not render — holdout, negative
-   * balance, programme off, or a loyalty error.
+   * checkout page. Null when the box must not render — negative balance,
+   * programme off, or a loyalty error.
    */
   coinsSlot = null,
   /** Paise taken off by coins, shown as its own line (§10.2). */

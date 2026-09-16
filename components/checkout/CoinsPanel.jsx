@@ -26,8 +26,8 @@ import { useEffect, useRef, useState } from "react";
  *   this renders nothing and checkout continues at full price. It must never
  *   block the payment step or show an error on the payment path (§8.1 #11).
  *
- *   NEVER SHOWN for holdout or negative-balance customers — the server returns
- *   a null quote for both, so there is no client-side branch to get wrong.
+ *   NEVER SHOWN for negative-balance customers — the server returns a null
+ *   quote, so there is no client-side branch to get wrong.
  *
  * The parent owns the applied amount so the order summary and this panel cannot
  * disagree; this component is the control surface, not the source of truth.
