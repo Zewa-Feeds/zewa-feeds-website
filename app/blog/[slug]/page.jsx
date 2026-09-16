@@ -80,6 +80,38 @@ function renderBlock(block, i, tagColor) {
           {block.text}
         </h2>
       );
+    case "h3":
+      return (
+        <h3
+          key={i}
+          id={block.id}
+          className="font-[Playfair_Display] text-[17px] sm:text-[19px] text-white/85 leading-snug mt-9 mb-3 scroll-mt-28"
+        >
+          {block.text}
+        </h3>
+      );
+    case "figure":
+      // Inline article image. Unoptimised `sizes` would ship the full-width
+      // asset to phones, so the prose column width is declared explicitly.
+      return (
+        <figure key={i} className="my-10">
+          <div className="relative overflow-hidden rounded-2xl border border-white/8"
+            style={{ aspectRatio: block.aspect ?? "16 / 9" }}>
+            <Image
+              src={block.src}
+              alt={block.alt}
+              fill
+              sizes="(max-width: 900px) 100vw, 860px"
+              className="object-cover"
+            />
+          </div>
+          {block.caption && (
+            <figcaption className="mt-3 text-[11.5px] text-white/30 font-[Montserrat] leading-relaxed">
+              {block.caption}
+            </figcaption>
+          )}
+        </figure>
+      );
     case "p":
       return (
         <p key={i} className="text-[14.5px] text-white/55 font-[Montserrat] leading-[1.75] mb-5">
