@@ -130,8 +130,20 @@ export default function CoinsPanel({
   const typed = Number.parseInt(value, 10);
   const previewValid = Number.isFinite(typed) && typed > 0 && typed <= maxRedeemable;
 
+  /** True when this order cannot absorb the customer's whole balance. */
+  const capped = maxRedeemable < available;
+
   return (
     <form onSubmit={submit} className="flex flex-col gap-2">
+      {/*
+        TWO DIFFERENT NUMBERS, SAID SEPARATELY.
+
+        `available` is what the customer owns; `maxRedeemable` is what THIS order
+        can absorb. Collapsing them reads as "you only have 229 coins" to someone
+        holding 500, which is both wrong and alarming. The ceiling line is shown
+        only when it actually bites — when the order can take the whole balance,
+        a second number would invent a limit that is not there.
+      */}
       <label
         htmlFor={inputId}
         className="font-[Montserrat] text-[12.5px] text-white/70"
@@ -140,8 +152,17 @@ export default function CoinsPanel({
         <span className="font-semibold text-[#44e5c2]">
           {available} Zewa Coins ({rupeesFor(available)})
         </span>
-        . How many would you like to use?
+        {capped ? ". How many would you like to use?" : ". Use as many as you like on this order."}
       </label>
+
+      {capped && (
+        <p className="-mt-1 font-[Montserrat] text-[11.5px] text-white/50">
+          Maximum usable on this order:{" "}
+          <span className="font-semibold text-white/75">
+            {maxRedeemable} Coins ({rupeesFor(maxRedeemable)})
+          </span>
+        </p>
+      )}
 
       <div className="flex gap-2">
         <input
@@ -157,7 +178,11 @@ export default function CoinsPanel({
             setError("");
           }}
           disabled={busy}
-          aria-label={`Zewa Coins to use. You have ${available} coins, worth ${rupeesFor(available)}`}
+          aria-label={
+            capped
+              ? `Zewa Coins to use. You have ${available} coins, worth ${rupeesFor(available)}. Up to ${maxRedeemable} can be used on this order`
+              : `Zewa Coins to use. You have ${available} coins, worth ${rupeesFor(available)}`
+          }
           aria-invalid={error ? "true" : undefined}
           className="min-w-0 flex-1 rounded-lg border border-white/12 bg-[#060c17] px-3 py-2.5 font-[Montserrat] text-[13px] text-white outline-none transition placeholder:text-white/25 focus:border-[#44e5c2]/50 disabled:opacity-50"
         />
@@ -181,14 +206,14 @@ export default function CoinsPanel({
           disabled={busy}
           className="self-start font-[Montserrat] text-[11.5px] font-semibold text-white/55 underline-offset-2 transition hover:text-[#44e5c2] hover:underline disabled:opacity-40"
         >
-          Use all {maxRedeemable}
+          {capped ? `Use maximum ${maxRedeemable} Coins` : `Use all ${maxRedeemable} Coins`}
         </button>
       )}
 
       {/* Live conversion as they type (§10.1). */}
       {previewValid && !error && (
         <p className="font-[Montserrat] text-[11.5px] text-white/50">
-          Using {typed} = {rupeesFor(typed)} off
+          Using {typed} Coins = {rupeesFor(typed)} off
         </p>
       )}
 

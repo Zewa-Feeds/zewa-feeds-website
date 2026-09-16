@@ -43,9 +43,9 @@ describe("§10.1 Free entry, defaulting to empty", () => {
     expect(screen.getByLabelText(/Zewa Coins to use/i).value).toBe("");
   });
 
-  it("offers the maximum as a one-tap shortcut", () => {
+  it("offers the order maximum as a one-tap shortcut", () => {
     render(<CoinsPanel quote={QUOTE} />);
-    fireEvent.click(screen.getByRole("button", { name: /Use all 260/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Use maximum 260 Coins/i }));
     expect(screen.getByLabelText(/Zewa Coins to use/i).value).toBe("260");
   });
 
@@ -54,7 +54,7 @@ describe("§10.1 Free entry, defaulting to empty", () => {
     fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
       target: { value: "150" },
     });
-    expect(screen.getByText(/Using 150 = ₹150 off/i)).toBeDefined();
+    expect(screen.getByText(/Using 150 Coins = ₹150 off/i)).toBeDefined();
   });
 
   it("says unused coins stay in the account, so partial use feels normal", () => {
@@ -117,6 +117,48 @@ describe("§10.1 Validate on entry, with the reason", () => {
   });
 });
 
+describe("The balance and the order ceiling are two different numbers", () => {
+  it("names the balance AND the order maximum when the order caps redemption", () => {
+    // 340 owned, 260 usable here. Saying only "260" would read as "you have
+    // 260 coins" to someone holding 340.
+    render(<CoinsPanel quote={QUOTE} />);
+
+    expect(screen.getByText(/340 Zewa Coins \(₹340\)/i)).toBeDefined();
+    expect(screen.getByText(/Maximum usable on this order/i)).toBeDefined();
+    expect(screen.getByText(/260 Coins \(₹260\)/i)).toBeDefined();
+    expect(screen.getByRole("button", { name: /Use maximum 260 Coins/i })).toBeDefined();
+  });
+
+  it("invents no ceiling when the order can absorb the whole balance", () => {
+    // 340 owned, 340 usable — a "maximum" line here would imply a limit that
+    // does not exist.
+    render(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 340 }} />);
+
+    expect(screen.getByText(/340 Zewa Coins \(₹340\)/i)).toBeDefined();
+    expect(screen.queryByText(/Maximum usable on this order/i)).toBeNull();
+    expect(screen.getByRole("button", { name: /Use all 340 Coins/i })).toBeDefined();
+  });
+
+  it("tracks the ceiling when the cart changes it", () => {
+    // The maximum comes from the server quote; it must follow the cart.
+    const { rerender } = render(<CoinsPanel quote={QUOTE} />);
+    expect(screen.getByText(/260 Coins \(₹260\)/i)).toBeDefined();
+
+    rerender(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 100 }} />);
+    expect(screen.getByText(/100 Coins \(₹100\)/i)).toBeDefined();
+    expect(screen.getByRole("button", { name: /Use maximum 100 Coins/i })).toBeDefined();
+    // The balance is unchanged by a cart change.
+    expect(screen.getByText(/340 Zewa Coins \(₹340\)/i)).toBeDefined();
+  });
+
+  it("still applies nothing until the customer acts", () => {
+    const onApply = vi.fn();
+    render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
+    expect(screen.getByLabelText(/Zewa Coins to use/i).value).toBe("");
+    expect(onApply).not.toHaveBeenCalled();
+  });
+});
+
 describe("§10.2 Below the minimum balance", () => {
   it("tells the customer how far off they are", () => {
     // "Earn 10 coins to start using them. You have 6."
@@ -157,11 +199,17 @@ describe("Applied state", () => {
 });
 
 describe("Accessibility (§10.1)", () => {
-  it("labels the input with both the coin count and the rupee value", () => {
+  it("labels the input with the balance and the order ceiling", () => {
     render(<CoinsPanel quote={QUOTE} />);
     expect(
-      screen.getByLabelText(/You have 340 coins, worth ₹340/i),
+      screen.getByLabelText(/You have 340 coins, worth ₹340\. Up to 260 can be used on this order/i),
     ).toBeDefined();
+  });
+
+  it("omits the ceiling from the label when there is none", () => {
+    render(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 340 }} />);
+    const input = screen.getByLabelText(/You have 340 coins, worth ₹340/i);
+    expect(input.getAttribute("aria-label")).not.toMatch(/can be used on this order/i);
   });
 
   it("marks the field invalid when entry is rejected", () => {
