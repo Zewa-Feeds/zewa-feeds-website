@@ -616,6 +616,19 @@ export default function CheckoutPage() {
 
     try {
       const fresh = await validate({ state: form.state, email: form.email });
+
+      /*
+       * Send only what THIS quote accepted.
+       *
+       * `couponCodes` in scope is the value from this render, and validate()
+       * drops codes the server no longer recognises — but that state update is
+       * not visible here. Reading the codes off the fresh quote instead means a
+       * stale code cannot ride along into a 409 that blocks the order.
+       */
+      const codesToSend = fresh
+        ? (fresh.coupons ?? []).map((c) => c.code)
+        : couponCodes;
+
       const blocking = (fresh?.issues ?? []).filter((i) => i.sku !== "__coupon__");
       if (blocking.length > 0) {
         unlockScroll();
@@ -639,9 +652,10 @@ export default function CheckoutPage() {
             pincode: form.pincode.trim(),
           },
           paymentMethod: "RAZORPAY",
-          // Every code the server accepted. It re-evaluates eligibility and
-          // stacking from scratch — this is a request, not an instruction.
-          couponCodes: couponCodes,
+          // Every code the server accepted on the quote just above. It
+          // re-evaluates eligibility and stacking from scratch — this is a
+          // request, not an instruction.
+          couponCodes: codesToSend,
           customerNote: form.notes.trim() || undefined,
           // Only meaningful for a newly typed address; one picked from the book
           // is already saved, and the server dedupes anyway.

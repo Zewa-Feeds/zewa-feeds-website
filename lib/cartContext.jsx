@@ -245,6 +245,29 @@ export function CartProvider({ children }) {
         setQuote(result);
         setQuoteSignature(pricedSignature);
         dispatch({ type: "RECONCILE", lines: result.lines });
+
+        /*
+         * Drop codes the server does not recognise.
+         *
+         * Applied codes persist in localStorage, so a code that stops existing
+         * — deleted, renamed, or issued on a different environment — used to
+         * survive forever in a returning shopper's cart. Every re-price then
+         * reported it, and checkout refused the order outright, because asking
+         * for a coupon the server rejects is a 409 there. The shopper had no
+         * way to clear it: there is no Remove control for a coupon that was
+         * never applied.
+         *
+         * Only COUPON_NOT_FOUND is pruned. A code refused for a reason that can
+         * change — minimum spend, first-order-only, a stacking conflict — is
+         * kept, so it starts working when the cart qualifies.
+         */
+        const unknown = (result?.issues ?? [])
+          .filter((i) => i.sku === "__coupon__" && i.code === "COUPON_NOT_FOUND" && i.couponCode)
+          .map((i) => i.couponCode);
+        if (unknown.length > 0) {
+          setCouponCodes((prev) => prev.filter((c) => !unknown.includes(c)));
+        }
+
         return result;
       } catch {
         // Offline or server down: keep showing local estimates rather than
