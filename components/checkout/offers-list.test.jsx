@@ -7,7 +7,7 @@
  * that the shop offered them something it would not honour.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import OrderSummaryCard from "./OrderSummaryCard";
 
 vi.mock("next/image", () => ({
@@ -64,11 +64,18 @@ describe("available offers", () => {
     expect(screen.queryByText(/^Min /)).toBeNull();
   });
 
-  it("fills the input when a code is tapped", () => {
+  it("applies the code on tap, without a second confirm step", async () => {
+    const onSubmitCoupon = vi.fn();
     const onChange = vi.fn();
-    render(<OrderSummaryCard {...base} availableOffers={OFFERS} onCouponInputChange={onChange} />);
+    render(
+      <OrderSummaryCard {...base} availableOffers={OFFERS}
+        onCouponInputChange={onChange} onSubmitCoupon={onSubmitCoupon} />,
+    );
     fireEvent.click(offerButton("ZEWA1"));
-    expect(onChange).toHaveBeenCalledWith("ZEWA1");
+    // The code goes straight to the apply handler; nothing is typed into the
+    // input for the shopper to confirm.
+    await waitFor(() => expect(onSubmitCoupon).toHaveBeenCalledWith("ZEWA1"));
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("marks an already-applied code as applied and stops re-applying it", () => {
