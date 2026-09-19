@@ -398,4 +398,122 @@ describe("Checkout Payment UX & Loading State", () => {
     expect(screen.getByText("27ZFO004")).toBeDefined();
     vi.useRealTimers();
   });
+
+  /*
+   * Retry after dismissal — the bug this suite was extended for.
+   *
+   * The browser holds ONE idempotency key for the whole checkout session, so
+   * the second Pay Online replays the same order server-side. The replay used
+   * to omit publicKey/amountPaise, the widget could not be constructed, and the
+   * storefront showed PAYMENT FAILED for what was only a closed popup.
+   */
+  it("reopens Razorpay when the customer pays again after dismissing", async () => {
+    const replay = {
+      orderNo: "27ZFO010",
+      payment: {
+        required: true,
+        publicKey: "rzp_test_123",
+        amountPaise: 6450,
+        gatewayOrderId: "order_rzp_same",
+        simulated: false,
+      },
+    };
+    placeMock.mockResolvedValue(replay);
+    statusMock.mockResolvedValue({ paymentStatus: "UNPAID", status: "PENDING" });
+
+    let container;
+    await act(async () => {
+      container = render(<CheckoutPage />).container;
+    });
+    fillValidForm(container);
+
+    // Dismiss on every open.
+    window.Razorpay = vi.fn().mockImplementation((opts) => ({
+      open: () => opts.modal.ondismiss(),
+      on: vi.fn(),
+    }));
+
+    const pay = () => screen.getAllByRole("button", { name: /Pay Online/i })[0];
+
+    await act(async () => { fireEvent.click(pay()); });
+    await waitFor(() => expect(window.Razorpay).toHaveBeenCalledTimes(1));
+    // Back on the form, not the failure screen.
+    await waitFor(() => expect(screen.queryByText(/Payment Failed/i)).toBeNull());
+    expect(screen.getByRole("heading", { name: /Complete Your Order/i })).toBeDefined();
+
+    // Second attempt opens again.
+    await act(async () => { fireEvent.click(pay()); });
+    await waitFor(() => expect(window.Razorpay).toHaveBeenCalledTimes(2));
+    expect(screen.queryByText(/Payment Failed/i)).toBeNull();
+
+    // Third, to prove it is not a one-shot recovery.
+    await act(async () => { fireEvent.click(pay()); });
+    await waitFor(() => expect(window.Razorpay).toHaveBeenCalledTimes(3));
+    expect(screen.queryByText(/Payment Failed/i)).toBeNull();
+    expect(screen.getByRole("heading", { name: /Complete Your Order/i })).toBeDefined();
+  });
+
+  it("hands Razorpay the exact paise total, never a rounded rupee", async () => {
+    placeMock.mockResolvedValue({
+      orderNo: "27ZFO011",
+      // ₹64.50 — the amount from the reported mismatch.
+      payment: {
+        required: true,
+        publicKey: "rzp_test_123",
+        amountPaise: 6450,
+        gatewayOrderId: "order_rzp_exact",
+        simulated: false,
+      },
+    });
+
+    let container;
+    await act(async () => {
+      container = render(<CheckoutPage />).container;
+    });
+    fillValidForm(container);
+
+    let opts;
+    window.Razorpay = vi.fn().mockImplementation((o) => {
+      opts = o;
+      return { open: vi.fn(), on: vi.fn() };
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getAllByRole("button", { name: /Pay Online/i })[0]);
+    });
+
+    await waitFor(() => expect(opts).toBeDefined());
+    expect(opts.amount).toBe(6450); // not 6500
+    expect(opts.order_id).toBe("order_rzp_exact");
+  });
+
+  it("does not place two orders when Pay Online is double-clicked", async () => {
+    let resolvePlace;
+    placeMock.mockReturnValue(new Promise((res) => { resolvePlace = res; }));
+
+    let container;
+    await act(async () => {
+      container = render(<CheckoutPage />).container;
+    });
+    fillValidForm(container);
+
+    const payButton = screen.getAllByRole("button", { name: /Pay Online/i })[0];
+    // Both clicks land before any re-render, which is what defeats a
+    // state-only guard.
+    await act(async () => {
+      fireEvent.click(payButton);
+      fireEvent.click(payButton);
+      fireEvent.click(payButton);
+    });
+
+    expect(placeMock).toHaveBeenCalledTimes(1);
+
+    window.Razorpay = vi.fn().mockImplementation(() => ({ open: vi.fn(), on: vi.fn() }));
+    await act(async () => {
+      resolvePlace({
+        orderNo: "27ZFO012",
+        payment: { required: true, publicKey: "k", amountPaise: 100, gatewayOrderId: "g" },
+      });
+    });
+  });
 });

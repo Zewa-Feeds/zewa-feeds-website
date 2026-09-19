@@ -116,6 +116,17 @@ export default function CheckoutPage() {
   );
 
   /*
+   * Synchronous re-entry guard for the pay button.
+   *
+   * `isSubmittingPayment` is state, so two clicks dispatched in the same tick
+   * both read the pre-render value and both proceed. A ref flips immediately,
+   * so the second click returns before it can fire a duplicate order request.
+   * The idempotency key makes a duplicate harmless server-side; this stops it
+   * being sent at all.
+   */
+  const submitting = useRef(false);
+
+  /*
    * Current form values, readable from async callbacks.
    *
    * The pincode lookup resolves a few hundred ms after it is fired, by which
@@ -619,7 +630,8 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e) => {
     if (e?.preventDefault) e.preventDefault();
-    if (isSubmittingPayment || validating) return;
+    if (submitting.current || isSubmittingPayment || validating) return;
+    submitting.current = true;
 
     const errs = validateForm();
     if (Object.keys(errs).length) {
@@ -634,6 +646,9 @@ export default function CheckoutPage() {
         element.scrollIntoView({ behavior: "smooth", block: "center" });
         element.focus();
       }
+      // Outside the try below, so release the guard here or the button stays
+      // dead after a failed field validation.
+      submitting.current = false;
       return;
     }
 
@@ -644,28 +659,22 @@ export default function CheckoutPage() {
     resetScrollAndLock();
 
     try {
-      const fresh = await validate({ state: form.state, email: form.email });
-
       /*
-       * Send only what THIS quote accepted.
+       * Straight to the order — no pre-flight re-price.
        *
-       * `couponCodes` in scope is the value from this render, and validate()
-       * drops codes the server no longer recognises — but that state update is
-       * not visible here. Reading the codes off the fresh quote instead means a
-       * stale code cannot ride along into a 409 that blocks the order.
+       * This used to await a full validate() before placing, which put two
+       * sequential round trips between the click and the widget opening. It
+       * bought nothing: place() prices the cart server-side and runs the same
+       * assertFulfillable(), returning the same 409 with the same message,
+       * which the catch below already surfaces. Dropping it halves the wait
+       * without moving a single check off the server.
+       *
+       * Codes come from the last quote the server accepted, which the cart
+       * context keeps current — a code the server has since refused is already
+       * pruned from it, and place() re-evaluates every code from scratch
+       * regardless. This is a request, not an instruction.
        */
-      const codesToSend = fresh
-        ? (fresh.coupons ?? []).map((c) => c.code)
-        : couponCodes;
-
-      const blocking = (fresh?.issues ?? []).filter((i) => i.sku !== "__coupon__");
-      if (blocking.length > 0) {
-        unlockScroll();
-        setErrors({ _root: blocking[0].message });
-        setIsSubmittingPayment(false);
-        setStep("form");
-        return;
-      }
+      const codesToSend = (coupons ?? []).map((c) => c.code);
 
       const result = await checkoutApi.place(
         {
@@ -813,6 +822,14 @@ export default function CheckoutPage() {
       setErrors(err.fields ?? { _root: err.message });
       setStep("form");
       if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    } finally {
+      /*
+       * Released on EVERY exit — success, failure, dismissal, validation
+       * bounce, throw. A `finally` rather than a line per return, because this
+       * function has eight of them and one missed path would leave the pay
+       * button permanently dead with no way back but a reload.
+       */
+      submitting.current = false;
     }
   };
 
