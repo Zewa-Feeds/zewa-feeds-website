@@ -19,8 +19,18 @@ export default function CartPage() {
      * neither list. Reading `.map` off undefined here would take down the whole
      * cart over a promotion panel.
      */
-    coupons = [], couponCodes = [], applyCoupon, removeCoupon,
+    coupons = [], applyCoupon, removeCoupon,
   } = useCart();
+
+  /*
+   * Server-CONFIRMED codes, not the customer's selection.
+   *
+   * This drives the "Applied" badge AND disables the offer button, so a code
+   * the server has refused must not appear here: it would read as applied,
+   * refuse to re-apply, and have no Remove row either (those render from
+   * `coupons`), leaving the shopper unable to act on it at all.
+   */
+  const appliedCodes = (coupons ?? []).map((c) => c.code);
 
   const total = totalPaise > 0 ? totalPaise : Math.max(0, subtotalPaise - discountPaise);
 
@@ -106,7 +116,7 @@ export default function CartPage() {
       onCouponInputChange={setCouponInput}
       onSubmit={submitCoupon}
       availableOffers={availableOffers}
-      appliedCodes={couponCodes}
+      appliedCodes={appliedCodes}
       coupons={coupons}
       onRemoveCoupon={removeCoupon ? dropCoupon : undefined}
       applying={couponApplying}
