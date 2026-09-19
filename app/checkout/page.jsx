@@ -86,6 +86,21 @@ export default function CheckoutPage() {
   // refuses the hold (ZSOP004 §4) — and so applying or removing a code re-quotes
   // exactly as a quantity change does.
   const coins = useCoins({ items, isAuthenticated, couponCodes });
+
+  /*
+   * The payable total, with coins taken off.
+   *
+   * `totalPaise` comes from the cart quote, which knows nothing about coins —
+   * the redemption is held separately against the loyalty account. Rendering
+   * the coin line without subtracting it showed a total that was simply wrong:
+   * a ₹229 cart with ₹22.90 off and 229 coins applied displayed ₹206.10, the
+   * coupon discount only, as though the coins were free.
+   *
+   * Floored at zero: coins can cover the whole order, and a negative total is
+   * not a refund.
+   */
+  const payableTotalPaise =
+    totalPaise === null ? null : Math.max(0, totalPaise - (coins.discountPaise ?? 0));
   /** True once a prefill has run, so it cannot fight the customer's own edits. */
   const prefilled = useRef(false);
 
@@ -1469,7 +1484,7 @@ export default function CheckoutPage() {
                       ? "Fix cart issues to continue"
                       : totalPaise === null
                       ? "Calculating total…"
-                      : `Pay Online · ${formatInr(totalPaise)}`}
+                      : `Pay Online · ${formatInr(payableTotalPaise)}`}
                   </span>
                 </button>
 
@@ -1484,7 +1499,7 @@ export default function CheckoutPage() {
                 subtotalPaise={subtotalPaise}
                 discountPaise={discountPaise}
                 shippingPaise={shippingPaise}
-                totalPaise={totalPaise}
+                totalPaise={payableTotalPaise}
                 amountToFreeShippingPaise={amountToFreeShippingPaise}
                 coupon={coupon}
                 coupons={coupons}
@@ -1536,7 +1551,7 @@ export default function CheckoutPage() {
               Total Amount
             </span>
             <span className="truncate font-[Playfair_Display] text-[20px] font-bold tabular-nums text-white">
-              {formatInrPending(totalPaise)}
+              {formatInrPending(payableTotalPaise)}
             </span>
           </div>
 
