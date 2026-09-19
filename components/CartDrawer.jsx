@@ -12,7 +12,6 @@ export default function CartDrawer() {
     subtotalPaise,
     discountPaise,
     totalPaise,
-    coupon,
     coupons,
     couponCodes,
     removeCoupon,
@@ -304,14 +303,18 @@ export default function CartDrawer() {
             {(couponCodes || []).length > 0 && (
               <div className="flex flex-wrap gap-2 pt-0.5">
                 {(couponCodes || []).map((code) => {
-                  const appliedInfo = (coupons || []).find((c) => c.code === code) || coupon;
-                  const discountLabel = appliedInfo?.discountPaise
+                  /*
+                   * By CODE only, and only what the SERVER applied. Falling
+                   * back to `coupon` lent the first promotion's discount to an
+                   * unrelated code, and a hardcoded "10% off" for SPECIAL10
+                   * showed a discount that was not in the total.
+                   */
+                  const appliedInfo = (coupons || []).find((c) => c.code === code);
+                  const discountLabel = !appliedInfo
+                    ? "pending"
+                    : appliedInfo.discountPaise > 0
                     ? `- ${formatInr(appliedInfo.discountPaise)}`
-                    : appliedInfo?.percent
-                    ? `${appliedInfo.percent}% off`
-                    : code === "SPECIAL10"
-                    ? "10% off"
-                    : "Applied";
+                    : appliedInfo.discountLabel || "applied";
 
                   return (
                     <div
@@ -354,9 +357,10 @@ export default function CartDrawer() {
                 <div className="flex items-baseline justify-between text-emerald-400">
                   <span className="text-[13px] flex items-center gap-1.5">
                     <span>Discount</span>
-                    {couponCodes[0] && (
+                    {/* The codes actually responsible for this discount. */}
+                    {(coupons || []).length > 0 && (
                       <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
-                        {couponCodes[0]}
+                        {(coupons || []).map((c) => c.code).join(", ")}
                       </span>
                     )}
                   </span>

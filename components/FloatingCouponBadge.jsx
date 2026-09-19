@@ -10,7 +10,7 @@ export const PROMO_CODE = "SPECIAL10";
 
 export default function FloatingCouponBadge() {
   const pathname = usePathname();
-  const { applyCoupon, couponCodes, items, setDrawerOpen } = useCart();
+  const { applyCoupon, coupons, items, setDrawerOpen } = useCart();
 
   const [mounted, setMounted] = useState(false);
   const [dismissed, setDismissed] = useState(true);
@@ -20,7 +20,12 @@ export default function FloatingCouponBadge() {
   const [applying, setApplying] = useState(false);
   const [applyMessage, setApplyMessage] = useState("");
 
-  const isApplied = couponCodes.includes(PROMO_CODE);
+  /*
+   * Server-CONFIRMED, not merely selected. Read from the customer's own
+   * selection this claimed "Already applied" for a code a later re-price had
+   * refused, and returned without retrying.
+   */
+  const isApplied = (coupons ?? []).some((c) => c.code === PROMO_CODE);
 
   useEffect(() => {
     setMounted(true);

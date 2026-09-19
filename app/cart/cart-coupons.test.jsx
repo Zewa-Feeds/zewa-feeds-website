@@ -282,4 +282,40 @@ describe("applied coupons", () => {
     await firstText(/Available offers/i);
     expect(screen.getByText("Order Summary")).toBeTruthy();
   });
+
+  /*
+   * The badge drives the offer button's disabled state too, so a code the
+   * server refused must not read as applied: it could not be re-applied, and
+   * has no Remove row either (those render from `coupons`), which left the
+   * shopper unable to act on it at all.
+   */
+  it("offers a refused code as applyable, not as already applied", async () => {
+    mockCartState = baseCart({
+      // Selected by the customer, but the latest quote applied nothing.
+      couponCodes: ["SPECIAL10"],
+      coupons: [],
+      discountPaise: 0,
+    });
+    render(<CartPage />);
+    await firstText(/Available offers/i);
+
+    const offer = screen.getAllByRole("button", { name: /^SPECIAL10/ })[0];
+    expect(offer.disabled).toBe(false);
+    expect(within(offer).getByText(/^Apply$/i)).toBeTruthy();
+    expect(within(offer).queryByText(/^Applied$/i)).toBeNull();
+  });
+
+  it("marks a code applied once the server confirms it", async () => {
+    mockCartState = baseCart({
+      couponCodes: ["SPECIAL10"],
+      coupons: [{ code: "SPECIAL10", discountLabel: "10% off", discountPaise: 1850 }],
+      discountPaise: 1850,
+    });
+    render(<CartPage />);
+    await firstText(/Available offers/i);
+
+    const offer = screen.getAllByRole("button", { name: /^SPECIAL10/ })[0];
+    expect(offer.disabled).toBe(true);
+    expect(within(offer).getByText(/^Applied$/i)).toBeTruthy();
+  });
 });
