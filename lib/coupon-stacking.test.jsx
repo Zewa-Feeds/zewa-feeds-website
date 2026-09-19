@@ -353,6 +353,131 @@ describe("discount display", () => {
   });
 
   /*
+   * THE ₹166.50 → ₹245 BUG.
+   *
+   * The quote signature was the line-up alone, so a quote priced WITHOUT
+   * coupons counted as current for the same items. The page kept showing the
+   * couponed total from an earlier quote while `coupons` underneath was empty,
+   * and checkout — which read its codes off that list — placed the order with
+   * none, at full price plus shipping.
+   */
+  it("blocks checkout while a coupon is being applied", async () => {
+    const { result } = await setupCart();
+    await waitFor(() => expect(result.current.pricesPending).toBe(false));
+
+    /*
+     * applyCoupon() validates BEFORE it commits the code, so the signature is
+     * briefly unchanged — `validating` is what covers this window, and the pay
+     * button is disabled on it. The invariant that matters is that one of the
+     * two flags is always set while the displayed price could be wrong.
+     */
+    validate.mockImplementation(() => new Promise(() => {}));
+    await act(async () => {
+      void result.current.applyCoupon("SPECIAL10");
+    });
+
+    await waitFor(() =>
+      expect(result.current.validating || result.current.pricesPending).toBe(true),
+    );
+  });
+
+  it("marks the quote stale once an accepted code lands but the re-price has not", async () => {
+    const { result } = await setupCart();
+    validate.mockResolvedValue(
+      quote({ coupons: [{ code: "SPECIAL10", discountPaise: 1850, discountLabel: "10% off" }], discountPaise: 1850 }),
+    );
+    await act(async () => {
+      await result.current.applyCoupon("SPECIAL10");
+    });
+    await waitFor(() => expect(result.current.couponCodes).toContain("SPECIAL10"));
+
+    // A SECOND code arrives while the server is unreachable: the committed
+    // codes now differ from what the standing quote was priced with.
+    validate.mockImplementation(() => new Promise(() => {}));
+    await act(async () => {
+      void result.current.applyCoupon("ZEWA1");
+    });
+
+    await waitFor(() =>
+      expect(result.current.validating || result.current.pricesPending).toBe(true),
+    );
+  });
+
+  it("marks the quote stale when a coupon is removed", async () => {
+    const { result } = await setupCart();
+    validate.mockResolvedValue(
+      quote({ coupons: [{ code: "SPECIAL10", discountPaise: 1850, discountLabel: "10% off" }], discountPaise: 1850 }),
+    );
+    await act(async () => {
+      await result.current.applyCoupon("SPECIAL10");
+    });
+    await waitFor(() => expect(result.current.pricesPending).toBe(false));
+
+    validate.mockImplementation(() => new Promise(() => {}));
+    await act(async () => {
+      void result.current.removeCoupon("SPECIAL10");
+    });
+
+    await waitFor(() => expect(result.current.pricesPending).toBe(true));
+    // And the code is gone from the customer's intent, so nothing can send it.
+    expect(result.current.couponCodes).not.toContain("SPECIAL10");
+  });
+
+  it("treats the same set of codes in any order as one signature", async () => {
+    const { result } = await setupCart();
+    validate.mockResolvedValue(
+      quote({
+        coupons: [
+          { code: "ZEWA1", discountPaise: 0, discountLabel: "Free shipping" },
+          { code: "SPECIAL10", discountPaise: 1850, discountLabel: "10% off" },
+        ],
+        discountPaise: 1850,
+      }),
+    );
+    await act(async () => {
+      await result.current.applyCoupon("ZEWA1");
+      await result.current.applyCoupon("SPECIAL10");
+    });
+
+    await waitFor(() => expect(result.current.pricesPending).toBe(false));
+    const callsBefore = validate.mock.calls.length;
+
+    // Re-applying a code already present must not churn the signature.
+    await act(async () => {
+      await result.current.applyCoupon("ZEWA1");
+    });
+    await waitFor(() => expect(result.current.pricesPending).toBe(false));
+    expect(validate.mock.calls.length).toBeLessThanOrEqual(callsBefore + 1);
+  });
+
+  it("keeps the customer's codes when the quote is lost, and reports prices pending", async () => {
+    const { result } = await setupCart();
+    validate.mockResolvedValue(
+      quote({ coupons: [{ code: "SPECIAL10", discountPaise: 1850, discountLabel: "10% off" }], discountPaise: 1850 }),
+    );
+    await act(async () => {
+      await result.current.applyCoupon("SPECIAL10");
+    });
+    expect(result.current.couponCodes).toContain("SPECIAL10");
+
+    // The server goes away: validate() throws and clears the quote.
+    validate.mockRejectedValue(new Error("network down"));
+    await act(async () => {
+      await result.current.validate();
+    });
+
+    /*
+     * The applied list empties with the quote — but the customer's INTENT
+     * survives, and the cart reports that its prices are not current. Checkout
+     * reads couponCodes, so it can no longer send an empty set behind a
+     * couponed-looking total.
+     */
+    expect(result.current.coupons).toEqual([]);
+    expect(result.current.couponCodes).toContain("SPECIAL10");
+    expect(result.current.pricesPending).toBe(true);
+  });
+
+  /*
    * Applied codes persist in localStorage. A code that stops existing used to
    * survive there forever: every re-price reported it, and checkout refused the
    * order with a 409, with no Remove control to clear a coupon that was never

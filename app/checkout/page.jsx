@@ -31,7 +31,7 @@ export default function CheckoutPage() {
   const {
     items, subtotalPaise, discountPaise, shippingPaise, totalPaise,
     amountToFreeShippingPaise, coupon, coupons, freeShippingFromCoupon,
-    issues, fulfillable, validating,
+    issues, fulfillable, validating, pricesPending,
     validate, applyCoupon, removeCoupon, couponCodes, clearCart, setQty, removeFromCart, quote,
   } = useCart();
 
@@ -590,7 +590,13 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e) => {
     if (e?.preventDefault) e.preventDefault();
-    if (isSubmittingPayment || validating) return;
+    /*
+     * `pricesPending` means the quote on screen does not describe the current
+     * cart AND coupon codes — a remount that restored codes from localStorage
+     * before the first re-price lands, or a validate that failed. Submitting
+     * then would price the order against codes the customer never saw applied.
+     */
+    if (isSubmittingPayment || validating || pricesPending) return;
 
     const errs = validateForm();
     if (Object.keys(errs).length) {
@@ -620,14 +626,18 @@ export default function CheckoutPage() {
       /*
        * Send only what THIS quote accepted.
        *
-       * `couponCodes` in scope is the value from this render, and validate()
-       * drops codes the server no longer recognises — but that state update is
-       * not visible here. Reading the codes off the fresh quote instead means a
-       * stale code cannot ride along into a 409 that blocks the order.
+       * Codes are the ones the CUSTOMER selected, not the ones the last quote
+       * happened to apply.
+       *
+       * Reading them off `fresh.coupons` sent NO codes whenever that quote
+       * applied none — which is what happens the moment the email is known and
+       * the server refuses a per-customer-limited code. The order was then
+       * priced at full value: a cart showing ₹166.50 became a ₹245 Razorpay
+       * order. `couponCodes` is the customer's intent, and place() re-evaluates
+       * every code from scratch anyway, so eligibility, stacking and the
+       * discount all stay server-side. This is a request, not an instruction.
        */
-      const codesToSend = fresh
-        ? (fresh.coupons ?? []).map((c) => c.code)
-        : couponCodes;
+      const codesToSend = couponCodes ?? [];
 
       const blocking = (fresh?.issues ?? []).filter((i) => i.sku !== "__coupon__");
       if (blocking.length > 0) {
@@ -652,9 +662,8 @@ export default function CheckoutPage() {
             pincode: form.pincode.trim(),
           },
           paymentMethod: "RAZORPAY",
-          // Every code the server accepted on the quote just above. It
-          // re-evaluates eligibility and stacking from scratch — this is a
-          // request, not an instruction.
+          // The customer's selected codes. The server re-evaluates every one
+          // from scratch — this is a request, not an instruction.
           couponCodes: codesToSend,
           customerNote: form.notes.trim() || undefined,
           // Only meaningful for a newly typed address; one picked from the book
@@ -1440,7 +1449,7 @@ export default function CheckoutPage() {
               <div className="flex flex-col gap-3">
                 <button
                   type="submit"
-                  disabled={validating || isSubmittingPayment || !fulfillable || totalPaise === null}
+                  disabled={validating || isSubmittingPayment || pricesPending || !fulfillable || totalPaise === null}
                   aria-busy={validating || isSubmittingPayment}
                   className={`group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-primary py-4 text-[13px] font-bold uppercase tracking-[0.2em] text-[#00382d] font-[Montserrat] shadow-[0_4px_28px_rgba(68,229,194,0.35)] sm:py-5 ${EASE} hover:bg-primary/90 hover:shadow-[0_6px_34px_rgba(68,229,194,0.45)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:bg-primary ${FOCUS_RING}`}
                 >
@@ -1453,7 +1462,7 @@ export default function CheckoutPage() {
                     className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden"
                   />
 
-                  {isSubmittingPayment || validating ? (
+                  {isSubmittingPayment || validating || pricesPending ? (
                     <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                       <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />
@@ -1473,7 +1482,7 @@ export default function CheckoutPage() {
                   <span className="relative">
                     {isSubmittingPayment
                       ? "Preparing secure payment…"
-                      : validating
+                      : validating || pricesPending
                       ? "Validating prices..."
                       : !fulfillable
                       ? "Fix cart issues to continue"
@@ -1542,7 +1551,7 @@ export default function CheckoutPage() {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={validating || isSubmittingPayment || !fulfillable || totalPaise === null}
+            disabled={validating || isSubmittingPayment || pricesPending || !fulfillable || totalPaise === null}
             aria-busy={validating || isSubmittingPayment}
             className={`flex shrink-0 items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-[#00382d] font-[Montserrat] ${EASE} hover:bg-primary/90 active:scale-[0.98] disabled:opacity-40 ${FOCUS_RING}`}
           >
@@ -1555,7 +1564,7 @@ export default function CheckoutPage() {
                 ? "Fix cart"
                 : "Pay Online"}
             </span>
-            {isSubmittingPayment || validating ? (
+            {isSubmittingPayment || validating || pricesPending ? (
               <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                 <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />

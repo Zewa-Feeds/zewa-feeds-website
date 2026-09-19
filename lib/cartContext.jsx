@@ -29,6 +29,26 @@ const CartContext = createContext(null);
 const STORAGE_KEY = "zewa_cart_v2";
 
 /**
+ * What a quote has to match to still describe the cart.
+ *
+ * COUPON CODES ARE PART OF IT. The signature used to be the line-up alone, so
+ * a quote priced with no coupons counted as "current" for the same items — the
+ * page kept showing the couponed total from an earlier quote while the applied
+ * list underneath it was empty, and checkout then placed the order at full
+ * price. Including the codes means any change to them marks the quote stale
+ * until the server has re-priced.
+ *
+ * Codes are sorted and de-duplicated so the same SET always produces the same
+ * string: applying A then B must not look different from B then A, or every
+ * reordering would fire a pointless re-price.
+ */
+function cartSignature(items, codes = []) {
+  const lines = items.map((i) => `${i.sku}:${i.qty}`).join(",");
+  const promos = [...new Set(codes)].sort().join(",");
+  return `${lines}|${promos}`;
+}
+
+/**
  * Fallback ceiling when a line has no `maxQty` (an older stored cart).
  *
  * Was 99, which let the drawer and cart page climb far past real stock — the
@@ -248,9 +268,11 @@ export function CartProvider({ children }) {
       const effectiveState = state !== undefined ? state : (lastStateRef.current ?? undefined);
 
       const seq = ++requestSeq.current;
-      // The line-up being priced, captured before the await so a cart change
-      // mid-flight cannot make this quote look current when it is not.
-      const pricedSignature = items.map((i) => `${i.sku}:${i.qty}`).join(",");
+      // The line-up AND codes being priced, captured before the await so a cart
+      // or coupon change mid-flight cannot make this quote look current when it
+      // is not. `codes` is what actually goes to the server, not the state,
+      // which may already have moved on.
+      const pricedSignature = cartSignature(items, codes);
       setValidating(true);
       try {
         const result = await cartApi.validate({
@@ -304,8 +326,9 @@ export function CartProvider({ children }) {
     [items, couponCodes],
   );
 
-  // Signature of the line-up, so the effect below fires on real changes only.
-  const signature = items.map((i) => `${i.sku}:${i.qty}`).join(",");
+  // Signature of the line-up AND the codes, so the effect below fires on real
+  // changes only — see cartSignature().
+  const signature = cartSignature(items, couponCodes);
 
   // Debounced so holding a quantity stepper does not fire a request per tick.
   useEffect(() => {
