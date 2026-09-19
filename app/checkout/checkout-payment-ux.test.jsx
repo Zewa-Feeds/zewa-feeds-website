@@ -516,4 +516,61 @@ describe("Checkout Payment UX & Loading State", () => {
       });
     });
   });
+
+  /*
+   * PAYMENT INTEGRITY — the success screen may never appear without payment.
+   *
+   * The server answers an unpayable order with `payment.required: false`, and
+   * this page used to read that alone as "checkout complete". A cancelled
+   * order therefore rendered as confirmed, with no Razorpay and no money.
+   */
+  it("does not show success when payment is not required but nothing was paid", async () => {
+    placeMock.mockResolvedValue({
+      orderNo: "27ZFO020",
+      paymentMethod: "RAZORPAY",
+      // No paymentSettled: the order is not payable, but it is NOT paid.
+      payment: { required: false },
+    });
+
+    let container;
+    await act(async () => {
+      container = render(<CheckoutPage />).container;
+    });
+    fillValidForm(container);
+
+    window.Razorpay = vi.fn();
+
+    await act(async () => {
+      fireEvent.click(screen.getAllByRole("button", { name: /Pay Online/i })[0]);
+    });
+
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: /Complete Your Order/i })).toBeDefined(),
+    );
+    expect(screen.queryByText(/Order Confirmed/i)).toBeNull();
+    expect(screen.getByText(/could not start payment/i)).toBeDefined();
+    // The widget was never constructed, so nothing could have been paid.
+    expect(window.Razorpay).not.toHaveBeenCalled();
+  });
+
+  it("shows success for a verified paid order replayed by the server", async () => {
+    placeMock.mockResolvedValue({
+      orderNo: "27ZFO021",
+      paymentMethod: "RAZORPAY",
+      payment: { required: false, paymentSettled: true },
+    });
+
+    let container;
+    await act(async () => {
+      container = render(<CheckoutPage />).container;
+    });
+    fillValidForm(container);
+
+    await act(async () => {
+      fireEvent.click(screen.getAllByRole("button", { name: /Pay Online/i })[0]);
+    });
+
+    await waitFor(() => expect(screen.queryByText(/could not start payment/i)).toBeNull());
+    expect(screen.queryByRole("heading", { name: /Complete Your Order/i })).toBeNull();
+  });
 });

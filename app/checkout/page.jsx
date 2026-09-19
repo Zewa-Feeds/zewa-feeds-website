@@ -707,7 +707,37 @@ export default function CheckoutPage() {
 
       setPlaced(result);
 
+      /*
+       * "No online payment owed" is NOT "paid".
+       *
+       * This used to show the success screen on `!payment.required` alone,
+       * which is also what the server returns for an order that is merely
+       * unpayable — so replaying a cancelled order confirmed a checkout nobody
+       * had paid for, without Razorpay ever opening.
+       *
+       * Success is now shown only where money is genuinely settled:
+       *   COD            — nothing is owed online, payable on delivery
+       *   paymentSettled — the server has verified a real payment
+       *
+       * Anything else that claims no payment is required is a state the
+       * storefront must not celebrate: bounce to the form and let the customer
+       * retry rather than telling them an unpaid order is done.
+       */
       if (!result.payment.required) {
+        const genuinelyDone =
+          result.paymentMethod === "COD" || result.payment.paymentSettled === true;
+
+        if (!genuinelyDone) {
+          unlockScroll();
+          setIsSubmittingPayment(false);
+          setErrors({
+            _root:
+              "We could not start payment for that order. Please try again, or contact support if you were charged.",
+          });
+          setStep("form");
+          return;
+        }
+
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         unlockScroll();
