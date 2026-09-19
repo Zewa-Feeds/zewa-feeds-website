@@ -165,6 +165,47 @@ describe("applying coupons", () => {
 });
 
 describe("removing coupons", () => {
+  /*
+   * Remove one code and immediately apply another, with no render in between.
+   *
+   * Both mutators derive a new list from the current one. Reading that from
+   * the render closure meant the apply built on the PRE-REMOVE value, so the
+   * removed code came straight back and both ended up attached — and the two
+   * in-flight re-prices raced, so whichever landed last decided the discount.
+   */
+  it("does not resurrect a code removed a moment earlier", async () => {
+    validate.mockImplementation(async ({ couponCodes }) =>
+      quote({
+        coupons: (couponCodes ?? []).map((code) => ({
+          code,
+          discountPaise: 100,
+          discountLabel: "x",
+        })),
+      }),
+    );
+    const { result } = await setupCart();
+
+    await act(async () => {
+      await result.current.applyCoupon("ZEWA1");
+    });
+    expect(result.current.couponCodes).toEqual(["ZEWA1"]);
+
+    validate.mockClear();
+    await act(async () => {
+      const removing = result.current.removeCoupon("ZEWA1");
+      const applying = result.current.applyCoupon("SPECIAL10");
+      await Promise.all([removing, applying]);
+    });
+
+    // The apply must not carry the removed code back with it.
+    expect(validate.mock.calls.map((c) => c[0].couponCodes)).toEqual([
+      [],
+      ["SPECIAL10"],
+    ]);
+    expect(result.current.couponCodes).toEqual(["SPECIAL10"]);
+  });
+
+
   it("drops the code and re-prices without it", async () => {
     const { result } = await setupCart();
 

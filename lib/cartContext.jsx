@@ -173,12 +173,33 @@ export function CartProvider({ children }) {
   // Guards against a slow earlier response overwriting a newer one.
   const requestSeq = useRef(0);
 
+  /**
+   * The live coupon codes, readable without waiting for a re-render.
+   *
+   * `applyCoupon` and `removeCoupon` both derive a new list from the current
+   * one. Reading that from the render closure meant a remove followed
+   * immediately by an apply built its list from the PRE-REMOVE value, so the
+   * removed code came straight back and both ended up attached — and the two
+   * in-flight re-prices then raced, leaving whichever landed last.
+   */
+  const couponCodesRef = useRef([]);
+
+  /** Write both, so the ref can never drift from the state it mirrors. */
+  const commitCouponCodes = useCallback((codes) => {
+    couponCodesRef.current = codes;
+    setCouponCodes(codes);
+  }, []);
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) dispatch({ type: "INIT", items: JSON.parse(stored) });
       const storedCoupons = localStorage.getItem("zewa_applied_coupons");
-      if (storedCoupons) setCouponCodes(JSON.parse(storedCoupons));
+      if (storedCoupons) {
+        const restored = JSON.parse(storedCoupons);
+        couponCodesRef.current = restored;
+        setCouponCodes(restored);
+      }
     } catch {
       /* corrupt payload — start empty rather than crashing the app */
     }
@@ -265,7 +286,9 @@ export function CartProvider({ children }) {
           .filter((i) => i.sku === "__coupon__" && i.code === "COUPON_NOT_FOUND" && i.couponCode)
           .map((i) => i.couponCode);
         if (unknown.length > 0) {
-          setCouponCodes((prev) => prev.filter((c) => !unknown.includes(c)));
+          commitCouponCodes(
+            couponCodesRef.current.filter((c) => !unknown.includes(c)),
+          );
         }
 
         return result;
@@ -312,37 +335,50 @@ export function CartProvider({ children }) {
     async (code) => {
       const next = String(code || "").toUpperCase().trim();
       if (!next) return null;
-      if (couponCodes.includes(next)) {
-        if (items.length === 0) return { staged: true, codes: couponCodes };
-        return validate({ codes: couponCodes });
+
+      // The list as it stands RIGHT NOW — a remove a moment ago may not have
+      // re-rendered yet, and building on the stale value would undo it.
+      const current = couponCodesRef.current;
+      if (current.includes(next)) {
+        if (items.length === 0) return { staged: true, codes: current };
+        return validate({ codes: current });
       }
 
-      const attempted = [...couponCodes, next];
+      const attempted = [...current, next];
 
       // If cart is empty, stage the coupon code so it activates as soon as items are added.
       if (items.length === 0) {
-        setCouponCodes(attempted);
+        commitCouponCodes(attempted);
         return { staged: true, codes: attempted };
       }
 
       const result = await validate({ codes: attempted });
 
-      // Keep it only if the server actually applied it.
+      /*
+       * Keep it only if the server actually applied it — and reconcile against
+       * the list as it is NOW, not as it was when this call started, so a
+       * removal that happened in between is not resurrected.
+       */
       const accepted = (result?.coupons ?? []).some((c) => c.code === next);
-      setCouponCodes(accepted ? attempted : couponCodes);
+      const latest = couponCodesRef.current;
+      commitCouponCodes(
+        accepted
+          ? [...new Set([...latest, next])]
+          : latest.filter((c) => c !== next),
+      );
       return result;
     },
-    [items.length, couponCodes, validate],
+    [items.length, validate, commitCouponCodes],
   );
 
   /** Remove one code and re-price — this is what frees a blocked coupon's slot. */
   const removeCoupon = useCallback(
     async (code) => {
-      const next = couponCodes.filter((c) => c !== code);
-      setCouponCodes(next);
+      const next = couponCodesRef.current.filter((c) => c !== code);
+      commitCouponCodes(next);
       return validate({ codes: next });
     },
-    [couponCodes, validate],
+    [validate, commitCouponCodes],
   );
 
   const localSubtotalPaise = useMemo(
@@ -439,7 +475,7 @@ export function CartProvider({ children }) {
       dispatch({ type: "CLEAR" });
       setQuote(null);
       setQuoteSignature(null);
-      setCouponCodes([]);
+      commitCouponCodes([]);
     },
     validate,
     applyCoupon,
