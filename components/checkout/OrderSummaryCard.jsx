@@ -59,6 +59,18 @@ export default function OrderSummaryCard({
     setCouponApplying(false);
   };
 
+  /*
+   * Tapping an advertised code APPLIES it, rather than filling the input for
+   * the shopper to confirm with Apply. The two-step version made a customer
+   * press twice for a code the shop is actively promoting; the applied coupon
+   * still has a Remove control, so nothing here is one-way.
+   */
+  const handleOfferSelect = async (code) => {
+    setCouponApplying(true);
+    await onSubmitCoupon(code);
+    setCouponApplying(false);
+  };
+
   return (
     <div className={`flex flex-col ${CARD} p-5 sm:p-7 ${EASE}`}>
       {/* Header & Mobile Toggle */}
@@ -110,7 +122,7 @@ export default function OrderSummaryCard({
         <AvailableOffers
           offers={availableOffers}
           appliedCodes={appliedCodes}
-          onSelect={onCouponInputChange}
+          onSelect={handleOfferSelect}
           disabled={couponApplying}
         />
       </div>
@@ -279,17 +291,12 @@ export default function OrderSummaryCard({
             </button>
           </div>
 
-          {/*
-            Tapping a code here FILLS THE INPUT rather than applying it: at
-            checkout the shopper is a click away from paying, so the code is put
-            in front of them to confirm with Apply. The cart page shares this
-            same list but applies on tap — see components/AvailableOffers.jsx.
-          */}
+          {/* Applies on tap, the same as the cart — see handleOfferSelect. */}
           <div className="hidden lg:block">
             <AvailableOffers
               offers={availableOffers}
               appliedCodes={appliedCodes}
-              onSelect={onCouponInputChange}
+              onSelect={handleOfferSelect}
               disabled={couponApplying}
             />
           </div>

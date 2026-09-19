@@ -9,10 +9,10 @@ import { formatInr } from "@/lib/api";
  * hoping they saw an Instagram story. Private referral and influencer codes are
  * excluded server-side, so nothing personal is ever published by this panel.
  *
- * Presentational only. What tapping a code DOES is the caller's decision:
- * checkout fills its coupon input so the shopper confirms with Apply, while the
- * cart applies straight away. Sharing the markup keeps the two identical to
- * look at without forcing the same interaction on both.
+ * Presentational only — the caller decides what tapping a code does, and both
+ * the cart and checkout now apply it straight away. The button reads "Apply"
+ * because that is what it does: an earlier version filled checkout's coupon
+ * input instead, which made a promoted code cost two taps.
  */
 export default function AvailableOffers({
   offers = [],
@@ -72,7 +72,7 @@ export default function AvailableOffers({
                   )}
                 </div>
                 <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-primary/70 font-[Montserrat] group-hover:text-primary">
-                  {alreadyOn ? "Applied" : "Use"}
+                  {alreadyOn ? "Applied" : "Apply"}
                 </span>
               </button>
             </li>

@@ -310,4 +310,65 @@ describe("discount display", () => {
     // coupon must never block checkout.
     expect(result.current.fulfillable).toBe(true);
   });
+
+  /*
+   * Applied codes persist in localStorage. A code that stops existing used to
+   * survive there forever: every re-price reported it, and checkout refused the
+   * order with a 409, with no Remove control to clear a coupon that was never
+   * applied. Orders were blocked until the shopper wiped their storage.
+   */
+  it("drops a code the server no longer recognises", async () => {
+    const { result } = await setupCart();
+    validate.mockResolvedValue(quote({ coupons: [{ code: "GOOD", discountPaise: 100, discountLabel: "10% off" }] }));
+    await act(async () => {
+      await result.current.applyCoupon("GOOD");
+    });
+    expect(result.current.couponCodes).toContain("GOOD");
+
+    // The code disappears server-side; the next re-price rejects it by name.
+    validate.mockResolvedValue(
+      quote({
+        issues: [
+          {
+            sku: "__coupon__",
+            code: "COUPON_NOT_FOUND",
+            couponCode: "GOOD",
+            message: "GOOD is not a recognised coupon code.",
+          },
+        ],
+      }),
+    );
+    await act(async () => {
+      await result.current.validate();
+    });
+
+    await waitFor(() => expect(result.current.couponCodes).not.toContain("GOOD"));
+  });
+
+  it("keeps a code refused for a reason that can still change", async () => {
+    const { result } = await setupCart();
+    validate.mockResolvedValue(quote({ coupons: [{ code: "MIN500", discountPaise: 100, discountLabel: "10% off" }] }));
+    await act(async () => {
+      await result.current.applyCoupon("MIN500");
+    });
+
+    // Below the minimum now, but adding a line would qualify — so it stays.
+    validate.mockResolvedValue(
+      quote({
+        issues: [
+          {
+            sku: "__coupon__",
+            code: "COUPON_MIN_ORDER",
+            couponCode: "MIN500",
+            message: "Spend ₹500 to use MIN500.",
+          },
+        ],
+      }),
+    );
+    await act(async () => {
+      await result.current.validate();
+    });
+
+    expect(result.current.couponCodes).toContain("MIN500");
+  });
 });

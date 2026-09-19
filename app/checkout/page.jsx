@@ -499,11 +499,22 @@ export default function CheckoutPage() {
     return e;
   };
 
-  const submitCoupon = async (e) => {
-    e.preventDefault();
+  /**
+   * Apply a coupon.
+   *
+   * Called two ways: as the input's submit handler, where the code comes from
+   * `couponInput`, and directly with a code when the shopper taps one of the
+   * advertised offers. Taking the code as an argument is what lets that tap
+   * apply in one step instead of filling the box for them to confirm.
+   */
+  const submitCoupon = async (eventOrCode) => {
+    const fromOffer = typeof eventOrCode === "string";
+    if (!fromOffer) eventOrCode?.preventDefault?.();
+
     setCouponError("");
     setCouponSuccess("");
-    const code = couponInput.trim().toUpperCase();
+    const code = (fromOffer ? eventOrCode : couponInput).trim().toUpperCase();
+    if (!code) return;
     const result = await applyCoupon(code);
 
     /*
@@ -523,7 +534,9 @@ export default function CheckoutPage() {
       return;
     }
 
-    setCouponInput("");
+    // Only clear what the shopper typed. A code applied by tapping an offer
+    // must not wipe a different one they were part-way through entering.
+    if (!fromOffer) setCouponInput("");
     /*
      * Confirm what the code was actually worth, using the SERVER's figure for
      * this promotion — "applied" alone leaves the shopper to hunt for the
@@ -632,6 +645,19 @@ export default function CheckoutPage() {
 
     try {
       const fresh = await validate({ state: form.state, email: form.email });
+
+      /*
+       * Send only what THIS quote accepted.
+       *
+       * `couponCodes` in scope is the value from this render, and validate()
+       * drops codes the server no longer recognises — but that state update is
+       * not visible here. Reading the codes off the fresh quote instead means a
+       * stale code cannot ride along into a 409 that blocks the order.
+       */
+      const codesToSend = fresh
+        ? (fresh.coupons ?? []).map((c) => c.code)
+        : couponCodes;
+
       const blocking = (fresh?.issues ?? []).filter((i) => i.sku !== "__coupon__");
       if (blocking.length > 0) {
         unlockScroll();
@@ -655,9 +681,10 @@ export default function CheckoutPage() {
             pincode: form.pincode.trim(),
           },
           paymentMethod: "RAZORPAY",
-          // Every code the server accepted. It re-evaluates eligibility and
-          // stacking from scratch — this is a request, not an instruction.
-          couponCodes: couponCodes,
+          // Every code the server accepted on the quote just above. It
+          // re-evaluates eligibility and stacking from scratch — this is a
+          // request, not an instruction.
+          couponCodes: codesToSend,
           // The KEY, not an amount — the server holds the authoritative
           // reservation and decides how many coins it is worth (§4.3).
           coinCartKey: coins.applied > 0 ? coins.cartKey : undefined,

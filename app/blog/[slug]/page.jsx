@@ -189,7 +189,7 @@ export default function ArticlePage() {
       <main className="bg-[#05070d] text-[#dde2f6] min-h-screen">
 
         {/* ── HERO ─────────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden pt-20" style={{ minHeight: 580 }}>
+        <section className="relative flex flex-col overflow-hidden pt-20 min-h-[600px] sm:min-h-[660px]">
           {/* Hero image */}
           <div className="absolute inset-0">
             <Image
@@ -201,16 +201,16 @@ export default function ArticlePage() {
               priority
             />
             {/* Heavy dark overlays for legibility */}
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(5,7,13,0.62) 0%, rgba(5,7,13,0.82) 55%, rgba(5,7,13,1) 100%)" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(5,7,13,0.5) 0%, transparent 60%)" }} />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(5,7,13,0.35) 0%, rgba(5,7,13,0.55) 45%, rgba(5,7,13,0.92) 85%, rgba(5,7,13,1) 100%)" }} />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(5,7,13,0.45)_0%,transparent_75%)] sm:bg-[linear-gradient(to_right,rgba(5,7,13,0.92)_0%,rgba(5,7,13,0.75)_45%,transparent_85%)]" />
             {/* Tag-colour glow */}
             <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 50% 60% at 20% 70%, ${article.tagColor}0d, transparent 65%)` }} />
           </div>
 
           {/* Breadcrumb */}
-          <div className="relative z-10 max-w-[860px] mx-auto px-6 sm:px-10 pt-12">
+          <div className="relative z-10 max-w-[860px] mx-auto w-full px-6 sm:px-10 pt-6 sm:pt-12">
             <a href="/blog"
-              className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase font-[Montserrat] text-white/30 hover:text-white/60 transition-colors duration-200 mb-10">
+              className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase font-[Montserrat] text-white/30 hover:text-white/60 transition-colors duration-200 mb-4 sm:mb-10">
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
                 <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -219,7 +219,7 @@ export default function ArticlePage() {
           </div>
 
           {/* Title block */}
-          <div className="relative z-10 max-w-[860px] mx-auto px-6 sm:px-10 pb-20">
+          <div className="relative z-10 mt-auto w-full max-w-[860px] mx-auto px-6 sm:px-10 pt-24 pb-8 sm:pt-32 sm:pb-12">
             {/* Tag + meta row */}
             <div className="flex flex-wrap items-center gap-3 mb-7">
               <span className="text-[9px] font-bold px-3 py-1.5 rounded-full tracking-[0.2em] font-[Montserrat] border backdrop-blur-sm"

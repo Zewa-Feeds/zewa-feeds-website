@@ -51,10 +51,8 @@ export default function CartCouponPanel({
       </div>
 
       {/*
-        Tapping a code here APPLIES it, unlike checkout — where the same list
-        only fills the input because the shopper is one click from paying. On
-        the cart there is still a whole checkout ahead to change their mind, and
-        the Remove control below undoes it in one tap.
+        Tapping a code APPLIES it, here and at checkout alike. The Remove
+        control below undoes it in one tap, so there is nothing to confirm.
       */}
       <AvailableOffers
         offers={availableOffers}
