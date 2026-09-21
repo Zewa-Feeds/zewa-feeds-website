@@ -55,8 +55,8 @@ export default function OrderSummaryCard({
   /*
    * Tapping an advertised code APPLIES it, rather than filling the input for
    * the shopper to confirm with Apply. The two-step version made a customer
-   * press twice for a code the shop is actively promoting; the applied coupon
-   * still has a Remove control, so nothing here is one-way.
+   * press twice for a code the shop is actively promoting; tapping an applied
+   * row takes it back off, so nothing here is one-way.
    */
   /*
    * Codes the server refused for THIS cart, as code -> reason.
@@ -70,6 +70,16 @@ export default function OrderSummaryCard({
     if (i.sku === "__coupon__" && i.couponCode) acc[i.couponCode] = i.message;
     return acc;
   }, {});
+
+  /*
+   * Applied coupons that the offers panel is NOT already showing.
+   *
+   * An advertised code appears there marked APPLIED, so repeating it as a chip
+   * below listed the same coupon twice. A code the shopper typed — a private or
+   * partner code, never advertised — has no row up there, so it keeps one here.
+   */
+  const advertisedCodes = new Set(availableOffers.map((o) => o.code));
+  const couponsNotAdvertised = coupons.filter((c) => !advertisedCodes.has(c.code));
 
   const handleOfferSelect = async (code) => {
     setCouponApplying(true);
@@ -130,6 +140,7 @@ export default function OrderSummaryCard({
           appliedCodes={appliedCodes}
           unavailableReasons={unavailableReasons}
           onSelect={handleOfferSelect}
+          onRemove={onRemoveCoupon}
           disabled={couponApplying}
         />
       </div>
@@ -303,8 +314,9 @@ export default function OrderSummaryCard({
             <AvailableOffers
               offers={availableOffers}
               appliedCodes={appliedCodes}
-          unavailableReasons={unavailableReasons}
+              unavailableReasons={unavailableReasons}
               onSelect={handleOfferSelect}
+              onRemove={onRemoveCoupon}
               disabled={couponApplying}
             />
           </div>
@@ -331,8 +343,14 @@ export default function OrderSummaryCard({
             Every promotion the SERVER applied, not what was typed. A code the
             backend refused never appears here, so the list can't imply a
             discount that isn't in the total.
+
+            A code that is ALSO in the offers panel above is skipped: that row
+            already says APPLIED, and repeating it here listed the same coupon
+            twice on one screen. A privately typed code is not in that panel,
+            so it still needs a row of its own — and that row carries Remove,
+            which the offers panel does not offer.
           */}
-          {coupons.map((c) => (
+          {couponsNotAdvertised.map((c) => (
             <div
               key={c.code}
               className="flex items-center justify-between gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-[11px] text-primary font-[Montserrat]"

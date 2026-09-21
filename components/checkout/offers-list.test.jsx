@@ -78,17 +78,46 @@ describe("available offers", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it("marks an already-applied code as applied and stops re-applying it", () => {
-    const onChange = vi.fn();
+  /*
+   * An applied row is the ONLY remove control for an advertised code — the
+   * duplicate chip that used to carry one was removed, because listing the same
+   * coupon twice on one screen confused more than it helped. So the row stays
+   * live and toggles back off rather than going inert.
+   */
+  it("marks an already-applied code as applied and removes it when tapped", () => {
+    const onRemove = vi.fn();
     render(
       <OrderSummaryCard {...base} availableOffers={OFFERS} appliedCodes={["SPECIAL10"]}
-        onCouponInputChange={onChange} />,
+        coupons={[{ code: "SPECIAL10", discountLabel: "10% off" }]}
+        onRemoveCoupon={onRemove} onCouponInputChange={vi.fn()} />,
     );
     expect(first("Applied")).toBeTruthy();
     const btn = offerButton("SPECIAL10");
-    expect(btn.disabled).toBe(true);
+    expect(btn.disabled).toBe(false);
     fireEvent.click(btn);
-    expect(onChange).not.toHaveBeenCalled();
+    expect(onRemove).toHaveBeenCalledWith("SPECIAL10");
+  });
+
+  it("does not list an advertised coupon a second time once applied", () => {
+    render(
+      <OrderSummaryCard {...base} availableOffers={OFFERS} appliedCodes={["SPECIAL10"]}
+        coupons={[{ code: "SPECIAL10", discountLabel: "10% off" }]}
+        onRemoveCoupon={vi.fn()} onCouponInputChange={vi.fn()} />,
+    );
+    // Once in the offers panel, and nowhere else.
+    expect(screen.queryByText(/SPECIAL10 applied/)).toBeNull();
+  });
+
+  it("still lists a privately typed code, which no offer row covers", () => {
+    render(
+      <OrderSummaryCard {...base} availableOffers={OFFERS} appliedCodes={["PARTNER20"]}
+        coupons={[{ code: "PARTNER20", discountLabel: "20% off" }]}
+        onRemoveCoupon={vi.fn()} onCouponInputChange={vi.fn()} />,
+    );
+    // The chip wraps the code in <strong>, so match across elements.
+    expect(
+      screen.getAllByText((_t, el) => /PARTNER20 applied/.test(el?.textContent || ""))[0],
+    ).toBeTruthy();
   });
 
   it("renders nothing at all when the shop advertises no codes", () => {

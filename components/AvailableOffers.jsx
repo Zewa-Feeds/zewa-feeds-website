@@ -27,6 +27,8 @@ export default function AvailableOffers({
    */
   unavailableReasons = {},
   onSelect,
+  /** Takes an applied coupon back off. Without it an applied row is inert. */
+  onRemove,
   disabled = false,
 }) {
   if (offers.length === 0) return null;
@@ -61,14 +63,31 @@ export default function AvailableOffers({
 
           return (
             <li key={offer.code}>
+              {/*
+                Applied rows stay ENABLED and toggle back off. The applied
+                coupon used to be listed a second time below purely to carry a
+                Remove button; now that the duplicate is gone, removal has to
+                live here or an advertised coupon could never be taken off.
+              */}
               <button
                 type="button"
-                disabled={alreadyOn || unavailable || disabled}
-                onClick={() => onSelect?.(offer.code)}
+                disabled={unavailable || disabled}
+                onClick={() => (alreadyOn ? onRemove?.(offer.code) : onSelect?.(offer.code))}
+                // The name leads with the code so it stays unique among the
+                // several controls that mention the same coupon.
+                aria-label={
+                  alreadyOn
+                    ? `${offer.code} — applied, tap to remove`
+                    : `${offer.code} — apply`
+                }
                 className={
                   unavailable
                     ? "flex w-full items-center gap-2.5 rounded-lg border border-dashed border-white/10 bg-white/[0.02] px-2.5 py-2 text-left disabled:cursor-not-allowed"
-                    : "group flex w-full items-center gap-2.5 rounded-lg border border-dashed border-primary/25 bg-primary/[0.04] px-2.5 py-2 text-left transition-all hover:border-primary/50 hover:bg-primary/10 disabled:cursor-default disabled:opacity-45 disabled:hover:border-primary/25 disabled:hover:bg-primary/[0.04]"
+                    : alreadyOn
+                      // Solid rather than dashed: this one is ON, and it is
+                      // still live so it can be switched back off.
+                      ? "group flex w-full items-center gap-2.5 rounded-lg border border-primary/40 bg-primary/10 px-2.5 py-2 text-left transition-all hover:border-primary/60 hover:bg-primary/15"
+                      : "group flex w-full items-center gap-2.5 rounded-lg border border-dashed border-primary/25 bg-primary/[0.04] px-2.5 py-2 text-left transition-all hover:border-primary/50 hover:bg-primary/10 disabled:cursor-default disabled:opacity-45 disabled:hover:border-primary/25 disabled:hover:bg-primary/[0.04]"
                 }
               >
                 <div className="min-w-0 flex-1">
@@ -112,7 +131,21 @@ export default function AvailableOffers({
                       : "text-primary/70 group-hover:text-primary"
                   }`}
                 >
-                  {alreadyOn ? "Applied" : unavailable ? "Unavailable" : "Apply"}
+                  {/*
+                    An applied row reads "Applied" at rest and "Remove" on
+                    hover or keyboard focus, so the state is what you see until
+                    you go to act on it.
+                  */}
+                  {alreadyOn ? (
+                    <>
+                      <span className="group-hover:hidden group-focus-visible:hidden">Applied</span>
+                      <span className="hidden group-hover:inline group-focus-visible:inline">Remove</span>
+                    </>
+                  ) : unavailable ? (
+                    "Unavailable"
+                  ) : (
+                    "Apply"
+                  )}
                 </span>
               </button>
             </li>

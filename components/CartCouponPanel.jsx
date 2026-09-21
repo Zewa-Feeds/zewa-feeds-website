@@ -29,6 +29,13 @@ export default function CartCouponPanel({
   error = "",
   success = "",
 }) {
+  /*
+   * Applied coupons the offers panel is not already showing — a privately
+   * typed code keeps its own row, an advertised one does not need a second.
+   */
+  const advertisedCodes = new Set(availableOffers.map((o) => o.code));
+  const couponsNotAdvertised = coupons.filter((c) => !advertisedCodes.has(c.code));
+
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); onSubmit(couponInput); }}
@@ -52,14 +59,15 @@ export default function CartCouponPanel({
       </div>
 
       {/*
-        Tapping a code APPLIES it, here and at checkout alike. The Remove
-        control below undoes it in one tap, so there is nothing to confirm.
+        Tapping a code APPLIES it, here and at checkout alike; tapping an
+        applied row takes it back off, so there is nothing to confirm.
       */}
       <AvailableOffers
         offers={availableOffers}
         appliedCodes={appliedCodes}
         unavailableReasons={unavailableReasons}
         onSelect={onSubmit}
+        onRemove={onRemoveCoupon}
         disabled={applying}
       />
 
@@ -84,8 +92,11 @@ export default function CartCouponPanel({
       {/*
         Every promotion the SERVER applied, not what was typed, so the list can
         never imply a discount that is not in the total.
+
+        Advertised codes are skipped: the offers panel above already shows them
+        as applied, and listing them again repeated the same coupon twice.
       */}
-      {coupons.map((c) => (
+      {couponsNotAdvertised.map((c) => (
         <div
           key={c.code}
           className="flex items-center justify-between gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-[11px] text-primary font-[Montserrat]"

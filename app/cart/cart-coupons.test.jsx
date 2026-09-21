@@ -138,11 +138,14 @@ describe("available offers on the cart", () => {
     });
     render(<CartPage />);
 
+    // The row stays live: it is the only remove control an advertised code
+    // has, now that the duplicate chip below is gone.
     const btn = await offerButton("SPECIAL10");
-    expect(btn.disabled).toBe(true);
+    expect(btn.disabled).toBe(false);
     expect(within(btn).getByText("Applied")).toBeTruthy();
     fireEvent.click(btn);
     expect(mockCartState.applyCoupon).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockCartState.removeCoupon).toHaveBeenCalledWith("SPECIAL10"));
   });
 
   it("shows the offers on mobile without scrolling past the whole order", async () => {
@@ -252,8 +255,10 @@ describe("applied coupons", () => {
     });
     render(<CartPage />);
 
-    expect(await firstText(/applied \(10% off\)/)).toBeTruthy();
-    fireEvent.click(screen.getAllByLabelText("Remove SPECIAL10")[0]);
+    // SPECIAL10 is advertised, so it is shown once — in the offers panel —
+    // and that row is what removes it.
+    const offer = (await screen.findAllByRole("button", { name: /^SPECIAL10/ }))[0];
+    fireEvent.click(offer);
     await waitFor(() => expect(mockCartState.removeCoupon).toHaveBeenCalledWith("SPECIAL10"));
   });
 
@@ -315,7 +320,7 @@ describe("applied coupons", () => {
     await firstText(/Available offers/i);
 
     const offer = screen.getAllByRole("button", { name: /^SPECIAL10/ })[0];
-    expect(offer.disabled).toBe(true);
+    expect(offer.disabled).toBe(false);
     expect(within(offer).getByText(/^Applied$/i)).toBeTruthy();
   });
 });
