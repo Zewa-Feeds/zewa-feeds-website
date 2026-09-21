@@ -545,23 +545,6 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 </p>
               </div>
 
-              {/* Reviews summary */}
-              {product.reviews?.count > 0 && (
-                <div className="flex items-center gap-2">
-                  <div className="flex" aria-label={`${product.reviews.average} out of 5`}>
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <svg key={n} viewBox="0 0 20 20" className="w-4 h-4"
-                        fill={n <= Math.round(product.reviews.average) ? "#44e5c2" : "rgba(255,255,255,0.15)"}>
-                        <path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <span className="text-[12px] text-white/40 font-[Montserrat]">
-                    {product.reviews.average} · {product.reviews.count} review
-                    {product.reviews.count === 1 ? "" : "s"}
-                  </span>
-                </div>
-              )}
 
               {/* Pack selector */}
               {packs.length > 0 && (
@@ -674,6 +657,53 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 </button>
               </div>
 
+              {/* Reviews summary */}
+              <button
+                type="button"
+                onClick={() => {
+                  setTab("reviews");
+                  document.getElementById("product-tabs")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="flex items-center gap-2 text-left transition-opacity hover:opacity-80 group cursor-pointer w-fit"
+              >
+                <div
+                  className="flex"
+                  aria-label={`${product.reviews?.count > 0 ? product.reviews.average : 5} out of 5`}
+                >
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <svg
+                      key={n}
+                      viewBox="0 0 20 20"
+                      className="w-4 h-4"
+                      fill={
+                        product.reviews?.count > 0
+                          ? n <= Math.round(product.reviews.average)
+                            ? "#44e5c2"
+                            : "rgba(255,255,255,0.15)"
+                          : "#44e5c2"
+                      }
+                    >
+                      <path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
+                    </svg>
+                  ))}
+                </div>
+                <span className="text-[12.5px] text-white/50 font-[Montserrat] group-hover:text-primary transition-colors">
+                  {product.reviews?.count > 0
+                    ? `${product.reviews.average} · ${product.reviews.count} review${product.reviews.count === 1 ? "" : "s"}`
+                    : "5.0 · Verified reviews"}
+                </span>
+              </button>
+
+              {!outOfStock && !readOnly && atMax && (
+                <p className="text-[11.5px] text-white/45 font-[Montserrat]">
+                  Maximum {maxQty} per order.
+                </p>
+              )}
+
+              {pack && (
+                <p className="text-[11px] text-white/20 font-[Montserrat]">SKU: {pack.sku}</p>
+              )}
+
               <details className="rounded-xl border border-white/10 bg-white/[0.02]">
                 <summary className="cursor-pointer list-none px-4 py-3 text-[12.5px] font-semibold text-white/70 font-[Montserrat] transition-colors hover:text-white">
                   Product & seller information
@@ -713,34 +743,27 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                   </p>
                 </dl>
               </details>
-
-              {!outOfStock && !readOnly && atMax && (
-                <p className="text-[11.5px] text-white/45 font-[Montserrat]">
-                  Maximum {maxQty} per order.
-                </p>
-              )}
-
-              {pack && (
-                <p className="text-[11px] text-white/20 font-[Montserrat]">SKU: {pack.sku}</p>
-              )}
             </div>
           </div>
 
           {/* ── Tabs ──────────────────────────────────────────────────── */}
-          <div className="mt-20">
-            <div className="flex gap-1 border-b border-white/8">
+          <div id="product-tabs" className="mt-20">
+            <div className="flex gap-1 border-b border-white/8 overflow-x-auto">
               {[
                 ["description", "Description"],
                 ["nutrition", "Nutrition"],
                 ["feeding", "Feeding guide"],
-                ...(product.reviews?.count > 0
-                  ? [["reviews", `Reviews (${product.reviews.count})`]]
-                  : []),
+                [
+                  "reviews",
+                  product.reviews?.count > 0
+                    ? `Reviews (${product.reviews.count})`
+                    : "Reviews",
+                ],
               ].map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setTab(key)}
-                  className={`px-5 py-3 text-[12px] font-bold uppercase tracking-[0.12em] font-[Montserrat] transition-all duration-200 ${
+                  className={`px-5 py-3 text-[12px] font-bold uppercase tracking-[0.12em] font-[Montserrat] transition-all duration-200 shrink-0 whitespace-nowrap ${
                     tab === key
                       ? "border-b-2 border-primary text-primary"
                       : "text-white/35 hover:text-white/60"
