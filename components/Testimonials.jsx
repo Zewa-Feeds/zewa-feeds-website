@@ -1,4 +1,5 @@
 import { featuredReviews } from "@/lib/api";
+import { FALLBACK_REVIEWS, FALLBACK_RATING } from "@/lib/fallback-reviews";
 import TestimonialsMarquee from "./TestimonialsMarquee";
 
 /**
@@ -23,13 +24,20 @@ export default async function Testimonials() {
     data = await featuredReviews.list();
   } catch {
     /*
-     * Never break the home page over a testimonial. An unreachable API means
-     * the section is omitted entirely, which is the honest outcome: the
-     * alternative is inventing the reviews again.
+     * Fall back to the snapshot rather than deleting the section.
+     *
+     * Returning null here meant one unreachable API removed "What keepers say"
+     * from the home page entirely — which is what happens during any deploy
+     * where the storefront is newer than the running backend. The snapshot is
+     * the same real reviews, so the worst case is slightly stale, never
+     * invented.
      */
   }
 
-  const items = data?.items ?? [];
+  const items = data?.items?.length ? data.items : FALLBACK_REVIEWS;
+  const rating =
+    data?.average != null ? { average: data.average, count: data.count } : FALLBACK_RATING;
+
   if (items.length === 0) return null;
 
   return (
@@ -54,7 +62,7 @@ export default async function Testimonials() {
             hardcoded to "4.9 / 5 across 200+ reviews", which was both wrong
             and unfalsifiable.
           */}
-          {data?.average != null && (
+          {rating?.average != null && (
             <div className="flex items-center gap-2">
               {/*
                 Half stars, because rounding overstates: Math.round(4.5) is 5,
@@ -62,7 +70,7 @@ export default async function Testimonials() {
                 "4.5 / 5". The star row and the number now agree.
               */}
               {[1, 2, 3, 4, 5].map((n) => {
-                const filled = Math.min(1, Math.max(0, data.average - (n - 1)));
+                const filled = Math.min(1, Math.max(0, rating.average - (n - 1)));
                 return (
                   <span key={`header-star-${n}`} className="relative text-lg text-gray-300">
                     ★
@@ -77,7 +85,7 @@ export default async function Testimonials() {
                 );
               })}
               <span className="font-body-md text-[13px] text-gray-400 ml-2 tabular-nums">
-                {data.average} / 5 across {data.count.toLocaleString("en-IN")} ratings
+                {rating.average} / 5 across {rating.count.toLocaleString("en-IN")} ratings
               </span>
             </div>
           )}
