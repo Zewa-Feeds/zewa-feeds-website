@@ -128,8 +128,9 @@ export default function CheckoutPage() {
 
   /*
    * Advertised offer codes. Purely informational — a shopper still has to apply
-   * one, and the server re-validates it. A failure here is silent: not knowing
-   * what is on offer must never block checking out.
+   * one, and the server re-validates it. A failure never surfaces to the
+   * shopper (not knowing what is on offer must never block checking out) but it
+   * is logged: a failed fetch and an empty list look identical on screen.
    */
   const [availableOffers, setAvailableOffers] = useState([]);
   useEffect(() => {
@@ -137,7 +138,10 @@ export default function CheckoutPage() {
     offersApi
       .list()
       .then((list) => { if (!cancelled) setAvailableOffers(list ?? []); })
-      .catch(() => undefined);
+      // Still silent for the shopper, but no longer silent for us: an empty
+      // panel and a failed fetch look identical on screen, so the reason goes
+      // to the console rather than nowhere.
+      .catch((err) => { console.warn("Could not load available offers:", err); });
     return () => { cancelled = true; };
   }, []);
 
