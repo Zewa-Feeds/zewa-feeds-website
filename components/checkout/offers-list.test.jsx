@@ -114,4 +114,84 @@ describe("available offers", () => {
     const accordion = container.querySelector(".hidden.lg\\:flex");
     expect(accordion?.contains(mobileCopy)).toBeFalsy();
   });
+
+  /*
+   * A refused code must be removable.
+   *
+   * The applied rows render from `coupons`, so a code the server refused —
+   * "You have already used SPECIAL10" — appeared nowhere and had no Remove
+   * control, while still sitting in the cart and being re-sent on every
+   * attempt. The only way out was to abandon the order.
+   */
+  it("gives a selected-but-unapplied code its own Remove control", async () => {
+    const onRemoveCoupon = vi.fn();
+    render(
+      <OrderSummaryCard
+        {...base}
+        coupons={[]}
+        selectedCodes={["SPECIAL10"]}
+        onRemoveCoupon={onRemoveCoupon}
+      />,
+    );
+
+    expect(first(/SPECIAL10/)).toBeTruthy();
+    expect(first(/not applied/i)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove SPECIAL10" }));
+    expect(onRemoveCoupon).toHaveBeenCalledWith("SPECIAL10");
+  });
+
+  it("does not duplicate a code that the server did apply", () => {
+    render(
+      <OrderSummaryCard
+        {...base}
+        coupons={[{ code: "SPECIAL10", discountLabel: "10% off", discountPaise: 1850 }]}
+        selectedCodes={["SPECIAL10"]}
+        onRemoveCoupon={vi.fn()}
+      />,
+    );
+
+    // The applied row owns it; no "not applied" twin alongside.
+    expect(screen.queryByText(/not applied/i)).toBeNull();
+    expect(screen.getAllByRole("button", { name: "Remove SPECIAL10" })).toHaveLength(1);
+  });
+
+  /*
+   * An offer the customer cannot use must not invite a tap.
+   *
+   * The advertised list is anonymous, so it cannot know a code has already
+   * been used by THIS customer. The quote's issues do, and greying the offer
+   * out with the server's own reason beats a button whose only outcome is an
+   * error banner.
+   */
+  it("greys out a code the server refused, with its reason", () => {
+    render(
+      <OrderSummaryCard
+        {...base}
+        availableOffers={OFFERS}
+        coupons={[]}
+        issues={[
+          {
+            sku: "__coupon__",
+            code: "COUPON_ALREADY_USED",
+            couponCode: "SPECIAL10",
+            message: "You have already used SPECIAL10.",
+          },
+        ]}
+      />,
+    );
+
+    const offer = offerButton("SPECIAL10");
+    expect(offer.disabled).toBe(true);
+    expect(within(offer).getByText(/Unavailable/i)).toBeTruthy();
+    expect(within(offer).getByText(/already used SPECIAL10/i)).toBeTruthy();
+  });
+
+  it("leaves an offer with no issue fully usable", () => {
+    render(<OrderSummaryCard {...base} availableOffers={OFFERS} coupons={[]} issues={[]} />);
+
+    const offer = offerButton("SPECIAL10");
+    expect(offer.disabled).toBe(false);
+    expect(within(offer).getByText(/^Apply$/i)).toBeTruthy();
+  });
 });

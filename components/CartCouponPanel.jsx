@@ -22,6 +22,7 @@ export default function CartCouponPanel({
   onSubmit,
   availableOffers = [],
   appliedCodes = [],
+  unavailableReasons = {},
   coupons = [],
   onRemoveCoupon,
   applying = false,
@@ -57,6 +58,7 @@ export default function CartCouponPanel({
       <AvailableOffers
         offers={availableOffers}
         appliedCodes={appliedCodes}
+        unavailableReasons={unavailableReasons}
         onSelect={onSubmit}
         disabled={applying}
       />

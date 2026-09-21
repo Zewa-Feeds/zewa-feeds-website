@@ -23,6 +23,8 @@ export default function OrderSummaryCard({
   availableOffers = [],
   /** Codes the server has already applied, so they are not offered again. */
   appliedCodes = [],
+  /** Everything the customer selected, applied or not — see the pending rows. */
+  selectedCodes = [],
   couponInput,
   onCouponInputChange,
   couponError,
@@ -56,6 +58,19 @@ export default function OrderSummaryCard({
    * press twice for a code the shop is actively promoting; the applied coupon
    * still has a Remove control, so nothing here is one-way.
    */
+  /*
+   * Codes the server refused for THIS cart, as code -> reason.
+   *
+   * The advertised offers list is anonymous and cannot know that a customer
+   * has already used a code; the quote's issues do. Passing them down lets an
+   * unusable offer be greyed out with the real reason instead of inviting a
+   * tap that can only fail.
+   */
+  const unavailableReasons = issues.reduce((acc, i) => {
+    if (i.sku === "__coupon__" && i.couponCode) acc[i.couponCode] = i.message;
+    return acc;
+  }, {});
+
   const handleOfferSelect = async (code) => {
     setCouponApplying(true);
     await onSubmitCoupon(code);
@@ -113,6 +128,7 @@ export default function OrderSummaryCard({
         <AvailableOffers
           offers={availableOffers}
           appliedCodes={appliedCodes}
+          unavailableReasons={unavailableReasons}
           onSelect={handleOfferSelect}
           disabled={couponApplying}
         />
@@ -287,6 +303,7 @@ export default function OrderSummaryCard({
             <AvailableOffers
               offers={availableOffers}
               appliedCodes={appliedCodes}
+          unavailableReasons={unavailableReasons}
               onSelect={handleOfferSelect}
               disabled={couponApplying}
             />
@@ -354,6 +371,41 @@ export default function OrderSummaryCard({
             <span>Subtotal</span>
             <span className="font-semibold text-white/80 tabular-nums">{formatInr(subtotalPaise)}</span>
           </div>
+
+          {/*
+            Codes the customer selected that the server did NOT apply.
+            Without these a refused code had no Remove control at all — it sat
+            in the cart, was re-sent on every attempt, and the only way out was
+            to abandon the order. They claim no discount, so they carry a muted
+            style and say why rather than "applied".
+          */}
+          {selectedCodes
+            .filter((code) => !coupons.some((c) => c.code === code))
+            .map((code) => (
+              <div
+                key={`unapplied-${code}`}
+                className="flex items-center justify-between gap-2 rounded-xl border border-white/12 bg-white/[0.03] px-3 py-2 text-[11px] text-white/45 font-[Montserrat]"
+              >
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3.75m0 3.75h.008M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="truncate">
+                    <strong className="font-bold">{code}</strong> not applied
+                  </span>
+                </div>
+                {onRemoveCoupon && (
+                  <button
+                    type="button"
+                    onClick={() => onRemoveCoupon(code)}
+                    aria-label={`Remove ${code}`}
+                    className="shrink-0 rounded-md px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-white/50 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
 
           {discountPaise > 0 && (
             <div className="flex justify-between text-primary">

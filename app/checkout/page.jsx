@@ -1510,6 +1510,7 @@ export default function CheckoutPage() {
                 freeShippingFromCoupon={freeShippingFromCoupon}
                 availableOffers={availableOffers}
                 appliedCodes={(coupons ?? []).map((c) => c.code)}
+                selectedCodes={couponCodes ?? []}
                 couponInput={couponInput}
                 onCouponInputChange={setCouponInput}
                 couponError={couponError}

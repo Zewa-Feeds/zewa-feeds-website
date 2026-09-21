@@ -19,7 +19,7 @@ export default function CartPage() {
      * neither list. Reading `.map` off undefined here would take down the whole
      * cart over a promotion panel.
      */
-    coupons = [], applyCoupon, removeCoupon,
+    coupons = [], issues = [], applyCoupon, removeCoupon,
   } = useCart();
 
   /*
@@ -31,6 +31,12 @@ export default function CartPage() {
    * `coupons`), leaving the shopper unable to act on it at all.
    */
   const appliedCodes = (coupons ?? []).map((c) => c.code);
+
+  /* Codes the server refused for this cart, as code -> reason. */
+  const unavailableReasons = (issues ?? []).reduce((acc, i) => {
+    if (i.sku === "__coupon__" && i.couponCode) acc[i.couponCode] = i.message;
+    return acc;
+  }, {});
 
   const total = totalPaise > 0 ? totalPaise : Math.max(0, subtotalPaise - discountPaise);
 
@@ -117,6 +123,7 @@ export default function CartPage() {
       onSubmit={submitCoupon}
       availableOffers={availableOffers}
       appliedCodes={appliedCodes}
+      unavailableReasons={unavailableReasons}
       coupons={coupons}
       onRemoveCoupon={removeCoupon ? dropCoupon : undefined}
       applying={couponApplying}

@@ -17,6 +17,15 @@ import { formatInr } from "@/lib/api";
 export default function AvailableOffers({
   offers = [],
   appliedCodes = [],
+  /**
+   * Why the server refused a code, keyed by code.
+   *
+   * The advertised list is anonymous — it cannot know that THIS customer has
+   * already used a code. The cart quote does, so a refusal is passed down here
+   * and the offer is greyed out with the server's own reason instead of
+   * inviting a tap that can only fail.
+   */
+  unavailableReasons = {},
   onSelect,
   disabled = false,
 }) {
@@ -37,6 +46,8 @@ export default function AvailableOffers({
       <ul className="flex flex-col gap-1.5">
         {offers.map((offer) => {
           const alreadyOn = appliedCodes.includes(offer.code);
+          const refusedReason = alreadyOn ? null : unavailableReasons[offer.code];
+          const unavailable = Boolean(refusedReason);
           /*
            * The conditions are shown, not hidden in a tooltip. A code a customer
            * cannot use is worse than no code at all if they only find out after
@@ -52,27 +63,56 @@ export default function AvailableOffers({
             <li key={offer.code}>
               <button
                 type="button"
-                disabled={alreadyOn || disabled}
+                disabled={alreadyOn || unavailable || disabled}
                 onClick={() => onSelect?.(offer.code)}
-                className="group flex w-full items-center gap-2.5 rounded-lg border border-dashed border-primary/25 bg-primary/[0.04] px-2.5 py-2 text-left transition-all hover:border-primary/50 hover:bg-primary/10 disabled:cursor-default disabled:opacity-45 disabled:hover:border-primary/25 disabled:hover:bg-primary/[0.04]"
+                className={
+                  unavailable
+                    ? "flex w-full items-center gap-2.5 rounded-lg border border-dashed border-white/10 bg-white/[0.02] px-2.5 py-2 text-left disabled:cursor-not-allowed"
+                    : "group flex w-full items-center gap-2.5 rounded-lg border border-dashed border-primary/25 bg-primary/[0.04] px-2.5 py-2 text-left transition-all hover:border-primary/50 hover:bg-primary/10 disabled:cursor-default disabled:opacity-45 disabled:hover:border-primary/25 disabled:hover:bg-primary/[0.04]"
+                }
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                    <span className="font-mono text-[12px] font-bold uppercase tracking-wider text-primary">
+                    <span
+                      className={`font-mono text-[12px] font-bold uppercase tracking-wider ${
+                        unavailable ? "text-white/35" : "text-primary"
+                      }`}
+                    >
                       {offer.code}
                     </span>
-                    <span className="text-[11.5px] font-semibold text-white/85 font-[Montserrat]">
+                    <span
+                      className={`text-[11.5px] font-semibold font-[Montserrat] ${
+                        unavailable ? "text-white/30 line-through" : "text-white/85"
+                      }`}
+                    >
                       {offer.discountLabel}
                     </span>
                   </div>
-                  {conditions.length > 0 && (
-                    <p className="mt-0.5 text-[10.5px] text-white/40 font-[Montserrat]">
-                      {conditions.join(" · ")}
+                  {/*
+                    The server's own reason when it refused this code, which is
+                    more useful than the generic conditions — it says what is
+                    actually wrong for THIS customer.
+                  */}
+                  {unavailable ? (
+                    <p className="mt-0.5 text-[10.5px] text-white/35 font-[Montserrat]">
+                      {refusedReason}
                     </p>
+                  ) : (
+                    conditions.length > 0 && (
+                      <p className="mt-0.5 text-[10.5px] text-white/40 font-[Montserrat]">
+                        {conditions.join(" · ")}
+                      </p>
+                    )
                   )}
                 </div>
-                <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-primary/70 font-[Montserrat] group-hover:text-primary">
-                  {alreadyOn ? "Applied" : "Apply"}
+                <span
+                  className={`shrink-0 text-[10px] font-bold uppercase tracking-wider font-[Montserrat] ${
+                    unavailable
+                      ? "text-white/25"
+                      : "text-primary/70 group-hover:text-primary"
+                  }`}
+                >
+                  {alreadyOn ? "Applied" : unavailable ? "Unavailable" : "Apply"}
                 </span>
               </button>
             </li>
