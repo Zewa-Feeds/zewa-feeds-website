@@ -385,8 +385,22 @@ export default function OrderSummaryCard({
           ))}
         </form>
 
-        {/* Pricing Breakdown */}
-        <div className="flex flex-col gap-2.5 pt-4 border-t border-white/8 text-[13px] font-[Montserrat]">
+        {/*
+          Pricing Breakdown.
+
+          While the server re-prices, EVERY figure here is stale, not just the
+          shipping row that used to carry the only indicator — and on a cart
+          with no state picked yet that row is "Select state", so there was no
+          feedback at all. Dimming the whole block says "these numbers are
+          settling" without moving anything: a spinner that reflows the layout
+          on each quantity tap is worse than a quiet fade.
+        */}
+        <div
+          className={`flex flex-col gap-2.5 pt-4 border-t border-white/8 text-[13px] font-[Montserrat] transition-opacity duration-200 ${
+            validating ? "opacity-50" : "opacity-100"
+          }`}
+          aria-busy={validating || undefined}
+        >
           <div className="flex justify-between text-white/50">
             <span>Subtotal</span>
             <span className="font-semibold text-white/80 tabular-nums">{formatInr(subtotalPaise)}</span>
@@ -401,6 +415,11 @@ export default function OrderSummaryCard({
           */}
           {selectedCodes
             .filter((code) => !coupons.some((c) => c.code === code))
+            // An advertised code is already greyed out in the offers panel with
+            // the reason it was refused, so a second "not applied" row below
+            // says nothing new. A privately typed code has no row up there and
+            // would otherwise vanish with no way to take it off.
+            .filter((code) => !advertisedCodes.has(code))
             .map((code) => (
               <div
                 key={`unapplied-${code}`}

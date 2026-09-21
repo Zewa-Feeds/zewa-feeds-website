@@ -268,14 +268,36 @@ export default function CheckoutPage() {
     setAutoDetectedBadge("");
   };
 
-  // Re-price when state changes for state-wise shipping & tax calculation
-  const lastPricedStateRef = useRef("");
+  /*
+   * Re-price when the DESTINATION changes, for state-wise shipping and tax.
+   *
+   * The guard covers the email as well as the state. Both are sent to the
+   * quote, and both are in the dependency list, so guarding on the state alone
+   * meant every keystroke in the email field re-priced the whole cart — a
+   * request per character, each one landing on a total the shopper is reading.
+   * `validate` is also rebuilt whenever the cart lines or codes change, so the
+   * effect re-runs on every quantity tap too; comparing what was actually
+   * priced makes all of those no-ops.
+   */
+  const lastPricedDestinationRef = useRef(null);
   useEffect(() => {
     const trimmed = form.state?.trim() || "";
-    if (trimmed !== lastPricedStateRef.current) {
-      lastPricedStateRef.current = trimmed;
-      void validate({ state: trimmed || undefined, email: form.email || undefined });
-    }
+    const email = form.email?.trim() || "";
+    /*
+     * A half-typed address is not a destination. The email only changes the
+     * quote once it is a real one (first-order offers key off the customer),
+     * so an incomplete one is treated as absent rather than re-pricing the
+     * cart on the way to typing it.
+     */
+    const pricedEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? email : "";
+    const destination = `${trimmed}|${pricedEmail}`;
+    if (destination === lastPricedDestinationRef.current) return;
+    // Skip the first run: the cart's own mount effect has already priced it,
+    // and an empty destination adds nothing the server does not assume.
+    const isFirst = lastPricedDestinationRef.current === null;
+    lastPricedDestinationRef.current = destination;
+    if (isFirst && !trimmed) return;
+    void validate({ state: trimmed || undefined, email: pricedEmail || undefined });
   }, [form.state, form.email, validate]);
 
   /*
