@@ -38,10 +38,10 @@ export default function TestimonialsMarquee({ items = [] }) {
         {doubled.map((t, i) => (
           <div
             key={`${t.author}-${i}`}
-            className="w-[340px] sm:w-[380px] shrink-0 bg-white border border-gray-100 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 p-7 flex flex-col justify-between gap-6"
+            className="w-[340px] sm:w-[380px] shrink-0 bg-white border border-gray-100 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 p-5 sm:p-6 flex flex-col justify-between gap-4"
           >
             <div>
-              <div className="text-primary text-[40px] font-display-lg leading-none mb-4 opacity-50">
+              <div className="text-primary text-[28px] font-display-lg leading-none mb-2 opacity-50">
                 &ldquo;
               </div>
               {t.title && (
@@ -50,16 +50,16 @@ export default function TestimonialsMarquee({ items = [] }) {
                 </p>
               )}
               {/*
-                Clamped rather than truncated with an ellipsis: these are real
-                reviews of real length, and a hard cut mid-sentence reads worse
-                than a few lines that simply end.
+                Clamped to four lines. Real reviews vary wildly in length — one
+                runs to a paragraph — and letting the longest one set the card
+                height made the whole section far taller than it needed to be.
               */}
-              <p className="font-body-md text-[14px] sm:text-[15px] text-gray-600 leading-relaxed line-clamp-5">
+              <p className="font-body-md text-[14px] sm:text-[15px] text-gray-600 leading-relaxed line-clamp-4">
                 {t.body}
               </p>
             </div>
 
-            <div className="flex items-center gap-4 pt-5 border-t border-gray-100">
+            <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
               <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
                 <span className="font-label-caps text-[11px] text-primary font-bold">
                   {initialsOf(t.author)}

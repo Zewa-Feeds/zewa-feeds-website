@@ -41,12 +41,12 @@ export default async function Testimonials() {
   if (items.length === 0) return null;
 
   return (
-    <section className="bg-[#f8faf9] py-20 sm:py-28 overflow-hidden">
+    <section className="bg-[#f8faf9] py-12 sm:py-16 overflow-hidden">
       {/* Header */}
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 mb-14">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 mb-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-2">
               <div className="w-6 h-px bg-primary" />
               <span className="font-label-caps text-label-caps text-primary tracking-[0.18em]">
                 WHAT KEEPERS SAY
