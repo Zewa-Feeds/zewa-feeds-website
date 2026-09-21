@@ -675,12 +675,11 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                       key={n}
                       viewBox="0 0 20 20"
                       className="w-4 h-4"
+                      /* Unrated shows empty stars, not five filled ones. */
                       fill={
-                        product.reviews?.count > 0
-                          ? n <= Math.round(product.reviews.average)
-                            ? "#44e5c2"
-                            : "rgba(255,255,255,0.15)"
-                          : "#44e5c2"
+                        product.reviews?.count > 0 && n <= Math.round(product.reviews.average)
+                          ? "#44e5c2"
+                          : "rgba(255,255,255,0.15)"
                       }
                     >
                       <path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
@@ -688,9 +687,14 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                   ))}
                 </div>
                 <span className="text-[12.5px] text-white/50 font-[Montserrat] group-hover:text-primary transition-colors">
+                  {/*
+                    A product with no ratings said "5.0 · Verified reviews",
+                    which invented both the score and the verification. It now
+                    says so plainly.
+                  */}
                   {product.reviews?.count > 0
-                    ? `${product.reviews.average} · ${product.reviews.count} review${product.reviews.count === 1 ? "" : "s"}`
-                    : "5.0 · Verified reviews"}
+                    ? `${product.reviews.average} · ${product.reviews.count} rating${product.reviews.count === 1 ? "" : "s"}`
+                    : "No ratings yet"}
                 </span>
               </button>
 
@@ -879,7 +883,24 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                                 Verified purchase
                               </span>
                             )}
+                            {/*
+                              Reviews carried over from where these products
+                              sold before. Said plainly: passing someone else's
+                              review off as one left here would be a lie, and a
+                              shopper weighing it deserves to know where it came
+                              from.
+                            */}
+                            {r.source && (
+                              <span className="rounded-full border border-white/12 px-2 py-0.5 text-[10px] font-semibold text-white/40 font-[Montserrat]">
+                                Reviewed on {r.source}
+                              </span>
+                            )}
                           </div>
+                          {r.title && (
+                            <p className="mb-1 text-[13px] font-bold text-white/80 font-[Montserrat]">
+                              {r.title}
+                            </p>
+                          )}
                           <p className="text-[13px] leading-relaxed text-white/55 font-[Montserrat]">
                             {r.body}
                           </p>

@@ -409,6 +409,24 @@ function ProductCard({ p }) {
                 </span>
               )}
             </div>
+            {/*
+              Rating under the price: every rating behind it, carried over
+              ratings included, so a card shows the product's real standing
+              rather than looking unreviewed because the site is new.
+            */}
+            {p.rating?.average != null && (
+              <div className="mt-1.5 flex items-center gap-1.5">
+                <svg viewBox="0 0 20 20" className="h-3 w-3 shrink-0" fill="#44e5c2">
+                  <path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
+                </svg>
+                <span className="text-[11.5px] font-semibold text-white/70 font-[Montserrat] tabular-nums">
+                  {p.rating.average}
+                </span>
+                <span className="text-[11px] text-white/35 font-[Montserrat] tabular-nums">
+                  ({p.rating.count})
+                </span>
+              </div>
+            )}
             <QtyButton product={p} />
           </>
         ) : (
