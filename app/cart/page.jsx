@@ -129,6 +129,7 @@ export default function CartPage() {
       availableOffers={availableOffers}
       appliedCodes={appliedCodes}
       unavailableReasons={unavailableReasons}
+      subtotalPaise={subtotalPaise}
       coupons={coupons}
       onRemoveCoupon={removeCoupon ? dropCoupon : undefined}
       applying={couponApplying}

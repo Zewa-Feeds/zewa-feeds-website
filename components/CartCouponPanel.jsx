@@ -23,6 +23,8 @@ export default function CartCouponPanel({
   availableOffers = [],
   appliedCodes = [],
   unavailableReasons = {},
+  /** Cart subtotal, for the minimum-spend shortfall on an offer row. */
+  subtotalPaise = 0,
   coupons = [],
   onRemoveCoupon,
   applying = false,
@@ -66,6 +68,7 @@ export default function CartCouponPanel({
         offers={availableOffers}
         appliedCodes={appliedCodes}
         unavailableReasons={unavailableReasons}
+        subtotalPaise={subtotalPaise}
         onSelect={onSubmit}
         onRemove={onRemoveCoupon}
         disabled={applying}

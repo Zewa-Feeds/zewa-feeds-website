@@ -98,7 +98,19 @@ describe("available offers on the cart", () => {
     expect(await firstText("Free shipping")).toBeTruthy();
     // A code that will be refused should say why BEFORE it is tapped.
     expect(await firstText(/First order only/)).toBeTruthy();
-    expect(await firstText(/Min ₹499/)).toBeTruthy();
+    /*
+     * This cart is ₹185 and ZEWA1 needs ₹499, so the row states the GAP rather
+     * than the bare minimum: "Min ₹499" leaves the shopper to do the
+     * subtraction, and the point of the line is to tell them what to do next.
+     */
+    expect(await firstText(/Add ₹314 more/)).toBeTruthy();
+  });
+
+  it("does not grey out an offer the cart already clears", async () => {
+    // ₹185 clears SPECIAL10's zero minimum, so it stays applicable.
+    render(<CartPage />);
+    const btn = await offerButton("SPECIAL10");
+    expect(btn.disabled).toBe(false);
   });
 
   it("renders no offers panel when the shop advertises nothing", async () => {

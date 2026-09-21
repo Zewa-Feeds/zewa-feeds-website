@@ -139,6 +139,7 @@ export default function OrderSummaryCard({
           offers={availableOffers}
           appliedCodes={appliedCodes}
           unavailableReasons={unavailableReasons}
+          subtotalPaise={subtotalPaise}
           onSelect={handleOfferSelect}
           onRemove={onRemoveCoupon}
           disabled={couponApplying}
@@ -315,6 +316,7 @@ export default function OrderSummaryCard({
               offers={availableOffers}
               appliedCodes={appliedCodes}
               unavailableReasons={unavailableReasons}
+              subtotalPaise={subtotalPaise}
               onSelect={handleOfferSelect}
               onRemove={onRemoveCoupon}
               disabled={couponApplying}

@@ -223,4 +223,54 @@ describe("available offers", () => {
     expect(offer.disabled).toBe(false);
     expect(within(offer).getByText(/^Apply$/i)).toBeTruthy();
   });
+
+  /*
+   * Greying out used to depend on the SERVER refusing a code, which it only
+   * does for a code the shopper submitted. An untried offer therefore looked
+   * applicable however short the cart was. The minimum spend is checked here
+   * instead, so the row is honest before it is tapped.
+   */
+  describe("minimum spend, before the code is tried", () => {
+    it("greys out an offer the cart is short of, and says by how much", () => {
+      render(
+        <OrderSummaryCard {...base} subtotalPaise={20000} availableOffers={OFFERS}
+          onCouponInputChange={vi.fn()} />,
+      );
+      const btn = offerButton("ZEWA1");
+      expect(btn.disabled).toBe(true);
+      // The line appends other conditions, so match across child elements.
+      expect(
+        screen.getAllByText((_t, el) => /Add ₹299 more/.test(el?.textContent || ""))[0],
+      ).toBeTruthy();
+    });
+
+    it("keeps an offer live once the cart clears its minimum", () => {
+      render(
+        <OrderSummaryCard {...base} subtotalPaise={60000} availableOffers={OFFERS}
+          onCouponInputChange={vi.fn()} />,
+      );
+      expect(offerButton("ZEWA1").disabled).toBe(false);
+    });
+
+    it("still shows conditions the shortfall does not cover", () => {
+      render(
+        <OrderSummaryCard {...base} subtotalPaise={20000} availableOffers={OFFERS}
+          onCouponInputChange={vi.fn()} />,
+      );
+      // "First order only" decides eligibility even once the minimum is met.
+      expect(first(/First order only/)).toBeTruthy();
+    });
+
+    it("puts usable offers above ones the cart cannot take", () => {
+      render(
+        <OrderSummaryCard {...base} subtotalPaise={20000} availableOffers={OFFERS}
+          onCouponInputChange={vi.fn()} />,
+      );
+      const codes = screen
+        .getAllByRole("button", { name: /^(SPECIAL10|ZEWA1)/ })
+        .map((b) => b.getAttribute("aria-label").split(" ")[0]);
+      // SPECIAL10 has no minimum; ZEWA1 is out of reach at this subtotal.
+      expect(codes.slice(0, 2)).toEqual(["SPECIAL10", "ZEWA1"]);
+    });
+  });
 });
