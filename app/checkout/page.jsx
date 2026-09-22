@@ -219,12 +219,27 @@ export default function CheckoutPage() {
         lastName: f.lastName || customer.lastName || "",
         email: f.email || customer.email || "",
         phone: f.phone || defaultAddress?.phone || customer.phone || "",
-        address: f.address || (defaultAddress
-          ? [defaultAddress.line1, defaultAddress.line2].filter(Boolean).join(", ")
-          : ""),
-        city: f.city || defaultAddress?.city || "",
-        state: f.state || defaultAddress?.state || "",
-        pincode: f.pincode || defaultAddress?.pincode || "",
+        /*
+         * The PRESELECTED address wins over whatever the form was restored
+         * with. These used to be `f.city || defaultAddress?.city`, so a form
+         * rehydrated from sessionStorage kept its old address while the picker
+         * above highlighted the default one — the radio said Kerala and the
+         * quote was priced for somewhere else, which is why the total looked
+         * stuck when the address changed.
+         */
+        ...(defaultAddress
+          ? {
+              address: [defaultAddress.line1, defaultAddress.line2].filter(Boolean).join(", "),
+              city: defaultAddress.city ?? "",
+              state: defaultAddress.state ?? "",
+              pincode: defaultAddress.pincode ?? "",
+            }
+          : {
+              address: f.address,
+              city: f.city,
+              state: f.state,
+              pincode: f.pincode,
+            }),
       }));
     })();
 
