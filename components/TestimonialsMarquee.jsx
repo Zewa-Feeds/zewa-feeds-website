@@ -1,5 +1,7 @@
 "use client";
 
+import StarRating from "./StarRating";
+
 /**
  * The scrolling row of review cards.
  *
@@ -80,16 +82,7 @@ export default function TestimonialsMarquee({ items = [] }) {
                 </div>
               </div>
               {/* The rating this reviewer GAVE, not a decorative five. */}
-              <div className="ml-auto flex gap-0.5 shrink-0">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <span
-                    key={`card-star-${i}-${s}`}
-                    className={s <= t.rating ? "text-primary text-[12px]" : "text-gray-200 text-[12px]"}
-                  >
-                    ★
-                  </span>
-                ))}
-              </div>
+              <StarRating value={t.rating} size="w-3 h-3" className="ml-auto shrink-0" emptyFill="rgba(0,0,0,0.14)" />
             </div>
           </div>
         ))}

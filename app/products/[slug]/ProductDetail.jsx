@@ -5,6 +5,7 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReviewForm from "@/components/ReviewForm";
+import StarRating from "@/components/StarRating";
 import { useCart } from "@/lib/cartContext";
 import { getSortedNutritionEntries, isCutout, packOptionLabels, PLACEHOLDER_IMAGE } from "@/app/products/adapters";
 import { discountPct, formatInr } from "@/lib/api";
@@ -567,7 +568,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                         <div className="text-[14px] font-semibold text-white font-[Montserrat]">
                           {packLabels[i] || p.pack}
                         </div>
-                        <div className="text-[12px] text-white/45 font-[Montserrat]">
+                        <div className="text-[12.5px] text-white/65 font-[Montserrat]">
                           {formatInr(p.pricePaise)}
                         </div>
                         {!p.inStock && (
@@ -589,7 +590,13 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                   </span>
                   {pack.mrpPaise > pack.pricePaise && (
                     <>
-                      <span className="text-[15px] text-white/30 line-through font-[Montserrat]">
+                      {/*
+                        MRP at 30% opacity was unreadable on this background.
+                        A struck-out price still has to be legible — it is the
+                        number the discount is measured against, and a saving
+                        nobody can read is not a saving they can judge.
+                      */}
+                      <span className="text-[16px] text-white/55 line-through decoration-white/40 font-[Montserrat]">
                         {formatInr(pack.mrpPaise)}
                       </span>
                       <span className="rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-bold text-primary font-[Montserrat]">
@@ -666,26 +673,12 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 }}
                 className="flex items-center gap-2 text-left transition-opacity hover:opacity-80 group cursor-pointer w-fit"
               >
-                <div
-                  className="flex"
-                  aria-label={`${product.reviews?.count > 0 ? product.reviews.average : 5} out of 5`}
-                >
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <svg
-                      key={n}
-                      viewBox="0 0 20 20"
-                      className="w-4 h-4"
-                      /* Unrated shows empty stars, not five filled ones. */
-                      fill={
-                        product.reviews?.count > 0 && n <= Math.round(product.reviews.average)
-                          ? "#44e5c2"
-                          : "rgba(255,255,255,0.15)"
-                      }
-                    >
-                      <path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
-                    </svg>
-                  ))}
-                </div>
+                {/*
+                  Half-filled, not rounded: Math.round(4.5) is 5, so a 4.5
+                  average drew five solid stars beside the text "4.5".
+                  Unrated shows five empty stars rather than five filled ones.
+                */}
+                <StarRating value={product.reviews?.count > 0 ? product.reviews.average : 0} size="w-4 h-4" />
                 <span className="text-[12.5px] text-white/50 font-[Montserrat] group-hover:text-primary transition-colors">
                   {/*
                     A product with no ratings said "5.0 · Verified reviews",
@@ -867,14 +860,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                       {product.reviews.items.map((r, i) => (
                         <div key={i} className="rounded-xl border border-white/8 bg-white/3 p-5">
                           <div className="mb-2 flex items-center gap-3">
-                            <div className="flex">
-                              {[1, 2, 3, 4, 5].map((n) => (
-                                <svg key={n} viewBox="0 0 20 20" className="w-3.5 h-3.5"
-                                  fill={n <= r.rating ? "#44e5c2" : "rgba(255,255,255,0.15)"}>
-                                  <path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
-                                </svg>
-                              ))}
-                            </div>
+                            <StarRating value={r.rating} size="w-3.5 h-3.5" />
                             <span className="text-[12px] font-semibold text-white/70 font-[Montserrat]">
                               {r.author}
                             </span>

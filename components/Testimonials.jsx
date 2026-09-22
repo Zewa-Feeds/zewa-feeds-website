@@ -1,5 +1,6 @@
 import { featuredReviews } from "@/lib/api";
 import { FALLBACK_REVIEWS, FALLBACK_RATING } from "@/lib/fallback-reviews";
+import StarRating from "./StarRating";
 import TestimonialsMarquee from "./TestimonialsMarquee";
 
 /**
@@ -64,26 +65,8 @@ export default async function Testimonials() {
           */}
           {rating?.average != null && (
             <div className="flex items-center gap-2">
-              {/*
-                Half stars, because rounding overstates: Math.round(4.5) is 5,
-                so a 4.5 average drew five full stars right beside the text
-                "4.5 / 5". The star row and the number now agree.
-              */}
-              {[1, 2, 3, 4, 5].map((n) => {
-                const filled = Math.min(1, Math.max(0, rating.average - (n - 1)));
-                return (
-                  <span key={`header-star-${n}`} className="relative text-lg text-gray-300">
-                    ★
-                    <span
-                      className="absolute inset-0 overflow-hidden text-primary"
-                      style={{ width: `${filled * 100}%` }}
-                      aria-hidden="true"
-                    >
-                      ★
-                    </span>
-                  </span>
-                );
-              })}
+              {/* Shared with the product pages, so one rating looks the same everywhere. */}
+              <StarRating value={rating.average} size="w-4 h-4" emptyFill="rgba(0,0,0,0.14)" />
               <span className="font-body-md text-[13px] text-gray-400 ml-2 tabular-nums">
                 {rating.average} / 5 across {rating.count.toLocaleString("en-IN")} ratings
               </span>
