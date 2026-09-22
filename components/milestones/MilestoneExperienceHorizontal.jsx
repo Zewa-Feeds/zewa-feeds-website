@@ -91,46 +91,66 @@ const MILESTONES = [
 export default function MilestoneExperienceHorizontal() {
   const sliderRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
   const dragStartX = useRef(0);
   const dragStartScrollLeft = useRef(0);
 
-  // Update progress on scroll
-  const handleScroll = useCallback(() => {
+  // Update scroll boundaries & active card index
+  const updateScrollState = useCallback(() => {
     if (!sliderRef.current) return;
-    const { scrollLeft, scrollWidth } = sliderRef.current;
-    const cardWidth = scrollWidth / MILESTONES.length;
-    const index = Math.round(scrollLeft / cardWidth);
-    setCurrentIndex(Math.min(Math.max(index, 0), MILESTONES.length - 1));
+    const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
+
+    // Threshold of 8px to handle sub-pixel rounding
+    setCanScrollLeft(scrollLeft > 8);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 8);
+
+    // Calculate active milestone index based on card positions
+    const cards = sliderRef.current.children;
+    if (cards && cards.length > 0) {
+      let activeIndex = 0;
+      let minDiff = Infinity;
+      for (let i = 0; i < cards.length; i++) {
+        const card = cards[i];
+        const diff = Math.abs(card.offsetLeft - scrollLeft);
+        if (diff < minDiff) {
+          minDiff = diff;
+          activeIndex = i;
+        }
+      }
+      setCurrentIndex(activeIndex);
+    }
   }, []);
 
   useEffect(() => {
     const slider = sliderRef.current;
     if (!slider) return;
-    slider.addEventListener("scroll", handleScroll, { passive: true });
-    return () => slider.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
 
-  // Jump to specific index smoothly
-  const scrollToIndex = (index) => {
-    if (!sliderRef.current) return;
-    const container = sliderRef.current;
-    const targetCard = container.children[index];
-    if (targetCard) {
-      targetCard.scrollIntoView({
-        behavior: "smooth",
-        inline: "start",
-        block: "nearest",
-      });
-    }
-  };
+    updateScrollState();
+    slider.addEventListener("scroll", updateScrollState, { passive: true });
+    window.addEventListener("resize", updateScrollState);
+
+    return () => {
+      slider.removeEventListener("scroll", updateScrollState);
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, [updateScrollState]);
 
   const handlePrev = () => {
-    scrollToIndex(Math.max(0, currentIndex - 1));
+    if (!sliderRef.current) return;
+    const container = sliderRef.current;
+    const firstCard = container.querySelector(".snap-start");
+    const scrollAmount = firstCard ? firstCard.offsetWidth + 20 : 340;
+    container.scrollBy({ left: -scrollAmount, behavior: "smooth" });
   };
 
   const handleNext = () => {
-    scrollToIndex(Math.min(MILESTONES.length - 1, currentIndex + 1));
+    if (!sliderRef.current) return;
+    const container = sliderRef.current;
+    const firstCard = container.querySelector(".snap-start");
+    const scrollAmount = firstCard ? firstCard.offsetWidth + 20 : 340;
+    container.scrollBy({ left: scrollAmount, behavior: "smooth" });
   };
 
   // Mouse Drag-to-scroll on slider
@@ -154,9 +174,10 @@ export default function MilestoneExperienceHorizontal() {
   };
 
   return (
-    <div className="relative mx-auto max-w-7xl px-6 py-12 sm:py-16">
+    <div className="relative mx-auto max-w-7xl px-4 sm:px-10 lg:px-14 py-12 sm:py-16">
       {/* ── HEADER ─────────────────────────────────────────────────── */}
-      <div className="border-b border-white/10 pb-6 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-white/10 pb-6 mb-8">
+        <div>
           <div className="mb-4 flex items-center gap-3">
             <div className="h-px w-6 bg-primary" />
             <span className="font-label-caps text-label-caps tracking-[0.2em] text-primary">
@@ -169,57 +190,61 @@ export default function MilestoneExperienceHorizontal() {
           >
             Key events, National and International recognitions
           </h2>
-      </div>
+        </div>
 
-      {/*
-        Controls sit in their own row directly above the strip.
-
-        They were tried floating on the strip's left and right edges, which
-        reads well until you notice the section clips overflow and the gutter
-        is only 24px — so the buttons landed ON the cards, over a year heading
-        and a bullet. Sitting just above keeps them beside what they move
-        without covering any of it, and gives room for the position counter.
-      */}
-      <div className="mb-3 flex items-center justify-end gap-3">
-        <span className="font-label-caps text-[11px] tracking-[0.18em] text-white/40 tabular-nums">
-          {String(currentIndex + 1).padStart(2, "0")} / {String(MILESTONES.length).padStart(2, "0")}
-        </span>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handlePrev}
-            disabled={currentIndex === 0}
-            aria-label="Previous milestone"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/70 transition-all duration-200 hover:border-primary hover:bg-primary/10 hover:text-primary active:scale-95 disabled:opacity-25 disabled:pointer-events-none"
-          >
-            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-              <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <button
-            onClick={handleNext}
-            disabled={currentIndex === MILESTONES.length - 1}
-            aria-label="Next milestone"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/70 transition-all duration-200 hover:border-primary hover:bg-primary/10 hover:text-primary active:scale-95 disabled:opacity-25 disabled:pointer-events-none"
-          >
-            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
-              <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+        {/* Milestone Position Counter */}
+        <div className="flex items-center gap-3 shrink-0 pb-1 self-start sm:self-end">
+          <span className="font-label-caps text-[11px] sm:text-[12px] tracking-[0.2em] text-white/50 tabular-nums">
+            {String(currentIndex + 1).padStart(2, "0")} / {String(MILESTONES.length).padStart(2, "0")}
+          </span>
         </div>
       </div>
 
-      {/* ── HORIZONTAL YEARWISE CARDS STRIP ──────────────────────────── */}
-      <div
-        ref={sliderRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUpOrLeave}
-        onMouseLeave={handleMouseUpOrLeave}
-        className={`flex items-stretch gap-4 sm:gap-5 overflow-x-auto pb-4 pt-1 no-scrollbar snap-x snap-mandatory ${
-          isDraggingSlider ? "cursor-grabbing select-none" : "cursor-grab"
-        }`}
-        style={{ scrollBehavior: isDraggingSlider ? "auto" : "smooth" }}
-      >
+      {/* ── CAROUSEL WITH SADDLE NAVIGATION ARROWS ─────────────────────── */}
+      <div className="relative">
+        {/* Left Navigation Arrow */}
+        <button
+          type="button"
+          onClick={handlePrev}
+          disabled={!canScrollLeft}
+          aria-label="Previous milestone"
+          className={`absolute -left-2 sm:-left-5 lg:-left-7 top-1/2 -translate-y-1/2 z-30 flex h-9 w-9 sm:h-11 sm:w-11 lg:h-12 lg:w-12 items-center justify-center rounded-full border border-white/20 bg-[#080e1a]/90 text-white/90 backdrop-blur-md transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.6)] hover:scale-110 hover:border-primary hover:bg-[#0c1524] hover:text-primary hover:shadow-[0_0_20px_rgba(68,229,194,0.35)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+            canScrollLeft
+              ? "opacity-100 pointer-events-auto translate-x-0"
+              : "opacity-0 pointer-events-none -translate-x-2"
+          }`}
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 sm:h-5 sm:w-5">
+            <path
+              d="M15 19l-7-7 7-7"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
+        {/* Left edge fade gradient */}
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute left-0 top-0 bottom-4 w-10 sm:w-16 bg-gradient-to-r from-[#06080f] via-[#06080f]/75 to-transparent z-20 transition-opacity duration-300 ${
+            canScrollLeft ? "opacity-100" : "opacity-0"
+          }`}
+        />
+
+        {/* Horizontal yearwise cards strip */}
+        <div
+          ref={sliderRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUpOrLeave}
+          onMouseLeave={handleMouseUpOrLeave}
+          className={`flex items-stretch gap-4 sm:gap-5 overflow-x-auto pb-4 pt-1 no-scrollbar snap-x snap-mandatory ${
+            isDraggingSlider ? "cursor-grabbing select-none" : "cursor-grab"
+          }`}
+          style={{ scrollBehavior: isDraggingSlider ? "auto" : "smooth" }}
+        >
         {MILESTONES.map((m, idx) => {
           const isActive = idx === currentIndex;
 
@@ -281,6 +306,38 @@ export default function MilestoneExperienceHorizontal() {
             </div>
           );
         })}
+        </div>
+
+        {/* Right edge fade gradient */}
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute right-0 top-0 bottom-4 w-10 sm:w-16 bg-gradient-to-l from-[#06080f] via-[#06080f]/75 to-transparent z-20 transition-opacity duration-300 ${
+            canScrollRight ? "opacity-100" : "opacity-0"
+          }`}
+        />
+
+        {/* Right Navigation Arrow */}
+        <button
+          type="button"
+          onClick={handleNext}
+          disabled={!canScrollRight}
+          aria-label="Next milestone"
+          className={`absolute -right-2 sm:-right-5 lg:-right-7 top-1/2 -translate-y-1/2 z-30 flex h-9 w-9 sm:h-11 sm:w-11 lg:h-12 lg:w-12 items-center justify-center rounded-full border border-white/20 bg-[#080e1a]/90 text-white/90 backdrop-blur-md transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.6)] hover:scale-110 hover:border-primary hover:bg-[#0c1524] hover:text-primary hover:shadow-[0_0_20px_rgba(68,229,194,0.35)] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+            canScrollRight
+              ? "opacity-100 pointer-events-auto translate-x-0"
+              : "opacity-0 pointer-events-none translate-x-2"
+          }`}
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 sm:h-5 sm:w-5">
+            <path
+              d="M9 5l7 7-7 7"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </div>
     </div>
   );
