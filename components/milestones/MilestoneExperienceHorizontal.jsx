@@ -213,7 +213,7 @@ export default function MilestoneExperienceHorizontal() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUpOrLeave}
         onMouseLeave={handleMouseUpOrLeave}
-        className={`flex items-stretch gap-4 sm:gap-5 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory ${
+        className={`flex items-stretch gap-4 sm:gap-5 overflow-x-auto pb-4 pt-1 no-scrollbar snap-x snap-mandatory ${
           isDraggingSlider ? "cursor-grabbing select-none" : "cursor-grab"
         }`}
         style={{ scrollBehavior: isDraggingSlider ? "auto" : "smooth" }}
