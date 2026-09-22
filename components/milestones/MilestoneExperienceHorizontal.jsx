@@ -157,7 +157,6 @@ export default function MilestoneExperienceHorizontal() {
     <div className="relative mx-auto max-w-7xl px-6 py-12 sm:py-16">
       {/* ── HEADER ─────────────────────────────────────────────────── */}
       <div className="border-b border-white/10 pb-6 mb-8">
-        <div>
           <div className="mb-4 flex items-center gap-3">
             <div className="h-px w-6 bg-primary" />
             <span className="font-label-caps text-label-caps tracking-[0.2em] text-primary">
@@ -170,43 +169,46 @@ export default function MilestoneExperienceHorizontal() {
           >
             Key events, National and International recognitions
           </h2>
-        </div>
+      </div>
 
+      {/*
+        Controls sit in their own row directly above the strip.
+
+        They were tried floating on the strip's left and right edges, which
+        reads well until you notice the section clips overflow and the gutter
+        is only 24px — so the buttons landed ON the cards, over a year heading
+        and a bullet. Sitting just above keeps them beside what they move
+        without covering any of it, and gives room for the position counter.
+      */}
+      <div className="mb-3 flex items-center justify-end gap-3">
+        <span className="font-label-caps text-[11px] tracking-[0.18em] text-white/40 tabular-nums">
+          {String(currentIndex + 1).padStart(2, "0")} / {String(MILESTONES.length).padStart(2, "0")}
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handlePrev}
+            disabled={currentIndex === 0}
+            aria-label="Previous milestone"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/70 transition-all duration-200 hover:border-primary hover:bg-primary/10 hover:text-primary active:scale-95 disabled:opacity-25 disabled:pointer-events-none"
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+              <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={currentIndex === MILESTONES.length - 1}
+            aria-label="Next milestone"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/70 transition-all duration-200 hover:border-primary hover:bg-primary/10 hover:text-primary active:scale-95 disabled:opacity-25 disabled:pointer-events-none"
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+              <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* ── HORIZONTAL YEARWISE CARDS STRIP ──────────────────────────── */}
-      {/*
-        The arrows sit ON the strip's left and right edges rather than in the
-        header. Up there they were far from the thing they moved — on a wide
-        screen, a whole heading away from the cards — and read as decoration
-        beside the title instead of controls for the carousel.
-
-        `relative` anchors them; the buttons are absolutely positioned and
-        vertically centred, so they stay beside the cards at any height.
-      */}
-      <div className="relative">
-        <button
-          onClick={handlePrev}
-          disabled={currentIndex === 0}
-          aria-label="Previous milestone"
-          className="absolute left-0 top-1/2 z-10 hidden -translate-y-1/2 -translate-x-1/2 h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[#0a1220]/90 text-white/70 backdrop-blur transition-all duration-200 hover:border-primary hover:bg-primary/10 hover:text-primary active:scale-95 disabled:opacity-0 disabled:pointer-events-none sm:flex"
-        >
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-            <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-
-        <button
-          onClick={handleNext}
-          disabled={currentIndex === MILESTONES.length - 1}
-          aria-label="Next milestone"
-          className="absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 translate-x-1/2 h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-[#0a1220]/90 text-white/70 backdrop-blur transition-all duration-200 hover:border-primary hover:bg-primary/10 hover:text-primary active:scale-95 disabled:opacity-0 disabled:pointer-events-none sm:flex"
-        >
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-            <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-
       <div
         ref={sliderRef}
         onMouseDown={handleMouseDown}
@@ -279,7 +281,6 @@ export default function MilestoneExperienceHorizontal() {
             </div>
           );
         })}
-      </div>
       </div>
     </div>
   );
