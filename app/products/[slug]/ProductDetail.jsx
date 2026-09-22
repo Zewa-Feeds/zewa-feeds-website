@@ -671,15 +671,23 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                   setTab("reviews");
                   document.getElementById("product-tabs")?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="flex items-center gap-2 text-left transition-opacity hover:opacity-80 group cursor-pointer w-fit"
+                className="flex items-center gap-2.5 text-left transition-opacity hover:opacity-80 group cursor-pointer w-fit"
               >
                 {/*
                   Half-filled, not rounded: Math.round(4.5) is 5, so a 4.5
                   average drew five solid stars beside the text "4.5".
                   Unrated shows five empty stars rather than five filled ones.
                 */}
-                <StarRating value={product.reviews?.count > 0 ? product.reviews.average : 0} size="w-4 h-4" />
-                <span className="text-[12.5px] text-white/50 font-[Montserrat] group-hover:text-primary transition-colors">
+                <StarRating
+                  value={product.reviews?.count > 0 ? product.reviews.average : 0}
+                  size="w-5 h-5"
+                />
+                {/*
+                  Sized up from 16px stars and 12.5px text. This is the page's
+                  main trust signal and sits directly under Add to cart, so it
+                  should not read smaller than the SKU line beneath it.
+                */}
+                <span className="text-[14px] text-white/70 font-[Montserrat] group-hover:text-primary transition-colors">
                   {/*
                     A product with no ratings said "5.0 · Verified reviews",
                     which invented both the score and the verification. It now
