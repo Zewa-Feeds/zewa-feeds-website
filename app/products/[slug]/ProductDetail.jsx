@@ -596,10 +596,15 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                         number the discount is measured against, and a saving
                         nobody can read is not a saving they can judge.
                       */}
-                      <span className="text-[16px] text-white/55 line-through decoration-white/40 font-[Montserrat]">
+                      <span className="text-[19px] text-white/60 line-through decoration-white/45 font-[Montserrat]">
                         {formatInr(pack.mrpPaise)}
                       </span>
-                      <span className="rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-bold text-primary font-[Montserrat]">
+                      {/*
+                        The saving was the smallest thing in a row anchored by
+                        a 34px price, so the one number arguing for the
+                        purchase was the hardest to read.
+                      */}
+                      <span className="rounded-full bg-primary/12 px-3 py-1.5 text-[13px] font-bold text-primary font-[Montserrat]">
                         {discountPct(pack.mrpPaise, pack.pricePaise)}% off
                       </span>
                     </>
