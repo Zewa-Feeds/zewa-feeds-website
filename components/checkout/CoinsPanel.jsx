@@ -7,9 +7,16 @@ import { useEffect, useRef, useState } from "react";
  *
  * Every decision below is specified, not stylistic:
  *
- *   A NUMERIC INPUT, not a slider or a toggle. Review asked for free entry, so
- *   the customer types how many coins to use and the rupee conversion updates
- *   live beside it.
+ *   A SLIDER AND A NUMERIC INPUT, bound to one value. An earlier review asked
+ *   for free entry and rejected a slider outright; the slider was reinstated on
+ *   25 Sep 2026 by product decision, because a bare number gives no sense of
+ *   where the ceiling is — someone holding 500 coins on a 229-coin order has to
+ *   read the limit, do the arithmetic, and hope. Dragging shows it.
+ *
+ *   FREE ENTRY IS PRESERVED, which is what that review actually protected: the
+ *   field still accepts a typed number, and typing is the only way to hit an
+ *   exact figure on a touchscreen. The two controls are the same state, so
+ *   neither can disagree with the other.
  *
  *   DEFAULTS TO EMPTY, never to the maximum. "Auto-applying burns a balance the
  *   customer may have been saving and removes the agency that makes the reward
@@ -130,6 +137,15 @@ export default function CoinsPanel({
   const typed = Number.parseInt(value, 10);
   const previewValid = Number.isFinite(typed) && typed > 0 && typed <= maxRedeemable;
 
+  /*
+   * Where the slider sits.
+   *
+   * Clamped only for the THUMB's position — an out-of-range typed number parks it
+   * at the end rather than throwing the control off its track, while the field
+   * keeps the digits as entered so `submit` can explain what is wrong.
+   */
+  const sliderValue = Number.isFinite(typed) ? Math.min(Math.max(typed, 0), maxRedeemable) : 0;
+
   /** True when this order cannot absorb the customer's whole balance. */
   const capped = maxRedeemable < available;
 
@@ -162,6 +178,57 @@ export default function CoinsPanel({
             {maxRedeemable} Coins ({rupeesFor(maxRedeemable)})
           </span>
         </p>
+      )}
+
+      {/*
+        THE SLIDER AND THE FIELD ARE ONE VALUE.
+
+        Both write `value`, so they cannot drift apart. The slider is capped at
+        `maxRedeemable` — it physically cannot select an invalid amount, which is
+        the point of having it. The TYPED field is deliberately NOT clamped as you
+        type: silently rewriting someone's digits mid-entry is disorienting, and
+        `submit` already reports the real reason with the real number.
+
+        A zero-width slider is meaningless, so it is hidden when the order cannot
+        absorb even the minimum; the field alone still works.
+      */}
+      {maxRedeemable >= minRedemption && (
+        <div className="flex items-center gap-3">
+          <input
+            type="range"
+            min={0}
+            max={maxRedeemable}
+            step={1}
+            value={sliderValue}
+            onChange={(e) => {
+              setValue(e.target.value === "0" ? "" : e.target.value);
+              setError("");
+            }}
+            disabled={busy}
+            /*
+             * Deliberately NOT "Zewa Coins to use" — that names the text field, and
+             * two controls sharing a label is ambiguous to a screen reader reading
+             * them in sequence. "Adjust" says this is the coarse control and the
+             * field is where an exact figure goes.
+             */
+            aria-label={`Adjust Zewa Coins, 0 to ${maxRedeemable}`}
+            aria-valuetext={`${sliderValue} coins, ${rupeesFor(sliderValue)} off`}
+            className="zewa-coin-slider min-w-0 flex-1 accent-[#44e5c2] disabled:opacity-40"
+          />
+
+          {/*
+            The live amount, on the right as asked. Reserves its width with
+            tabular numerals so the row does not jitter as the number changes
+            while dragging.
+          */}
+          <span
+            aria-hidden="true"
+            className="shrink-0 text-right font-[Montserrat] text-[12px] tabular-nums text-white/70"
+          >
+            <span className="font-semibold text-[#44e5c2]">{sliderValue}</span>
+            <span className="text-white/45"> · {rupeesFor(sliderValue)}</span>
+          </span>
+        </div>
       )}
 
       <div className="flex gap-2">

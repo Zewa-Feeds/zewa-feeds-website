@@ -226,3 +226,91 @@ describe("Accessibility (§10.1)", () => {
     expect(screen.getByLabelText(/Zewa Coins to use/i).disabled).toBe(true);
   });
 });
+
+/*
+ * The slider was added on 25 Sep 2026, superseding an earlier review that asked
+ * for free entry only. What earns tests is the coupling: two controls writing one
+ * value is exactly the shape that drifts, and a slider that can select an invalid
+ * amount would push the failure to the payment step — the thing §10.1 exists to
+ * prevent.
+ */
+describe("§10.1 The slider and the field are one value", () => {
+  const slider = () => screen.getByRole("slider");
+  const field = () => screen.getByRole("textbox");
+
+  it("offers both controls", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    expect(slider()).toBeTruthy();
+    expect(field()).toBeTruthy();
+  });
+
+  it("starts at zero, matching the empty field", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    expect(slider().value).toBe("0");
+    expect(field().value).toBe("");
+  });
+
+  /* The slider physically cannot select more than this order can absorb. */
+  it("caps the slider at the order ceiling, not the balance", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    expect(slider().max).toBe(String(QUOTE.maxRedeemable));
+    expect(slider().max).not.toBe(String(QUOTE.available));
+  });
+
+  it("moves the field when the slider moves", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(slider(), { target: { value: "120" } });
+    expect(field().value).toBe("120");
+  });
+
+  it("moves the slider when the field is typed into", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(field(), { target: { value: "75" } });
+    expect(slider().value).toBe("75");
+  });
+
+  it("clears the field rather than showing a literal 0 at the left end", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(slider(), { target: { value: "50" } });
+    fireEvent.change(slider(), { target: { value: "0" } });
+    expect(field().value).toBe("");
+  });
+
+  /*
+   * Typing over the ceiling must NOT be silently rewritten — the digits stay as
+   * entered so submit can explain the real reason with the real number. Only the
+   * thumb clamps, so the control does not fly off its track.
+   */
+  it("keeps an over-limit typed number while parking the thumb at the end", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(field(), { target: { value: "9999" } });
+    expect(field().value).toBe("9999");
+    expect(slider().value).toBe(String(QUOTE.maxRedeemable));
+  });
+
+  it("applies exactly what the slider shows", () => {
+    const onApply = vi.fn();
+    render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
+    fireEvent.change(slider(), { target: { value: "200" } });
+    fireEvent.click(screen.getByRole("button", { name: /^apply$/i }));
+    expect(onApply).toHaveBeenCalledWith(200);
+  });
+
+  it("shows the live coin count and rupee value as it moves", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(slider(), { target: { value: "150" } });
+    expect(screen.getAllByText("150").length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/₹150/).length).toBeGreaterThan(0);
+  });
+
+  /* A zero-width slider is meaningless; the field alone still works. */
+  it("hides the slider when the order cannot absorb the minimum", () => {
+    render(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 4, minRedemption: 10 }} />);
+    expect(screen.queryByRole("slider")).toBeNull();
+  });
+
+  it("disables the slider while the server is working", () => {
+    render(<CoinsPanel quote={QUOTE} busy />);
+    expect(slider().disabled).toBe(true);
+  });
+});

@@ -210,3 +210,69 @@
     overflow-x: auto;
   }
 }
+
+/*
+ * Checkout coins slider.
+ *
+ * `accent-color` alone leaves a light default track that is invisible against the
+ * dark checkout panel, and the native thumb is too small to drag comfortably on a
+ * phone. Both vendor prefixes are needed: WebKit and Firefox do not share a
+ * pseudo-element for either part, and omitting one silently reverts that browser
+ * to the default.
+ */
+.zewa-coin-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 22px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.zewa-coin-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.zewa-coin-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Firefox only: fills the portion left of the thumb. WebKit has no equivalent. */
+.zewa-coin-slider::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: #44e5c2;
+}
+
+.zewa-coin-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  /* Centres a 16px thumb on a 4px track. */
+  margin-top: -6px;
+  border-radius: 50%;
+  background: #44e5c2;
+  border: 2px solid #06101d;
+  box-shadow: 0 0 0 1px rgba(68, 229, 194, 0.45);
+}
+
+.zewa-coin-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #44e5c2;
+  border: 2px solid #06101d;
+  box-shadow: 0 0 0 1px rgba(68, 229, 194, 0.45);
+}
+
+.zewa-coin-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(68, 229, 194, 0.35);
+}
+
+.zewa-coin-slider:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(68, 229, 194, 0.35);
+}
