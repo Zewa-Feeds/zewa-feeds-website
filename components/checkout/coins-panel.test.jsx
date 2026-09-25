@@ -45,7 +45,7 @@ describe("§10.1 Free entry, defaulting to empty", () => {
 
   it("offers the order maximum as a one-tap shortcut", () => {
     render(<CoinsPanel quote={QUOTE} />);
-    fireEvent.click(screen.getByRole("button", { name: /Use maximum 260 Coins/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^max$/i }));
     expect(screen.getByLabelText(/Zewa Coins to use/i).value).toBe("260");
   });
 
@@ -54,7 +54,7 @@ describe("§10.1 Free entry, defaulting to empty", () => {
     fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
       target: { value: "150" },
     });
-    expect(screen.getByText(/Using 150 Coins = ₹150 off/i)).toBeDefined();
+    expect(screen.getByText(/₹150 off/i)).toBeDefined();
   });
 
   it("says unused coins stay in the account, so partial use feels normal", () => {
@@ -123,10 +123,11 @@ describe("The balance and the order ceiling are two different numbers", () => {
     // 260 coins" to someone holding 340.
     render(<CoinsPanel quote={QUOTE} />);
 
-    expect(screen.getByText(/340 Zewa Coins \(₹340\)/i)).toBeDefined();
-    expect(screen.getByText(/Maximum usable on this order/i)).toBeDefined();
-    expect(screen.getByText(/260 Coins \(₹260\)/i)).toBeDefined();
-    expect(screen.getByRole("button", { name: /Use maximum 260 Coins/i })).toBeDefined();
+    expect(screen.getByText(/340 Zewa Coins/i)).toBeDefined();
+    expect(screen.getByText(/worth ₹340/i)).toBeDefined();
+    expect(screen.getByText(/260 on this order/i)).toBeDefined();
+    expect(screen.getByText(/full product value/i)).toBeDefined();
+    expect(screen.getByRole("button", { name: /^max$/i })).toBeDefined();
   });
 
   it("invents no ceiling when the order can absorb the whole balance", () => {
@@ -134,21 +135,24 @@ describe("The balance and the order ceiling are two different numbers", () => {
     // does not exist.
     render(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 340 }} />);
 
-    expect(screen.getByText(/340 Zewa Coins \(₹340\)/i)).toBeDefined();
-    expect(screen.queryByText(/Maximum usable on this order/i)).toBeNull();
-    expect(screen.getByRole("button", { name: /Use all 340 Coins/i })).toBeDefined();
+    expect(screen.getByText(/340 Zewa Coins/i)).toBeDefined();
+    expect(screen.getByText(/worth ₹340/i)).toBeDefined();
+    // No ceiling sub-line at all when the order can absorb everything.
+    expect(screen.queryByText(/on this order —/i)).toBeNull();
+    expect(screen.getByRole("button", { name: /^max$/i }).title).toMatch(/use all 340 coins/i);
   });
 
   it("tracks the ceiling when the cart changes it", () => {
     // The maximum comes from the server quote; it must follow the cart.
     const { rerender } = render(<CoinsPanel quote={QUOTE} />);
-    expect(screen.getByText(/260 Coins \(₹260\)/i)).toBeDefined();
+    expect(screen.getByText(/260 on this order/i)).toBeDefined();
 
     rerender(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 100 }} />);
-    expect(screen.getByText(/100 Coins \(₹100\)/i)).toBeDefined();
-    expect(screen.getByRole("button", { name: /Use maximum 100 Coins/i })).toBeDefined();
+    expect(screen.getByText(/100 on this order/i)).toBeDefined();
+    expect(screen.getByRole("button", { name: /^max$/i })).toBeDefined();
     // The balance is unchanged by a cart change.
-    expect(screen.getByText(/340 Zewa Coins \(₹340\)/i)).toBeDefined();
+    expect(screen.getByText(/340 Zewa Coins/i)).toBeDefined();
+    expect(screen.getByText(/worth ₹340/i)).toBeDefined();
   });
 
   it("still applies nothing until the customer acts", () => {
@@ -299,7 +303,7 @@ describe("§10.1 The slider and the field are one value", () => {
   it("shows the live coin count and rupee value as it moves", () => {
     render(<CoinsPanel quote={QUOTE} />);
     fireEvent.change(slider(), { target: { value: "150" } });
-    expect(screen.getAllByText("150").length).toBeGreaterThan(0);
+    expect(screen.getByRole("textbox").value).toBe("150");
     expect(screen.getAllByText(/₹150/).length).toBeGreaterThan(0);
   });
 
@@ -312,5 +316,42 @@ describe("§10.1 The slider and the field are one value", () => {
   it("disables the slider while the server is working", () => {
     render(<CoinsPanel quote={QUOTE} busy />);
     expect(slider().disabled).toBe(true);
+  });
+});
+
+describe("The live line reads as a benefit, not a warning", () => {
+  it("names the remainder when there is one", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "100" } });
+    // 340 held, 100 spent.
+    expect(screen.getByText(/240 coins stay in your account/i)).toBeDefined();
+  });
+
+  /*
+   * Spending the whole balance used to render "0 coins stay in your account",
+   * which states a loss where the line is meant to reassure. §10.1 wants partial
+   * use to feel normal — not full use to feel like a warning.
+   */
+  it("says nothing about a remainder when the whole balance is spent", () => {
+    render(<CoinsPanel quote={{ ...QUOTE, available: 260, maxRedeemable: 260 }} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "260" } });
+
+    expect(screen.getByText(/₹260 off/i)).toBeDefined();
+    expect(screen.queryByText(/0 coins stay in your account/i)).toBeNull();
+  });
+
+  /* Only ever ONE line under the row: the error replaces the conversion. */
+  it("shows the error instead of the conversion, never both", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "9999" } });
+    fireEvent.click(screen.getByRole("button", { name: /^apply$/i }));
+
+    expect(screen.getByRole("alert")).toBeDefined();
+    /*
+     * The CONVERSION must be gone. The §10.1 footer ("Coins you don't use stay in
+     * your account.") is a different line and correctly still shows, so this
+     * asserts on the rupees-off phrasing rather than the shared wording.
+     */
+    expect(screen.queryByText(/off this order/i)).toBeNull();
   });
 });

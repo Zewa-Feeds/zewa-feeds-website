@@ -160,40 +160,48 @@ export default function CoinsPanel({
         only when it actually bites — when the order can take the whole balance,
         a second number would invent a limit that is not there.
       */}
-      <label
-        htmlFor={inputId}
-        className="font-[Montserrat] text-[12.5px] text-white/70"
-      >
-        You have{" "}
-        <span className="font-semibold text-[#44e5c2]">
-          {available} Zewa Coins ({rupeesFor(available)})
+      {/*
+        ONE HEADING, NOT FOUR COMPETING LINES.
+
+        The balance leads because it is the thing the customer wants to know. The
+        order ceiling is a sub-line under it, and only when it actually bites —
+        when the order can absorb the whole balance, naming a second number
+        invents a limit that is not there.
+      */}
+      <div className="flex items-baseline justify-between gap-3">
+        <label htmlFor={inputId} className="font-[Montserrat] text-[12.5px] text-white/70">
+          Use your{" "}
+          <span className="font-semibold text-[#44e5c2]">{available} Zewa Coins</span>
+        </label>
+        <span className="shrink-0 font-[Montserrat] text-[11.5px] tabular-nums text-white/40">
+          worth {rupeesFor(available)}
         </span>
-        {capped ? ". How many would you like to use?" : ". Use as many as you like on this order."}
-      </label>
+      </div>
 
       {capped && (
-        <p className="-mt-1 font-[Montserrat] text-[11.5px] text-white/50">
-          Maximum usable on this order:{" "}
-          <span className="font-semibold text-white/75">
-            {maxRedeemable} Coins ({rupeesFor(maxRedeemable)})
-          </span>
+        <p className="-mt-1 font-[Montserrat] text-[11.5px] text-white/45">
+          Up to{" "}
+          <span className="font-semibold text-white/70">{maxRedeemable} on this order</span>{" "}
+          — the full product value. Shipping is payable separately.
         </p>
       )}
 
       {/*
-        THE SLIDER AND THE FIELD ARE ONE VALUE.
+        SLIDER, FIELD AND APPLY ON ONE ROW.
 
-        Both write `value`, so they cannot drift apart. The slider is capped at
-        `maxRedeemable` — it physically cannot select an invalid amount, which is
-        the point of having it. The TYPED field is deliberately NOT clamped as you
-        type: silently rewriting someone's digits mid-entry is disorienting, and
-        `submit` already reports the real reason with the real number.
+        Previously the slider floated above a full-width field, so a three-digit
+        number sat in a control sized for a sentence and the value was restated
+        four times over. One row, one restatement: the field IS the readout, so
+        dragging writes the number the customer is about to apply.
 
-        A zero-width slider is meaningless, so it is hidden when the order cannot
-        absorb even the minimum; the field alone still works.
+        Both controls write `value` and cannot drift. The slider is capped at
+        `maxRedeemable`, so it physically cannot select an invalid amount. The
+        TYPED field is deliberately NOT clamped while typing — silently rewriting
+        digits mid-entry is disorienting, and `submit` reports the real reason
+        with the real number.
       */}
-      {maxRedeemable >= minRedemption && (
-        <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
+        {maxRedeemable >= minRedemption && (
           <input
             type="range"
             min={0}
@@ -206,32 +214,21 @@ export default function CoinsPanel({
             }}
             disabled={busy}
             /*
-             * Deliberately NOT "Zewa Coins to use" — that names the text field, and
-             * two controls sharing a label is ambiguous to a screen reader reading
-             * them in sequence. "Adjust" says this is the coarse control and the
-             * field is where an exact figure goes.
+             * Deliberately NOT "Zewa Coins to use" — that names the text field,
+             * and two controls sharing a label reads as duplicates to a screen
+             * reader. "Adjust" marks this as the coarse control.
              */
             aria-label={`Adjust Zewa Coins, 0 to ${maxRedeemable}`}
             aria-valuetext={`${sliderValue} coins, ${rupeesFor(sliderValue)} off`}
             className="zewa-coin-slider min-w-0 flex-1 accent-[#44e5c2] disabled:opacity-40"
           />
+        )}
 
-          {/*
-            The live amount, on the right as asked. Reserves its width with
-            tabular numerals so the row does not jitter as the number changes
-            while dragging.
-          */}
-          <span
-            aria-hidden="true"
-            className="shrink-0 text-right font-[Montserrat] text-[12px] tabular-nums text-white/70"
-          >
-            <span className="font-semibold text-[#44e5c2]">{sliderValue}</span>
-            <span className="text-white/45"> · {rupeesFor(sliderValue)}</span>
-          </span>
-        </div>
-      )}
-
-      <div className="flex gap-2">
+        {/*
+          Sized to its content, not to the row. A coin count is three or four
+          digits; a full-width box made the number look like an afterthought
+          floating in empty space.
+        */}
         <input
           id={inputId}
           type="text"
@@ -251,49 +248,78 @@ export default function CoinsPanel({
               : `Zewa Coins to use. You have ${available} coins, worth ${rupeesFor(available)}`
           }
           aria-invalid={error ? "true" : undefined}
-          className="min-w-0 flex-1 rounded-lg border border-white/12 bg-[#060c17] px-3 py-2.5 font-[Montserrat] text-[13px] text-white outline-none transition placeholder:text-white/25 focus:border-[#44e5c2]/50 disabled:opacity-50"
+          className={`w-[4.5rem] shrink-0 rounded-lg border bg-[#060c17] px-2.5 py-2 text-center font-[Montserrat] text-[13px] font-semibold tabular-nums text-white outline-none transition placeholder:font-normal placeholder:text-white/25 focus:border-[#44e5c2]/50 disabled:opacity-50 ${
+            error ? "border-rose-400/50" : "border-white/12"
+          }`}
         />
+
+        {/*
+          A chip, not a sentence. "Use all 124 Coins" on its own line read as a
+          heading rather than a control, and restated a number already on screen
+          twice.
+        */}
+        {maxRedeemable >= minRedemption && (
+          <button
+            type="button"
+            onClick={() => {
+              setValue(String(maxRedeemable));
+              setError("");
+            }}
+            disabled={busy || sliderValue === maxRedeemable}
+            title={capped ? `Use the maximum ${maxRedeemable} coins` : `Use all ${maxRedeemable} coins`}
+            className="shrink-0 rounded-lg border border-white/12 px-2.5 py-2 font-[Montserrat] text-[11px] font-bold uppercase tracking-[0.1em] text-white/55 transition hover:border-[#44e5c2]/40 hover:text-[#44e5c2] disabled:opacity-30 disabled:hover:border-white/12 disabled:hover:text-white/55"
+          >
+            Max
+          </button>
+        )}
+
         <button
           type="submit"
           disabled={busy || !value}
-          className="shrink-0 rounded-lg border border-[#44e5c2]/30 bg-[#44e5c2]/10 px-4 font-[Montserrat] text-[11.5px] font-bold uppercase tracking-[0.14em] text-[#44e5c2] transition hover:bg-[#44e5c2]/20 disabled:cursor-not-allowed disabled:opacity-40"
+          className="shrink-0 rounded-lg border border-[#44e5c2]/30 bg-[#44e5c2]/10 px-3.5 py-2 font-[Montserrat] text-[11px] font-bold uppercase tracking-[0.1em] text-[#44e5c2] transition hover:bg-[#44e5c2]/20 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Apply
         </button>
       </div>
 
-      {/* The one-tap maximum, offered rather than auto-applied (§10.1). */}
-      {maxRedeemable >= minRedemption && (
-        <button
-          type="button"
-          onClick={() => {
-            setValue(String(maxRedeemable));
-            setError("");
-          }}
-          disabled={busy}
-          className="self-start font-[Montserrat] text-[11.5px] font-semibold text-white/55 underline-offset-2 transition hover:text-[#44e5c2] hover:underline disabled:opacity-40"
-        >
-          {capped ? `Use maximum ${maxRedeemable} Coins` : `Use all ${maxRedeemable} Coins`}
-        </button>
-      )}
-
-      {/* Live conversion as they type (§10.1). */}
-      {previewValid && !error && (
-        <p className="font-[Montserrat] text-[11.5px] text-white/50">
-          Using {typed} Coins = {rupeesFor(typed)} off
-        </p>
-      )}
-
-      {error && (
+      {/*
+        ONE line below the row, and only ever one: the error when something is
+        wrong, otherwise the conversion. Stacking both is what made this panel
+        feel like a wall of grey text.
+      */}
+      {error ? (
         <p role="alert" className="font-[Montserrat] text-[11.5px] text-rose-300/90">
           {error}
         </p>
-      )}
+      ) : previewValid ? (
+        <p className="font-[Montserrat] text-[11.5px] text-white/55">
+          <span className="font-semibold text-[#44e5c2]">{rupeesFor(typed)} off</span> this order
+          {/*
+            The remainder is mentioned only when there IS one. Spending the whole
+            balance rendered "0 coins stay in your account", which states a loss
+            where the line is meant to reassure — §10.1 wants partial use to feel
+            normal, not full use to feel like a warning.
+          */}
+          {available - typed > 0 && (
+            <span className="text-white/45">
+              {" "}· {available - typed} coins stay in your account
+            </span>
+          )}
+        </p>
+      ) : null}
 
-      {/* §10.1: "Partial use is normal and must feel normal." */}
-      <p className="font-[Montserrat] text-[11.5px] text-white/40">
-        Coins you don&apos;t use stay in your account.
-      </p>
+      {/*
+        §10.1: "Partial use is normal and must feel normal."
+        
+        Shown only while the live line is NOT saying it. Once a number is entered
+        that line already reads "… N coins stay in your account", and printing the
+        same promise twice is what made this panel feel repetitive.
+      */}
+      {!previewValid && (
+        <p className="font-[Montserrat] text-[11.5px] text-white/40">
+          Coins you don&apos;t use stay in your account.
+        </p>
+      )}
     </form>
   );
 }
