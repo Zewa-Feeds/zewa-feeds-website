@@ -220,6 +220,19 @@ export default function CoinsPanel({
              */
             aria-label={`Adjust Zewa Coins, 0 to ${maxRedeemable}`}
             aria-valuetext={`${sliderValue} coins, ${rupeesFor(sliderValue)} off`}
+            /*
+             * Drives the filled portion of the track. WebKit has no
+             * `::-moz-range-progress`, so the fill is a gradient whose hard stop
+             * sits at this percentage — the only way to colour the left of the
+             * thumb in Chrome and Safari.
+             *
+             * Guarded against a zero ceiling: `maxRedeemable` can be 0 on a cart
+             * that cannot absorb any coins, and 0/0 is NaN, which would drop the
+             * gradient entirely and leave an unstyled track.
+             */
+            style={{
+              "--coin-fill": `${maxRedeemable > 0 ? (sliderValue / maxRedeemable) * 100 : 0}%`,
+            }}
             className="zewa-coin-slider min-w-0 flex-1 accent-[#44e5c2] disabled:opacity-40"
           />
         )}

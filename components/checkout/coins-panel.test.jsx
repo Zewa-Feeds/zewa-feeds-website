@@ -355,3 +355,48 @@ describe("The live line reads as a benefit, not a warning", () => {
     expect(screen.queryByText(/off this order/i)).toBeNull();
   });
 });
+
+/*
+ * The track's filled portion.
+ *
+ * Before this the track was flat grey end to end, so dragging showed nothing but
+ * the thumb moving — no sense of how much of the balance was being committed.
+ * WebKit has no `::-moz-range-progress`, so the fill is a gradient positioned by
+ * this custom property; if it stops tracking, Chrome and Safari silently lose the
+ * fill while Firefox keeps it, which is exactly the kind of drift a test catches
+ * and a screenshot does not.
+ */
+describe("§10.1 The slider shows how much is being used", () => {
+  const fill = () => screen.getByRole("slider").style.getPropertyValue("--coin-fill");
+
+  it("starts empty", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    expect(fill()).toBe("0%");
+  });
+
+  it("fills in proportion to the order ceiling, not the balance", () => {
+    // 130 of a 260 ceiling is half, even though the customer holds 340.
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "130" } });
+    expect(fill()).toBe("50%");
+  });
+
+  it("fills completely at the ceiling", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "260" } });
+    expect(fill()).toBe("100%");
+  });
+
+  it("tracks a typed value, not just a drag", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "65" } });
+    expect(fill()).toBe("25%");
+  });
+
+  /* 0/0 is NaN, which would drop the gradient and leave an unstyled track. */
+  it("does not divide by zero when the order can absorb nothing", () => {
+    render(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 0, minRedemption: 0 }} />);
+    const slider = screen.queryByRole("slider");
+    if (slider) expect(slider.style.getPropertyValue("--coin-fill")).toBe("0%");
+  });
+});

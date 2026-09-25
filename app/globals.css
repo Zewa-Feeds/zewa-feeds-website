@@ -228,10 +228,27 @@
   cursor: pointer;
 }
 
+/*
+ * The filled portion is driven by a gradient, not a pseudo-element.
+ *
+ * Firefox has `::-moz-range-progress`; WebKit has no equivalent, so the only way
+ * to colour the left of the thumb there is a hard-stop gradient positioned from
+ * the current value. The component sets `--coin-fill` inline as a percentage.
+ *
+ * Without this the track was a single flat grey and dragging produced no visible
+ * change beyond the thumb sliding — there was nothing to show how much of the
+ * balance was being spent.
+ */
 .zewa-coin-slider::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(
+    to right,
+    #44e5c2 0%,
+    #44e5c2 var(--coin-fill, 0%),
+    rgba(255, 255, 255, 0.12) var(--coin-fill, 0%),
+    rgba(255, 255, 255, 0.12) 100%
+  );
 }
 
 .zewa-coin-slider::-moz-range-track {
@@ -275,4 +292,58 @@
 
 .zewa-coin-slider:focus-visible::-moz-range-thumb {
   box-shadow: 0 0 0 3px rgba(68, 229, 194, 0.35);
+}
+
+/*
+ * Feedback while the control is actually being held.
+ *
+ * `:active` fires on pointer-down, so the thumb grows and its halo widens for the
+ * duration of a drag — the direct "something is happening" signal that a flat
+ * track could not give. Transitioned so a click does not snap.
+ */
+.zewa-coin-slider::-webkit-slider-thumb {
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+}
+
+.zewa-coin-slider::-moz-range-thumb {
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+}
+
+.zewa-coin-slider:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(68, 229, 194, 0.22);
+}
+
+.zewa-coin-slider:hover::-moz-range-thumb {
+  box-shadow: 0 0 0 4px rgba(68, 229, 194, 0.22);
+}
+
+.zewa-coin-slider:active::-webkit-slider-thumb {
+  transform: scale(1.18);
+  background: #6ef2d6;
+  box-shadow: 0 0 0 6px rgba(68, 229, 194, 0.28);
+}
+
+.zewa-coin-slider:active::-moz-range-thumb {
+  transform: scale(1.18);
+  background: #6ef2d6;
+  box-shadow: 0 0 0 6px rgba(68, 229, 194, 0.28);
+}
+
+/* Respect a reduced-motion preference: keep the colour, drop the movement. */
+@media (prefers-reduced-motion: reduce) {
+  .zewa-coin-slider::-webkit-slider-thumb,
+  .zewa-coin-slider::-moz-range-thumb {
+    transition: none;
+  }
+
+  .zewa-coin-slider:active::-webkit-slider-thumb,
+  .zewa-coin-slider:active::-moz-range-thumb {
+    transform: none;
+  }
 }
