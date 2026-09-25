@@ -168,8 +168,9 @@ export default function CheckoutPage() {
 
   /*
    * Advertised offer codes. Purely informational — a shopper still has to apply
-   * one, and the server re-validates it. A failure here is silent: not knowing
-   * what is on offer must never block checking out.
+   * one, and the server re-validates it. A failure never surfaces to the
+   * shopper (not knowing what is on offer must never block checking out) but it
+   * is logged: a failed fetch and an empty list look identical on screen.
    */
   const [availableOffers, setAvailableOffers] = useState([]);
   useEffect(() => {
@@ -177,7 +178,10 @@ export default function CheckoutPage() {
     offersApi
       .list()
       .then((list) => { if (!cancelled) setAvailableOffers(list ?? []); })
-      .catch(() => undefined);
+      // Still silent for the shopper, but no longer silent for us: an empty
+      // panel and a failed fetch look identical on screen, so the reason goes
+      // to the console rather than nowhere.
+      .catch((err) => { console.warn("Could not load available offers:", err); });
     return () => { cancelled = true; };
   }, []);
 
@@ -255,12 +259,27 @@ export default function CheckoutPage() {
         lastName: f.lastName || customer.lastName || "",
         email: f.email || customer.email || "",
         phone: f.phone || defaultAddress?.phone || customer.phone || "",
-        address: f.address || (defaultAddress
-          ? [defaultAddress.line1, defaultAddress.line2].filter(Boolean).join(", ")
-          : ""),
-        city: f.city || defaultAddress?.city || "",
-        state: f.state || defaultAddress?.state || "",
-        pincode: f.pincode || defaultAddress?.pincode || "",
+        /*
+         * The PRESELECTED address wins over whatever the form was restored
+         * with. These used to be `f.city || defaultAddress?.city`, so a form
+         * rehydrated from sessionStorage kept its old address while the picker
+         * above highlighted the default one — the radio said Kerala and the
+         * quote was priced for somewhere else, which is why the total looked
+         * stuck when the address changed.
+         */
+        ...(defaultAddress
+          ? {
+              address: [defaultAddress.line1, defaultAddress.line2].filter(Boolean).join(", "),
+              city: defaultAddress.city ?? "",
+              state: defaultAddress.state ?? "",
+              pincode: defaultAddress.pincode ?? "",
+            }
+          : {
+              address: f.address,
+              city: f.city,
+              state: f.state,
+              pincode: f.pincode,
+            }),
       }));
     })();
 
@@ -304,14 +323,36 @@ export default function CheckoutPage() {
     setAutoDetectedBadge("");
   };
 
-  // Re-price when state changes for state-wise shipping & tax calculation
-  const lastPricedStateRef = useRef("");
+  /*
+   * Re-price when the DESTINATION changes, for state-wise shipping and tax.
+   *
+   * The guard covers the email as well as the state. Both are sent to the
+   * quote, and both are in the dependency list, so guarding on the state alone
+   * meant every keystroke in the email field re-priced the whole cart — a
+   * request per character, each one landing on a total the shopper is reading.
+   * `validate` is also rebuilt whenever the cart lines or codes change, so the
+   * effect re-runs on every quantity tap too; comparing what was actually
+   * priced makes all of those no-ops.
+   */
+  const lastPricedDestinationRef = useRef(null);
   useEffect(() => {
     const trimmed = form.state?.trim() || "";
-    if (trimmed !== lastPricedStateRef.current) {
-      lastPricedStateRef.current = trimmed;
-      void validate({ state: trimmed || undefined, email: form.email || undefined });
-    }
+    const email = form.email?.trim() || "";
+    /*
+     * A half-typed address is not a destination. The email only changes the
+     * quote once it is a real one (first-order offers key off the customer),
+     * so an incomplete one is treated as absent rather than re-pricing the
+     * cart on the way to typing it.
+     */
+    const pricedEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? email : "";
+    const destination = `${trimmed}|${pricedEmail}`;
+    if (destination === lastPricedDestinationRef.current) return;
+    // Skip the first run: the cart's own mount effect has already priced it,
+    // and an empty destination adds nothing the server does not assume.
+    const isFirst = lastPricedDestinationRef.current === null;
+    lastPricedDestinationRef.current = destination;
+    if (isFirst && !trimmed) return;
+    void validate({ state: trimmed || undefined, email: pricedEmail || undefined });
   }, [form.state, form.email, validate]);
 
   /*
@@ -691,6 +732,25 @@ export default function CheckoutPage() {
        */
       const codesToSend = couponCodes ?? [];
 
+      /*
+       * Cart-level problems (out of stock, an unbuyable line) must stop the
+       * order before Razorpay opens. Main gated this on a pre-flight validate()
+       * response; this branch dropped that round trip, so the check reads the
+       * provider's `issues` — the same server-validated list, already on screen
+       * and already disabling the button via `fulfillable`. Coupon issues are
+       * excluded: place() re-evaluates every code, and a refused coupon is not
+       * a reason to block an otherwise valid order.
+       */
+      const blocking = (issues ?? []).filter((i) => i.sku !== "__coupon__");
+      if (blocking.length > 0) {
+        unlockScroll();
+        setErrors({ _root: blocking[0].message });
+        setIsSubmittingPayment(false);
+        setStep("form");
+        submitting.current = false;
+        return;
+      }
+
       const result = await checkoutApi.place(
         {
           lines: items.map((i) => ({ sku: i.sku, qty: i.qty })),
@@ -705,9 +765,8 @@ export default function CheckoutPage() {
             pincode: form.pincode.trim(),
           },
           paymentMethod: "RAZORPAY",
-          // Every code the server accepted on the quote just above. It
-          // re-evaluates eligibility and stacking from scratch — this is a
-          // request, not an instruction.
+          // The customer's selected codes. The server re-evaluates every one
+          // from scratch — this is a request, not an instruction.
           couponCodes: codesToSend,
           // The KEY, not an amount — the server holds the authoritative
           // reservation and decides how many coins it is worth (§4.3).
@@ -1595,6 +1654,7 @@ export default function CheckoutPage() {
                 freeShippingFromCoupon={freeShippingFromCoupon}
                 availableOffers={availableOffers}
                 appliedCodes={(coupons ?? []).map((c) => c.code)}
+                selectedCodes={couponCodes ?? []}
                 couponInput={couponInput}
                 onCouponInputChange={setCouponInput}
                 couponError={couponError}

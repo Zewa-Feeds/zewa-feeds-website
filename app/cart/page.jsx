@@ -19,7 +19,7 @@ export default function CartPage() {
      * neither list. Reading `.map` off undefined here would take down the whole
      * cart over a promotion panel.
      */
-    coupons = [], applyCoupon, removeCoupon,
+    coupons = [], issues = [], applyCoupon, removeCoupon,
   } = useCart();
 
   /*
@@ -32,12 +32,20 @@ export default function CartPage() {
    */
   const appliedCodes = (coupons ?? []).map((c) => c.code);
 
+  /* Codes the server refused for this cart, as code -> reason. */
+  const unavailableReasons = (issues ?? []).reduce((acc, i) => {
+    if (i.sku === "__coupon__" && i.couponCode) acc[i.couponCode] = i.message;
+    return acc;
+  }, {});
+
   const total = totalPaise > 0 ? totalPaise : Math.max(0, subtotalPaise - discountPaise);
 
   /*
    * Advertised codes, from the server's opt-in list. Purely informational: the
-   * shopper still applies one and the server re-validates it. A failure here is
-   * silent — not knowing what is on offer must never break the cart.
+   * shopper still applies one and the server re-validates it. A failure never
+   * surfaces to the shopper — not knowing what is on offer must never break the
+   * cart — but it is logged, because a failed fetch and an empty list are
+   * indistinguishable on screen.
    */
   const [availableOffers, setAvailableOffers] = useState([]);
   useEffect(() => {
@@ -45,7 +53,10 @@ export default function CartPage() {
     offersApi
       .list()
       .then((list) => { if (!cancelled) setAvailableOffers(list ?? []); })
-      .catch(() => undefined);
+      // Still silent for the shopper, but no longer silent for us: an empty
+      // panel and a failed fetch look identical on screen, so the reason goes
+      // to the console rather than nowhere.
+      .catch((err) => { console.warn("Could not load available offers:", err); });
     return () => { cancelled = true; };
   }, []);
 
@@ -117,6 +128,8 @@ export default function CartPage() {
       onSubmit={submitCoupon}
       availableOffers={availableOffers}
       appliedCodes={appliedCodes}
+      unavailableReasons={unavailableReasons}
+      subtotalPaise={subtotalPaise}
       coupons={coupons}
       onRemoveCoupon={removeCoupon ? dropCoupon : undefined}
       applying={couponApplying}

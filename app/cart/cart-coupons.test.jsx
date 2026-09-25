@@ -98,7 +98,19 @@ describe("available offers on the cart", () => {
     expect(await firstText("Free shipping")).toBeTruthy();
     // A code that will be refused should say why BEFORE it is tapped.
     expect(await firstText(/First order only/)).toBeTruthy();
-    expect(await firstText(/Min ₹499/)).toBeTruthy();
+    /*
+     * This cart is ₹185 and ZEWA1 needs ₹499, so the row states the GAP rather
+     * than the bare minimum: "Min ₹499" leaves the shopper to do the
+     * subtraction, and the point of the line is to tell them what to do next.
+     */
+    expect(await firstText(/Add ₹314 more/)).toBeTruthy();
+  });
+
+  it("does not grey out an offer the cart already clears", async () => {
+    // ₹185 clears SPECIAL10's zero minimum, so it stays applicable.
+    render(<CartPage />);
+    const btn = await offerButton("SPECIAL10");
+    expect(btn.disabled).toBe(false);
   });
 
   it("renders no offers panel when the shop advertises nothing", async () => {
@@ -138,11 +150,14 @@ describe("available offers on the cart", () => {
     });
     render(<CartPage />);
 
+    // The row stays live: it is the only remove control an advertised code
+    // has, now that the duplicate chip below is gone.
     const btn = await offerButton("SPECIAL10");
-    expect(btn.disabled).toBe(true);
+    expect(btn.disabled).toBe(false);
     expect(within(btn).getByText("Applied")).toBeTruthy();
     fireEvent.click(btn);
     expect(mockCartState.applyCoupon).not.toHaveBeenCalled();
+    await waitFor(() => expect(mockCartState.removeCoupon).toHaveBeenCalledWith("SPECIAL10"));
   });
 
   it("shows the offers on mobile without scrolling past the whole order", async () => {
@@ -252,8 +267,10 @@ describe("applied coupons", () => {
     });
     render(<CartPage />);
 
-    expect(await firstText(/applied \(10% off\)/)).toBeTruthy();
-    fireEvent.click(screen.getAllByLabelText("Remove SPECIAL10")[0]);
+    // SPECIAL10 is advertised, so it is shown once — in the offers panel —
+    // and that row is what removes it.
+    const offer = (await screen.findAllByRole("button", { name: /^SPECIAL10/ }))[0];
+    fireEvent.click(offer);
     await waitFor(() => expect(mockCartState.removeCoupon).toHaveBeenCalledWith("SPECIAL10"));
   });
 
@@ -315,7 +332,7 @@ describe("applied coupons", () => {
     await firstText(/Available offers/i);
 
     const offer = screen.getAllByRole("button", { name: /^SPECIAL10/ })[0];
-    expect(offer.disabled).toBe(true);
+    expect(offer.disabled).toBe(false);
     expect(within(offer).getByText(/^Applied$/i)).toBeTruthy();
   });
 });

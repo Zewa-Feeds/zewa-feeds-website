@@ -290,4 +290,41 @@ describe("Address-Aware Shipping Checkout Flow", () => {
       );
     });
   });
+
+  /*
+   * The destination effect sends BOTH state and email to the quote and lists
+   * both as dependencies, so guarding on the state alone re-priced the cart on
+   * every keystroke in the email field.
+   */
+  it("does not re-price while the shopper types their email", async () => {
+    validateMock.mockResolvedValue({
+      lines: [], subtotalPaise: 30000, discountPaise: 0,
+      shippingPaise: 0, totalPaise: 30000, issues: [], fulfillable: true,
+    });
+    render(<CheckoutPage />);
+
+    let email;
+    await waitFor(() => {
+      email = document.querySelector('input[name="email"]');
+      expect(email).toBeTruthy();
+    });
+    validateMock.mockClear();
+
+    // Partial addresses: not a destination, so nothing to re-price.
+    for (const value of ["a", "ab", "abc@", "abc@x"]) {
+      fireEvent.change(email, { target: { value } });
+    }
+    await waitFor(() => expect(email.value).toBe("abc@x"));
+    expect(validateMock).not.toHaveBeenCalled();
+
+    /*
+     * A COMPLETE address does change the quote — first-order offers key off
+     * the customer — so exactly one re-price lands, when it becomes real.
+     */
+    fireEvent.change(email, { target: { value: "abc@x.com" } });
+    await waitFor(() => expect(validateMock).toHaveBeenCalledTimes(1));
+    expect(validateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ email: "abc@x.com" }),
+    );
+  });
 });

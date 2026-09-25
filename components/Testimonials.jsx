@@ -1,55 +1,53 @@
-"use client";
+import { featuredReviews } from "@/lib/api";
+import { FALLBACK_REVIEWS, FALLBACK_RATING } from "@/lib/fallback-reviews";
+import StarRating from "./StarRating";
+import TestimonialsMarquee from "./TestimonialsMarquee";
 
-const testimonials = [
-  {
-    quote: "Switched to Zewa six months ago. My discus colony has never looked this vibrant — colour saturation is night and day compared to what I was using before.",
-    name: "Rahul Menon",
-    role: "Discus Breeder, Kochi",
-    initials: "RM",
-  },
-  {
-    quote: "The science behind this is real. My guppies are growing faster, the water stays cleaner longer, and mortality in my fry tanks dropped noticeably within weeks.",
-    name: "Ananya Krishnan",
-    role: "Ornamental Fish Farmer, Thrissur",
-    initials: "AK",
-  },
-  {
-    quote: "I was sceptical about insect protein at first. Three months in, I'm a convert. My flowerhorn has put on more mass and the aggression stress is visibly lower.",
-    name: "Deepak Varma",
-    role: "Cichlid Enthusiast, Bangalore",
-    initials: "DV",
-  },
-  {
-    quote: "As a hatchery operator the reduced ammonia output alone justifies the price. Fewer water changes means lower overhead. This product pays for itself.",
-    name: "Suresh Pillai",
-    role: "Hatchery Operator, Alappuzha",
-    initials: "SP",
-  },
-  {
-    quote: "My betta's fins have fully recovered and his colour is phenomenal. I've tried every premium brand out there — Zewa is genuinely different.",
-    name: "Priya Nair",
-    role: "Betta Collector, Chennai",
-    initials: "PN",
-  },
-  {
-    quote: "Recommended Zewa to my entire aquarium club. Everyone who tried it has reordered. The digestibility difference is something you can see in the tank.",
-    name: "Mohammed Iqbal",
-    role: "Aquarium Club Lead, Calicut",
-    initials: "MI",
-  },
-];
+/**
+ * What keepers actually said, on the home page.
+ *
+ * This section used to hold SIX INVENTED CUSTOMERS — "Rahul Menon, Discus
+ * Breeder, Kochi" and five others who do not exist — under a headline of
+ * "4.9 / 5 across 200+ reviews" that was equally made up. Every card also drew
+ * five stars regardless of what it claimed to be quoting.
+ *
+ * Real reviews exist now, so all of it is served from the database: the quotes,
+ * the names, the per-card ratings and the headline figure. If the shop's rating
+ * moves, this moves with it — there is no second number to keep in sync.
+ *
+ * A server component, so the fetch happens during render and the marquee ships
+ * with its content rather than popping in. The animation lives in the client
+ * child, which is the only part that needs the browser.
+ */
+export default async function Testimonials() {
+  let data = null;
+  try {
+    data = await featuredReviews.list();
+  } catch {
+    /*
+     * Fall back to the snapshot rather than deleting the section.
+     *
+     * Returning null here meant one unreachable API removed "What keepers say"
+     * from the home page entirely — which is what happens during any deploy
+     * where the storefront is newer than the running backend. The snapshot is
+     * the same real reviews, so the worst case is slightly stale, never
+     * invented.
+     */
+  }
 
-// Duplicate for seamless infinite loop
-const doubled = [...testimonials, ...testimonials];
+  const items = data?.items?.length ? data.items : FALLBACK_REVIEWS;
+  const rating =
+    data?.average != null ? { average: data.average, count: data.count } : FALLBACK_RATING;
 
-export default function Testimonials() {
+  if (items.length === 0) return null;
+
   return (
-    <section className="bg-[#f8faf9] py-20 sm:py-28 overflow-hidden">
+    <section className="bg-[#f8faf9] py-12 sm:py-16 overflow-hidden">
       {/* Header */}
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 mb-14">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 mb-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-2">
               <div className="w-6 h-px bg-primary" />
               <span className="font-label-caps text-label-caps text-primary tracking-[0.18em]">
                 WHAT KEEPERS SAY
@@ -59,71 +57,25 @@ export default function Testimonials() {
               Trusted by serious aquarists.
             </h2>
           </div>
-          <div className="flex items-center gap-2">
-            {[...Array(5)].map((_, i) => (
-              <span key={`header-star-${i}`} className="text-primary text-lg">★</span>
-            ))}
-            <span className="font-body-md text-[13px] text-gray-400 ml-2">
-              4.9 / 5 across 200+ reviews
-            </span>
-          </div>
+
+          {/*
+            The real figure, over every rating the range has earned. It was
+            hardcoded to "4.9 / 5 across 200+ reviews", which was both wrong
+            and unfalsifiable.
+          */}
+          {rating?.average != null && (
+            <div className="flex items-center gap-2">
+              {/* Shared with the product pages, so one rating looks the same everywhere. */}
+              <StarRating value={rating.average} size="w-4 h-4" emptyFill="rgba(0,0,0,0.14)" />
+              <span className="font-body-md text-[13px] text-gray-400 ml-2 tabular-nums">
+                {rating.average} / 5 across {rating.count.toLocaleString("en-IN")} ratings
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Marquee track */}
-      <div
-        className="flex gap-5 w-max"
-        style={{
-          animation: "marquee 40s linear infinite",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.animationPlayState = "paused")}
-        onMouseLeave={(e) => (e.currentTarget.style.animationPlayState = "running")}
-      >
-        {doubled.map((t, i) => (
-          <div
-            key={i}
-            className="w-[340px] sm:w-[380px] shrink-0 bg-white border border-gray-100 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 p-7 flex flex-col justify-between gap-6"
-          >
-            {/* Quote mark */}
-            <div>
-              <div className="text-primary text-[40px] font-display-lg leading-none mb-4 opacity-50">"</div>
-              <p className="font-body-md text-[14px] sm:text-[15px] text-gray-600 leading-relaxed">
-                {t.quote}
-              </p>
-            </div>
-
-            {/* Author */}
-            <div className="flex items-center gap-4 pt-5 border-t border-gray-100">
-              <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/25 flex items-center justify-center shrink-0">
-                <span className="font-label-caps text-[11px] text-primary font-bold">
-                  {t.initials}
-                </span>
-              </div>
-              <div>
-                <div className="font-button text-[13px] text-gray-800 tracking-wide">
-                  {t.name}
-                </div>
-                <div className="font-body-md text-[11px] text-gray-400 mt-0.5">
-                  {t.role}
-                </div>
-              </div>
-              {/* Stars */}
-              <div className="ml-auto flex gap-0.5">
-                {[...Array(5)].map((_, s) => (
-                  <span key={`card-star-${i}-${s}`} className="text-primary text-[12px]">★</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <style>{`
-        @keyframes marquee {
-          from { transform: translateX(0) }
-          to   { transform: translateX(-50%) }
-        }
-      `}</style>
+      <TestimonialsMarquee items={items} />
     </section>
   );
 }

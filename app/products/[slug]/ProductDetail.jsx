@@ -5,6 +5,7 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReviewForm from "@/components/ReviewForm";
+import StarRating from "@/components/StarRating";
 import { useCart } from "@/lib/cartContext";
 import { getSortedNutritionEntries, isCutout, packOptionLabels, PLACEHOLDER_IMAGE } from "@/app/products/adapters";
 import { discountPct, formatInr } from "@/lib/api";
@@ -545,23 +546,6 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 </p>
               </div>
 
-              {/* Reviews summary */}
-              {product.reviews?.count > 0 && (
-                <div className="flex items-center gap-2">
-                  <div className="flex" aria-label={`${product.reviews.average} out of 5`}>
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <svg key={n} viewBox="0 0 20 20" className="w-4 h-4"
-                        fill={n <= Math.round(product.reviews.average) ? "#44e5c2" : "rgba(255,255,255,0.15)"}>
-                        <path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <span className="text-[12px] text-white/40 font-[Montserrat]">
-                    {product.reviews.average} · {product.reviews.count} review
-                    {product.reviews.count === 1 ? "" : "s"}
-                  </span>
-                </div>
-              )}
 
               {/* Pack selector */}
               {packs.length > 0 && (
@@ -584,7 +568,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                         <div className="text-[14px] font-semibold text-white font-[Montserrat]">
                           {packLabels[i] || p.pack}
                         </div>
-                        <div className="text-[12px] text-white/45 font-[Montserrat]">
+                        <div className="text-[12.5px] text-white/65 font-[Montserrat]">
                           {formatInr(p.pricePaise)}
                         </div>
                         {!p.inStock && (
@@ -606,10 +590,21 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                   </span>
                   {pack.mrpPaise > pack.pricePaise && (
                     <>
-                      <span className="text-[15px] text-white/30 line-through font-[Montserrat]">
+                      {/*
+                        MRP at 30% opacity was unreadable on this background.
+                        A struck-out price still has to be legible — it is the
+                        number the discount is measured against, and a saving
+                        nobody can read is not a saving they can judge.
+                      */}
+                      <span className="text-[19px] text-white/60 line-through decoration-white/45 font-[Montserrat]">
                         {formatInr(pack.mrpPaise)}
                       </span>
-                      <span className="rounded-full bg-primary/12 px-2.5 py-1 text-[11px] font-bold text-primary font-[Montserrat]">
+                      {/*
+                        The saving was the smallest thing in a row anchored by
+                        a 34px price, so the one number arguing for the
+                        purchase was the hardest to read.
+                      */}
+                      <span className="rounded-full bg-primary/12 px-3 py-1.5 text-[13px] font-bold text-primary font-[Montserrat]">
                         {discountPct(pack.mrpPaise, pack.pricePaise)}% off
                       </span>
                     </>
@@ -674,6 +669,51 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                 </button>
               </div>
 
+              {/* Reviews summary */}
+              <button
+                type="button"
+                onClick={() => {
+                  setTab("reviews");
+                  document.getElementById("product-tabs")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="flex items-center gap-2.5 text-left transition-opacity hover:opacity-80 group cursor-pointer w-fit"
+              >
+                {/*
+                  Half-filled, not rounded: Math.round(4.5) is 5, so a 4.5
+                  average drew five solid stars beside the text "4.5".
+                  Unrated shows five empty stars rather than five filled ones.
+                */}
+                <StarRating
+                  value={product.reviews?.count > 0 ? product.reviews.average : 0}
+                  size="w-5 h-5"
+                />
+                {/*
+                  Sized up from 16px stars and 12.5px text. This is the page's
+                  main trust signal and sits directly under Add to cart, so it
+                  should not read smaller than the SKU line beneath it.
+                */}
+                <span className="text-[14px] text-white/70 font-[Montserrat] group-hover:text-primary transition-colors">
+                  {/*
+                    A product with no ratings said "5.0 · Verified reviews",
+                    which invented both the score and the verification. It now
+                    says so plainly.
+                  */}
+                  {product.reviews?.count > 0
+                    ? `${product.reviews.average} · ${product.reviews.count} rating${product.reviews.count === 1 ? "" : "s"}`
+                    : "No ratings yet"}
+                </span>
+              </button>
+
+              {!outOfStock && !readOnly && atMax && (
+                <p className="text-[11.5px] text-white/45 font-[Montserrat]">
+                  Maximum {maxQty} per order.
+                </p>
+              )}
+
+              {pack && (
+                <p className="text-[11px] text-white/20 font-[Montserrat]">SKU: {pack.sku}</p>
+              )}
+
               <details className="rounded-xl border border-white/10 bg-white/[0.02]">
                 <summary className="cursor-pointer list-none px-4 py-3 text-[12.5px] font-semibold text-white/70 font-[Montserrat] transition-colors hover:text-white">
                   Product & seller information
@@ -713,34 +753,27 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                   </p>
                 </dl>
               </details>
-
-              {!outOfStock && !readOnly && atMax && (
-                <p className="text-[11.5px] text-white/45 font-[Montserrat]">
-                  Maximum {maxQty} per order.
-                </p>
-              )}
-
-              {pack && (
-                <p className="text-[11px] text-white/20 font-[Montserrat]">SKU: {pack.sku}</p>
-              )}
             </div>
           </div>
 
           {/* ── Tabs ──────────────────────────────────────────────────── */}
-          <div className="mt-20">
-            <div className="flex gap-1 border-b border-white/8">
+          <div id="product-tabs" className="mt-20">
+            <div className="flex gap-1 border-b border-white/8 overflow-x-auto">
               {[
                 ["description", "Description"],
                 ["nutrition", "Nutrition"],
                 ["feeding", "Feeding guide"],
-                ...(product.reviews?.count > 0
-                  ? [["reviews", `Reviews (${product.reviews.count})`]]
-                  : []),
+                [
+                  "reviews",
+                  product.reviews?.count > 0
+                    ? `Reviews (${product.reviews.count})`
+                    : "Reviews",
+                ],
               ].map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setTab(key)}
-                  className={`px-5 py-3 text-[12px] font-bold uppercase tracking-[0.12em] font-[Montserrat] transition-all duration-200 ${
+                  className={`px-5 py-3 text-[12px] font-bold uppercase tracking-[0.12em] font-[Montserrat] transition-all duration-200 shrink-0 whitespace-nowrap ${
                     tab === key
                       ? "border-b-2 border-primary text-primary"
                       : "text-white/35 hover:text-white/60"
@@ -840,14 +873,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                       {product.reviews.items.map((r, i) => (
                         <div key={i} className="rounded-xl border border-white/8 bg-white/3 p-5">
                           <div className="mb-2 flex items-center gap-3">
-                            <div className="flex">
-                              {[1, 2, 3, 4, 5].map((n) => (
-                                <svg key={n} viewBox="0 0 20 20" className="w-3.5 h-3.5"
-                                  fill={n <= r.rating ? "#44e5c2" : "rgba(255,255,255,0.15)"}>
-                                  <path d="M10 1.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L10 14.9l-5.2 2.7 1-5.8L1.5 7.7l5.9-.9L10 1.5z" />
-                                </svg>
-                              ))}
-                            </div>
+                            <StarRating value={r.rating} size="w-3.5 h-3.5" />
                             <span className="text-[12px] font-semibold text-white/70 font-[Montserrat]">
                               {r.author}
                             </span>
@@ -856,7 +882,24 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                                 Verified purchase
                               </span>
                             )}
+                            {/*
+                              Reviews carried over from where these products
+                              sold before. Said plainly: passing someone else's
+                              review off as one left here would be a lie, and a
+                              shopper weighing it deserves to know where it came
+                              from.
+                            */}
+                            {r.source && (
+                              <span className="rounded-full border border-white/12 px-2 py-0.5 text-[10px] font-semibold text-white/40 font-[Montserrat]">
+                                Reviewed on {r.source}
+                              </span>
+                            )}
                           </div>
+                          {r.title && (
+                            <p className="mb-1 text-[13px] font-bold text-white/80 font-[Montserrat]">
+                              {r.title}
+                            </p>
+                          )}
                           <p className="text-[13px] leading-relaxed text-white/55 font-[Montserrat]">
                             {r.body}
                           </p>

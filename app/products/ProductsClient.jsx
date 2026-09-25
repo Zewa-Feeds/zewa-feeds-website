@@ -8,6 +8,7 @@ import { useCart } from "@/lib/cartContext";
 import { formatInr, catalog } from "@/lib/api";
 import { useHoverVideo } from "@/lib/useHoverVideo";
 import { PLACEHOLDER_IMAGE } from "./adapters";
+import StarRating from "@/components/StarRating";
 import { COMPANY } from "@/lib/company";
 
 // ─── SVG icons ────────────────────────────────────────────────────────────────
@@ -402,13 +403,31 @@ function ProductCard({ p }) {
               <span className="font-[Playfair_Display] text-[24px] text-white">
                 ₹{p.price.toLocaleString("en-IN")}
               </span>
-              <span className="text-[11px] text-white/20 line-through font-[Montserrat]">{p.mrp}</span>
+              {/* See ProductDetail: 20% opacity made the MRP unreadable. */}
+              <span className="text-[12px] text-white/50 line-through decoration-white/35 font-[Montserrat]">{p.mrp}</span>
               {sizeOnly(p.packLabel) && (
                 <span className="ml-auto rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary font-[Montserrat] tracking-wide">
                   {sizeOnly(p.packLabel)}
                 </span>
               )}
             </div>
+            {/*
+              Rating under the price: every rating behind it, carried over
+              ratings included, so a card shows the product's real standing
+              rather than looking unreviewed because the site is new.
+            */}
+            {p.rating?.average != null && (
+              <div className="mt-1.5 flex items-center gap-1.5">
+                {/* Five stars, half-filled where the rating is a half. */}
+                <StarRating value={p.rating.average} size="w-3 h-3" />
+                <span className="text-[11.5px] font-semibold text-white/70 font-[Montserrat] tabular-nums">
+                  {p.rating.average}
+                </span>
+                <span className="text-[11px] text-white/35 font-[Montserrat] tabular-nums">
+                  ({p.rating.count})
+                </span>
+              </div>
+            )}
             <QtyButton product={p} />
           </>
         ) : (
@@ -1011,7 +1030,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                 <div className="flex items-center gap-5 justify-center sm:justify-start">
                   <div>
                     <span className="font-[Playfair_Display] text-[26px] sm:text-[30px] text-primary leading-none">₹{String(sp.price ?? "").replace("₹", "")}</span>
-                    <span className="text-[11px] text-white/20 line-through font-[Montserrat] ml-2">{sp.mrp}</span>
+                    <span className="text-[12px] text-white/50 line-through decoration-white/35 font-[Montserrat] ml-2">{sp.mrp}</span>
                   </div>
                   <div className="w-px h-7 sm:h-8 bg-white/10" />
                   <div>

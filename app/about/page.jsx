@@ -11,7 +11,6 @@ import {
   HERO,
   PURPOSE,
   RANGE,
-  REGISTERED_ADDRESS,
   STORY,
   TRUST,
   VALUES,
@@ -511,7 +510,7 @@ export default async function AboutPage() {
               Explore the range, or read the research behind every formulation.
             </p>
 
-            <div className="mt-12 flex flex-wrap justify-center gap-4">
+            <div className="mt-9 flex flex-wrap justify-center gap-4">
               <a
                 href="/products"
                 className="font-button rounded-full bg-primary px-9 py-4 text-[12px] uppercase tracking-[0.18em] text-on-primary transition-opacity duration-200 hover:opacity-85"
@@ -525,10 +524,6 @@ export default async function AboutPage() {
                 Knowledge Hub
               </a>
             </div>
-
-            <p className="font-body-md mt-20 text-[12px] leading-relaxed text-white/20">
-              {REGISTERED_ADDRESS}
-            </p>
           </div>
         </Section>
       </main>

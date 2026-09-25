@@ -23,6 +23,8 @@ export default function OrderSummaryCard({
   availableOffers = [],
   /** Codes the server has already applied, so they are not offered again. */
   appliedCodes = [],
+  /** Everything the customer selected, applied or not — see the pending rows. */
+  selectedCodes = [],
   couponInput,
   onCouponInputChange,
   couponError,
@@ -62,9 +64,32 @@ export default function OrderSummaryCard({
   /*
    * Tapping an advertised code APPLIES it, rather than filling the input for
    * the shopper to confirm with Apply. The two-step version made a customer
-   * press twice for a code the shop is actively promoting; the applied coupon
-   * still has a Remove control, so nothing here is one-way.
+   * press twice for a code the shop is actively promoting; tapping an applied
+   * row takes it back off, so nothing here is one-way.
    */
+  /*
+   * Codes the server refused for THIS cart, as code -> reason.
+   *
+   * The advertised offers list is anonymous and cannot know that a customer
+   * has already used a code; the quote's issues do. Passing them down lets an
+   * unusable offer be greyed out with the real reason instead of inviting a
+   * tap that can only fail.
+   */
+  const unavailableReasons = issues.reduce((acc, i) => {
+    if (i.sku === "__coupon__" && i.couponCode) acc[i.couponCode] = i.message;
+    return acc;
+  }, {});
+
+  /*
+   * Applied coupons that the offers panel is NOT already showing.
+   *
+   * An advertised code appears there marked APPLIED, so repeating it as a chip
+   * below listed the same coupon twice. A code the shopper typed — a private or
+   * partner code, never advertised — has no row up there, so it keeps one here.
+   */
+  const advertisedCodes = new Set(availableOffers.map((o) => o.code));
+  const couponsNotAdvertised = coupons.filter((c) => !advertisedCodes.has(c.code));
+
   const handleOfferSelect = async (code) => {
     setCouponApplying(true);
     await onSubmitCoupon(code);
@@ -122,7 +147,10 @@ export default function OrderSummaryCard({
         <AvailableOffers
           offers={availableOffers}
           appliedCodes={appliedCodes}
+          unavailableReasons={unavailableReasons}
+          subtotalPaise={subtotalPaise}
           onSelect={handleOfferSelect}
+          onRemove={onRemoveCoupon}
           disabled={couponApplying}
         />
       </div>
@@ -296,7 +324,10 @@ export default function OrderSummaryCard({
             <AvailableOffers
               offers={availableOffers}
               appliedCodes={appliedCodes}
+              unavailableReasons={unavailableReasons}
+              subtotalPaise={subtotalPaise}
               onSelect={handleOfferSelect}
+              onRemove={onRemoveCoupon}
               disabled={couponApplying}
             />
           </div>
@@ -323,8 +354,14 @@ export default function OrderSummaryCard({
             Every promotion the SERVER applied, not what was typed. A code the
             backend refused never appears here, so the list can't imply a
             discount that isn't in the total.
+
+            A code that is ALSO in the offers panel above is skipped: that row
+            already says APPLIED, and repeating it here listed the same coupon
+            twice on one screen. A privately typed code is not in that panel,
+            so it still needs a row of its own — and that row carries Remove,
+            which the offers panel does not offer.
           */}
-          {coupons.map((c) => (
+          {couponsNotAdvertised.map((c) => (
             <div
               key={c.code}
               className="flex items-center justify-between gap-2 rounded-xl border border-primary/30 bg-primary/10 px-3 py-2 text-[11px] text-primary font-[Montserrat]"
@@ -357,7 +394,6 @@ export default function OrderSummaryCard({
           ))}
         </form>
 
-        {/* Pricing Breakdown */}
         {/*
           Zewa Coins sit ABOVE the totals, beside the coupon controls, because
           §4.1 fixes the order of operations: coupon first, then coins. Putting
@@ -366,11 +402,66 @@ export default function OrderSummaryCard({
         */}
         {coinsSlot && <div className="pt-4 border-t border-white/8">{coinsSlot}</div>}
 
-        <div className="flex flex-col gap-2.5 pt-4 border-t border-white/8 text-[13px] font-[Montserrat]">
+        {/*
+          Pricing Breakdown.
+
+          While the server re-prices, EVERY figure here is stale, not just the
+          shipping row that used to carry the only indicator — and on a cart
+          with no state picked yet that row is "Select state", so there was no
+          feedback at all. Dimming the whole block says "these numbers are
+          settling" without moving anything: a spinner that reflows the layout
+          on each quantity tap is worse than a quiet fade.
+        */}
+        <div
+          className={`flex flex-col gap-2.5 pt-4 border-t border-white/8 text-[13px] font-[Montserrat] transition-opacity duration-200 ${
+            validating ? "opacity-50" : "opacity-100"
+          }`}
+          aria-busy={validating || undefined}
+        >
           <div className="flex justify-between text-white/50">
             <span>Subtotal</span>
             <span className="font-semibold text-white/80 tabular-nums">{formatInr(subtotalPaise)}</span>
           </div>
+
+          {/*
+            Codes the customer selected that the server did NOT apply.
+            Without these a refused code had no Remove control at all — it sat
+            in the cart, was re-sent on every attempt, and the only way out was
+            to abandon the order. They claim no discount, so they carry a muted
+            style and say why rather than "applied".
+          */}
+          {selectedCodes
+            .filter((code) => !coupons.some((c) => c.code === code))
+            // An advertised code is already greyed out in the offers panel with
+            // the reason it was refused, so a second "not applied" row below
+            // says nothing new. A privately typed code has no row up there and
+            // would otherwise vanish with no way to take it off.
+            .filter((code) => !advertisedCodes.has(code))
+            .map((code) => (
+              <div
+                key={`unapplied-${code}`}
+                className="flex items-center justify-between gap-2 rounded-xl border border-white/12 bg-white/[0.03] px-3 py-2 text-[11px] text-white/45 font-[Montserrat]"
+              >
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3.75m0 3.75h.008M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="truncate">
+                    <strong className="font-bold">{code}</strong> not applied
+                  </span>
+                </div>
+                {onRemoveCoupon && (
+                  <button
+                    type="button"
+                    onClick={() => onRemoveCoupon(code)}
+                    aria-label={`Remove ${code}`}
+                    className="shrink-0 rounded-md px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-white/50 transition-colors hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-white/40"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
 
           {discountPaise > 0 && (
             <div className="flex justify-between text-primary">

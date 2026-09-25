@@ -122,6 +122,12 @@ export function adaptProduct(api) {
     packLabels,
     tagline: api.shortDesc,
     price: first ? first.pricePaise / 100 : 0,
+    /*
+     * Combined rating: ratings carried over from Amazon plus every approved
+     * review left here. Null when the product has neither, so the card can say
+     * nothing rather than invent a score.
+     */
+    rating: api.rating?.count > 0 ? api.rating : null,
     mrp: first && first.mrpPaise > first.pricePaise ? formatInr(first.mrpPaise) : null,
     packs: packSizes,
     badge: api.badge ?? null,
