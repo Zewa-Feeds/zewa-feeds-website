@@ -79,6 +79,19 @@ function AuthDrawerContent() {
   const [signInErrors, setSignInErrors] = useState({});
   const [signInFormError, setSignInFormError] = useState(null);
   const [signInSubmitting, setSignInSubmitting] = useState(false);
+  /*
+   * Unverified-account recovery.
+   *
+   * The /signin PAGE already offered this; this drawer did not, so the surface most
+   * customers actually use — it opens from the header — left them stuck with
+   * "verify your email before signing in" and no way to get a new link. That is
+   * exactly what happens when the verification mail fails at signup, as it did
+   * during the Sep 2026 ZeptoMail outage.
+   */
+  const [isUnverified, setIsUnverified] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState("");
+  const [resending, setResending] = useState(false);
+  const [resendStatus, setResendStatus] = useState(null);
 
   // State for Sign Up form
   const [signUpForm, setSignUpForm] = useState({
@@ -160,6 +173,15 @@ function AuthDrawerContent() {
     setSignInForm((f) => ({ ...f, [key]: e.target.value }));
     if (signInErrors[key]) setSignInErrors((prev) => ({ ...prev, [key]: undefined }));
     if (signInFormError) setSignInFormError(null);
+    /*
+     * Clear the unverified panel too, or it keeps offering to resend to the PREVIOUS
+     * address while the customer types a different one — the resend would go to an
+     * account they are no longer trying to sign in to.
+     */
+    if (isUnverified && key === "email") {
+      setIsUnverified(false);
+      setResendStatus(null);
+    }
   };
 
   const handleSignInSubmit = async (e) => {
@@ -177,6 +199,8 @@ function AuthDrawerContent() {
 
     setSignInSubmitting(true);
     setSignInFormError(null);
+    setIsUnverified(false);
+    setResendStatus(null);
     try {
       await signIn({
         email: signInForm.email.trim(),
@@ -188,7 +212,16 @@ function AuthDrawerContent() {
         router.push(next);
       }
     } catch (err) {
-      if (err instanceof ApiError && err.fields) {
+      /*
+       * Checked BEFORE the `fields` branch: the server sends EMAIL_UNVERIFIED with
+       * the address in `details`, and falling through to the generic handler is what
+       * left this drawer showing the error with nothing to act on.
+       */
+      if (err instanceof ApiError && err.code === "EMAIL_UNVERIFIED") {
+        setIsUnverified(true);
+        setUnverifiedEmail(err.details?.email || signInForm.email.trim());
+        setSignInFormError("Please verify your email address before signing in.");
+      } else if (err instanceof ApiError && err.fields) {
         setSignInErrors(err.fields);
         setSignInFormError(err.message);
       } else {
@@ -200,6 +233,29 @@ function AuthDrawerContent() {
       }
     } finally {
       setSignInSubmitting(false);
+    }
+  };
+
+  /**
+   * Ask for a fresh verification link.
+   *
+   * The server mints a NEW token and spends any previous unused one — the original
+   * is single-use and 24-hour-bound, so resending the old email would deliver a dead
+   * link. The response is deliberately the same whether or not the account exists,
+   * so this never reports "no such account".
+   */
+  const handleResend = async () => {
+    const targetEmail = unverifiedEmail || signInForm.email.trim();
+    if (!targetEmail || resending) return;
+    setResending(true);
+    setResendStatus(null);
+    try {
+      await accountApi.resendVerification(targetEmail);
+      setResendStatus("A new verification link has been sent to your email.");
+    } catch {
+      setResendStatus("Could not resend link right now. Please try again in a moment.");
+    } finally {
+      setResending(false);
     }
   };
 
@@ -373,6 +429,27 @@ function AuthDrawerContent() {
           {authDrawerTab === "signin" && (
             <form onSubmit={handleSignInSubmit} noValidate className="flex flex-col gap-4">
               {signInFormError && <FormMessage>{signInFormError}</FormMessage>}
+
+              {isUnverified && (
+                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 space-y-2.5">
+                  <p className="text-[12.5px] text-amber-200 font-[Montserrat] leading-relaxed">
+                    We sent a verification link to{" "}
+                    <strong className="text-white">{unverifiedEmail}</strong>. Didn&apos;t receive
+                    it?
+                  </p>
+                  {resendStatus && (
+                    <p className="text-[12px] text-primary font-[Montserrat]">{resendStatus}</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resending}
+                    className="text-[12px] font-bold uppercase tracking-wider text-primary hover:underline disabled:opacity-50"
+                  >
+                    {resending ? "Sending link…" : "Resend Verification Email"}
+                  </button>
+                </div>
+              )}
 
               <FloatingInput
                 id="auth-email"
