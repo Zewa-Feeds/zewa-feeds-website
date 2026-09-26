@@ -768,9 +768,17 @@ export default function CheckoutPage() {
           // The customer's selected codes. The server re-evaluates every one
           // from scratch — this is a request, not an instruction.
           couponCodes: codesToSend,
-          // The KEY, not an amount — the server holds the authoritative
-          // reservation and decides how many coins it is worth (§4.3).
-          coinCartKey: coins.applied > 0 ? coins.cartKey : undefined,
+          /*
+           * The KEY, not an amount — the server holds the authoritative
+           * reservation and decides how many coins it is worth (§4.3).
+           *
+           * Sent whenever a hold is live, INCLUDING on a retry after a dismissed
+           * payment. The server re-resolves it every time and yields zero coins if
+           * it expired, was released, or belongs to someone else, so sending a key
+           * that no longer holds anything is safe — while NOT sending one loses a
+           * discount the customer can still see on screen.
+           */
+          coinCartKey: coins.hasHold ? coins.cartKey : undefined,
           customerNote: form.notes.trim() || undefined,
           // Only meaningful for a newly typed address; one picked from the book
           // is already saved, and the server dedupes anyway.
@@ -812,6 +820,7 @@ export default function CheckoutPage() {
           return;
         }
 
+        coins.settle(); // The hold now belongs to the order (§4.3), not to this page.
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         unlockScroll();
@@ -829,6 +838,7 @@ export default function CheckoutPage() {
         unlockScroll();
         setIsSubmittingPayment(false);
         if (paid === true) {
+          coins.settle(); // The hold now belongs to the order (§4.3), not to this page.
           clearCart();
           sessionStorage.removeItem(STORAGE_FORM_KEY);
           setStep("success");
@@ -849,6 +859,7 @@ export default function CheckoutPage() {
       setStep("paying");
 
       if (outcome === "paid") {
+        coins.settle(); // The hold now belongs to the order (§4.3), not to this page.
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         unlockScroll();
@@ -880,6 +891,7 @@ export default function CheckoutPage() {
             check.status === "PROCESSING" ||
             check.status === "SHIPPED"
           ) {
+            coins.settle(); // The hold now belongs to the order (§4.3), not to this page.
             clearCart();
             sessionStorage.removeItem(STORAGE_FORM_KEY);
             unlockScroll();
@@ -903,6 +915,7 @@ export default function CheckoutPage() {
       unlockScroll();
       setIsSubmittingPayment(false);
       if (pollResult === true) {
+        coins.settle(); // The hold now belongs to the order (§4.3), not to this page.
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         setStep("success");
