@@ -91,7 +91,11 @@ describe("§10.1 Validate on entry, with the reason", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /^Apply$/i }));
 
-    expect(screen.getByRole("alert").textContent).toMatch(/You can use up to 260 coins on this order.*full product value.*Shipping is payable separately/i);
+    // The ceiling is no longer "the full product value" — the server holds back
+    // ₹1 so the order stays above the payment gateway's minimum.
+    expect(screen.getByRole("alert").textContent).toMatch(
+      /You can use up to 260 coins on this order.*minimum of ₹1 are payable separately/i,
+    );
     expect(onApply).not.toHaveBeenCalled();
   });
 
@@ -126,7 +130,7 @@ describe("The balance and the order ceiling are two different numbers", () => {
     expect(screen.getByText(/340 Zewa Coins/i)).toBeDefined();
     expect(screen.getByText(/worth ₹340/i)).toBeDefined();
     expect(screen.getByText(/260 on this order/i)).toBeDefined();
-    expect(screen.getByText(/full product value/i)).toBeDefined();
+    expect(screen.getByText(/minimum of ₹1 are payable separately/i)).toBeDefined();
     expect(screen.getByRole("button", { name: /^max$/i })).toBeDefined();
   });
 

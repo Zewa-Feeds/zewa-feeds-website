@@ -247,3 +247,68 @@ describe("an order placed WITHOUT settling (the original defect)", () => {
     expect(removeCoins).toHaveBeenCalledTimes(1);
   });
 });
+
+/*
+ * A dismissed payment cancels the pending order, so the server has ALREADY
+ * released the reservation. `reopen()` is how the hook stops believing an order
+ * owns it — without that, `hasHold` stays false, the next attempt sends no cart
+ * key, and it quietly prices at full value.
+ */
+describe("after a dismissed payment releases the hold", () => {
+  it("clears the applied amount, because the coins are genuinely back", async () => {
+    const hook = setup();
+    await withHold(hook);
+    act(() => hook.result.current.settle());
+
+    act(() => hook.result.current.reopen());
+
+    expect(hook.result.current.applied).toBe(0);
+    expect(hook.result.current.hasHold).toBe(false);
+  });
+
+  /* The page owns the hold again, so a fresh apply must behave normally. */
+  it("lets the customer apply again", async () => {
+    const hook = setup();
+    await withHold(hook);
+    act(() => hook.result.current.settle());
+    act(() => hook.result.current.reopen());
+
+    applyCoins.mockResolvedValue({ held: 120 });
+    await act(async () => {
+      await hook.result.current.apply(120);
+    });
+
+    await waitFor(() => expect(hook.result.current.applied).toBe(120));
+    expect(hook.result.current.hasHold).toBe(true);
+  });
+
+  /*
+   * The unmount cleanup must work again too. After `settle()` it is suppressed,
+   * and a reopened hook that never un-suppressed it would strand the next hold
+   * until the 30-minute sweep.
+   */
+  it("restores the release-on-abandon behaviour", async () => {
+    const hook = setup();
+    await withHold(hook);
+    act(() => hook.result.current.settle());
+    act(() => hook.result.current.reopen());
+
+    applyCoins.mockResolvedValue({ held: 90 });
+    await act(async () => {
+      await hook.result.current.apply(90);
+    });
+    await waitFor(() => expect(hook.result.current.applied).toBe(90));
+    removeCoins.mockClear();
+
+    hook.unmount();
+
+    expect(removeCoins).toHaveBeenCalledTimes(1);
+  });
+
+  /* Nothing to give back when no order ever took the hold. */
+  it("is harmless when nothing was settled", () => {
+    const hook = setup();
+    act(() => hook.result.current.reopen());
+    expect(hook.result.current.applied).toBe(0);
+  });
+});

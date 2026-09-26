@@ -126,7 +126,9 @@ export default function CoinsPanel({
       // §10.2: "You can use up to 260 coins on this order — that's the full
       // product value. Shipping is payable separately."
       setError(
-        `You can use up to ${maxRedeemable} coins on this order — that's the full product value. Shipping is payable separately.`,
+        // No longer "the full product value": the server holds back ₹1 so the
+        // order stays above the payment gateway's minimum.
+        `You can use up to ${maxRedeemable} coins on this order. Shipping and a minimum of ₹1 are payable separately.`,
       );
       return;
     }
@@ -181,8 +183,8 @@ export default function CoinsPanel({
       {capped && (
         <p className="-mt-1 font-[Montserrat] text-[11.5px] text-white/45">
           Up to{" "}
-          <span className="font-semibold text-white/70">{maxRedeemable} on this order</span>{" "}
-          — the full product value. Shipping is payable separately.
+          <span className="font-semibold text-white/70">{maxRedeemable} on this order</span>.{" "}
+          Shipping and a minimum of ₹1 are payable separately.
         </p>
       )}
 

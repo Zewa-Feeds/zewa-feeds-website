@@ -26,6 +26,16 @@ export default function AvailableOffers({
    * inviting a tap that can only fail.
    */
   unavailableReasons = {},
+  /*
+   * Codes the customer chose, including ones the server then refused.
+   *
+   * `appliedCodes` is the server-CONFIRMED list, so a refused code is absent
+   * from it — which left it rendering as "Apply" with no way to take it off,
+   * while the Order Summary skipped it for being advertised. ZEWA1 applied and
+   * then refused ("valid only on your first order") was therefore stuck on the
+   * order with no remove control anywhere, blocking checkout.
+   */
+  selectedCodes = [],
   /** Cart subtotal, so a minimum-spend shortfall can be shown before a tap. */
   subtotalPaise = 0,
   onSelect,
@@ -82,6 +92,15 @@ export default function AvailableOffers({
             offer.minOrderPaise > 0 ? offer.minOrderPaise - subtotalPaise : 0;
           const belowMinimum = !alreadyOn && shortfallPaise > 0;
 
+          /*
+           * Chosen but NOT confirmed — the server refused it. The row must act
+           * as a remove control, exactly as an applied one does, or the code
+           * cannot be taken off at all.
+           */
+          const stuck = !alreadyOn && selectedCodes.includes(offer.code);
+          /** This row removes rather than applies. */
+          const removable = alreadyOn || stuck;
+
           const refusedReason = alreadyOn ? null : unavailableReasons[offer.code];
           const reason =
             refusedReason ||
@@ -112,14 +131,22 @@ export default function AvailableOffers({
               */}
               <button
                 type="button"
-                disabled={unavailable || disabled}
-                onClick={() => (alreadyOn ? onRemove?.(offer.code) : onSelect?.(offer.code))}
+                /*
+                 * `removable` overrides `unavailable`. This control is both the
+                 * apply AND the remove, so disabling it on a refused code traps
+                 * the customer — the reason is still shown, only the disabled
+                 * state is suppressed.
+                 */
+                disabled={(unavailable && !removable) || disabled}
+                onClick={() => (removable ? onRemove?.(offer.code) : onSelect?.(offer.code))}
                 // The name leads with the code so it stays unique among the
                 // several controls that mention the same coupon.
                 aria-label={
                   alreadyOn
                     ? `${offer.code} — applied, tap to remove`
-                    : `${offer.code} — apply`
+                    : stuck
+                      ? `${offer.code} — not applied, tap to remove`
+                      : `${offer.code} — apply`
                 }
                 className={
                   // Within reach: dimmed but still warm, because adding a

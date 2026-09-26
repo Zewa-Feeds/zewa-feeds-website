@@ -903,7 +903,42 @@ export default function CheckoutPage() {
         } catch {
           /* ignore */
         }
-        // Clean dismissal: restore form cleanly with all user inputs intact
+        /*
+         * Genuinely unpaid. Cancel the order so the coin reservation and any
+         * coupon hold come back NOW, rather than waiting out the 30-minute
+         * unpaid sweep.
+         *
+         * Without this the customer returned to a checkout whose coins had
+         * silently vanished from their balance — held against an order they
+         * never paid for, with nothing on screen explaining why. That reads as
+         * the coins being taken.
+         *
+         * Reuses the existing customer-cancel endpoint rather than inventing a
+         * release path: it already runs the CANCELLED transition, which calls
+         * `releaseForOrder` for coins and `releaseRedemption` for coupons, and
+         * it re-checks the gateway server-side so an order paid in the meantime
+         * cannot be cancelled out from under a real payment.
+         *
+         * Deliberately NOT allowed to block the customer. A cancel that fails —
+         * a guest with no session, a network drop, an order that moved on — just
+         * leaves the sweep to do its job, which is the behaviour we already had.
+         */
+        /*
+         * NOT awaited. The customer is going back to the form either way, and
+         * making them watch a spinner while a cancellation round-trips — on a
+         * cold Render instance, several seconds — would be a worse experience
+         * than the problem being fixed. The release is not something they wait
+         * for; it is something that happens.
+         */
+        void accountApi
+          .cancelOrder(result.orderNo, { reason: "Payment was not completed." })
+          .catch(() => undefined);
+
+        // The hold is the customer's again, so the panel may re-apply and
+        // release it as normal.
+        coins.reopen();
+
+        // Restore the form with all inputs intact.
         unlockScroll();
         setIsSubmittingPayment(false);
         setStep("form");

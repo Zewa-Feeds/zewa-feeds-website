@@ -147,6 +147,7 @@ export default function OrderSummaryCard({
         <AvailableOffers
           offers={availableOffers}
           appliedCodes={appliedCodes}
+          selectedCodes={selectedCodes}
           unavailableReasons={unavailableReasons}
           subtotalPaise={subtotalPaise}
           onSelect={handleOfferSelect}
@@ -324,6 +325,7 @@ export default function OrderSummaryCard({
             <AvailableOffers
               offers={availableOffers}
               appliedCodes={appliedCodes}
+              selectedCodes={selectedCodes}
               unavailableReasons={unavailableReasons}
               subtotalPaise={subtotalPaise}
               onSelect={handleOfferSelect}

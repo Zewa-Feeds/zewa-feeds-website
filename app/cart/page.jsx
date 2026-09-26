@@ -19,7 +19,7 @@ export default function CartPage() {
      * neither list. Reading `.map` off undefined here would take down the whole
      * cart over a promotion panel.
      */
-    coupons = [], issues = [], applyCoupon, removeCoupon,
+    coupons = [], issues = [], couponCodes = [], applyCoupon, removeCoupon,
   } = useCart();
 
   /*
@@ -128,6 +128,7 @@ export default function CartPage() {
       onSubmit={submitCoupon}
       availableOffers={availableOffers}
       appliedCodes={appliedCodes}
+      selectedCodes={couponCodes}
       unavailableReasons={unavailableReasons}
       subtotalPaise={subtotalPaise}
       coupons={coupons}
