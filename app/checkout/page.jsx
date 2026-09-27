@@ -605,9 +605,37 @@ export default function CheckoutPage() {
     }
   };
 
+  /*
+   * The applied coupon a failed checkout was complaining about.
+   *
+   * `place()` refuses the whole order when a code is no longer usable — "You have
+   * already used ZEWA1." — and the banner sat at the top of the page, detached
+   * from the control that fixes it. The customer saw an error beside a coupon
+   * still marked APPLIED and had no way to know that removing it was the answer.
+   *
+   * Matched by looking for an applied code inside the server's own message rather
+   * than by parsing a shape: the wording belongs to the eligibility rules and is
+   * written for the customer, and any of them may name the code.
+   */
+  const blockingCouponCode = (() => {
+    const message = errors._root;
+    if (!message) return null;
+    return (coupons ?? []).map((c) => c.code).find((code) => message.includes(code)) ?? null;
+  })();
+
   const dropCoupon = async (code) => {
     setCouponError("");
     setCouponSuccess("");
+    /*
+     * Clear the checkout-level banner too. It is usually ABOUT the code being
+     * removed ("You have already used ZEWA1"), so leaving it up after the fix
+     * tells the customer the problem persists when it does not.
+     */
+    setErrors((prev) => {
+      if (!prev._root) return prev;
+      const { _root, ...rest } = prev;
+      return rest;
+    });
     await removeCoupon(code);
   };
 
@@ -1325,7 +1353,27 @@ export default function CheckoutPage() {
               <svg className="h-5 w-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>{errors._root}</span>
+              <span>
+                {errors._root}
+                {/*
+                  Says what to DO, and does it. Without this the customer read a
+                  refusal next to a coupon still badged APPLIED, with the remove
+                  control several hundred pixels away in a panel they had no
+                  reason to look at.
+                */}
+                {blockingCouponCode && (
+                  <>
+                    {" "}
+                    <button
+                      type="button"
+                      onClick={() => dropCoupon(blockingCouponCode)}
+                      className="font-bold underline underline-offset-2 hover:text-red-200"
+                    >
+                      Remove {blockingCouponCode} to continue.
+                    </button>
+                  </>
+                )}
+              </span>
             </div>
           )}
 

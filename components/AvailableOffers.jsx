@@ -54,7 +54,7 @@ export default function AvailableOffers({
    */
   const rank = (o) => {
     if (appliedCodes.includes(o.code)) return 0;
-    if (unavailableReasons[o.code]) return 3;
+    if (unavailableReasons[o.code] || o.unavailableReason) return 3;
     if (o.minOrderPaise > 0 && o.minOrderPaise > subtotalPaise) return 2;
     return 1;
   };
@@ -101,7 +101,19 @@ export default function AvailableOffers({
           /** This row removes rather than applies. */
           const removable = alreadyOn || stuck;
 
-          const refusedReason = alreadyOn ? null : unavailableReasons[offer.code];
+          /*
+           * Two sources, one meaning.
+           *
+           * `unavailableReasons` carries what the CART was told when a code was
+           * submitted. `offer.unavailableReason` is what the server says about
+           * this VIEWER before they try — already used, first-order-only, not for
+           * their account. The second is why a used-up coupon no longer invites a
+           * tap that can only fail; the cart's own answer wins when it exists,
+           * because it is the more recent judgement.
+           */
+          const refusedReason = alreadyOn
+            ? null
+            : (unavailableReasons[offer.code] ?? offer.unavailableReason ?? null);
           const reason =
             refusedReason ||
             (belowMinimum ? `Add ${formatInr(shortfallPaise)} more to use this` : null);

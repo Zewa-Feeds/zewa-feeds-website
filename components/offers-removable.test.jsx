@@ -118,3 +118,75 @@ describe("a coupon the server confirmed", () => {
     expect(row().disabled).toBe(false);
   });
 });
+
+/*
+ * The server's own verdict on THIS viewer.
+ *
+ * `GET /offers` now carries `unavailableReason` per coupon — already used, first
+ * order only, not for your account — judged by the same `assertCustomerEligible`
+ * that checkout uses. Before this the endpoint had no session at all and
+ * advertised every coupon to everybody, which is how an already-used code reached
+ * the cart, showed as APPLIED, and was only refused at payment.
+ */
+describe("a coupon the server says this viewer cannot use", () => {
+  const usedUp = { ...ZEWA1, unavailableReason: "You have already used ZEWA1." };
+
+  it("is disabled before the customer ever taps it", () => {
+    renderOffers({ offers: [usedUp] });
+    expect(row().disabled).toBe(true);
+  });
+
+  it("shows the server's own wording, not a rephrasing", () => {
+    renderOffers({ offers: [usedUp] });
+    expect(screen.getByText(/You have already used ZEWA1\./)).toBeTruthy();
+  });
+
+  it.each([
+    ["first-order-only", "ZEWA1 is valid only on your first order."],
+    ["returning-customer", "ZEWA1 is for returning customers."],
+    ["account-specific", "ZEWA1 is not available for your account."],
+  ])("greys out a %s refusal the same way", (_label, reason) => {
+    renderOffers({ offers: [{ ...ZEWA1, unavailableReason: reason }] });
+    expect(row().disabled).toBe(true);
+    expect(screen.getByText(reason)).toBeTruthy();
+  });
+
+  /*
+   * The safety rule still wins. Once a code is applied it must stay removable,
+   * however the server later judges it — the row is the only control that can
+   * take it off.
+   */
+  it("stays removable if it is somehow already applied", () => {
+    const { onRemove } = renderOffers({ offers: [usedUp], appliedCodes: ["ZEWA1"] });
+
+    expect(row().disabled).toBe(false);
+    fireEvent.click(row());
+    expect(onRemove).toHaveBeenCalledWith("ZEWA1");
+  });
+
+  it("stays removable if it was selected and then refused", () => {
+    const { onRemove } = renderOffers({ offers: [usedUp], selectedCodes: ["ZEWA1"] });
+
+    expect(row().disabled).toBe(false);
+    fireEvent.click(row());
+    expect(onRemove).toHaveBeenCalledWith("ZEWA1");
+  });
+
+  /* A cart-level refusal is the newer judgement and wins over the listing's. */
+  it("prefers the cart's reason when both exist", () => {
+    renderOffers({
+      offers: [usedUp],
+      unavailableReasons: { ZEWA1: "Add ₹81 more to use this" },
+    });
+    expect(screen.getByText(/Add ₹81 more/)).toBeTruthy();
+  });
+
+  /* No reason means no change: an eligible coupon is offered as before. */
+  it("leaves an eligible coupon alone", () => {
+    const { onSelect } = renderOffers({ offers: [{ ...ZEWA1, unavailableReason: null }] });
+
+    expect(row().disabled).toBe(false);
+    fireEvent.click(row());
+    expect(onSelect).toHaveBeenCalledWith("ZEWA1");
+  });
+});
