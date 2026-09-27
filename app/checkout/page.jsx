@@ -958,13 +958,24 @@ export default function CheckoutPage() {
          * than the problem being fixed. The release is not something they wait
          * for; it is something that happens.
          */
-        void accountApi
+        const cancelled = accountApi
           .cancelOrder(result.orderNo, { reason: "Payment was not completed." })
           .catch(() => undefined);
 
-        // The hold is the customer's again, so the panel may re-apply and
-        // release it as normal.
-        coins.reopen();
+        /*
+         * The hold is the customer's again, so the panel may re-apply and
+         * release it as normal.
+         *
+         * The cancel above is what releases the reservation, so `reopen` is
+         * given it and refreshes the balance only once it has landed — a quote
+         * taken before that reports coins still held and the panel keeps
+         * showing a reduced, wrong figure.
+         *
+         * Still not awaited HERE: the form comes back immediately and the
+         * number corrects itself a moment later, rather than making the
+         * customer watch a spinner while a cancel round-trips.
+         */
+        void coins.reopen({ after: cancelled });
 
         // Restore the form with all inputs intact.
         unlockScroll();

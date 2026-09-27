@@ -62,7 +62,18 @@ describe("dismissing the payment modal", () => {
    * next attempt, and it quietly prices at full value.
    */
   it("hands the hold back to the page", () => {
-    expect(DISMISS_BRANCH).toMatch(/coins\.reopen\(\)/);
+    expect(DISMISS_BRANCH).toMatch(/coins\.reopen\(/);
+  });
+
+  /*
+   * The cancel is what RELEASES the reservation, and `reopen` refreshes the
+   * balance from the server. Refreshing first reads the pre-release figure, so
+   * the panel keeps showing coins as held — which is what
+   * "Earn 10 Zewa Coins... You have 0." was, with the coins sitting untouched
+   * in the account. The cancel is therefore handed to `reopen` to wait on.
+   */
+  it("refreshes the balance only after the release it depends on", () => {
+    expect(DISMISS_BRANCH).toMatch(/coins\.reopen\(\s*\{\s*after:/);
   });
 
   /* Reuses the existing customer-cancel flow rather than a new release path. */

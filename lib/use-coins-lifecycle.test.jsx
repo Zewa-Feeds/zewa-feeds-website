@@ -260,7 +260,7 @@ describe("after a dismissed payment releases the hold", () => {
     await withHold(hook);
     act(() => hook.result.current.settle());
 
-    act(() => hook.result.current.reopen());
+    await act(async () => { await hook.result.current.reopen(); });
 
     expect(hook.result.current.applied).toBe(0);
     expect(hook.result.current.hasHold).toBe(false);
@@ -271,7 +271,7 @@ describe("after a dismissed payment releases the hold", () => {
     const hook = setup();
     await withHold(hook);
     act(() => hook.result.current.settle());
-    act(() => hook.result.current.reopen());
+    await act(async () => { await hook.result.current.reopen(); });
 
     applyCoins.mockResolvedValue({ held: 120 });
     await act(async () => {
@@ -291,7 +291,7 @@ describe("after a dismissed payment releases the hold", () => {
     const hook = setup();
     await withHold(hook);
     act(() => hook.result.current.settle());
-    act(() => hook.result.current.reopen());
+    await act(async () => { await hook.result.current.reopen(); });
 
     applyCoins.mockResolvedValue({ held: 90 });
     await act(async () => {
@@ -306,9 +306,9 @@ describe("after a dismissed payment releases the hold", () => {
   });
 
   /* Nothing to give back when no order ever took the hold. */
-  it("is harmless when nothing was settled", () => {
+  it("is harmless when nothing was settled", async () => {
     const hook = setup();
-    act(() => hook.result.current.reopen());
+    await act(async () => { await hook.result.current.reopen(); });
     expect(hook.result.current.applied).toBe(0);
   });
 });
