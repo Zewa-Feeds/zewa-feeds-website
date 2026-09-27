@@ -268,11 +268,10 @@ export function CartProvider({ children }) {
       const effectiveState = state !== undefined ? state : (lastStateRef.current ?? undefined);
 
       const seq = ++requestSeq.current;
-      // The line-up AND codes being priced, captured before the await so a cart
-      // or coupon change mid-flight cannot make this quote look current when it
-      // is not. `codes` is what actually goes to the server, not the state,
-      // which may already have moved on.
-      const pricedSignature = cartSignature(items, codes);
+      // The line-up being priced, captured before the await so a cart change
+      // mid-flight cannot make this quote look current when it is not. The
+      // CODES half of the signature cannot be decided here — see below.
+      const pricedItems = items;
       setValidating(true);
       try {
         const result = await cartApi.validate({
@@ -286,7 +285,24 @@ export function CartProvider({ children }) {
         if (seq !== requestSeq.current) return result;
 
         setQuote(result);
-        setQuoteSignature(pricedSignature);
+        /*
+         * Sign the quote with the codes the server ACTUALLY APPLIED, not the
+         * ones we asked for.
+         *
+         * A refused code is pruned from `couponCodes` a moment later, so the
+         * live signature will never contain it. Signing with the REQUESTED list
+         * therefore left `quoteSignature` permanently ahead of `signature`,
+         * `quoteIsCurrent` false, and `pricesPending` stuck true — checkout sat
+         * on "Validating prices..." with the total rendered as a dash, and no
+         * shopper action could clear it because the cart was already settled.
+         *
+         * The quote genuinely describes a cart with only the accepted codes on
+         * it; that is what the server priced. Recording that is both honest and
+         * what makes the two signatures converge.
+         */
+        setQuoteSignature(
+          cartSignature(pricedItems, (result?.coupons ?? []).map((c) => c.code)),
+        );
         dispatch({ type: "RECONCILE", lines: result.lines });
 
         /*
