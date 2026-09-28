@@ -111,9 +111,25 @@ export default function CheckoutPage() {
   /** Ticked by default for guests — it costs them nothing and saves retyping. */
   const [saveAddress, setSaveAddress] = useState(true);
 
-  const idempotencyKey = useRef(
-    `chk-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
-  );
+  const newIdempotencyKey = () =>
+    `chk-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+  const idempotencyKey = useRef(newIdempotencyKey());
+
+  /*
+   * Start a fresh key after an attempt is cancelled.
+   *
+   * The key is per ATTEMPT, not per page. Dismissing or failing a payment
+   * cancels the pending order, and the server rightly refuses to replay a
+   * cancelled one — its stock is back and its holds are released, so
+   * resurrecting it would confirm an order nobody paid for. Reusing the key
+   * meant the retry asked about that dead order and was told
+   * "That order was cancelled... Please place a new order." — which is exactly
+   * what the customer was trying to do.
+   */
+  const rotateIdempotencyKey = () => {
+    idempotencyKey.current = newIdempotencyKey();
+  };
 
   /*
    * Synchronous re-entry guard for the pay button.
@@ -929,6 +945,8 @@ export default function CheckoutPage() {
           .cancelOrder(result.orderNo, { reason: "Payment failed." })
           .catch(() => undefined);
         void coins.reopen({ after: cancelled });
+        // That order is dead; the next attempt must not replay it.
+        rotateIdempotencyKey();
 
         unlockScroll();
         setIsSubmittingPayment(false);
@@ -1005,6 +1023,8 @@ export default function CheckoutPage() {
          * customer watch a spinner while a cancel round-trips.
          */
         void coins.reopen({ after: cancelled });
+        // That order is dead; the next attempt must not replay it.
+        rotateIdempotencyKey();
 
         // Restore the form with all inputs intact.
         unlockScroll();
