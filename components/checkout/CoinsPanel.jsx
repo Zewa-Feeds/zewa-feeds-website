@@ -66,12 +66,35 @@ export default function CoinsPanel({
   const { available, maxRedeemable, minRedemption, coinValuePaise } = quote;
   const rupeesFor = (coins) => `₹${((coins * coinValuePaise) / 100).toLocaleString("en-IN")}`;
 
-  // §10.2: "Earn 10 coins to start using them. You have 6."
+  /*
+   * §10.2, below the minimum — a LOCKED state, not a line of prose.
+   *
+   * This used to render one faint sentence ("Earn 10 Zewa Coins to start using
+   * them. You have 0.") between the offers box and the totals, and it read as
+   * filler. A customer who has never seen Zewa Coins had no reason to notice a
+   * wallet existed — and this is the one moment the feature can introduce
+   * itself.
+   *
+   * So: named in its own label, the balance shown as a figure, and the
+   * shortfall stated plainly. Deliberately still inert — nothing is spendable
+   * yet, so it must not borrow the applied state's filled treatment or imply a
+   * discount is on.
+   */
   if (available < minRedemption) {
+    const short = minRedemption - available;
     return (
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3">
-        <p className="font-[Montserrat] text-[12.5px] text-white/50">
-          Earn {minRedemption} Zewa Coins to start using them. You have {available}.
+      <div className="rounded-xl border border-[#44e5c2]/20 bg-[#44e5c2]/[0.03] px-4 py-3">
+        <div className="flex items-center justify-between gap-3">
+          <span className="font-[Montserrat] text-[12px] font-semibold uppercase tracking-wider text-[#44e5c2]/70">
+            Zewa Coins
+          </span>
+          <span className="font-[Montserrat] text-[13px] font-semibold tabular-nums text-white/70">
+            {available}
+          </span>
+        </div>
+        <p className="mt-1.5 font-[Montserrat] text-[12.5px] leading-relaxed text-white/50">
+          Earn {short} more to spend them on an order. You collect coins on every
+          purchase, and {minRedemption} unlocks redemption.
         </p>
       </div>
     );

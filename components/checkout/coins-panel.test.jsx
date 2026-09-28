@@ -169,11 +169,15 @@ describe("The balance and the order ceiling are two different numbers", () => {
 
 describe("§10.2 Below the minimum balance", () => {
   it("tells the customer how far off they are", () => {
-    // "Earn 10 coins to start using them. You have 6."
+    /*
+     * Asserted as BALANCE + SHORTFALL rather than one exact sentence. The copy
+     * changed when this state became a named, locked panel instead of a line of
+     * grey prose — the rule being pinned is that both numbers are present and
+     * no input is offered, not the wording that carried them.
+     */
     render(<CoinsPanel quote={{ ...QUOTE, available: 6, maxRedeemable: 6 }} />);
-    expect(
-      screen.getByText(/Earn 10 Zewa Coins to start using them\. You have 6\./i),
-    ).toBeDefined();
+    expect(screen.getByText("6")).toBeTruthy();                  // what they have
+    expect(document.body.textContent).toMatch(/Earn 4 more/i);   // to reach 10
     expect(screen.queryByLabelText(/Zewa Coins to use/i)).toBeNull();
   });
 });
