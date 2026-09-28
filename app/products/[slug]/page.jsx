@@ -96,7 +96,23 @@ export default async function ProductPage({ params }) {
   let product;
   try {
     product = await catalog.product(slug);
-  } catch {
+  } catch (err) {
+    /*
+     * Only 404 when the SERVER said the product is missing.
+     *
+     * This used to be a bare `catch { notFound(); }`, which could not tell
+     * "this product was deleted" from "the request timed out" — and the backend
+     * currently answers product queries in 7-20 seconds. So real products were
+     * 404ing, and because this page is ISR, that 404 was CACHED: every product
+     * on the live site showed "Oops! We couldn't find that page" while the API
+     * itself answered 200 for all 13 slugs.
+     *
+     * `notFound()` is a factual claim, and it is sticky. A timeout or a network
+     * failure is an outage instead: rethrowing surfaces an error page that
+     * Next.js will retry, which recovers on its own. A cached 404 does not.
+     */
+    const missing = err?.status === 404 || err?.code === 'NOT_FOUND';
+    if (!missing) throw err;
     notFound();
   }
 
