@@ -118,10 +118,23 @@ export function AuthProvider({ children }) {
           return null;
         }
 
-        // Unreachable, not unauthenticated. Keep whatever profile we already
-        // have; a first load with none stays "loading" so the header shows no
-        // claim either way rather than a wrong one.
-        setStatus((prev) => (prev === "authenticated" ? "authenticated" : "loading"));
+        /*
+         * Unreachable, not unauthenticated.
+         *
+         * An established session is KEPT: that is the whole point — a slow
+         * request must not throw someone out of a checkout.
+         *
+         * A FIRST load is different. There is no session to protect yet, and
+         * "loading" is not a free parking state: the header renders the profile
+         * icon as an inert div while it holds, and the mobile menu renders
+         * nothing at all, so staying there leaves the customer with no way to
+         * sign in. Against a 9-13s API that is where the first load lands.
+         *
+         * So it falls through to "anonymous" — which is also simply true: there
+         * is no verified session. The retry keeps running underneath, so if the
+         * server does answer, the session appears without a reload.
+         */
+        setStatus((prev) => (prev === "authenticated" ? "authenticated" : "anonymous"));
         scheduleRetry();
         return null;
       } finally {

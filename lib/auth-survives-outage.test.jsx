@@ -34,6 +34,9 @@ vi.mock("@/lib/api", () => ({
   },
 }));
 
+// AccountMenu reads the pathname; the provider itself does not.
+vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+
 const { AuthProvider, useAuth } = await import("@/lib/authContext");
 
 function Probe() {
@@ -89,20 +92,24 @@ describe("a session that the server never rejected", () => {
     expect(screen.getByTestId("who").textContent).toBe("abhi@example.com");
   });
 
-  it("never claims 'anonymous' on a first load that could not reach the server", async () => {
+  it("does NOT strand a first load in 'loading' — the header must stay usable", async () => {
     me.mockRejectedValue(unreachable());
     show();
 
-    // "loading" makes no claim; "anonymous" would be a false one.
-    await waitFor(() => expect(me).toHaveBeenCalled());
-    expect(status()).toBe("loading");
+    /*
+     * There is no session to protect on a first load, and "loading" is not a
+     * free parking state: AccountMenu renders the profile icon as an inert
+     * div while it holds, and MobileAccountLinks renders nothing, so a stuck
+     * "loading" leaves the customer unable to sign in at all.
+     */
+    await waitFor(() => expect(status()).toBe("anonymous"));
   });
 
   it("recovers by itself once the server answers, without a reload", async () => {
     me.mockRejectedValueOnce(unreachable());
     show();
     await waitFor(() => expect(me).toHaveBeenCalledTimes(1));
-    expect(status()).toBe("loading");
+    expect(status()).toBe("anonymous");
 
     me.mockResolvedValue(CUSTOMER);
     await act(async () => {
@@ -127,6 +134,23 @@ describe("a session that the server never rejected", () => {
       await vi.advanceTimersByTimeAsync(2500);
     });
     expect(me).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("the header the customer actually sees", () => {
+  it("offers a clickable sign-in when the server cannot be reached", async () => {
+    // The provider and the real AccountMenu together — the combination the
+    // status-only tests missed, and where the dead profile icon appeared.
+    const { default: AccountMenu } = await import("@/components/AccountMenu");
+    me.mockRejectedValue(unreachable());
+
+    render(
+      <AuthProvider>
+        <AccountMenu />
+      </AuthProvider>
+    );
+
+    await waitFor(() => expect(screen.getByRole("button", { name: /sign in/i })).toBeTruthy());
   });
 });
 
