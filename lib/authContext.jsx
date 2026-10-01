@@ -46,6 +46,37 @@ export function AuthProvider({ children }) {
    */
   const inflight = useRef(null);
 
+  /**
+   * Pending retry after an unreachable server, so it can be cancelled on
+   * unmount and never outlive the provider.
+   */
+  const retryTimer = useRef(null);
+  /** Backoff attempt count; reset by any successful refresh. */
+  const retryAttempt = useRef(0);
+
+  /**
+   * Try again after a transport failure, backing off 2s, 4s, 8s to a 30s
+   * ceiling. The ceiling matters more than the curve: the customer may sit on
+   * a page for minutes, and a session that only recovers on reload is barely
+   * better than one that ended.
+   */
+  const scheduleRetry = useCallback(() => {
+    if (retryTimer.current) return;
+    const delay = Math.min(2000 * 2 ** retryAttempt.current, 30_000);
+    retryAttempt.current += 1;
+    retryTimer.current = setTimeout(() => {
+      retryTimer.current = null;
+      void refreshRef.current?.();
+    }, delay);
+  }, []);
+
+  /**
+   * `refresh` and `scheduleRetry` call each other. A ref breaks the cycle
+   * without making either depend on the other's identity, which would
+   * re-create both on every render and refire the mount effect.
+   */
+  const refreshRef = useRef(null);
+
   /** Pull the current profile from the API. Safe to call repeatedly. */
   const refresh = useCallback(async () => {
     if (!tokenStore.token) {
@@ -59,21 +90,39 @@ export function AuthProvider({ children }) {
     inflight.current = (async () => {
       try {
         const me = await accountApi.me();
+        retryAttempt.current = 0;
         setCustomer(me);
         setStatus("authenticated");
         return me;
       } catch {
         /*
-         * Any failure here lands on "anonymous". request() already clears the
-         * token on a 401, so an expired session self-heals into a signed-out
-         * state instead of leaving the UI half-authenticated.
+         * Only the SERVER can end a session.
          *
-         * A network blip is treated the same way. Showing a signed-in shell
-         * whose every panel then fails to load is worse than showing the
-         * signed-out one, and the customer can simply sign in again.
+         * This used to land every failure on "anonymous", which conflated two
+         * very different things: "your token is no longer valid" and "we could
+         * not reach the server". The second is an outage, and treating it as a
+         * sign-out is how clicking a product signed customers out — the API
+         * answers /account/me in 9-13s, so a cold start or a slow response
+         * routinely times out, and the header flipped to signed-out while the
+         * token sat untouched in localStorage.
+         *
+         * request() clears the token on a 401 and ONLY on a 401, so the token's
+         * continued presence is the signal that the server never rejected it.
+         * When it is still there, the session is kept and retried; the customer
+         * is not thrown out of a checkout because one request was slow.
          */
-        setCustomer(null);
-        setStatus("anonymous");
+        const rejected = !tokenStore.token;
+        if (rejected) {
+          setCustomer(null);
+          setStatus("anonymous");
+          return null;
+        }
+
+        // Unreachable, not unauthenticated. Keep whatever profile we already
+        // have; a first load with none stays "loading" so the header shows no
+        // claim either way rather than a wrong one.
+        setStatus((prev) => (prev === "authenticated" ? "authenticated" : "loading"));
+        scheduleRetry();
         return null;
       } finally {
         inflight.current = null;
@@ -81,10 +130,20 @@ export function AuthProvider({ children }) {
     })();
 
     return inflight.current;
-  }, []);
+    // `scheduleRetry` is a stable useCallback([]); naming it keeps that
+    // dependency honest rather than relying on it silently.
+  }, [scheduleRetry]);
+
+  refreshRef.current = refresh;
 
   useEffect(() => {
     void refresh();
+    return () => {
+      if (retryTimer.current) {
+        clearTimeout(retryTimer.current);
+        retryTimer.current = null;
+      }
+    };
   }, [refresh]);
 
   /**
