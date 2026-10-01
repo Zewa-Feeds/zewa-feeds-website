@@ -34,8 +34,42 @@ import { account as accountApi, auth as tokenStore } from "@/lib/api";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [customer, setCustomer] = useState(null);
-  const [status, setStatus] = useState("loading");
+  /*
+   * Start from the cached profile when there is one.
+   *
+   * The initial state used to be (null, "loading") unconditionally, so every
+   * full page load — a first visit, a reload, a direct product URL, coming back
+   * from an external link — painted a signed-out header and only corrected
+   * itself once /account/me answered. That call takes 9-13s against the current
+   * API, so a signed-in customer saw the signed-out icon for most of a minute
+   * and concluded they had been logged out. They had not: the token was in
+   * localStorage the whole time.
+   *
+   * A lazy initialiser rather than an effect, so the FIRST paint is already
+   * correct and there is no flash to correct. The cache is display-only and the
+   * revalidation below still runs; the server's answer always wins.
+   */
+  const [customer, setCustomer] = useState(() => tokenStore.profile);
+  const [status, setStatus] = useState(() =>
+    tokenStore.profile ? "authenticated" : "loading"
+  );
+
+  /**
+   * The ONLY writer of customer state.
+   *
+   * State and cache have to move together: a cache that lags produces a header
+   * naming the wrong person after a profile edit, and one that outlives its
+   * token produces a signed-in header with no session. Routing all eight call
+   * sites through here is what keeps that true without having to remember it
+   * at each one.
+   */
+  const writeCustomer = useCallback((next) => {
+    setCustomer((prev) => {
+      const resolved = typeof next === "function" ? next(prev) : next;
+      tokenStore.setProfile(resolved);
+      return resolved;
+    });
+  }, []);
 
   /**
    * Guards against duplicate /account/me calls.
@@ -80,7 +114,7 @@ export function AuthProvider({ children }) {
   /** Pull the current profile from the API. Safe to call repeatedly. */
   const refresh = useCallback(async () => {
     if (!tokenStore.token) {
-      setCustomer(null);
+      writeCustomer(null);
       setStatus("anonymous");
       return null;
     }
@@ -91,7 +125,7 @@ export function AuthProvider({ children }) {
       try {
         const me = await accountApi.me();
         retryAttempt.current = 0;
-        setCustomer(me);
+        writeCustomer(me);
         setStatus("authenticated");
         return me;
       } catch {
@@ -113,7 +147,7 @@ export function AuthProvider({ children }) {
          */
         const rejected = !tokenStore.token;
         if (rejected) {
-          setCustomer(null);
+          writeCustomer(null);
           setStatus("anonymous");
           return null;
         }
@@ -145,7 +179,7 @@ export function AuthProvider({ children }) {
     return inflight.current;
     // `scheduleRetry` is a stable useCallback([]); naming it keeps that
     // dependency honest rather than relying on it silently.
-  }, [scheduleRetry]);
+  }, [scheduleRetry, writeCustomer]);
 
   refreshRef.current = refresh;
 
@@ -175,26 +209,26 @@ export function AuthProvider({ children }) {
 
   const signIn = useCallback(async (credentials) => {
     const me = await accountApi.login(credentials);
-    setCustomer(me);
+    writeCustomer(me);
     setStatus("authenticated");
     return me;
-  }, []);
+  }, [writeCustomer]);
 
   const signUp = useCallback(async (payload) => {
     const res = await accountApi.register(payload);
     if (res?.accessToken || res?.id) {
-      setCustomer(res);
+      writeCustomer(res);
       setStatus("authenticated");
     }
     return res;
-  }, []);
+  }, [writeCustomer]);
 
   const completeReset = useCallback(async (payload) => {
     const me = await accountApi.resetPassword(payload);
-    setCustomer(me);
+    writeCustomer(me);
     setStatus("authenticated");
     return me;
-  }, []);
+  }, [writeCustomer]);
 
   /**
    * Sign out.
@@ -206,9 +240,9 @@ export function AuthProvider({ children }) {
    */
   const signOut = useCallback(() => {
     accountApi.logout();
-    setCustomer(null);
+    writeCustomer(null);
     setStatus("anonymous");
-  }, []);
+  }, [writeCustomer]);
 
   /** Local patch after a profile save, so the UI updates without a refetch. */
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
@@ -224,8 +258,8 @@ export function AuthProvider({ children }) {
   }, []);
 
   const applyProfile = useCallback((next) => {
-    setCustomer((prev) => (prev ? { ...prev, ...next } : next));
-  }, []);
+    writeCustomer((prev) => (prev ? { ...prev, ...next } : next));
+  }, [writeCustomer]);
 
   const value = useMemo(
     () => ({

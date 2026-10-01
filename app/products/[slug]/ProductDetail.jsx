@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReviewForm from "@/components/ReviewForm";
@@ -325,9 +326,15 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
         <div className="max-w-[1180px] mx-auto px-6 sm:px-10">
           {/* Breadcrumb */}
           <nav className="mb-8 flex items-center gap-2 text-[11px] font-[Montserrat] text-white/30">
-            <a href="/" className="hover:text-white/60 transition-colors">Home</a>
+            {/*
+              <Link>, not <a>: a plain anchor is a full document navigation, so
+              leaving a product this way tears down the React tree, remounts
+              AuthProvider and re-fetches /account/me. At 9-13s that paints a
+              signed-out header the whole way back to the catalogue.
+            */}
+            <Link href="/" className="hover:text-white/60 transition-colors">Home</Link>
             <span>/</span>
-            <a href="/products" className="hover:text-white/60 transition-colors">Products</a>
+            <Link href="/products" className="hover:text-white/60 transition-colors">Products</Link>
             <span>/</span>
             <span className="text-white/60">{product.name}</span>
           </nav>

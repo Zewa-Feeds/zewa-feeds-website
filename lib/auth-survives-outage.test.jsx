@@ -19,6 +19,10 @@ const me = vi.fn();
 const logout = vi.fn();
 let token = "a-valid-token";
 
+// Models the real store, including the display cache: a profile is only
+// readable while a token exists, and clearing the token drops both.
+let cachedProfile = null;
+
 vi.mock("@/lib/api", () => ({
   account: { me: (...a) => me(...a), logout: (...a) => logout(...a) },
   auth: {
@@ -30,6 +34,13 @@ vi.mock("@/lib/api", () => ({
     },
     clear: () => {
       token = null;
+      cachedProfile = null;
+    },
+    get profile() {
+      return token ? cachedProfile : null;
+    },
+    setProfile: (p) => {
+      cachedProfile = p;
     },
   },
 }));
@@ -45,6 +56,7 @@ function Probe() {
     <div>
       <span data-testid="status">{status}</span>
       <span data-testid="who">{customer?.email ?? "-"}</span>
+      <span data-testid="name">{customer?.firstName ?? "-"}</span>
     </div>
   );
 }
@@ -67,6 +79,9 @@ const rejected = () => {
 beforeEach(() => {
   vi.useFakeTimers({ shouldAdvanceTime: true });
   token = "a-valid-token";
+  // Default to a COLD start (nothing cached) so each test states its own
+  // starting point; the hydration tests set it explicitly.
+  cachedProfile = null;
   me.mockReset();
   logout.mockReset();
 });
@@ -134,6 +149,78 @@ describe("a session that the server never rejected", () => {
       await vi.advanceTimersByTimeAsync(2500);
     });
     expect(me).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("a page load while already signed in", () => {
+  const CACHED = { id: "c1", email: "abhi@example.com", firstName: "Abhi", lastName: "M" };
+
+  it("paints signed-in on the FIRST render, before /account/me answers", async () => {
+    cachedProfile = CACHED;
+    // Never resolves: stands in for the 9-13s the real call takes.
+    me.mockImplementation(() => new Promise(() => {}));
+
+    show();
+
+    /*
+     * Asserted synchronously, with no waitFor. The header must be correct in
+     * the very first paint — a signed-in customer seeing the signed-out icon
+     * for even a moment is the whole complaint, and for most of a minute is
+     * what made people think they had been logged out.
+     */
+    expect(status()).toBe("authenticated");
+    expect(screen.getByTestId("who").textContent).toBe("abhi@example.com");
+  });
+
+  it("shows the account icon, not a dead one, while revalidating", async () => {
+    cachedProfile = CACHED;
+    me.mockImplementation(() => new Promise(() => {}));
+    const { default: AccountMenu } = await import("@/components/AccountMenu");
+
+    render(
+      <AuthProvider>
+        <AccountMenu />
+      </AuthProvider>
+    );
+
+    // Not the "Sign in to your account" button, and not the inert loading div.
+    expect(screen.queryByRole("button", { name: /sign in/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /account/i })).toBeTruthy();
+  });
+
+  it("lets the server's answer win over the cache", async () => {
+    cachedProfile = { ...CACHED, firstName: "Stale" };
+    me.mockResolvedValue({ ...CACHED, firstName: "Fresh" });
+
+    show();
+    expect(status()).toBe("authenticated"); // cached, immediately
+
+    await waitFor(() => expect(me).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(screen.getByTestId("name").textContent).toBe("Fresh")
+    );
+  });
+
+  it("signs out on a 401 even though a profile was cached", async () => {
+    cachedProfile = CACHED;
+    me.mockImplementation(() => Promise.reject(rejected()));
+
+    show();
+    expect(status()).toBe("authenticated"); // optimistic from cache
+
+    // The server rejecting the token must override the cache.
+    await waitFor(() => expect(status()).toBe("anonymous"));
+    expect(screen.getByTestId("who").textContent).toBe("-");
+  });
+
+  it("ignores a cached profile when the token is gone", async () => {
+    token = null;
+    cachedProfile = CACHED;
+
+    show();
+
+    await waitFor(() => expect(status()).toBe("anonymous"));
+    expect(me).not.toHaveBeenCalled();
   });
 });
 
