@@ -1,0 +1,28 @@
+# Netlify build configuration.
+#
+# Added so the build is reproducible from the repository rather than depending
+# on dashboard settings nobody can see in a diff. It does NOT decide which
+# branch is deployed — that is a site setting in the Netlify dashboard.
+#
+# NEXT_PUBLIC_API_URL is deliberately NOT set here. lib/api.js falls back to
+# the hosted Render API for any non-development build, so the preview already
+# points at https://zewa-api.onrender.com/api/v1 with no configuration. Setting
+# it in a committed file would bake one environment into every deploy context;
+# override it per-context in the Netlify UI if a build ever needs a different
+# API.
+
+[build]
+  command = "npm run build"
+  # No `publish` on purpose: @netlify/plugin-nextjs sets the publish directory
+  # itself, and declaring one here conflicts with it on some plugin versions.
+
+[build.environment]
+  # Next 16 requires Node 20.9+. Unpinned, Netlify picks its image default,
+  # which has changed before and would fail the build silently on an upgrade.
+  NODE_VERSION = "20.18.0"
+
+# The Next.js runtime that turns `next build` output into Netlify functions and
+# edge handlers. Without it a server-rendered Next app deploys as static files
+# and every dynamic route 404s.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

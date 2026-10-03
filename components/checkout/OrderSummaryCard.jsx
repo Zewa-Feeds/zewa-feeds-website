@@ -40,6 +40,15 @@ export default function OrderSummaryCard({
   chargeableWeightKg,
   setQty,
   removeFromCart,
+  /**
+   * The Zewa Coins control (ZSOP004 §10.1), passed in rather than imported so
+   * this card stays presentational and the reservation lifecycle lives with the
+   * checkout page. Null when the box must not render — negative balance,
+   * programme off, or a loyalty error.
+   */
+  coinsSlot = null,
+  /** Paise taken off by coins, shown as its own line (§10.2). */
+  coinDiscountPaise = 0,
 }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [couponApplying, setCouponApplying] = useState(false);
@@ -138,6 +147,7 @@ export default function OrderSummaryCard({
         <AvailableOffers
           offers={availableOffers}
           appliedCodes={appliedCodes}
+          selectedCodes={selectedCodes}
           unavailableReasons={unavailableReasons}
           subtotalPaise={subtotalPaise}
           onSelect={handleOfferSelect}
@@ -315,6 +325,7 @@ export default function OrderSummaryCard({
             <AvailableOffers
               offers={availableOffers}
               appliedCodes={appliedCodes}
+              selectedCodes={selectedCodes}
               unavailableReasons={unavailableReasons}
               subtotalPaise={subtotalPaise}
               onSelect={handleOfferSelect}
@@ -384,6 +395,14 @@ export default function OrderSummaryCard({
             </div>
           ))}
         </form>
+
+        {/*
+          Zewa Coins sit ABOVE the totals, beside the coupon controls, because
+          §4.1 fixes the order of operations: coupon first, then coins. Putting
+          the control where the arithmetic happens keeps the two legible as a
+          sequence rather than two unrelated boxes.
+        */}
+        {coinsSlot && <div className="pt-4 border-t border-white/8">{coinsSlot}</div>}
 
         {/*
           Pricing Breakdown.
@@ -457,6 +476,18 @@ export default function OrderSummaryCard({
                 )}
               </span>
               <span className="font-semibold tabular-nums">− {formatInr(discountPaise)}</span>
+            </div>
+          )}
+
+          {/*
+            Coins get their OWN line, never folded into the coupon discount.
+            §10.2 promises "You saved ₹340 with Zewa Coins" — a customer who
+            cannot see what their coins did has no reason to earn more.
+          */}
+          {coinDiscountPaise > 0 && (
+            <div className="flex justify-between text-primary">
+              <span>Zewa Coins</span>
+              <span className="font-semibold tabular-nums">− {formatInr(coinDiscountPaise)}</span>
             </div>
           )}
 

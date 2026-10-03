@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
@@ -114,6 +115,22 @@ function sizeOnly(packLabel) {
   return packLabel.replace(/\s*(bottle|pouch|jar|box|pack)\s*$/i, "").trim() || null;
 }
 
+/**
+ * The card's outer element.
+ *
+ * With a slug it is a Next <Link> so the catalogue navigates client-side; a
+ * product that has no slug does not navigate at all, and <Link> requires a real
+ * href, so that case renders a plain <div> instead.
+ */
+function CardShell({ slug, children, ...props }) {
+  if (!slug) return <div {...props}>{children}</div>;
+  return (
+    <Link href={`/products/${slug}`} {...props}>
+      {children}
+    </Link>
+  );
+}
+
 function ProductCard({ p }) {
   const gallery = p.gallery || [p.image];
   const [imgIdx, setImgIdx] = useState(0);
@@ -199,9 +216,17 @@ function ProductCard({ p }) {
 
   useEffect(() => () => clearInterval(autoTimerRef.current), []);
 
+  /*
+   * CardShell renders a Next <Link>, not a raw <a>. A plain anchor is a full
+   * document navigation: it tears down the React tree, remounts AuthProvider,
+   * and sends status back to "loading" -> "anonymous" while /account/me is
+   * re-fetched. Against an API that answers in 9-13s that reads as being signed
+   * out just from opening a product. <Link> keeps the route change client-side,
+   * so the session held in memory is never discarded.
+   */
   return (
-    <a
-      href={p.slug ? `/products/${p.slug}` : undefined}
+    <CardShell
+      slug={p.slug}
       className={`group relative flex flex-col rounded-2xl border border-[#44e5c2]/30 hover:border-[#44e5c2]/55 shadow-[0_0_15px_rgba(68,229,194,0.12)] hover:shadow-[0_0_25px_rgba(68,229,194,0.22)] transition-all duration-300 hover:-translate-y-0.5 ${p.slug ? "cursor-pointer" : "cursor-default pointer-events-none"}`}
       style={{ background: "linear-gradient(160deg, #0d1726 0%, #0a1219 100%)", overflow: "hidden" }}
       onMouseEnter={handleMouseEnter}
@@ -441,7 +466,7 @@ function ProductCard({ p }) {
         <div className="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-400 origin-left"
           style={{ background: "linear-gradient(to right, rgba(68,229,194,0.6), transparent)" }} />
       )}
-    </a>
+    </CardShell>
   );
 }
 
@@ -990,7 +1015,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
 
           {/* ── Spotlight rotator ── */}
           {sp && (
-          <a
+          <Link
             href={`/products/${sp.slug}`}
             className="block relative overflow-hidden rounded-2xl sm:rounded-3xl mb-8 cursor-pointer group"
             style={{ background: "linear-gradient(135deg, #0d1a2e 0%, #091a18 100%)" }}
@@ -1063,7 +1088,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                 ))}
               </div>
             </div>
-          </a>
+          </Link>
           )}
 
           {/* Product grid */}

@@ -1,0 +1,410 @@
+/**
+ * The checkout coins box — ZSOP004 §10.1, §10.2.
+ *
+ * Tested because every rule here is a specified behaviour that a redesign could
+ * silently undo: defaulting the field to empty, hiding the box entirely rather
+ * than showing a negative balance, and correcting an over-entry inline with the
+ * reason instead of failing at payment.
+ */
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import CoinsPanel from "./CoinsPanel";
+
+afterEach(cleanup);
+
+const QUOTE = {
+  visible: true,
+  available: 340,
+  maxRedeemable: 260,
+  minRedemption: 10,
+  coinValuePaise: 100,
+};
+
+describe("§10.1 The box is hidden where the specification says hide it", () => {
+  it("renders nothing when the server returns no quote", () => {
+    // Negative balance, kill switch off, or a loyalty error — all of
+    // which the server reports as a null quote so there is no client branch to
+    // get wrong.
+    const { container } = render(<CoinsPanel quote={null} />);
+    expect(container.innerHTML).toBe("");
+  });
+
+  it("renders nothing when the quote is explicitly not visible", () => {
+    const { container } = render(<CoinsPanel quote={{ ...QUOTE, visible: false }} />);
+    expect(container.innerHTML).toBe("");
+  });
+});
+
+describe("§10.1 Free entry, defaulting to empty", () => {
+  it("does not pre-fill the maximum", () => {
+    // "Default the field to empty, not to the maximum. Auto-applying burns a
+    // balance the customer may have been saving."
+    render(<CoinsPanel quote={QUOTE} />);
+    expect(screen.getByLabelText(/Zewa Coins to use/i).value).toBe("");
+  });
+
+  it("offers the order maximum as a one-tap shortcut", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.click(screen.getByRole("button", { name: /^max$/i }));
+    expect(screen.getByLabelText(/Zewa Coins to use/i).value).toBe("260");
+  });
+
+  it("shows the live rupee conversion as the customer types", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
+      target: { value: "150" },
+    });
+    expect(screen.getByText(/₹150 off/i)).toBeDefined();
+  });
+
+  it("says unused coins stay in the account, so partial use feels normal", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    expect(screen.getByText(/Coins you don't use stay in your account/i)).toBeDefined();
+  });
+
+  it("accepts only digits", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    const input = screen.getByLabelText(/Zewa Coins to use/i);
+    fireEvent.change(input, { target: { value: "1a2b3" } });
+    expect(input.value).toBe("123");
+  });
+});
+
+describe("§10.1 Validate on entry, with the reason", () => {
+  it("rejects more coins than the customer holds", () => {
+    const onApply = vi.fn();
+    render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
+    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
+      target: { value: "9999" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^Apply$/i }));
+
+    expect(screen.getByRole("alert").textContent).toContain("You have 340 Zewa Coins.");
+    expect(onApply).not.toHaveBeenCalled();
+  });
+
+  it("explains the cart ceiling rather than just refusing (§10.2)", () => {
+    const onApply = vi.fn();
+    render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
+    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
+      target: { value: "300" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^Apply$/i }));
+
+    // The ceiling is no longer "the full product value" — the server holds back
+    // ₹1 so the order stays above the payment gateway's minimum.
+    expect(screen.getByRole("alert").textContent).toMatch(
+      /You can use up to 260 coins on this order.*minimum of ₹1 are payable separately/i,
+    );
+    expect(onApply).not.toHaveBeenCalled();
+  });
+
+  it("enforces the 10-coin minimum", () => {
+    const onApply = vi.fn();
+    render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
+    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), { target: { value: "5" } });
+    fireEvent.click(screen.getByRole("button", { name: /^Apply$/i }));
+
+    expect(screen.getByRole("alert").textContent).toContain("Use at least 10 coins.");
+    expect(onApply).not.toHaveBeenCalled();
+  });
+
+  it("applies a valid amount", () => {
+    const onApply = vi.fn();
+    render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
+    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
+      target: { value: "150" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^Apply$/i }));
+
+    expect(onApply).toHaveBeenCalledWith(150);
+  });
+});
+
+describe("The balance and the order ceiling are two different numbers", () => {
+  it("names the balance AND the order maximum when the order caps redemption", () => {
+    // 340 owned, 260 usable here. Saying only "260" would read as "you have
+    // 260 coins" to someone holding 340.
+    render(<CoinsPanel quote={QUOTE} />);
+
+    expect(screen.getByText(/340 Zewa Coins/i)).toBeDefined();
+    expect(screen.getByText(/worth ₹340/i)).toBeDefined();
+    expect(screen.getByText(/260 on this order/i)).toBeDefined();
+    expect(screen.getByText(/minimum of ₹1 are payable separately/i)).toBeDefined();
+    expect(screen.getByRole("button", { name: /^max$/i })).toBeDefined();
+  });
+
+  it("invents no ceiling when the order can absorb the whole balance", () => {
+    // 340 owned, 340 usable — a "maximum" line here would imply a limit that
+    // does not exist.
+    render(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 340 }} />);
+
+    expect(screen.getByText(/340 Zewa Coins/i)).toBeDefined();
+    expect(screen.getByText(/worth ₹340/i)).toBeDefined();
+    // No ceiling sub-line at all when the order can absorb everything.
+    expect(screen.queryByText(/on this order —/i)).toBeNull();
+    expect(screen.getByRole("button", { name: /^max$/i }).title).toMatch(/use all 340 coins/i);
+  });
+
+  it("tracks the ceiling when the cart changes it", () => {
+    // The maximum comes from the server quote; it must follow the cart.
+    const { rerender } = render(<CoinsPanel quote={QUOTE} />);
+    expect(screen.getByText(/260 on this order/i)).toBeDefined();
+
+    rerender(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 100 }} />);
+    expect(screen.getByText(/100 on this order/i)).toBeDefined();
+    expect(screen.getByRole("button", { name: /^max$/i })).toBeDefined();
+    // The balance is unchanged by a cart change.
+    expect(screen.getByText(/340 Zewa Coins/i)).toBeDefined();
+    expect(screen.getByText(/worth ₹340/i)).toBeDefined();
+  });
+
+  it("still applies nothing until the customer acts", () => {
+    const onApply = vi.fn();
+    render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
+    expect(screen.getByLabelText(/Zewa Coins to use/i).value).toBe("");
+    expect(onApply).not.toHaveBeenCalled();
+  });
+});
+
+describe("§10.2 Below the minimum balance", () => {
+  it("tells the customer how far off they are", () => {
+    /*
+     * Asserted as BALANCE + SHORTFALL rather than one exact sentence. The copy
+     * changed when this state became a named, locked panel instead of a line of
+     * grey prose — the rule being pinned is that both numbers are present and
+     * no input is offered, not the wording that carried them.
+     */
+    render(<CoinsPanel quote={{ ...QUOTE, available: 6, maxRedeemable: 6 }} />);
+    expect(screen.getByText("6")).toBeTruthy();                  // what they have
+    expect(document.body.textContent).toMatch(/Earn 4 more/i);   // to reach 10
+    expect(screen.queryByLabelText(/Zewa Coins to use/i)).toBeNull();
+  });
+});
+
+describe("Applied state", () => {
+  it("shows what is applied and lets it be removed", () => {
+    const onRemove = vi.fn();
+    render(<CoinsPanel quote={QUOTE} applied={150} onRemove={onRemove} />);
+
+    expect(screen.getByText(/150 Zewa Coins/i)).toBeDefined();
+    expect(screen.getByText(/₹150 off/i)).toBeDefined();
+
+    fireEvent.click(screen.getByRole("button", { name: /Remove/i }));
+    expect(onRemove).toHaveBeenCalled();
+  });
+
+  it("surfaces a silent reduction as a non-blocking notice (§4.1)", () => {
+    // "If the eligible value falls below the coins already applied, silently
+    // reduce and show a non-blocking notice."
+    render(
+      <CoinsPanel
+        quote={QUOTE}
+        applied={100}
+        notice="We reduced your coins to 100 because your cart changed."
+      />,
+    );
+    expect(screen.getByText(/We reduced your coins to 100/i)).toBeDefined();
+    // Still an applied state, not an error state — checkout is not blocked.
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+});
+
+describe("Accessibility (§10.1)", () => {
+  it("labels the input with the balance and the order ceiling", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    expect(
+      screen.getByLabelText(/You have 340 coins, worth ₹340\. Up to 260 can be used on this order/i),
+    ).toBeDefined();
+  });
+
+  it("omits the ceiling from the label when there is none", () => {
+    render(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 340 }} />);
+    const input = screen.getByLabelText(/You have 340 coins, worth ₹340/i);
+    expect(input.getAttribute("aria-label")).not.toMatch(/can be used on this order/i);
+  });
+
+  it("marks the field invalid when entry is rejected", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
+      target: { value: "9999" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^Apply$/i }));
+    expect(screen.getByLabelText(/Zewa Coins to use/i).getAttribute("aria-invalid")).toBe("true");
+  });
+
+  it("disables the controls while a request is in flight", () => {
+    render(<CoinsPanel quote={QUOTE} busy />);
+    expect(screen.getByLabelText(/Zewa Coins to use/i).disabled).toBe(true);
+  });
+});
+
+/*
+ * The slider was added on 25 Sep 2026, superseding an earlier review that asked
+ * for free entry only. What earns tests is the coupling: two controls writing one
+ * value is exactly the shape that drifts, and a slider that can select an invalid
+ * amount would push the failure to the payment step — the thing §10.1 exists to
+ * prevent.
+ */
+describe("§10.1 The slider and the field are one value", () => {
+  const slider = () => screen.getByRole("slider");
+  const field = () => screen.getByRole("textbox");
+
+  it("offers both controls", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    expect(slider()).toBeTruthy();
+    expect(field()).toBeTruthy();
+  });
+
+  it("starts at zero, matching the empty field", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    expect(slider().value).toBe("0");
+    expect(field().value).toBe("");
+  });
+
+  /* The slider physically cannot select more than this order can absorb. */
+  it("caps the slider at the order ceiling, not the balance", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    expect(slider().max).toBe(String(QUOTE.maxRedeemable));
+    expect(slider().max).not.toBe(String(QUOTE.available));
+  });
+
+  it("moves the field when the slider moves", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(slider(), { target: { value: "120" } });
+    expect(field().value).toBe("120");
+  });
+
+  it("moves the slider when the field is typed into", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(field(), { target: { value: "75" } });
+    expect(slider().value).toBe("75");
+  });
+
+  it("clears the field rather than showing a literal 0 at the left end", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(slider(), { target: { value: "50" } });
+    fireEvent.change(slider(), { target: { value: "0" } });
+    expect(field().value).toBe("");
+  });
+
+  /*
+   * Typing over the ceiling must NOT be silently rewritten — the digits stay as
+   * entered so submit can explain the real reason with the real number. Only the
+   * thumb clamps, so the control does not fly off its track.
+   */
+  it("keeps an over-limit typed number while parking the thumb at the end", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(field(), { target: { value: "9999" } });
+    expect(field().value).toBe("9999");
+    expect(slider().value).toBe(String(QUOTE.maxRedeemable));
+  });
+
+  it("applies exactly what the slider shows", () => {
+    const onApply = vi.fn();
+    render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
+    fireEvent.change(slider(), { target: { value: "200" } });
+    fireEvent.click(screen.getByRole("button", { name: /^apply$/i }));
+    expect(onApply).toHaveBeenCalledWith(200);
+  });
+
+  it("shows the live coin count and rupee value as it moves", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(slider(), { target: { value: "150" } });
+    expect(screen.getByRole("textbox").value).toBe("150");
+    expect(screen.getAllByText(/₹150/).length).toBeGreaterThan(0);
+  });
+
+  /* A zero-width slider is meaningless; the field alone still works. */
+  it("hides the slider when the order cannot absorb the minimum", () => {
+    render(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 4, minRedemption: 10 }} />);
+    expect(screen.queryByRole("slider")).toBeNull();
+  });
+
+  it("disables the slider while the server is working", () => {
+    render(<CoinsPanel quote={QUOTE} busy />);
+    expect(slider().disabled).toBe(true);
+  });
+});
+
+describe("The live line reads as a benefit, not a warning", () => {
+  it("names the remainder when there is one", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "100" } });
+    // 340 held, 100 spent.
+    expect(screen.getByText(/240 coins stay in your account/i)).toBeDefined();
+  });
+
+  /*
+   * Spending the whole balance used to render "0 coins stay in your account",
+   * which states a loss where the line is meant to reassure. §10.1 wants partial
+   * use to feel normal — not full use to feel like a warning.
+   */
+  it("says nothing about a remainder when the whole balance is spent", () => {
+    render(<CoinsPanel quote={{ ...QUOTE, available: 260, maxRedeemable: 260 }} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "260" } });
+
+    expect(screen.getByText(/₹260 off/i)).toBeDefined();
+    expect(screen.queryByText(/0 coins stay in your account/i)).toBeNull();
+  });
+
+  /* Only ever ONE line under the row: the error replaces the conversion. */
+  it("shows the error instead of the conversion, never both", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "9999" } });
+    fireEvent.click(screen.getByRole("button", { name: /^apply$/i }));
+
+    expect(screen.getByRole("alert")).toBeDefined();
+    /*
+     * The CONVERSION must be gone. The §10.1 footer ("Coins you don't use stay in
+     * your account.") is a different line and correctly still shows, so this
+     * asserts on the rupees-off phrasing rather than the shared wording.
+     */
+    expect(screen.queryByText(/off this order/i)).toBeNull();
+  });
+});
+
+/*
+ * The track's filled portion.
+ *
+ * Before this the track was flat grey end to end, so dragging showed nothing but
+ * the thumb moving — no sense of how much of the balance was being committed.
+ * WebKit has no `::-moz-range-progress`, so the fill is a gradient positioned by
+ * this custom property; if it stops tracking, Chrome and Safari silently lose the
+ * fill while Firefox keeps it, which is exactly the kind of drift a test catches
+ * and a screenshot does not.
+ */
+describe("§10.1 The slider shows how much is being used", () => {
+  const fill = () => screen.getByRole("slider").style.getPropertyValue("--coin-fill");
+
+  it("starts empty", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    expect(fill()).toBe("0%");
+  });
+
+  it("fills in proportion to the order ceiling, not the balance", () => {
+    // 130 of a 260 ceiling is half, even though the customer holds 340.
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "130" } });
+    expect(fill()).toBe("50%");
+  });
+
+  it("fills completely at the ceiling", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByRole("slider"), { target: { value: "260" } });
+    expect(fill()).toBe("100%");
+  });
+
+  it("tracks a typed value, not just a drag", () => {
+    render(<CoinsPanel quote={QUOTE} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "65" } });
+    expect(fill()).toBe("25%");
+  });
+
+  /* 0/0 is NaN, which would drop the gradient and leave an unstyled track. */
+  it("does not divide by zero when the order can absorb nothing", () => {
+    render(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 0, minRedemption: 0 }} />);
+    const slider = screen.queryByRole("slider");
+    if (slider) expect(slider.style.getPropertyValue("--coin-fill")).toBe("0%");
+  });
+});

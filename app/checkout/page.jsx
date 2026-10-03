@@ -20,6 +20,8 @@ import CheckoutBreadcrumbs from "@/components/checkout/CheckoutBreadcrumbs";
 import { FloatingInput, FloatingSelect } from "@/components/checkout/FloatingInput";
 import PaymentMethodSelector from "@/components/checkout/PaymentMethodSelector";
 import OrderSummaryCard from "@/components/checkout/OrderSummaryCard";
+import CoinsPanel from "@/components/checkout/CoinsPanel";
+import { useCoins } from "@/lib/useCoins";
 import { CARD, CARD_PAD, CARD_HEADER, STEP_CHIP, SECTION_TITLE, EASE, FOCUS_RING } from "@/components/checkout/tokens";
 
 // Shared with the account address book so the two forms cannot drift apart.
@@ -72,6 +74,33 @@ export default function CheckoutPage() {
    * the account already holds.
    */
   const { customer, isAuthenticated, isLoading: authLoading } = useAuth();
+
+  /*
+   * Zewa Coins (ZSOP004 §10.1).
+   *
+   * The hook owns the reservation lifecycle and fails invisibly: if loyalty is
+   * unavailable, `quote` is null, the panel renders nothing, and checkout
+   * proceeds at full price. Nothing below needs a guard for that case.
+   */
+  // `couponCodes` is passed so a coupon carrying `blocksCoins` hides the box and
+  // refuses the hold (ZSOP004 §4) — and so applying or removing a code re-quotes
+  // exactly as a quantity change does.
+  const coins = useCoins({ items, isAuthenticated, couponCodes });
+
+  /*
+   * The payable total, with coins taken off.
+   *
+   * `totalPaise` comes from the cart quote, which knows nothing about coins —
+   * the redemption is held separately against the loyalty account. Rendering
+   * the coin line without subtracting it showed a total that was simply wrong:
+   * a ₹229 cart with ₹22.90 off and 229 coins applied displayed ₹206.10, the
+   * coupon discount only, as though the coins were free.
+   *
+   * Floored at zero: coins can cover the whole order, and a negative total is
+   * not a refund.
+   */
+  const payableTotalPaise =
+    totalPaise === null ? null : Math.max(0, totalPaise - (coins.discountPaise ?? 0));
   /** True once a prefill has run, so it cannot fight the customer's own edits. */
   const prefilled = useRef(false);
 
@@ -82,9 +111,36 @@ export default function CheckoutPage() {
   /** Ticked by default for guests — it costs them nothing and saves retyping. */
   const [saveAddress, setSaveAddress] = useState(true);
 
-  const idempotencyKey = useRef(
-    `chk-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
-  );
+  const newIdempotencyKey = () =>
+    `chk-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+  const idempotencyKey = useRef(newIdempotencyKey());
+
+  /*
+   * Start a fresh key after an attempt is cancelled.
+   *
+   * The key is per ATTEMPT, not per page. Dismissing or failing a payment
+   * cancels the pending order, and the server rightly refuses to replay a
+   * cancelled one — its stock is back and its holds are released, so
+   * resurrecting it would confirm an order nobody paid for. Reusing the key
+   * meant the retry asked about that dead order and was told
+   * "That order was cancelled... Please place a new order." — which is exactly
+   * what the customer was trying to do.
+   */
+  const rotateIdempotencyKey = () => {
+    idempotencyKey.current = newIdempotencyKey();
+  };
+
+  /*
+   * Synchronous re-entry guard for the pay button.
+   *
+   * `isSubmittingPayment` is state, so two clicks dispatched in the same tick
+   * both read the pre-render value and both proceed. A ref flips immediately,
+   * so the second click returns before it can fire a duplicate order request.
+   * The idempotency key makes a duplicate harmless server-side; this stops it
+   * being sent at all.
+   */
+  const submitting = useRef(false);
 
   /*
    * Current form values, readable from async callbacks.
@@ -565,9 +621,37 @@ export default function CheckoutPage() {
     }
   };
 
+  /*
+   * The applied coupon a failed checkout was complaining about.
+   *
+   * `place()` refuses the whole order when a code is no longer usable — "You have
+   * already used ZEWA1." — and the banner sat at the top of the page, detached
+   * from the control that fixes it. The customer saw an error beside a coupon
+   * still marked APPLIED and had no way to know that removing it was the answer.
+   *
+   * Matched by looking for an applied code inside the server's own message rather
+   * than by parsing a shape: the wording belongs to the eligibility rules and is
+   * written for the customer, and any of them may name the code.
+   */
+  const blockingCouponCode = (() => {
+    const message = errors._root;
+    if (!message) return null;
+    return (coupons ?? []).map((c) => c.code).find((code) => message.includes(code)) ?? null;
+  })();
+
   const dropCoupon = async (code) => {
     setCouponError("");
     setCouponSuccess("");
+    /*
+     * Clear the checkout-level banner too. It is usually ABOUT the code being
+     * removed ("You have already used ZEWA1"), so leaving it up after the fix
+     * tells the customer the problem persists when it does not.
+     */
+    setErrors((prev) => {
+      if (!prev._root) return prev;
+      const { _root, ...rest } = prev;
+      return rest;
+    });
     await removeCoupon(code);
   };
 
@@ -636,8 +720,15 @@ export default function CheckoutPage() {
      * cart AND coupon codes — a remount that restored codes from localStorage
      * before the first re-price lands, or a validate that failed. Submitting
      * then would price the order against codes the customer never saw applied.
+     *
+     * `coins.busy` is the same hazard one layer down: between "apply coins"
+     * being sent and the server answering, the quote does not yet include the
+     * hold. Submitting in that window creates the order at full price while the
+     * reservation still comes off the balance — charged in full AND the coins
+     * gone.
      */
-    if (isSubmittingPayment || validating || pricesPending) return;
+    if (submitting.current || isSubmittingPayment || validating || pricesPending || coins.busy) return;
+    submitting.current = true;
 
     const errs = validateForm();
     if (Object.keys(errs).length) {
@@ -652,6 +743,9 @@ export default function CheckoutPage() {
         element.scrollIntoView({ behavior: "smooth", block: "center" });
         element.focus();
       }
+      // Outside the try below, so release the guard here or the button stays
+      // dead after a failed field validation.
+      submitting.current = false;
       return;
     }
 
@@ -662,30 +756,48 @@ export default function CheckoutPage() {
     resetScrollAndLock();
 
     try {
-      const fresh = await validate({ state: form.state, email: form.email });
-
       /*
-       * Send only what THIS quote accepted.
+       * Straight to the order — no pre-flight re-price.
+       *
+       * This used to await a full validate() before placing, which put two
+       * sequential round trips between the click and the widget opening. It
+       * bought nothing: place() prices the cart server-side and runs the same
+       * assertFulfillable(), returning the same 409 with the same message,
+       * which the catch below already surfaces. Dropping it halves the wait
+       * without moving a single check off the server.
        *
        * Codes are the ones the CUSTOMER selected, not the ones the last quote
        * happened to apply.
        *
-       * Reading them off `fresh.coupons` sent NO codes whenever that quote
-       * applied none — which is what happens the moment the email is known and
-       * the server refuses a per-customer-limited code. The order was then
-       * priced at full value: a cart showing ₹166.50 became a ₹245 Razorpay
-       * order. `couponCodes` is the customer's intent, and place() re-evaluates
-       * every code from scratch anyway, so eligibility, stacking and the
-       * discount all stay server-side. This is a request, not an instruction.
+       * Reading them off `quote.coupons` meant an empty or stale quote sent no
+       * codes at all, and the server then priced the order at full value — a
+       * cart showing ₹166.50 with two coupons became a ₹245 Razorpay order.
+       * `couponCodes` is the customer's intent, survives a remount through
+       * localStorage, and is what the page has been pricing against all along.
+       *
+       * Sending intent is safe because place() re-evaluates every code from
+       * scratch: eligibility, stacking and the discount are all decided
+       * server-side. This is a request, not an instruction, and the guard
+       * below refuses to submit while the displayed quote does not match it.
        */
       const codesToSend = couponCodes ?? [];
 
-      const blocking = (fresh?.issues ?? []).filter((i) => i.sku !== "__coupon__");
+      /*
+       * Cart-level problems (out of stock, an unbuyable line) must stop the
+       * order before Razorpay opens. Main gated this on a pre-flight validate()
+       * response; this branch dropped that round trip, so the check reads the
+       * provider's `issues` — the same server-validated list, already on screen
+       * and already disabling the button via `fulfillable`. Coupon issues are
+       * excluded: place() re-evaluates every code, and a refused coupon is not
+       * a reason to block an otherwise valid order.
+       */
+      const blocking = (issues ?? []).filter((i) => i.sku !== "__coupon__");
       if (blocking.length > 0) {
         unlockScroll();
         setErrors({ _root: blocking[0].message });
         setIsSubmittingPayment(false);
         setStep("form");
+        submitting.current = false;
         return;
       }
 
@@ -706,6 +818,17 @@ export default function CheckoutPage() {
           // The customer's selected codes. The server re-evaluates every one
           // from scratch — this is a request, not an instruction.
           couponCodes: codesToSend,
+          /*
+           * The KEY, not an amount — the server holds the authoritative
+           * reservation and decides how many coins it is worth (§4.3).
+           *
+           * Sent whenever a hold is live, INCLUDING on a retry after a dismissed
+           * payment. The server re-resolves it every time and yields zero coins if
+           * it expired, was released, or belongs to someone else, so sending a key
+           * that no longer holds anything is safe — while NOT sending one loses a
+           * discount the customer can still see on screen.
+           */
+          coinCartKey: coins.hasHold ? coins.cartKey : undefined,
           customerNote: form.notes.trim() || undefined,
           // Only meaningful for a newly typed address; one picked from the book
           // is already saved, and the server dedupes anyway.
@@ -716,7 +839,38 @@ export default function CheckoutPage() {
 
       setPlaced(result);
 
+      /*
+       * "No online payment owed" is NOT "paid".
+       *
+       * This used to show the success screen on `!payment.required` alone,
+       * which is also what the server returns for an order that is merely
+       * unpayable — so replaying a cancelled order confirmed a checkout nobody
+       * had paid for, without Razorpay ever opening.
+       *
+       * Success is now shown only where money is genuinely settled:
+       *   COD            — nothing is owed online, payable on delivery
+       *   paymentSettled — the server has verified a real payment
+       *
+       * Anything else that claims no payment is required is a state the
+       * storefront must not celebrate: bounce to the form and let the customer
+       * retry rather than telling them an unpaid order is done.
+       */
       if (!result.payment.required) {
+        const genuinelyDone =
+          result.paymentMethod === "COD" || result.payment.paymentSettled === true;
+
+        if (!genuinelyDone) {
+          unlockScroll();
+          setIsSubmittingPayment(false);
+          setErrors({
+            _root:
+              "We could not start payment for that order. Please try again, or contact support if you were charged.",
+          });
+          setStep("form");
+          return;
+        }
+
+        coins.settle(); // The hold now belongs to the order (§4.3), not to this page.
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         unlockScroll();
@@ -734,6 +888,7 @@ export default function CheckoutPage() {
         unlockScroll();
         setIsSubmittingPayment(false);
         if (paid === true) {
+          coins.settle(); // The hold now belongs to the order (§4.3), not to this page.
           clearCart();
           sessionStorage.removeItem(STORAGE_FORM_KEY);
           setStep("success");
@@ -754,6 +909,7 @@ export default function CheckoutPage() {
       setStep("paying");
 
       if (outcome === "paid") {
+        coins.settle(); // The hold now belongs to the order (§4.3), not to this page.
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         unlockScroll();
@@ -767,6 +923,31 @@ export default function CheckoutPage() {
        * A declined payment is final — stop now.
        */
       if (outcome === "failed" || outcome === "unavailable") {
+        /*
+         * Release the holds, exactly as a dismissal does.
+         *
+         * A declined payment used to leave the order PENDING for the full
+         * 30-minute unpaid sweep, and the customer met the consequence on their
+         * very next attempt: a `perCustomerLimit: 1` coupon was still held by
+         * the order that had just failed, so the retry was refused with
+         * "You have already used ZEWA1" — naming an order they never paid for
+         * and cannot see. Their coins were held the same way.
+         *
+         * A declined card is a NORMAL event and retrying is the normal response.
+         * Blocking that retry for half an hour is the worst possible moment.
+         *
+         * Same shape as the dismissal branch below: fire-and-forget so the
+         * failure screen is never delayed, `.catch` because the sweep is the
+         * backstop, and `reopen({ after })` so the balance refresh waits for the
+         * release it depends on.
+         */
+        const cancelled = accountApi
+          .cancelOrder(result.orderNo, { reason: "Payment failed." })
+          .catch(() => undefined);
+        void coins.reopen({ after: cancelled });
+        // That order is dead; the next attempt must not replay it.
+        rotateIdempotencyKey();
+
         unlockScroll();
         setIsSubmittingPayment(false);
         setFailure({ orderNo: result.orderNo, reason: message });
@@ -785,6 +966,7 @@ export default function CheckoutPage() {
             check.status === "PROCESSING" ||
             check.status === "SHIPPED"
           ) {
+            coins.settle(); // The hold now belongs to the order (§4.3), not to this page.
             clearCart();
             sessionStorage.removeItem(STORAGE_FORM_KEY);
             unlockScroll();
@@ -796,7 +978,55 @@ export default function CheckoutPage() {
         } catch {
           /* ignore */
         }
-        // Clean dismissal: restore form cleanly with all user inputs intact
+        /*
+         * Genuinely unpaid. Cancel the order so the coin reservation and any
+         * coupon hold come back NOW, rather than waiting out the 30-minute
+         * unpaid sweep.
+         *
+         * Without this the customer returned to a checkout whose coins had
+         * silently vanished from their balance — held against an order they
+         * never paid for, with nothing on screen explaining why. That reads as
+         * the coins being taken.
+         *
+         * Reuses the existing customer-cancel endpoint rather than inventing a
+         * release path: it already runs the CANCELLED transition, which calls
+         * `releaseForOrder` for coins and `releaseRedemption` for coupons, and
+         * it re-checks the gateway server-side so an order paid in the meantime
+         * cannot be cancelled out from under a real payment.
+         *
+         * Deliberately NOT allowed to block the customer. A cancel that fails —
+         * a guest with no session, a network drop, an order that moved on — just
+         * leaves the sweep to do its job, which is the behaviour we already had.
+         */
+        /*
+         * NOT awaited. The customer is going back to the form either way, and
+         * making them watch a spinner while a cancellation round-trips — on a
+         * cold Render instance, several seconds — would be a worse experience
+         * than the problem being fixed. The release is not something they wait
+         * for; it is something that happens.
+         */
+        const cancelled = accountApi
+          .cancelOrder(result.orderNo, { reason: "Payment was not completed." })
+          .catch(() => undefined);
+
+        /*
+         * The hold is the customer's again, so the panel may re-apply and
+         * release it as normal.
+         *
+         * The cancel above is what releases the reservation, so `reopen` is
+         * given it and refreshes the balance only once it has landed — a quote
+         * taken before that reports coins still held and the panel keeps
+         * showing a reduced, wrong figure.
+         *
+         * Still not awaited HERE: the form comes back immediately and the
+         * number corrects itself a moment later, rather than making the
+         * customer watch a spinner while a cancel round-trips.
+         */
+        void coins.reopen({ after: cancelled });
+        // That order is dead; the next attempt must not replay it.
+        rotateIdempotencyKey();
+
+        // Restore the form with all inputs intact.
         unlockScroll();
         setIsSubmittingPayment(false);
         setStep("form");
@@ -808,6 +1038,7 @@ export default function CheckoutPage() {
       unlockScroll();
       setIsSubmittingPayment(false);
       if (pollResult === true) {
+        coins.settle(); // The hold now belongs to the order (§4.3), not to this page.
         clearCart();
         sessionStorage.removeItem(STORAGE_FORM_KEY);
         setStep("success");
@@ -831,6 +1062,14 @@ export default function CheckoutPage() {
       setErrors(err.fields ?? { _root: err.message });
       setStep("form");
       if (typeof window !== "undefined") window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    } finally {
+      /*
+       * Released on EVERY exit — success, failure, dismissal, validation
+       * bounce, throw. A `finally` rather than a line per return, because this
+       * function has eight of them and one missed path would leave the pay
+       * button permanently dead with no way back but a reload.
+       */
+      submitting.current = false;
     }
   };
 
@@ -1174,7 +1413,27 @@ export default function CheckoutPage() {
               <svg className="h-5 w-5 shrink-0 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>{errors._root}</span>
+              <span>
+                {errors._root}
+                {/*
+                  Says what to DO, and does it. Without this the customer read a
+                  refusal next to a coupon still badged APPLIED, with the remove
+                  control several hundred pixels away in a panel they had no
+                  reason to look at.
+                */}
+                {blockingCouponCode && (
+                  <>
+                    {" "}
+                    <button
+                      type="button"
+                      onClick={() => dropCoupon(blockingCouponCode)}
+                      className="font-bold underline underline-offset-2 hover:text-red-200"
+                    >
+                      Remove {blockingCouponCode} to continue.
+                    </button>
+                  </>
+                )}
+              </span>
             </div>
           )}
 
@@ -1490,7 +1749,7 @@ export default function CheckoutPage() {
               <div className="flex flex-col gap-3">
                 <button
                   type="submit"
-                  disabled={validating || isSubmittingPayment || pricesPending || !fulfillable || totalPaise === null}
+                  disabled={validating || isSubmittingPayment || pricesPending || coins.busy || !fulfillable || totalPaise === null}
                   aria-busy={validating || isSubmittingPayment}
                   className={`group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-primary py-4 text-[13px] font-bold uppercase tracking-[0.2em] text-[#00382d] font-[Montserrat] shadow-[0_4px_28px_rgba(68,229,194,0.35)] sm:py-5 ${EASE} hover:bg-primary/90 hover:shadow-[0_6px_34px_rgba(68,229,194,0.45)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:bg-primary ${FOCUS_RING}`}
                 >
@@ -1503,7 +1762,7 @@ export default function CheckoutPage() {
                     className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full motion-reduce:hidden"
                   />
 
-                  {isSubmittingPayment || validating || pricesPending ? (
+                  {isSubmittingPayment || validating || pricesPending || coins.busy ? (
                     <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                       <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />
@@ -1523,13 +1782,15 @@ export default function CheckoutPage() {
                   <span className="relative">
                     {isSubmittingPayment
                       ? "Preparing secure payment…"
+                      : coins.busy
+                      ? "Applying your coins…"
                       : validating || pricesPending
                       ? "Validating prices..."
                       : !fulfillable
                       ? "Fix cart issues to continue"
                       : totalPaise === null
                       ? "Calculating total…"
-                      : `Pay Online · ${formatInr(totalPaise)}`}
+                      : `Pay Online · ${formatInr(payableTotalPaise)}`}
                   </span>
                 </button>
 
@@ -1544,7 +1805,7 @@ export default function CheckoutPage() {
                 subtotalPaise={subtotalPaise}
                 discountPaise={discountPaise}
                 shippingPaise={shippingPaise}
-                totalPaise={totalPaise}
+                totalPaise={payableTotalPaise}
                 amountToFreeShippingPaise={amountToFreeShippingPaise}
                 coupon={coupon}
                 coupons={coupons}
@@ -1567,6 +1828,17 @@ export default function CheckoutPage() {
                 chargeableWeightKg={quote?.chargeableWeightKg}
                 setQty={setQty}
                 removeFromCart={removeFromCart}
+                coinsSlot={
+                  <CoinsPanel
+                    quote={coins.quote}
+                    applied={coins.applied}
+                    onApply={coins.apply}
+                    onRemove={coins.remove}
+                    busy={coins.busy}
+                    notice={coins.notice}
+                  />
+                }
+                coinDiscountPaise={coins.discountPaise}
               />
             </div>
           </div>
@@ -1586,27 +1858,29 @@ export default function CheckoutPage() {
               Total Amount
             </span>
             <span className="truncate font-[Playfair_Display] text-[20px] font-bold tabular-nums text-white">
-              {formatInrPending(totalPaise)}
+              {formatInrPending(payableTotalPaise)}
             </span>
           </div>
 
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={validating || isSubmittingPayment || pricesPending || !fulfillable || totalPaise === null}
+            disabled={validating || isSubmittingPayment || pricesPending || coins.busy || !fulfillable || totalPaise === null}
             aria-busy={validating || isSubmittingPayment}
             className={`flex shrink-0 items-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-[#00382d] font-[Montserrat] ${EASE} hover:bg-primary/90 active:scale-[0.98] disabled:opacity-40 ${FOCUS_RING}`}
           >
             <span>
               {isSubmittingPayment
                 ? "Preparing..."
+                : coins.busy
+                ? "Applying coins…"
                 : validating
                 ? "Checking..."
                 : !fulfillable
                 ? "Fix cart"
                 : "Pay Online"}
             </span>
-            {isSubmittingPayment || validating || pricesPending ? (
+            {isSubmittingPayment || validating || pricesPending || coins.busy ? (
               <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                 <path className="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z" />

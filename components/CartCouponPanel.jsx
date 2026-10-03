@@ -22,6 +22,8 @@ export default function CartCouponPanel({
   onSubmit,
   availableOffers = [],
   appliedCodes = [],
+  /** The customer's chosen codes, including any the server refused. */
+  selectedCodes = [],
   unavailableReasons = {},
   /** Cart subtotal, for the minimum-spend shortfall on an offer row. */
   subtotalPaise = 0,
@@ -67,6 +69,7 @@ export default function CartCouponPanel({
       <AvailableOffers
         offers={availableOffers}
         appliedCodes={appliedCodes}
+        selectedCodes={selectedCodes}
         unavailableReasons={unavailableReasons}
         subtotalPaise={subtotalPaise}
         onSelect={onSubmit}
