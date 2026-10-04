@@ -103,6 +103,9 @@ export default function CheckoutPage() {
     totalPaise === null ? null : Math.max(0, totalPaise - (coins.discountPaise ?? 0));
   /** True once a prefill has run, so it cannot fight the customer's own edits. */
   const prefilled = useRef(false);
+  /** Set when the customer types into an address field, so a late address-book
+   *  response cannot overwrite what they have started entering. */
+  const addressTouched = useRef(false);
 
   /** The customer's address book, for the picker. Empty for guests. */
   const [savedAddresses, setSavedAddresses] = useState([]);
@@ -188,6 +191,7 @@ export default function CheckoutPage() {
    * shopper (not knowing what is on offer must never block checking out) but it
    * is logged: a failed fetch and an empty list look identical on screen.
    */
+  const offersViewer = isAuthenticated ? (customer?.id ?? "in") : "out";
   const [availableOffers, setAvailableOffers] = useState([]);
   useEffect(() => {
     let cancelled = false;
@@ -199,7 +203,9 @@ export default function CheckoutPage() {
       // to the console rather than nowhere.
       .catch((err) => { console.warn("Could not load available offers:", err); });
     return () => { cancelled = true; };
-  }, []);
+    // Refetched when the viewer changes: a signed-in list greys out codes this
+    // customer can no longer use (ZEWA1 after their first order).
+  }, [offersViewer]);
 
   // Fetch payment config on mount
   useEffect(() => {
@@ -253,6 +259,21 @@ export default function CheckoutPage() {
     if (authLoading || !isAuthenticated || !customer || prefilled.current) return;
     prefilled.current = true;
 
+    /*
+     * Identity first, straight from the profile we already hold.
+     *
+     * These used to wait for the address book, and /account/addresses takes
+     * 10s or more against the hosted API (39s from a cold start), so a signed-in
+     * customer sat looking at an empty form with no name or email.
+     */
+    setForm((f) => ({
+      ...f,
+      firstName: f.firstName || customer.firstName || "",
+      lastName: f.lastName || customer.lastName || "",
+      email: f.email || customer.email || "",
+      phone: f.phone || customer.phone || "",
+    }));
+
     let cancelled = false;
     (async () => {
       let list = [];
@@ -263,18 +284,22 @@ export default function CheckoutPage() {
       }
       if (cancelled) return;
 
-      const defaultAddress = list.find((a) => a.isDefault) ?? list[0] ?? null;
       setSavedAddresses(list);
+      // Typed an address while the address book was loading — theirs wins, and
+      // the picker stays on "new" with the saved ones a click away.
+      if (addressTouched.current) return;
+      const defaultAddress = list.find((a) => a.isDefault) ?? list[0] ?? null;
       // Preselect the default so the common case is one fewer decision. With no
       // saved addresses the picker does not render and this stays on "new".
       if (defaultAddress) setSelectedAddressId(defaultAddress.id);
 
       setForm((f) => ({
         ...f,
-        firstName: f.firstName || customer.firstName || "",
-        lastName: f.lastName || customer.lastName || "",
-        email: f.email || customer.email || "",
-        phone: f.phone || defaultAddress?.phone || customer.phone || "",
+        // The address's phone beats the profile's, but never one they typed.
+        phone:
+          f.phone && f.phone !== (customer.phone || "")
+            ? f.phone
+            : defaultAddress?.phone || f.phone,
         /*
          * The PRESELECTED address wins over whatever the form was restored
          * with. These used to be `f.city || defaultAddress?.city`, so a form
@@ -495,6 +520,8 @@ export default function CheckoutPage() {
     } else if (field === "notes") {
       val = val.slice(0, 1000);
     }
+
+    if (["address", "city", "state", "pincode"].includes(field)) addressTouched.current = true;
 
     setForm((f) => ({ ...f, [field]: val }));
 

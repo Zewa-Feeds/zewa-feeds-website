@@ -327,4 +327,47 @@ describe("Address-Aware Shipping Checkout Flow", () => {
       expect.objectContaining({ email: "abc@x.com" }),
     );
   });
+
+  /*
+   * /account/addresses takes 10s+ against the hosted API. The name and email
+   * used to wait for it, so a signed-in customer saw an empty form.
+   */
+  it("fills name and email from the profile before the address book answers", async () => {
+    mockAuthState = {
+      customer: { id: "cust-9", firstName: "Nik", lastName: "Mulakkal", email: "nik@example.com" },
+      isAuthenticated: true,
+      isLoading: false,
+    };
+    addressesMock.mockReturnValue(new Promise(() => {})); // never answers
+    validateMock.mockResolvedValue({ lines: [], subtotalPaise: 30000, totalPaise: 30000 });
+
+    render(<CheckoutPage />);
+
+    expect(await screen.findByDisplayValue("Nik")).toBeTruthy();
+    expect(screen.getByDisplayValue("Mulakkal")).toBeTruthy();
+    expect(screen.getByDisplayValue("nik@example.com")).toBeTruthy();
+  });
+
+  it("does not overwrite an address typed while the address book was loading", async () => {
+    mockAuthState = {
+      customer: { id: "cust-9", firstName: "Nik", lastName: "Mulakkal", email: "nik@example.com" },
+      isAuthenticated: true,
+      isLoading: false,
+    };
+    let answer;
+    addressesMock.mockReturnValue(new Promise((r) => { answer = r; }));
+    validateMock.mockResolvedValue({ lines: [], subtotalPaise: 30000, totalPaise: 30000 });
+
+    const { container } = render(<CheckoutPage />);
+    await screen.findByDisplayValue("Nik");
+    const street = container.querySelector('[name="address"], #address');
+    fireEvent.change(street, { target: { value: "Typed Street 1" } });
+
+    await act(async () => {
+      answer([{ id: "a1", name: "Nik Mulakkal", line1: "Mulakkal House", city: "Palakkad", state: "Kerala", pincode: "679303", isDefault: true }]);
+    });
+
+    expect(screen.getByDisplayValue("Typed Street 1")).toBeTruthy();
+    expect(screen.queryByDisplayValue("Mulakkal House")).toBeNull();
+  });
 });

@@ -54,6 +54,9 @@ vi.mock("@/lib/api", async () => {
   };
 });
 
+vi.mock("@/lib/authContext", () => ({
+  useAuth: () => ({ customer: null, isAuthenticated: false, isLoading: false }),
+}));
 vi.mock("@/components/Header", () => ({ default: () => <header /> }));
 vi.mock("@/components/Footer", () => ({ default: () => <footer /> }));
 vi.mock("next/image", () => ({

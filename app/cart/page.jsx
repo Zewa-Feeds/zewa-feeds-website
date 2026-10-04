@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartCouponPanel from "@/components/CartCouponPanel";
 import { useCart } from "@/lib/cartContext";
+import { useAuth } from "@/lib/authContext";
 import { PLACEHOLDER_IMAGE } from "@/app/products/adapters";
 import { formatInr, formatInrPending, offers as offersApi } from "@/lib/api";
 
@@ -47,6 +48,8 @@ export default function CartPage() {
    * cart — but it is logged, because a failed fetch and an empty list are
    * indistinguishable on screen.
    */
+  const { customer, isAuthenticated } = useAuth();
+  const offersViewer = isAuthenticated ? (customer?.id ?? "in") : "out";
   const [availableOffers, setAvailableOffers] = useState([]);
   useEffect(() => {
     let cancelled = false;
@@ -58,7 +61,9 @@ export default function CartPage() {
       // to the console rather than nowhere.
       .catch((err) => { console.warn("Could not load available offers:", err); });
     return () => { cancelled = true; };
-  }, []);
+    // Refetched when the viewer changes: a signed-in list greys out codes this
+    // customer can no longer use (ZEWA1 after their first order).
+  }, [offersViewer]);
 
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState("");
