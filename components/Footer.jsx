@@ -251,6 +251,13 @@ export default function Footer() {
               <circle cx="15" cy="10" r="2.6" fill="none" stroke="#000080" strokeWidth="0.6" />
               <circle cx="15" cy="10" r="0.5" fill="#000080" />
             </svg>
+            <Image
+              src="/make-in-india.png"
+              alt="Make in India"
+              width={151}
+              height={72}
+              className="ml-2 inline-block h-[15px] w-auto -translate-y-px align-middle opacity-40 grayscale"
+            />
           </p>
         </div>
       </div>
