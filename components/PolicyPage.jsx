@@ -8,10 +8,6 @@ import { COMPANY, COMPANY_ADDRESS_LINE } from "@/lib/company";
  * One layout so Privacy, Terms, Shipping, Returns and Contact cannot drift
  * apart, and so the seller-identity block required by the E-Commerce Rules
  * appears on all of them without being copy-pasted five times.
- *
- * The draft banner is deliberate and deliberately ugly: this copy has NOT been
- * through legal review, and it must be obvious to anyone who lands here — and
- * to whoever ships the site — that it still needs sign-off.
  */
 export default function PolicyPage({ title, updated, intro, children }) {
   return (
@@ -19,12 +15,6 @@ export default function PolicyPage({ title, updated, intro, children }) {
       <Header />
       <main className="min-h-screen bg-[#06080f] pb-24 pt-32 text-[#dde2f6]">
         <div className="mx-auto max-w-[820px] px-6 sm:px-10">
-          <div className="mb-8 rounded-xl border border-[#d4793a]/40 bg-[#d4793a]/10 px-4 py-3 text-[12.5px] leading-relaxed text-[#e8a86a]">
-            <strong className="font-semibold">Draft — pending legal review.</strong>{" "}
-            This page sets out the required structure and disclosures. The wording
-            must be reviewed and approved before public launch.
-          </div>
-
           <h1 className="font-[Playfair_Display] text-[34px] leading-tight text-white sm:text-[42px]">
             {title}
           </h1>

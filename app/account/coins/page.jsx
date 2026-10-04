@@ -291,7 +291,7 @@ export default function CoinsPage() {
               Earn 2 Zewa Coins for every ₹100 of eligible product value. 1 coin = ₹1 off a
               future order. Coins unlock after the return window closes and expire 12 months
               after you earn them. Coins have no cash value and are not refundable as cash.{" "}
-              <Link href="/terms" className="underline underline-offset-2 hover:text-white/60">
+              <Link href="/zewa-coins-terms" className="underline underline-offset-2 hover:text-white/60">
                 Full terms
               </Link>
             </p>
