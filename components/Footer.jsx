@@ -238,6 +238,19 @@ export default function Footer() {
               {COMPANY.phone}
             </a>{" "}
             · Country of origin: {COMPANY.countryOfOrigin}
+            {/* Deliberately quiet: small and desaturated so it reads as a detail, not a badge. */}
+            <svg
+              viewBox="0 0 30 20"
+              role="img"
+              aria-label="Flag of India"
+              className="ml-1.5 inline-block h-[9px] w-[13.5px] -translate-y-px rounded-[1.5px] align-middle opacity-50 saturate-50"
+            >
+              <rect width="30" height="20" fill="#FF9933" />
+              <rect y="6.67" width="30" height="6.67" fill="#FFFFFF" />
+              <rect y="13.33" width="30" height="6.67" fill="#138808" />
+              <circle cx="15" cy="10" r="2.6" fill="none" stroke="#000080" strokeWidth="0.6" />
+              <circle cx="15" cy="10" r="0.5" fill="#000080" />
+            </svg>
           </p>
         </div>
       </div>
