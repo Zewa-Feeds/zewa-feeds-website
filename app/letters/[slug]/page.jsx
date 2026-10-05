@@ -37,7 +37,7 @@ export default async function LetterPage({ params }) {
     <>
       <Header />
       <main className="min-h-screen bg-[#05070d] pb-20 pt-28 text-[#dde2f6] sm:pt-32">
-        <article className="mx-auto max-w-[780px] px-6 sm:px-10">
+        <article className="mx-auto max-w-[960px] px-6 sm:px-10">
           <a
             href="/letters"
             className="mb-10 inline-flex items-center gap-2 font-body-md text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 transition-colors duration-200 hover:text-white/60"

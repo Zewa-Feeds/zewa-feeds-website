@@ -29,7 +29,7 @@ function Gallery({ images }) {
   const single = images.length === 1;
   const ratio = single ? images[0].width / images[0].height : 0;
   // Portrait and near-square images are capped; only clearly wide ones span the column.
-  const cap = !single ? "" : ratio < 0.9 ? "mx-auto max-w-[420px]" : ratio < 1.3 ? "mx-auto max-w-[520px]" : "";
+  const cap = !single ? "" : ratio < 0.9 ? "mx-auto max-w-[480px]" : ratio < 1.3 ? "mx-auto max-w-[600px]" : "";
   return (
     <figure className={`my-9 flex flex-col gap-3 sm:flex-row ${cap}`}>
       {images.map((img) => (
@@ -45,7 +45,7 @@ function Gallery({ images }) {
             alt={img.alt}
             width={img.width}
             height={img.height}
-            sizes={single ? "(max-width: 900px) 100vw, 780px" : "(max-width: 640px) 100vw, 400px"}
+            sizes={single ? "(max-width: 1000px) 100vw, 880px" : "(max-width: 640px) 100vw, 520px"}
             className="h-auto w-full"
           />
         </div>
@@ -58,7 +58,7 @@ function renderBlock(block, i) {
   switch (block.type) {
     case "p":
       return (
-        <p key={i} className="mb-5 font-body-md text-[15px] leading-[1.8] text-white/60">
+        <p key={i} className="mb-5 font-body-md text-[16px] leading-[1.8] text-white/60">
           <Text value={block.text} />
         </p>
       );
@@ -102,7 +102,7 @@ function renderBlock(block, i) {
           {block.items.map((item, j) => (
             <li
               key={j}
-              className="list-disc font-body-md text-[15px] leading-[1.7] text-white/60 marker:text-primary/60"
+              className="list-disc font-body-md text-[16px] leading-[1.7] text-white/60 marker:text-primary/60"
             >
               <Text value={item} />
             </li>
