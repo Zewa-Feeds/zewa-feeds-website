@@ -9,12 +9,13 @@ import { COMPANY, COMPANY_ADDRESS_LINE } from "@/lib/company";
  * apart, and so the seller-identity block required by the E-Commerce Rules
  * appears on all of them without being copy-pasted five times.
  */
-export default function PolicyPage({ title, updated, intro, children }) {
+export default function PolicyPage({ title, updated, intro, icon, children }) {
   return (
     <>
       <Header />
       <main className="min-h-screen bg-[#06080f] pb-24 pt-32 text-[#dde2f6]">
         <div className="mx-auto max-w-[820px] px-6 sm:px-10">
+          {icon && <div className="mb-6">{icon}</div>}
           <h1 className="font-[Playfair_Display] text-[34px] leading-tight text-white sm:text-[42px]">
             {title}
           </h1>

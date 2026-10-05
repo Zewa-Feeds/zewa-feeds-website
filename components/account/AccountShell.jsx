@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth, signInHref } from "@/lib/authContext";
+import ZewaCoin from "@/components/ZewaCoin";
 import { EyebrowLabel, PANEL, Skeleton } from "./ui";
 
 /**
@@ -49,12 +50,7 @@ const NAV = [
   {
     href: "/account/coins",
     label: "Zewa Coins",
-    icon: (
-      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M15 9.5a3.5 3.5 0 100 5" />
-      </svg>
-    ),
+    icon: <ZewaCoin size={16} />,
   },
   {
     href: "/account/profile",

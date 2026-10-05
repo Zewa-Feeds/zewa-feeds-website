@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PolicyPage, { PolicySection } from "@/components/PolicyPage";
 import { COMPANY } from "@/lib/company";
+import ZewaCoin from "@/components/ZewaCoin";
 
 export const metadata = {
   title: "Zewa Coins Terms & Conditions",
@@ -37,6 +38,7 @@ export default function ZewaCoinsTermsPage() {
   return (
     <PolicyPage
       title="Zewa Coins Terms & Conditions"
+      icon={<ZewaCoin size={64} />}
       updated="4 October 2026"
       intro={`Zewa Coins is the rewards programme run by ${COMPANY.legalName} on zewafeeds.com. These terms explain how coins are earned and used, and apply alongside our Terms of Use. By earning or using Zewa Coins you accept them.`}
     >

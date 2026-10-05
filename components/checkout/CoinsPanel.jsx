@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import ZewaCoin from "@/components/ZewaCoin";
 
 /**
  * The Zewa Coins box at checkout — ZSOP004 §10.1.
@@ -85,7 +86,8 @@ export default function CoinsPanel({
     return (
       <div className="rounded-xl border border-[#44e5c2]/20 bg-[#44e5c2]/[0.03] px-4 py-3">
         <div className="flex items-center justify-between gap-3">
-          <span className="font-[Montserrat] text-[12px] font-semibold uppercase tracking-wider text-[#44e5c2]/70">
+          <span className="flex items-center gap-2 font-[Montserrat] text-[12px] font-semibold uppercase tracking-wider text-[#44e5c2]/70">
+            <ZewaCoin size={18} />
             Zewa Coins
           </span>
           <span className="font-[Montserrat] text-[13px] font-semibold tabular-nums text-white/70">
@@ -106,6 +108,7 @@ export default function CoinsPanel({
       <div className="flex flex-col gap-2 rounded-xl border border-[#44e5c2]/25 bg-[#44e5c2]/[0.06] px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <p className="font-[Montserrat] text-[13px] text-white/85">
+            <ZewaCoin size={18} className="mr-1.5 align-[-4px]" />
             <span className="font-semibold text-[#44e5c2]">{applied} Zewa Coins</span> applied
             · {rupeesFor(applied)} off
           </p>
@@ -195,6 +198,7 @@ export default function CoinsPanel({
       */}
       <div className="flex items-baseline justify-between gap-3">
         <label htmlFor={inputId} className="font-[Montserrat] text-[12.5px] text-white/70">
+          <ZewaCoin size={18} className="mr-1.5 align-[-4px]" />
           Use your{" "}
           <span className="font-semibold text-[#44e5c2]">{available} Zewa Coins</span>
         </label>

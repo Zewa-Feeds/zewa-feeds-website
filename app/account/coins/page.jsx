@@ -6,6 +6,7 @@ import AccountShell, { AccountCard } from "@/components/account/AccountShell";
 import { EmptyState, GhostButton, PrimaryButton, Skeleton } from "@/components/account/ui";
 import { useAuth } from "@/lib/authContext";
 import { account as accountApi } from "@/lib/api";
+import ZewaCoin from "@/components/ZewaCoin";
 
 /**
  * Zewa Coins — balance, pending, expiring and history (ZSOP004 §10.2).
@@ -120,6 +121,8 @@ export default function CoinsPage() {
             {/* ---- Headline balance. Available only — never plus pending. ---- */}
             <section className="overflow-hidden rounded-3xl border border-[#44e5c2]/20 bg-gradient-to-br from-[#0c1a2b] to-[#09101f] shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
               <div className="flex flex-col gap-6 px-6 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+                <div className="flex items-center gap-5">
+                  <ZewaCoin size={72} className="hidden sm:inline-block" />
                 <div>
                   <p className="font-[Montserrat] text-[11px] font-semibold uppercase tracking-[0.18em] text-[#44e5c2]/70">
                     Available to use
@@ -134,6 +137,7 @@ export default function CoinsPage() {
                     Worth {rupees(balance.available, balance.coinValuePaise)} off your next order
                     · 1 coin = ₹1
                   </p>
+                </div>
                 </div>
 
                 {balance.available >= balance.minRedemption && (

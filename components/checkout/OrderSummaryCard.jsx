@@ -6,6 +6,7 @@ import { formatInr, formatInrPending } from "@/lib/api";
 import { CARD, EASE } from "./tokens";
 import { lineMax } from "@/lib/cartContext";
 import AvailableOffers from "@/components/AvailableOffers";
+import ZewaCoin from "@/components/ZewaCoin";
 
 export default function OrderSummaryCard({
   items = [],
@@ -486,7 +487,10 @@ export default function OrderSummaryCard({
           */}
           {coinDiscountPaise > 0 && (
             <div className="flex justify-between text-primary">
-              <span>Zewa Coins</span>
+              <span className="flex items-center gap-1.5">
+                <ZewaCoin size={15} />
+                Zewa Coins
+              </span>
               <span className="font-semibold tabular-nums">− {formatInr(coinDiscountPaise)}</span>
             </div>
           )}
