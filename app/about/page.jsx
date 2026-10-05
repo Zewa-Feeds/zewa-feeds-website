@@ -16,6 +16,7 @@ import {
   VALUES,
   WHY,
 } from "@/lib/about";
+import { LETTERS, latestLetter } from "@/lib/letters";
 
 /**
  * Rule-plus-caps eyebrow, matching Science and ClinicalProof.
@@ -87,6 +88,8 @@ export default async function AboutPage() {
   } catch {
     /* catalogue unavailable — cards render unlinked */
   }
+
+  const letter = latestLetter();
 
   return (
     <>
@@ -495,6 +498,62 @@ export default async function AboutPage() {
             </div>
           </div>
         </Section>
+        )}
+
+        {/* ── FOUNDER'S LETTER — always the newest (lib/letters.js) ──── */}
+        {letter && (
+          <Section tone="raised" className="border-y border-white/5">
+            <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:gap-16">
+              <a
+                href={`/letters/${letter.slug}`}
+                className="relative mx-auto block aspect-[4/5] w-full max-w-[340px] overflow-hidden rounded-2xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+              >
+                <Image
+                  src={letter.cover.src}
+                  alt={letter.cover.alt}
+                  fill
+                  sizes="(max-width: 1024px) 90vw, 340px"
+                  className="object-cover object-top"
+                />
+              </a>
+
+              <div>
+                <Eyebrow>Founder&rsquo;s Letter · {letter.dateLabel}</Eyebrow>
+                <h2
+                  className="font-display-lg leading-[1.15] text-white"
+                  style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
+                >
+                  {letter.title}
+                </h2>
+                <p className="font-display-lg mt-3 text-[18px] italic text-white/50">
+                  {letter.subtitle}
+                </p>
+                <p className="font-body-md mt-6 max-w-[620px] text-[15.5px] leading-[1.8] text-white/50">
+                  {letter.excerpt}
+                </p>
+                <p className="font-body-md mt-4 text-[13px] text-white/35">
+                  {letter.author}, {letter.authorRole}
+                </p>
+
+                <div className="mt-8 flex flex-wrap items-center gap-6">
+                  <a
+                    href={`/letters/${letter.slug}`}
+                    className="font-button rounded-full bg-primary px-8 py-3.5 text-[12px] uppercase tracking-[0.18em] text-on-primary transition-opacity duration-200 hover:opacity-85"
+                  >
+                    Read more
+                  </a>
+                  {LETTERS.length > 1 && (
+                    <a
+                      href="/letters"
+                      className="font-button text-[12px] uppercase tracking-[0.18em] text-white/50 transition-colors hover:text-primary"
+                    >
+                      All letters
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Section>
         )}
 
         {/* ── CTA ───────────────────────────────────────────────────── */}

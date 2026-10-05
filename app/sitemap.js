@@ -1,5 +1,6 @@
 import { catalog } from "@/lib/api";
 import { ARTICLES } from "@/lib/articles";
+import { LETTERS } from "@/lib/letters";
 import { SITE_URL } from "@/lib/site";
 
 /**
@@ -41,6 +42,7 @@ const STATIC_PATHS = [
   { path: "/returns", priority: 0.3, changeFrequency: "yearly" },
   { path: "/terms", priority: 0.2, changeFrequency: "yearly" },
   { path: "/zewa-coins-terms", priority: 0.2, changeFrequency: "yearly" },
+  { path: "/letters", priority: 0.4, changeFrequency: "monthly" },
   { path: "/privacy", priority: 0.2, changeFrequency: "yearly" },
 ];
 
@@ -62,6 +64,15 @@ export default async function sitemap() {
       lastModified: now,
       changeFrequency: "yearly",
       priority: 0.5,
+    });
+  }
+
+  for (const letter of LETTERS) {
+    entries.push({
+      url: absolute(`/letters/${letter.slug}`),
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.4,
     });
   }
 
