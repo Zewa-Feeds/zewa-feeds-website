@@ -4,16 +4,58 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 
 const SLIDE_DURATION = 5000; // ms before auto-advancing tiles 1 & 2
+/**
+ * The first slide holds longer on the visit's first view, so the welcome
+ * animation (about 2s) does not eat into the time to read it.
+ */
+const FIRST_VIEW_DURATION = 7000;
+
+/**
+ * Animation helper for the welcome entrance. `intro` false (every later visit
+ * to the slide) renders the final state with no animation at all.
+ */
+const anim = (intro, name, delay, duration = 800) =>
+  intro
+    ? { animation: `${name} ${duration}ms cubic-bezier(0.22, 1, 0.36, 1) ${delay}ms both` }
+    : undefined;
+
+/**
+ * Counts a percentage up from 0 during the welcome.
+ *
+ * Renders the final value first, so server HTML, crawlers and no-JS visitors
+ * read the real figure. The reset to 0 happens while the panel is still
+ * invisible (it fades in later), so the swap is never seen.
+ */
+function CountUp({ to, intro, delay, duration = 1100 }) {
+  const [value, setValue] = useState(to);
+  useEffect(() => {
+    if (!intro) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    setValue(0);
+    let frame;
+    const start = performance.now() + delay;
+    const tick = (now) => {
+      const t = Math.min(1, Math.max(0, (now - start) / duration));
+      setValue(Math.round(to * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [to, intro, delay, duration]);
+  return <>{value}%</>;
+}
 
 // ── Tile 1: WHY provocation ──────────────────────────────────────────────────
-function TileWhy() {
+function TileWhy({ intro = false }) {
   return (
     <div className="relative w-full md:h-full flex items-center">
       {/* Illustration placeholder background */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#080e1c] via-[#0d1a2e] to-[#091a18]" />
-      {/* Subtle teal orb */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[55%] h-[80%] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-      <div className="absolute right-[10%] top-[20%] w-[30%] h-[50%] rounded-full bg-primary/8 blur-[80px] pointer-events-none" />
+      {/* Subtle teal orb — the glow settles in on the welcome. */}
+      <div className="hero-anim absolute inset-0 pointer-events-none" style={anim(intro, "heroGlow", 0, 1600)}>
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[55%] h-[80%] rounded-full bg-primary/5 blur-[120px]" />
+        <div className="absolute right-[10%] top-[20%] w-[30%] h-[50%] rounded-full bg-primary/8 blur-[80px]" />
+      </div>
 
       {/*
         Two columns from lg up.
@@ -28,20 +70,45 @@ function TileWhy() {
       <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 pt-6 pb-14 md:py-0">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16">
         <div className="max-w-2xl">
+          {/*
+            Each line rises from behind its own mask. The padding/negative
+            margin pair gives descenders, the italic overhang and (on line 1) the
+            underline room inside the clip without changing the line box.
+          */}
           <h1 className="font-display-lg text-[32px] sm:text-display-lg-mobile md:text-display-lg mb-4 sm:mb-6 leading-[1.08] text-on-surface">
-            Your fish is built to{" "}
-            <span className="text-primary italic">digest insects.</span>
-            <br />
-            Most fish food feeds it soy.
+            <span className="block overflow-hidden pb-[0.22em] -mb-[0.22em] pr-[0.1em]">
+              <span className="hero-anim block" style={anim(intro, "heroRise", 150, 900)}>
+                Your fish is built to{" "}
+                <span className="relative text-primary italic whitespace-nowrap">
+                  digest insects.
+                  <span
+                    aria-hidden="true"
+                    className="hero-anim absolute hidden sm:block left-0 right-[0.2em] bottom-[0.03em] h-[2px] origin-left rounded-full bg-primary/60"
+                    style={anim(intro, "heroLine", 1050, 900)}
+                  />
+                </span>
+              </span>
+            </span>
+            <span className="block overflow-hidden pb-[0.12em] -mb-[0.12em]">
+              <span className="hero-anim block" style={anim(intro, "heroRise", 320, 900)}>
+                Most fish food feeds it soy.
+              </span>
+            </span>
           </h1>
 
-          <p className="font-body-lg text-[15px] sm:text-body-lg text-on-surface/70 mb-8 sm:mb-12 max-w-lg leading-relaxed">
+          <p
+            className="hero-anim font-body-lg text-[15px] sm:text-body-lg text-on-surface/70 mb-8 sm:mb-12 max-w-lg leading-relaxed"
+            style={anim(intro, "heroFadeUp", 600)}
+          >
             For millions of years, aquatic species evolved on insect protein.
             Modern fish food replaced that with cheap soy — and your fish pays
             the price.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <div
+            className="hero-anim flex flex-col sm:flex-row gap-4 items-start sm:items-center"
+            style={anim(intro, "heroFadeUp", 780)}
+          >
             {/*
               Was a <button> with no onClick — it looked like the page's primary
               action and did nothing. #science is the R&D section further down
@@ -73,7 +140,7 @@ function TileWhy() {
             single comparison the headline rests on, and the same figures the
             Science section charts further down the page.
           */}
-          <div className="hidden lg:block">
+          <div className="hero-anim hidden lg:block" style={anim(intro, "heroPanel", 650, 900)}>
             <div
               className="rounded-2xl border border-white/8 p-8"
               style={{ background: "rgba(255,255,255,0.03)" }}
@@ -89,8 +156,8 @@ function TileWhy() {
 
               <div className="space-y-7">
                 {[
-                  { label: "ZEWA INSECT PROTEIN", pct: 88, value: "88%", strong: true },
-                  { label: "SOY MEAL", pct: 75, value: "75%", strong: false },
+                  { label: "ZEWA INSECT PROTEIN", pct: 88, strong: true },
+                  { label: "SOY MEAL", pct: 75, strong: false },
                 ].map((bar) => (
                   <div key={bar.label}>
                     <div className="mb-2.5 flex items-baseline justify-between">
@@ -106,15 +173,16 @@ function TileWhy() {
                           bar.strong ? "text-primary" : "text-white/45"
                         }`}
                       >
-                        {bar.value}
+                        <CountUp to={bar.pct} intro={intro} delay={1050} />
                       </span>
                     </div>
                     <div className="h-[3px] w-full overflow-hidden rounded-full bg-white/8">
                       <div
-                        className="h-full rounded-full"
+                        className="hero-anim h-full origin-left rounded-full"
                         style={{
                           width: `${bar.pct}%`,
                           background: bar.strong ? "#44e5c2" : "rgba(255,255,255,0.25)",
+                          ...anim(intro, "heroBar", 1050, 1100),
                         }}
                       />
                     </div>
@@ -192,13 +260,17 @@ const TILES = ["why", "banner", "video"];
 export default function Hero() {
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
+  /** True until slide 1 is left for the first time — the welcome plays once. */
+  const [firstView, setFirstView] = useState(true);
   const timerRef = useRef(null);
+  const slideDuration = current === 0 && firstView ? FIRST_VIEW_DURATION : SLIDE_DURATION;
 
   const goTo = useCallback((idx) => {
     if (animating) return;
     setAnimating(true);
     setTimeout(() => {
       setCurrent(idx);
+      setFirstView(false);
       setAnimating(false);
     }, 400);
   }, [animating]);
@@ -215,10 +287,10 @@ export default function Hero() {
   useEffect(() => {
     clearTimeout(timerRef.current);
     if (current !== 2) {
-      timerRef.current = setTimeout(next, SLIDE_DURATION);
+      timerRef.current = setTimeout(next, slideDuration);
     }
     return () => clearTimeout(timerRef.current);
-  }, [current, next]);
+  }, [current, next, slideDuration]);
 
   const handleVideoEnd = useCallback(() => {
     goTo(0); // loop back to tile 1 after video
@@ -250,7 +322,7 @@ export default function Hero() {
           className="relative w-full h-full overflow-hidden transition-opacity duration-[400ms]"
           style={{ opacity: animating ? 0 : 1 }}
         >
-          {current === 0 && <TileWhy />}
+          {current === 0 && <TileWhy intro={firstView} />}
           {current === 1 && <TileBanner />}
           {current === 2 && <TileVideo onVideoEnd={handleVideoEnd} />}
         </div>
@@ -321,7 +393,7 @@ export default function Hero() {
                       key={`fill-${current}`}
                       className="absolute inset-y-0 left-0 rounded-full bg-primary"
                       style={{
-                        animation: `slideProgress ${SLIDE_DURATION}ms linear forwards`,
+                        animation: `slideProgress ${slideDuration}ms linear forwards`,
                       }}
                     />
                   )}
