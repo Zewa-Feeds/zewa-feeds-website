@@ -94,7 +94,7 @@ const nav = {
   Company: [
     { label: "Find Nearest Dealer", href: "#", soon: true },
     { label: "Become a Distributor", href: "#", soon: true },
-    { label: "Zewa Coins Terms & Conditions", href: "/zewa-coins-terms" },
+    { label: "Zewa Coins – The Loyalty Program", href: "/zewa-coins-terms" },
     { label: "Download Catalogue", href: "/zewa-product-catalogue.pdf", download: "Zewa-Product-Catalogue.pdf", target: "_blank" },
     { label: "About Us", href: "/about" },
   ],
