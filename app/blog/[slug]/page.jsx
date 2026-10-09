@@ -94,7 +94,7 @@ function renderBlock(block, i, tagColor) {
       // Inline article image. Unoptimised `sizes` would ship the full-width
       // asset to phones, so the prose column width is declared explicitly.
       return (
-        <figure key={i} className="my-10">
+        <figure key={i} className="mt-6 mb-8 sm:my-10">
           <div className="relative overflow-hidden rounded-2xl border border-white/8"
             style={{ aspectRatio: block.aspect ?? "16 / 9" }}>
             <Image

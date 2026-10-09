@@ -22,7 +22,7 @@ export function ComparisonTable({ block, accent }) {
   const { headers, rows, caption, highlightColumn } = block;
 
   return (
-    <figure className="my-10">
+    <figure className="mt-6 mb-8 sm:my-10">
       <div
         className="overflow-x-auto rounded-2xl border border-white/8"
         style={{ background: "linear-gradient(135deg,#0b1828 0%,#081917 100%)" }}

@@ -7,6 +7,19 @@ module.exports = {
   ],
   theme: {
     extend: {
+      /*
+       * Opacity steps the codebase uses that Tailwind 3 does not ship (its scale
+       * runs in fives). Without these, classes like `border-white/8` or
+       * `text-white/42` generate no CSS at all: borders fell back to the default
+       * light grey (the bright frames round blog figures and tables) and faded
+       * text rendered at full strength. Listed from a scan of app/ and
+       * components/; add a step here before using a new one.
+       */
+      opacity: {
+        2: "0.02", 3: "0.03", 4: "0.04", 6: "0.06", 7: "0.07", 8: "0.08",
+        12: "0.12", 18: "0.18", 22: "0.22", 28: "0.28", 32: "0.32", 38: "0.38",
+        42: "0.42", 48: "0.48", 62: "0.62", 78: "0.78",
+      },
       colors: {
         "on-error": "#690005",
         "surface-container": "#191f2e",
