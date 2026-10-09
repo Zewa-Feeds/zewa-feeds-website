@@ -192,12 +192,29 @@ export default function ArticlePage() {
         <section className="relative flex flex-col overflow-hidden pt-20 min-h-[600px] sm:min-h-[660px]">
           {/* Hero image */}
           <div className="absolute inset-0">
+            {/*
+              Optional portrait hero for phones. The hero box there is tall and
+              narrow, so a 16:9 image under object-cover is blown up to fill the
+              height and its subject lands behind the title. An article can
+              supply `imageMobile` composed for that box; anchored to the top so
+              taller phones crop the empty bottom, not the subject.
+            */}
+            {article.imageMobile && (
+              <Image
+                src={article.imageMobile}
+                alt={article.title}
+                fill
+                sizes="100vw"
+                className="object-cover object-top sm:hidden"
+                priority
+              />
+            )}
             <Image
               src={article.image}
               alt={article.title}
               fill
               sizes="100vw"
-              className="object-cover"
+              className={`object-cover ${article.imageMobile ? "hidden sm:block" : ""}`}
               priority
             />
             {/* Heavy dark overlays for legibility */}
