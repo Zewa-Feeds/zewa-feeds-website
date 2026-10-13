@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useAuth, signInHref } from "@/lib/authContext";
-import ZewaCoin from "@/components/ZewaCoin";
+import ZewaSeed from "@/components/ZewaSeed";
 import { EyebrowLabel, PANEL, Skeleton } from "./ui";
 
 /**
@@ -48,9 +48,9 @@ const NAV = [
     ),
   },
   {
-    href: "/account/coins",
-    label: "Zewa Coins",
-    icon: <ZewaCoin size={16} />,
+    href: "/account/seeds",
+    label: "Zewa Seeds",
+    icon: <ZewaSeed size={16} />,
   },
   {
     href: "/account/profile",

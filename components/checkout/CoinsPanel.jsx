@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ZewaCoin from "@/components/ZewaCoin";
+import ZewaSeed from "@/components/ZewaSeed";
 
 /**
- * The Zewa Coins box at checkout — ZSOP004 §10.1.
+ * The Zewa Seeds box at checkout — ZSOP004 §10.1.
  *
  * Every decision below is specified, not stylistic:
  *
@@ -70,9 +70,9 @@ export default function CoinsPanel({
   /*
    * §10.2, below the minimum — a LOCKED state, not a line of prose.
    *
-   * This used to render one faint sentence ("Earn 10 Zewa Coins to start using
+   * This used to render one faint sentence ("Earn 10 Zewa Seeds to start using
    * them. You have 0.") between the offers box and the totals, and it read as
-   * filler. A customer who has never seen Zewa Coins had no reason to notice a
+   * filler. A customer who has never seen Zewa Seeds had no reason to notice a
    * wallet existed — and this is the one moment the feature can introduce
    * itself.
    *
@@ -87,15 +87,15 @@ export default function CoinsPanel({
       <div className="rounded-xl border border-[#44e5c2]/20 bg-[#44e5c2]/[0.03] px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <span className="flex items-center gap-2 font-[Montserrat] text-[12px] font-semibold uppercase tracking-wider text-[#44e5c2]/70">
-            <ZewaCoin size={18} />
-            Zewa Coins
+            <ZewaSeed size={18} />
+            Zewa Seeds
           </span>
           <span className="font-[Montserrat] text-[13px] font-semibold tabular-nums text-white/70">
             {available}
           </span>
         </div>
         <p className="mt-1.5 font-[Montserrat] text-[12.5px] leading-relaxed text-white/50">
-          Earn {short} more to spend them on an order. You collect coins on every
+          Earn {short} more to spend them on an order. You collect seeds on every
           purchase, and {minRedemption} unlocks redemption.
         </p>
       </div>
@@ -108,8 +108,8 @@ export default function CoinsPanel({
       <div className="flex flex-col gap-2 rounded-xl border border-[#44e5c2]/25 bg-[#44e5c2]/[0.06] px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <p className="font-[Montserrat] text-[13px] text-white/85">
-            <ZewaCoin size={18} className="mr-1.5 align-[-4px]" />
-            <span className="font-semibold text-[#44e5c2]">{applied} Zewa Coins</span> applied
+            <ZewaSeed size={18} className="mr-1.5 align-[-4px]" />
+            <span className="font-semibold text-[#44e5c2]">{applied} Zewa Seeds</span> applied
             · {rupeesFor(applied)} off
           </p>
           <button
@@ -125,7 +125,7 @@ export default function CoinsPanel({
           <p className="font-[Montserrat] text-[11.5px] text-amber-300/80">{notice}</p>
         )}
         <p className="font-[Montserrat] text-[11.5px] text-white/40">
-          Coins you don&apos;t use stay in your account.
+          Seeds you don&apos;t use stay in your account.
         </p>
       </div>
     );
@@ -137,15 +137,15 @@ export default function CoinsPanel({
 
     // Validate on entry with the REASON, not a generic failure (§10.1).
     if (!Number.isFinite(coins) || coins <= 0) {
-      setError("Enter how many coins to use.");
+      setError("Enter how many seeds to use.");
       return;
     }
     if (coins < minRedemption) {
-      setError(`Use at least ${minRedemption} coins.`);
+      setError(`Use at least ${minRedemption} seeds.`);
       return;
     }
     if (coins > available) {
-      setError(`You have ${available} Zewa Coins.`);
+      setError(`You have ${available} Zewa Seeds.`);
       return;
     }
     if (coins > maxRedeemable) {
@@ -154,7 +154,7 @@ export default function CoinsPanel({
       setError(
         // No longer "the full product value": the server holds back ₹1 so the
         // order stays above the payment gateway's minimum.
-        `You can use up to ${maxRedeemable} coins on this order. Shipping and a minimum of ₹1 are payable separately.`,
+        `You can use up to ${maxRedeemable} seeds on this order. Shipping and a minimum of ₹1 are payable separately.`,
       );
       return;
     }
@@ -198,9 +198,9 @@ export default function CoinsPanel({
       */}
       <div className="flex items-baseline justify-between gap-3">
         <label htmlFor={inputId} className="font-[Montserrat] text-[12.5px] text-white/70">
-          <ZewaCoin size={18} className="mr-1.5 align-[-4px]" />
+          <ZewaSeed size={18} className="mr-1.5 align-[-4px]" />
           Use your{" "}
-          <span className="font-semibold text-[#44e5c2]">{available} Zewa Coins</span>
+          <span className="font-semibold text-[#44e5c2]">{available} Zewa Seeds</span>
         </label>
         <span className="shrink-0 font-[Montserrat] text-[11.5px] tabular-nums text-white/40">
           worth {rupeesFor(available)}
@@ -243,12 +243,12 @@ export default function CoinsPanel({
             }}
             disabled={busy}
             /*
-             * Deliberately NOT "Zewa Coins to use" — that names the text field,
+             * Deliberately NOT "Zewa Seeds to use" — that names the text field,
              * and two controls sharing a label reads as duplicates to a screen
              * reader. "Adjust" marks this as the coarse control.
              */
-            aria-label={`Adjust Zewa Coins, 0 to ${maxRedeemable}`}
-            aria-valuetext={`${sliderValue} coins, ${rupeesFor(sliderValue)} off`}
+            aria-label={`Adjust Zewa Seeds, 0 to ${maxRedeemable}`}
+            aria-valuetext={`${sliderValue} seeds, ${rupeesFor(sliderValue)} off`}
             /*
              * Drives the filled portion of the track. WebKit has no
              * `::-moz-range-progress`, so the fill is a gradient whose hard stop
@@ -286,8 +286,8 @@ export default function CoinsPanel({
           disabled={busy}
           aria-label={
             capped
-              ? `Zewa Coins to use. You have ${available} coins, worth ${rupeesFor(available)}. Up to ${maxRedeemable} can be used on this order`
-              : `Zewa Coins to use. You have ${available} coins, worth ${rupeesFor(available)}`
+              ? `Zewa Seeds to use. You have ${available} seeds, worth ${rupeesFor(available)}. Up to ${maxRedeemable} can be used on this order`
+              : `Zewa Seeds to use. You have ${available} seeds, worth ${rupeesFor(available)}`
           }
           aria-invalid={error ? "true" : undefined}
           className={`w-[4.5rem] shrink-0 rounded-lg border bg-[#060c17] px-2.5 py-2 text-center font-[Montserrat] text-[13px] font-semibold tabular-nums text-white outline-none transition placeholder:font-normal placeholder:text-white/25 focus:border-[#44e5c2]/50 disabled:opacity-50 ${
@@ -308,7 +308,7 @@ export default function CoinsPanel({
               setError("");
             }}
             disabled={busy || sliderValue === maxRedeemable}
-            title={capped ? `Use the maximum ${maxRedeemable} coins` : `Use all ${maxRedeemable} coins`}
+            title={capped ? `Use the maximum ${maxRedeemable} seeds` : `Use all ${maxRedeemable} seeds`}
             className="shrink-0 rounded-lg border border-white/12 px-2.5 py-2 font-[Montserrat] text-[11px] font-bold uppercase tracking-[0.1em] text-white/55 transition hover:border-[#44e5c2]/40 hover:text-[#44e5c2] disabled:opacity-30 disabled:hover:border-white/12 disabled:hover:text-white/55"
           >
             Max
@@ -344,7 +344,7 @@ export default function CoinsPanel({
           */}
           {available - typed > 0 && (
             <span className="text-white/45">
-              {" "}· {available - typed} coins stay in your account
+              {" "}· {available - typed} seeds stay in your account
             </span>
           )}
         </p>
@@ -359,7 +359,7 @@ export default function CoinsPanel({
       */}
       {!previewValid && (
         <p className="font-[Montserrat] text-[11.5px] text-white/40">
-          Coins you don&apos;t use stay in your account.
+          Seeds you don&apos;t use stay in your account.
         </p>
       )}
     </form>

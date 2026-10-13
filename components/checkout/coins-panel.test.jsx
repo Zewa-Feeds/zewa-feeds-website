@@ -40,18 +40,18 @@ describe("§10.1 Free entry, defaulting to empty", () => {
     // "Default the field to empty, not to the maximum. Auto-applying burns a
     // balance the customer may have been saving."
     render(<CoinsPanel quote={QUOTE} />);
-    expect(screen.getByLabelText(/Zewa Coins to use/i).value).toBe("");
+    expect(screen.getByLabelText(/Zewa Seeds to use/i).value).toBe("");
   });
 
   it("offers the order maximum as a one-tap shortcut", () => {
     render(<CoinsPanel quote={QUOTE} />);
     fireEvent.click(screen.getByRole("button", { name: /^max$/i }));
-    expect(screen.getByLabelText(/Zewa Coins to use/i).value).toBe("260");
+    expect(screen.getByLabelText(/Zewa Seeds to use/i).value).toBe("260");
   });
 
   it("shows the live rupee conversion as the customer types", () => {
     render(<CoinsPanel quote={QUOTE} />);
-    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
+    fireEvent.change(screen.getByLabelText(/Zewa Seeds to use/i), {
       target: { value: "150" },
     });
     expect(screen.getByText(/₹150 off/i)).toBeDefined();
@@ -59,12 +59,12 @@ describe("§10.1 Free entry, defaulting to empty", () => {
 
   it("says unused coins stay in the account, so partial use feels normal", () => {
     render(<CoinsPanel quote={QUOTE} />);
-    expect(screen.getByText(/Coins you don't use stay in your account/i)).toBeDefined();
+    expect(screen.getByText(/Seeds you don't use stay in your account/i)).toBeDefined();
   });
 
   it("accepts only digits", () => {
     render(<CoinsPanel quote={QUOTE} />);
-    const input = screen.getByLabelText(/Zewa Coins to use/i);
+    const input = screen.getByLabelText(/Zewa Seeds to use/i);
     fireEvent.change(input, { target: { value: "1a2b3" } });
     expect(input.value).toBe("123");
   });
@@ -74,19 +74,19 @@ describe("§10.1 Validate on entry, with the reason", () => {
   it("rejects more coins than the customer holds", () => {
     const onApply = vi.fn();
     render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
-    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
+    fireEvent.change(screen.getByLabelText(/Zewa Seeds to use/i), {
       target: { value: "9999" },
     });
     fireEvent.click(screen.getByRole("button", { name: /^Apply$/i }));
 
-    expect(screen.getByRole("alert").textContent).toContain("You have 340 Zewa Coins.");
+    expect(screen.getByRole("alert").textContent).toContain("You have 340 Zewa Seeds.");
     expect(onApply).not.toHaveBeenCalled();
   });
 
   it("explains the cart ceiling rather than just refusing (§10.2)", () => {
     const onApply = vi.fn();
     render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
-    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
+    fireEvent.change(screen.getByLabelText(/Zewa Seeds to use/i), {
       target: { value: "300" },
     });
     fireEvent.click(screen.getByRole("button", { name: /^Apply$/i }));
@@ -94,7 +94,7 @@ describe("§10.1 Validate on entry, with the reason", () => {
     // The ceiling is no longer "the full product value" — the server holds back
     // ₹1 so the order stays above the payment gateway's minimum.
     expect(screen.getByRole("alert").textContent).toMatch(
-      /You can use up to 260 coins on this order.*minimum of ₹1 are payable separately/i,
+      /You can use up to 260 seeds on this order.*minimum of ₹1 are payable separately/i,
     );
     expect(onApply).not.toHaveBeenCalled();
   });
@@ -102,17 +102,17 @@ describe("§10.1 Validate on entry, with the reason", () => {
   it("enforces the 10-coin minimum", () => {
     const onApply = vi.fn();
     render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
-    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), { target: { value: "5" } });
+    fireEvent.change(screen.getByLabelText(/Zewa Seeds to use/i), { target: { value: "5" } });
     fireEvent.click(screen.getByRole("button", { name: /^Apply$/i }));
 
-    expect(screen.getByRole("alert").textContent).toContain("Use at least 10 coins.");
+    expect(screen.getByRole("alert").textContent).toContain("Use at least 10 seeds.");
     expect(onApply).not.toHaveBeenCalled();
   });
 
   it("applies a valid amount", () => {
     const onApply = vi.fn();
     render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
-    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
+    fireEvent.change(screen.getByLabelText(/Zewa Seeds to use/i), {
       target: { value: "150" },
     });
     fireEvent.click(screen.getByRole("button", { name: /^Apply$/i }));
@@ -127,7 +127,7 @@ describe("The balance and the order ceiling are two different numbers", () => {
     // 260 coins" to someone holding 340.
     render(<CoinsPanel quote={QUOTE} />);
 
-    expect(screen.getByText(/340 Zewa Coins/i)).toBeDefined();
+    expect(screen.getByText(/340 Zewa Seeds/i)).toBeDefined();
     expect(screen.getByText(/worth ₹340/i)).toBeDefined();
     expect(screen.getByText(/260 on this order/i)).toBeDefined();
     expect(screen.getByText(/minimum of ₹1 are payable separately/i)).toBeDefined();
@@ -139,11 +139,11 @@ describe("The balance and the order ceiling are two different numbers", () => {
     // does not exist.
     render(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 340 }} />);
 
-    expect(screen.getByText(/340 Zewa Coins/i)).toBeDefined();
+    expect(screen.getByText(/340 Zewa Seeds/i)).toBeDefined();
     expect(screen.getByText(/worth ₹340/i)).toBeDefined();
     // No ceiling sub-line at all when the order can absorb everything.
     expect(screen.queryByText(/on this order —/i)).toBeNull();
-    expect(screen.getByRole("button", { name: /^max$/i }).title).toMatch(/use all 340 coins/i);
+    expect(screen.getByRole("button", { name: /^max$/i }).title).toMatch(/use all 340 seeds/i);
   });
 
   it("tracks the ceiling when the cart changes it", () => {
@@ -155,14 +155,14 @@ describe("The balance and the order ceiling are two different numbers", () => {
     expect(screen.getByText(/100 on this order/i)).toBeDefined();
     expect(screen.getByRole("button", { name: /^max$/i })).toBeDefined();
     // The balance is unchanged by a cart change.
-    expect(screen.getByText(/340 Zewa Coins/i)).toBeDefined();
+    expect(screen.getByText(/340 Zewa Seeds/i)).toBeDefined();
     expect(screen.getByText(/worth ₹340/i)).toBeDefined();
   });
 
   it("still applies nothing until the customer acts", () => {
     const onApply = vi.fn();
     render(<CoinsPanel quote={QUOTE} onApply={onApply} />);
-    expect(screen.getByLabelText(/Zewa Coins to use/i).value).toBe("");
+    expect(screen.getByLabelText(/Zewa Seeds to use/i).value).toBe("");
     expect(onApply).not.toHaveBeenCalled();
   });
 });
@@ -178,7 +178,7 @@ describe("§10.2 Below the minimum balance", () => {
     render(<CoinsPanel quote={{ ...QUOTE, available: 6, maxRedeemable: 6 }} />);
     expect(screen.getByText("6")).toBeTruthy();                  // what they have
     expect(document.body.textContent).toMatch(/Earn 4 more/i);   // to reach 10
-    expect(screen.queryByLabelText(/Zewa Coins to use/i)).toBeNull();
+    expect(screen.queryByLabelText(/Zewa Seeds to use/i)).toBeNull();
   });
 });
 
@@ -187,7 +187,7 @@ describe("Applied state", () => {
     const onRemove = vi.fn();
     render(<CoinsPanel quote={QUOTE} applied={150} onRemove={onRemove} />);
 
-    expect(screen.getByText(/150 Zewa Coins/i)).toBeDefined();
+    expect(screen.getByText(/150 Zewa Seeds/i)).toBeDefined();
     expect(screen.getByText(/₹150 off/i)).toBeDefined();
 
     fireEvent.click(screen.getByRole("button", { name: /Remove/i }));
@@ -201,10 +201,10 @@ describe("Applied state", () => {
       <CoinsPanel
         quote={QUOTE}
         applied={100}
-        notice="We reduced your coins to 100 because your cart changed."
+        notice="We reduced your seeds to 100 because your cart changed."
       />,
     );
-    expect(screen.getByText(/We reduced your coins to 100/i)).toBeDefined();
+    expect(screen.getByText(/We reduced your seeds to 100/i)).toBeDefined();
     // Still an applied state, not an error state — checkout is not blocked.
     expect(screen.queryByRole("alert")).toBeNull();
   });
@@ -214,28 +214,28 @@ describe("Accessibility (§10.1)", () => {
   it("labels the input with the balance and the order ceiling", () => {
     render(<CoinsPanel quote={QUOTE} />);
     expect(
-      screen.getByLabelText(/You have 340 coins, worth ₹340\. Up to 260 can be used on this order/i),
+      screen.getByLabelText(/You have 340 seeds, worth ₹340\. Up to 260 can be used on this order/i),
     ).toBeDefined();
   });
 
   it("omits the ceiling from the label when there is none", () => {
     render(<CoinsPanel quote={{ ...QUOTE, maxRedeemable: 340 }} />);
-    const input = screen.getByLabelText(/You have 340 coins, worth ₹340/i);
+    const input = screen.getByLabelText(/You have 340 seeds, worth ₹340/i);
     expect(input.getAttribute("aria-label")).not.toMatch(/can be used on this order/i);
   });
 
   it("marks the field invalid when entry is rejected", () => {
     render(<CoinsPanel quote={QUOTE} />);
-    fireEvent.change(screen.getByLabelText(/Zewa Coins to use/i), {
+    fireEvent.change(screen.getByLabelText(/Zewa Seeds to use/i), {
       target: { value: "9999" },
     });
     fireEvent.click(screen.getByRole("button", { name: /^Apply$/i }));
-    expect(screen.getByLabelText(/Zewa Coins to use/i).getAttribute("aria-invalid")).toBe("true");
+    expect(screen.getByLabelText(/Zewa Seeds to use/i).getAttribute("aria-invalid")).toBe("true");
   });
 
   it("disables the controls while a request is in flight", () => {
     render(<CoinsPanel quote={QUOTE} busy />);
-    expect(screen.getByLabelText(/Zewa Coins to use/i).disabled).toBe(true);
+    expect(screen.getByLabelText(/Zewa Seeds to use/i).disabled).toBe(true);
   });
 });
 
@@ -332,7 +332,7 @@ describe("The live line reads as a benefit, not a warning", () => {
     render(<CoinsPanel quote={QUOTE} />);
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "100" } });
     // 340 held, 100 spent.
-    expect(screen.getByText(/240 coins stay in your account/i)).toBeDefined();
+    expect(screen.getByText(/240 seeds stay in your account/i)).toBeDefined();
   });
 
   /*
@@ -345,7 +345,7 @@ describe("The live line reads as a benefit, not a warning", () => {
     fireEvent.change(screen.getByRole("textbox"), { target: { value: "260" } });
 
     expect(screen.getByText(/₹260 off/i)).toBeDefined();
-    expect(screen.queryByText(/0 coins stay in your account/i)).toBeNull();
+    expect(screen.queryByText(/0 seeds stay in your account/i)).toBeNull();
   });
 
   /* Only ever ONE line under the row: the error replaces the conversion. */

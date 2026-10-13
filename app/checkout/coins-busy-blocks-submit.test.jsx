@@ -38,6 +38,6 @@ describe("while coins are being applied", () => {
 
   it("shows the customer why the button is unavailable", () => {
     // A disabled button with no explanation reads as a broken page.
-    expect(SOURCE).toMatch(/coins\.busy[\s\S]{0,400}?Applying (your )?coins/i);
+    expect(SOURCE).toMatch(/coins\.busy[\s\S]{0,400}?Applying (your )?seeds/i);
   });
 });
