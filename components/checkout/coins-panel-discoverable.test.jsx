@@ -28,7 +28,7 @@ describe("the coins panel below the minimum", () => {
     render(<CoinsPanel {...BASE} />);
     // A short standalone label — the old version had the name only inside a
     // full sentence, which is why the box did not read as a feature.
-    const label = screen.getByText(/^\s*Zewa Coins\s*$/i);
+    const label = screen.getByText(/^\s*Zewa Seeds\s*$/i);
     expect(label).toBeTruthy();
   });
 

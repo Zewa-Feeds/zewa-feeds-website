@@ -41,7 +41,7 @@ const STATIC_PATHS = [
   { path: "/shipping", priority: 0.3, changeFrequency: "yearly" },
   { path: "/returns", priority: 0.3, changeFrequency: "yearly" },
   { path: "/terms", priority: 0.2, changeFrequency: "yearly" },
-  { path: "/zewa-coins-terms", priority: 0.2, changeFrequency: "yearly" },
+  { path: "/zewa-seeds-terms", priority: 0.2, changeFrequency: "yearly" },
   { path: "/letters", priority: 0.4, changeFrequency: "monthly" },
   { path: "/privacy", priority: 0.2, changeFrequency: "yearly" },
 ];

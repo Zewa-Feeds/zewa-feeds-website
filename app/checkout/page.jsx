@@ -1810,7 +1810,7 @@ export default function CheckoutPage() {
                     {isSubmittingPayment
                       ? "Preparing secure payment…"
                       : coins.busy
-                      ? "Applying your coins…"
+                      ? "Applying your seeds…"
                       : validating || pricesPending
                       ? "Validating prices..."
                       : !fulfillable
@@ -1900,7 +1900,7 @@ export default function CheckoutPage() {
               {isSubmittingPayment
                 ? "Preparing..."
                 : coins.busy
-                ? "Applying coins…"
+                ? "Applying seeds…"
                 : validating
                 ? "Checking..."
                 : !fulfillable

@@ -6,7 +6,7 @@ import AccountShell, { AccountCard } from "@/components/account/AccountShell";
 import { EmptyState, GhostButton, PrimaryButton, Skeleton } from "@/components/account/ui";
 import { useAuth } from "@/lib/authContext";
 import { account as accountApi } from "@/lib/api";
-import ZewaCoin from "@/components/ZewaCoin";
+import ZewaSeed from "@/components/ZewaSeed";
 
 /**
  * Zewa Coins — balance, pending, expiring and history (ZSOP004 §10.2).
@@ -93,14 +93,14 @@ export default function CoinsPage() {
 
   return (
     <AccountShell
-      title="Zewa Coins"
-      subtitle="Earn coins on every order and spend them on the next one."
+      title="Zewa Seeds"
+      subtitle="Earn seeds on every order and spend them on the next one."
     >
       <div className="flex flex-col gap-6 sm:gap-8">
         {loadError && (
           <AccountCard>
             <EmptyState
-              title="We couldn't load your coins"
+              title="We couldn't load your seeds"
               body="Please refresh the page. Your balance is safe."
             />
           </AccountCard>
@@ -122,7 +122,7 @@ export default function CoinsPage() {
             <section className="overflow-hidden rounded-3xl border border-[#44e5c2]/20 bg-gradient-to-br from-[#0c1a2b] to-[#09101f] shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
               <div className="flex flex-col gap-6 px-6 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-8">
                 <div className="flex items-center gap-5">
-                  <ZewaCoin size={72} className="hidden sm:inline-block" />
+                  <ZewaSeed size={72} className="hidden sm:inline-block" />
                 <div>
                   <p className="font-[Montserrat] text-[11px] font-semibold uppercase tracking-[0.18em] text-[#44e5c2]/70">
                     Available to use
@@ -130,12 +130,12 @@ export default function CoinsPage() {
                   <p className="mt-2 font-[Playfair_Display] text-[44px] leading-none text-white">
                     {balance.available.toLocaleString("en-IN")}
                     <span className="ml-2 font-[Montserrat] text-[15px] font-medium text-white/50">
-                      Zewa Coins
+                      Zewa Seeds
                     </span>
                   </p>
                   <p className="mt-2 font-[Montserrat] text-[13px] text-white/55">
                     Worth {rupees(balance.available, balance.coinValuePaise)} off your next order
-                    · 1 coin = ₹1
+                    · 1 seed = ₹1
                   </p>
                 </div>
                 </div>
@@ -154,7 +154,7 @@ export default function CoinsPage() {
               {balance.negative && (
                 <div className="border-t border-white/10 bg-white/[0.03] px-6 py-4 sm:px-8">
                   <p className="font-[Montserrat] text-[12.5px] text-white/60">
-                    Your coins balance is being adjusted following a recent return.
+                    Your seeds balance is being adjusted following a recent return.
                   </p>
                 </div>
               )}
@@ -162,7 +162,7 @@ export default function CoinsPage() {
               {!balance.negative && balance.available < balance.minRedemption && (
                 <div className="border-t border-white/10 bg-white/[0.03] px-6 py-4 sm:px-8">
                   <p className="font-[Montserrat] text-[12.5px] text-white/60">
-                    Earn {balance.minRedemption} coins to start using them. You have{" "}
+                    Earn {balance.minRedemption} seeds to start using them. You have{" "}
                     {balance.available}.
                   </p>
                 </div>
@@ -172,13 +172,13 @@ export default function CoinsPage() {
             {/* ---- Guest orders waiting to be claimed (§3.4) ---- */}
             {claimable?.totalCoins > 0 && (
               <AccountCard
-                title="Claim your coins"
+                title="Claim your seeds"
                 description="You placed an order before creating your profile."
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <p className="font-[Montserrat] text-[13.5px] leading-relaxed text-white/70">
                     <span className="font-semibold text-[#44e5c2]">
-                      {claimable.totalCoins} Zewa Coins
+                      {claimable.totalCoins} Zewa Seeds
                     </span>{" "}
                     are waiting on{" "}
                     {claimable.orders.length === 1
@@ -200,14 +200,14 @@ export default function CoinsPage() {
             {balance.pending > 0 && (
               <AccountCard
                 title="On the way"
-                description="Coins unlock once the return window on your order closes."
+                description="Seeds unlock once the return window on your order closes."
               >
                 <div className="flex items-baseline gap-3">
                   <span className="font-[Playfair_Display] text-[28px] leading-none text-white">
                     {balance.pending.toLocaleString("en-IN")}
                   </span>
                   <span className="font-[Montserrat] text-[13px] text-white/55">
-                    coins pending
+                    seeds pending
                     {balance.nextUnlockAt && ` · unlock on ${formatDate(balance.nextUnlockAt)}`}
                   </span>
                 </div>
@@ -218,7 +218,7 @@ export default function CoinsPage() {
             {balance.expiringSoon?.length > 0 && (
               <AccountCard
                 title="Expiring soon"
-                description="Use these before they go — coins last 12 months from the day you earn them."
+                description="Use these before they go — seeds last 12 months from the day you earn them."
               >
                 <ul className="flex flex-col divide-y divide-white/10">
                   {balance.expiringSoon.map((lot) => (
@@ -227,7 +227,7 @@ export default function CoinsPage() {
                       className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
                     >
                       <span className="font-[Montserrat] text-[13.5px] text-white/75">
-                        {lot.coins} coins
+                        {lot.coins} seeds
                       </span>
                       <span className="font-[Montserrat] text-[12.5px] text-white/45">
                         Expires {formatDate(lot.expiresAt)}
@@ -241,12 +241,12 @@ export default function CoinsPage() {
             {/* ---- History, in plain language, linking to orders (§9.4) ---- */}
             <AccountCard
               title="History"
-              description="Every coin you've earned, used or had returned."
+              description="Every seed you've earned, used or had returned."
             >
               {!history?.entries?.length ? (
                 <EmptyState
-                  title="No coin activity yet"
-                  body="You'll earn 2 Zewa Coins for every ₹100 you spend."
+                  title="No seed activity yet"
+                  body="You'll earn 2 Zewa Seeds for every ₹100 you spend."
                   action={
                     <Link href="/products">
                       <GhostButton type="button">Browse products</GhostButton>
@@ -292,10 +292,10 @@ export default function CoinsPage() {
 
             {/* ---- The terms, where the balance is shown (§12.2) ---- */}
             <p className="px-1 font-[Montserrat] text-[11.5px] leading-relaxed text-white/35">
-              Earn 2 Zewa Coins for every ₹100 of eligible product value. 1 coin = ₹1 off a
-              future order. Coins unlock after the return window closes and expire 12 months
-              after you earn them. Coins have no cash value and are not refundable as cash.{" "}
-              <Link href="/zewa-coins-terms" className="underline underline-offset-2 hover:text-white/60">
+              Earn 2 Zewa Seeds for every ₹100 of eligible product value. 1 seed = ₹1 off a
+              future order. Seeds unlock after the return window closes and expire 12 months
+              after you earn them. Seeds have no cash value and are not refundable as cash.{" "}
+              <Link href="/zewa-seeds-terms" className="underline underline-offset-2 hover:text-white/60">
                 Full terms
               </Link>
             </p>

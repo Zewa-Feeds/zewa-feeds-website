@@ -42,6 +42,14 @@ const nextConfig = {
       },
 
       /*
+       * Zewa Coins was renamed Zewa Seeds. Emails already sent (coins earned,
+       * expiry reminders, the founder's letter) and bookmarks still carry the
+       * old paths.
+       */
+      { source: "/account/coins", destination: "/account/seeds", permanent: true },
+      { source: "/zewa-coins-terms", destination: "/zewa-seeds-terms", permanent: true },
+
+      /*
        * ---- Dukaan URLs, for the zewafeeds.com cutover --------------------
        *
        * The old storefront is being replaced on the same domain, so links that
