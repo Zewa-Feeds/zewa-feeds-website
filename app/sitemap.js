@@ -1,6 +1,5 @@
 import { catalog } from "@/lib/api";
-import { ARTICLES } from "@/lib/articles";
-import { LETTERS } from "@/lib/letters";
+import { getArticleIndex, getSection } from "@/lib/siteContent";
 import { SITE_URL } from "@/lib/site";
 
 /**
@@ -58,16 +57,20 @@ export default async function sitemap() {
     priority: entry.priority,
   }));
 
-  for (const article of ARTICLES) {
+  // Published articles (CMS). Tagged site:articles, so a publish refreshes this.
+  const { data: articles } = await getArticleIndex();
+  for (const article of articles) {
     entries.push({
       url: absolute(`/blog/${article.slug}`),
-      lastModified: now,
+      lastModified: new Date(article.modifiedAt ?? article.publishedAt ?? now),
       changeFrequency: "yearly",
       priority: 0.5,
     });
   }
 
-  for (const letter of LETTERS) {
+  // Published letters (CMS). Tagged site:letters.
+  const { data: letters } = await getSection("letters");
+  for (const letter of letters) {
     entries.push({
       url: absolute(`/letters/${letter.slug}`),
       lastModified: now,

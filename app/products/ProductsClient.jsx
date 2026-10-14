@@ -671,7 +671,13 @@ export default function ProductsClient(props) {
   return <ProductsPageInner {...props} />;
 }
 
-function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, categories }) {
+function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, categories, heroBanner }) {
+  /*
+   * The brand banner is CMS content (Website → Products page). When it is
+   * switched off the rotator holds on the range statement: no timer, no dots,
+   * no arrows.
+   */
+  const hasBanner = Boolean(heroBanner?.image?.url);
   /*
    * The category filter is driven by ?category= in the URL.
    *
@@ -779,13 +785,14 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
   const [heroSlide, setHeroSlide] = useState(0);
 
   useEffect(() => {
+    if (!hasBanner) return undefined;
     const HOLD_MS = [5000, 7000]; // [range statement, banner]
     const timer = setTimeout(
       () => setHeroSlide((s) => (s === 0 ? 1 : 0)),
       HOLD_MS[heroSlide],
     );
     return () => clearTimeout(timer);
-  }, [heroSlide]);
+  }, [heroSlide, hasBanner]);
 
   useEffect(() => {
     // Nothing to rotate while loading (or with a single slide) — and `% 0` is NaN.
@@ -901,7 +908,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
 
                 {/* Slide dots — bottom right */}
                 <div className="absolute bottom-1 right-2 sm:bottom-0 sm:right-0 z-10 flex items-center gap-2">
-                  {[0, 1].map((i) => (
+                  {hasBanner && [0, 1].map((i) => (
                     <button
                       key={i}
                       type="button"
@@ -919,11 +926,11 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
           )}
 
           {/* Slide 1 — Full Bleed Edge-to-Edge Brand Banner */}
-          {heroSlide === 1 && (
+          {heroSlide === 1 && hasBanner && (
             <div className="relative w-full h-[200px] sm:h-[380px] md:h-[450px] lg:h-[500px] animate-fadeIn overflow-hidden">
               <Image
-                src="/banner-products.png"
-                alt="Discover a diverse range of feeds to nourish every species of fish — Zewa Feeds"
+                src={heroBanner.image.url}
+                alt={heroBanner.alt}
                 fill
                 className="object-cover object-center"
                 sizes="100vw"
@@ -955,6 +962,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
             type="button"
             onClick={() => setHeroSlide((s) => (s === 0 ? 1 : 0))}
             aria-label="Previous slide"
+            style={hasBanner ? undefined : { display: "none" }}
             className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 backdrop-blur-md transition-all duration-200 hover:scale-110 hover:border-primary hover:bg-primary/20 hover:text-primary active:scale-95 shadow-lg"
           >
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 sm:h-5 sm:w-5">
@@ -966,6 +974,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
             type="button"
             onClick={() => setHeroSlide((s) => (s === 0 ? 1 : 0))}
             aria-label="Next slide"
+            style={hasBanner ? undefined : { display: "none" }}
             className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white/80 backdrop-blur-md transition-all duration-200 hover:scale-110 hover:border-primary hover:bg-primary/20 hover:text-primary active:scale-95 shadow-lg"
           >
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 sm:h-5 sm:w-5">

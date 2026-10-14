@@ -3,92 +3,10 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 
-const MILESTONES = [
-  {
-    year: "2021",
-    points: [
-      "Incorporation",
-      "First waste-to-protein pilots",
-      "UNDP Green Innovation Fund Winner",
-    ],
-    index: "01",
-    image: "/Website_ Milestones/Incorporation& first office.jpg",
-    imageAlt: "Incorporation and first waste-to-protein pilots, 2021",
-  },
-  {
-    year: "2022",
-    points: [
-      "Commercial plant producing insect protein from municipal waste",
-      "EY Climathon Champion",
-      "Swachh Technology Challenge, Kerala Nominee",
-    ],
-    index: "02",
-    image: "/Website_ Milestones/India's first data centric Insect farm 2022.png",
-    imageAlt: "India's first data-centric insect farm, 2022",
-  },
-  {
-    year: "2023",
-    points: [
-      "Pivot to formulation science",
-      "Formulation research and field trials begin",
-      "Australian Government AAGS Winner",
-      "KSUM Market Acceleration Grant",
-      "ICAR-CIFT MoU signed",
-    ],
-    index: "03",
-    image: "/Website_ Milestones/AAGS 2023.jpg",
-    imageAlt: "Australian Government AAGS Winner & formulation trials, 2023",
-  },
-  {
-    year: "2024",
-    points: [
-      "Facility and team rebuilt",
-      "First species-specific SKUs launched",
-      "ICAR Pusa Krishi UPJA Winner",
-      "AgHub Catalytic Capital Recipient",
-    ],
-    index: "04",
-    image: "/Website_ Milestones/ICAR IARI 2024.JPG",
-    imageAlt: "ICAR Pusa Krishi UPJA Winner & species-specific feeds, 2024",
-  },
-  {
-    year: "2025",
-    points: [
-      "KAU feeding trial validates 2.2× weight gain over imported feed",
-      "Temasek Foundation Ecosphere NextGen Leader",
-      "AFTEA Finalist, Singapore",
-    ],
-    index: "05",
-    image: "/Website_ Milestones/Product display 2025.jpeg",
-    imageAlt: "KAU feeding trial validation & product display, 2025",
-  },
-  {
-    year: "2025",
-    points: [
-      "Research presented at MECOS 4 (SFM-177)",
-      "National expansion",
-      "Amazon, Flipkart, Blinkit and D2C live",
-    ],
-    index: "06",
-    image: "/Website_ Milestones/Product display 2025_2.jpeg",
-    imageAlt: "MECOS 4 research presentation & national expansion, 2025",
-  },
-  {
-    year: "2026",
-    points: [
-      "44 SKUs across 29 formulations",
-      "500+ outlets in 8 states",
-      "Amazon US Global Selling opened",
-      "KSIDC Scale up Support",
-      "Vande Bharatam National Finalist — 56 selected from 26,000+ applications",
-    ],
-    index: "07",
-    image: "/Website_ Milestones/Vande Bharatam 2026.webp",
-    imageAlt: "Vande Bharatam National Finalist & global expansion, 2026",
-  },
-];
-
-export default function MilestoneExperienceHorizontal() {
+/**
+ * `milestones` (published CMS content): { id, year, index, points[], image: { url } | null, imageAlt }.
+ */
+export default function MilestoneExperienceHorizontal({ milestones: MILESTONES, heading }) {
   const sliderRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -181,14 +99,14 @@ export default function MilestoneExperienceHorizontal() {
           <div className="mb-4 flex items-center gap-3">
             <div className="h-px w-6 bg-primary" />
             <span className="font-label-caps text-label-caps tracking-[0.2em] text-primary">
-              MILESTONES
+              {heading?.eyebrow}
             </span>
           </div>
           <h2
             className="font-display-lg leading-[1.15] text-white"
             style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
           >
-            Key events, National and International recognitions
+            {heading?.title}
           </h2>
         </div>
 
@@ -250,7 +168,7 @@ export default function MilestoneExperienceHorizontal() {
 
           return (
             <div
-              key={`${m.year}-${m.index}`}
+              key={m.id ?? `${m.year}-${m.index}`}
               className={`w-[280px] sm:w-[320px] md:w-[340px] shrink-0 snap-start rounded-2xl border p-4 sm:p-5 flex flex-col transition-all duration-200 shadow-md group ${
                 isActive
                   ? "border-primary/50 bg-[#0c1524] shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
@@ -259,10 +177,10 @@ export default function MilestoneExperienceHorizontal() {
             >
               <div>
                 {/* Milestone Image */}
-                {m.image && (
+                {m.image?.url && (
                   <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-black/40 border border-white/10 mb-4 group-hover:border-primary/30 transition-colors">
                     <Image
-                      src={m.image}
+                      src={m.image.url}
                       alt={m.imageAlt || (m.points ? m.points.join(", ") : m.text || "")}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"

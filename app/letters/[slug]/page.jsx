@@ -3,15 +3,22 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LetterBody from "@/components/letters/LetterBody";
 import LetterCard from "@/components/letters/LetterCard";
-import { LETTERS, LETTERS_BY_DATE, findLetter } from "@/lib/letters";
+import ContentVersion from "@/components/ContentVersion";
+import { getSection } from "@/lib/siteContent";
 
-export function generateStaticParams() {
-  return LETTERS.map((l) => ({ slug: l.slug }));
+async function load(slug) {
+  const letters = await getSection("letters");
+  return { letters, letter: letters.data.find((l) => l.slug === slug) ?? null };
+}
+
+export async function generateStaticParams() {
+  const letters = await getSection("letters");
+  return letters.data.map((l) => ({ slug: l.slug }));
 }
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const letter = findLetter(slug);
+  const { letter } = await load(slug);
   if (!letter) return {};
   return {
     title: `${letter.title} — Founder's Letter`,
@@ -21,20 +28,23 @@ export async function generateMetadata({ params }) {
       type: "article",
       title: letter.title,
       description: letter.excerpt,
-      images: [{ url: letter.cover.src, alt: letter.cover.alt }],
+      images: letter.cover ? [{ url: letter.cover.src, alt: letter.cover.alt }] : undefined,
     },
   };
 }
 
 export default async function LetterPage({ params }) {
   const { slug } = await params;
-  const letter = findLetter(slug);
+  const { letters, letter } = await load(slug);
   if (!letter) notFound();
+  return <LetterView letter={letter} others={letters.data.filter((l) => l.slug !== letter.slug)} version={letters.version} />;
+}
 
-  const others = LETTERS_BY_DATE.filter((l) => l.slug !== letter.slug);
-
+/** The page body; /preview/site?page=letters renders it with a draft letter. */
+export function LetterView({ letter, others, version }) {
   return (
     <>
+      <ContentVersion version={version} />
       <Header />
       <main className="min-h-screen bg-[#05070d] pb-20 pt-28 text-[#dde2f6] sm:pt-32">
         <article className="mx-auto max-w-[960px] px-6 sm:px-10">

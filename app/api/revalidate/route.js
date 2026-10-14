@@ -58,6 +58,8 @@ export async function POST(request) {
     /* an empty body means "catalogue-wide", which is a valid request */
   }
 
+  if (body.scope === "site") return revalidateSite(body);
+
   const slug = typeof body.slug === "string" ? body.slug : null;
   const revalidated = [];
 
@@ -88,4 +90,40 @@ export async function POST(request) {
   revalidated.push("/products", "/");
 
   return Response.json({ revalidated, at: Date.now() });
+}
+
+/*
+ * ---- Website publications -------------------------------------------------
+ *
+ * Sent by the CMS publish worker with exactly the tags and pages one
+ * publication changed. Both lists are allowlisted: the secret already gates
+ * this route, but a leaked secret should still not be able to evict arbitrary
+ * cache entries or make the server render arbitrary paths.
+ *
+ * TAGS ONLY — never revalidatePath here. Every site page reads its content
+ * through tagged fetches, and revalidateTag(tag, "max") is stale-while-
+ * revalidate: the current page keeps serving until the regenerated one has
+ * rendered successfully, so a failed regeneration (API down, a render error)
+ * can never replace a good page. revalidatePath, by contrast, EXPIRES the page:
+ * the next visitor gets a blocking render, and if that throws they get a 500.
+ * Verified end to end — with the API stopped, a path purge turned /about into
+ * a 500 while a tag purge kept serving the last good page.
+ *
+ * `paths` is accepted (and allowlisted) so the publish worker can say which
+ * pages it will read back, but it purges nothing.
+ */
+const SITE_TAG = /^site:(home|products|blog|about|letters|articles|article:[a-z0-9]+(?:-[a-z0-9]+)*)$/;
+const SITE_PATH = /^\/(|products|blog|about|letters|sitemap\.xml|(?:blog|letters)\/[a-z0-9]+(?:-[a-z0-9]+)*)$/;
+
+function revalidateSite(body) {
+  const tags = Array.isArray(body.tags) ? body.tags.filter((t) => typeof t === "string" && SITE_TAG.test(t)) : [];
+  const paths = Array.isArray(body.paths) ? body.paths.filter((p) => typeof p === "string" && SITE_PATH.test(p)) : [];
+
+  if (tags.length === 0) {
+    return Response.json({ error: "Nothing to revalidate" }, { status: 400 });
+  }
+
+  for (const tag of tags) revalidateTag(tag, "max");
+
+  return Response.json({ revalidated: tags.map((t) => `tag:${t}`), pages: paths, version: body.version ?? null, at: Date.now() });
 }

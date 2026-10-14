@@ -104,7 +104,7 @@ function ArrowIcon() {
   );
 }
 
-export default async function ProductShowcase() {
+export default async function ProductShowcase({ productSlugs }) {
   let products = [];
   try {
     products = await catalog.products();
@@ -120,7 +120,7 @@ export default async function ProductShowcase() {
    * Which three, and in what order — see lib/featured.js. This was
    * `products.slice(0, 3)`, i.e. whichever three sorted first alphabetically.
    */
-  const SECONDARY = selectFeatured(products).map((p, i) => adapt(p, i));
+  const SECONDARY = selectFeatured(products, productSlugs?.length ? { slugs: productSlugs } : undefined).map((p, i) => adapt(p, i));
 
   return (
     <Reveal id="products" className="bg-[#06080f]">

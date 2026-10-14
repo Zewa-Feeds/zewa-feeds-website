@@ -4,19 +4,10 @@ import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import LogoMarquee from "@/components/LogoMarquee";
 import MilestonesSection from "@/components/milestones/MilestonesSection";
+import ContentVersion from "@/components/ContentVersion";
+import { getSection, versionOf } from "@/lib/siteContent";
 import { catalog } from "@/lib/api";
-import {
-  FOUNDER,
-  HEADLINE_STATS,
-  HERO,
-  PURPOSE,
-  RANGE,
-  STORY,
-  TRUST,
-  VALUES,
-  WHY,
-} from "@/lib/about";
-import { LETTERS, latestLetter } from "@/lib/letters";
+
 
 /**
  * Rule-plus-caps eyebrow, matching Science and ClinicalProof.
@@ -53,13 +44,11 @@ function Eyebrow({ children, onLight = false }) {
  * className — so children carrying an explicit `text-white` must still be
  * overridden at the call site.
  */
-/**
- * Is the founder section shown?
- *
- * Hidden for now at the team's request. The block and its content are left
- * intact — flip this to true to bring it back.
+/*
+ * Whether the founder section shows, its portrait, the story video, the
+ * milestones and the institution logos are CMS content (Website → About).
+ * So is the copy around them — see AboutView.
  */
-const SHOW_FOUNDER = false;
 
 function Section({ children, tone = "dark", className = "" }) {
   const bg =
@@ -76,6 +65,33 @@ function Section({ children, tone = "dark", className = "" }) {
 }
 
 export default async function AboutPage() {
+  const [about, letters] = await Promise.all([getSection("about"), getSection("letters")]);
+  return <AboutView about={about} letters={letters} />;
+}
+
+/**
+ * The page body; /preview/site renders it with draft content.
+ *
+ * Every word and file here is CMS content (Website → About): `copy` carries
+ * the text under the names the page used before it moved out of code, so
+ * the markup is unchanged.
+ */
+export async function AboutView({ about, letters }) {
+  const { storyVideo, founder, milestones, logos, copy } = about.data;
+  const {
+    hero: HERO,
+    headlineStats: HEADLINE_STATS,
+    story: STORY,
+    purpose: PURPOSE,
+    why: WHY,
+    founder: FOUNDER,
+    values: VALUES,
+    trust: TRUST,
+    range: RANGE,
+    milestonesHeading,
+    cta: CTA,
+  } = copy;
+
   /*
    * Which products are publicly live. Cards link only to published products —
    * a DRAFT slug 404s, so linking to it would ship dead links. They begin
@@ -89,10 +105,12 @@ export default async function AboutPage() {
     /* catalogue unavailable — cards render unlinked */
   }
 
-  const letter = latestLetter();
+  // Newest published letter (the snapshot is already sorted newest first).
+  const letter = letters?.data?.[0] ?? null;
 
   return (
     <>
+      <ContentVersion version={versionOf(about, letters)} />
       <Header />
       <main className="min-h-screen bg-[#06080f] text-[#dde2f6]">
         {/* ── HERO ──────────────────────────────────────────────────── */}
@@ -186,8 +204,8 @@ export default async function AboutPage() {
 
               <div className="mt-8 relative aspect-video w-full overflow-hidden rounded-2xl border border-white/15 bg-black/60 shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
                 <iframe
-                  src="https://www.youtube-nocookie.com/embed/gcnpEOW09k0?rel=0"
-                  title="Zewa Feeds - Our Story"
+                  src={`https://www.youtube-nocookie.com/embed/${storyVideo.youtubeId}?rel=0`}
+                  title={storyVideo.title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   className="absolute inset-0 h-full w-full border-0"
@@ -329,7 +347,7 @@ export default async function AboutPage() {
               ))}
             </div>
             <p className="font-body-md mt-8 text-[12px] text-white/25">
-              Based on studies and trials conducted with leading research institutes. NABL lab certified.
+              {TRUST.footnote}
             </p>
           </div>
 
@@ -342,14 +360,14 @@ export default async function AboutPage() {
             page scroll sideways. overflow-hidden cannot cap a block's own width.
           */}
           <div className="min-w-0 mt-16 border-t border-white/5 pt-12">
-            <Eyebrow>BACKED BY</Eyebrow>
+            <Eyebrow>{TRUST.backedByEyebrow}</Eyebrow>
             <h2
               className="font-display-lg leading-[1.15] text-white mb-8"
               style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
             >
-              Backed by leading institutions
+              {TRUST.backedByTitle}
             </h2>
-            <LogoMarquee logos={TRUST.institutionLogos} />
+            <LogoMarquee logos={logos.filter((l) => l.image).map((l) => ({ src: l.image.url, alt: l.alt }))} />
 
             {/* Backers with no logo file supplied — still named, not dropped. */}
             {TRUST.institutionsTextOnly?.length > 0 && (
@@ -365,7 +383,7 @@ export default async function AboutPage() {
         </Section>
 
         {/* ── KEY EVENTS, NATIONAL & INTERNATIONAL RECOGNITION: MILESTONES ── */}
-        <MilestonesSection />
+        <MilestonesSection milestones={milestones} heading={milestonesHeading} />
 
         {/* ── RANGE ─────────────────────────────────────────────────── */}
         {/*
@@ -431,14 +449,14 @@ export default async function AboutPage() {
           finished and the portrait exists, so bringing it back is a one-line
           change — flip SHOW_FOUNDER to true.
         */}
-        {SHOW_FOUNDER && (
+        {founder?.portrait && (
         <Section tone="raised" className="border-y border-white/5">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] lg:gap-16">
             <div>
               <div className="relative aspect-[4/5] w-full max-w-[320px] overflow-hidden rounded-xl bg-white/5">
                 <Image
-                  src={FOUNDER.portrait}
-                  alt={FOUNDER.portraitAlt}
+                  src={founder.portrait.url}
+                  alt={founder.alt}
                   fill
                   sizes="(max-width: 1024px) 80vw, 320px"
                   className="object-cover"
@@ -500,7 +518,7 @@ export default async function AboutPage() {
         </Section>
         )}
 
-        {/* ── FOUNDER'S LETTER — always the newest (lib/letters.js) ──── */}
+        {/* ── FOUNDER'S LETTER — always the newest published (CMS → Letters) ── */}
         {letter && (
           <Section tone="raised" className="border-y border-white/5">
             <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:gap-16">
@@ -508,13 +526,15 @@ export default async function AboutPage() {
                 href={`/letters/${letter.slug}`}
                 className="relative mx-auto block aspect-[4/5] w-full max-w-[340px] overflow-hidden rounded-2xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
               >
-                <Image
-                  src={letter.cover.src}
-                  alt={letter.cover.alt}
-                  fill
-                  sizes="(max-width: 1024px) 90vw, 340px"
-                  className="object-cover object-top"
-                />
+                {letter.cover && (
+                  <Image
+                    src={letter.cover.src}
+                    alt={letter.cover.alt}
+                    fill
+                    sizes="(max-width: 1024px) 90vw, 340px"
+                    className="object-cover object-top"
+                  />
+                )}
               </a>
 
               <div>
@@ -542,7 +562,7 @@ export default async function AboutPage() {
                   >
                     Read more
                   </a>
-                  {LETTERS.length > 1 && (
+                  {letters.data.length > 1 && (
                     <a
                       href="/letters"
                       className="font-button text-[12px] uppercase tracking-[0.18em] text-white/50 transition-colors hover:text-primary"
@@ -563,24 +583,24 @@ export default async function AboutPage() {
               className="font-display-lg leading-[1.15] text-white"
               style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
             >
-              Feed built on evidence, not marketing
+              {CTA.title}
             </h2>
             <p className="font-body-md mx-auto mt-6 max-w-[460px] text-[15px] leading-relaxed text-white/40">
-              Explore the range, or read the research behind every formulation.
+              {CTA.body}
             </p>
 
             <div className="mt-9 flex flex-wrap justify-center gap-4">
               <a
-                href="/products"
+                href={CTA.primary.href}
                 className="font-button rounded-full bg-primary px-9 py-4 text-[12px] uppercase tracking-[0.18em] text-on-primary transition-opacity duration-200 hover:opacity-85"
               >
-                Explore products
+                {CTA.primary.label}
               </a>
               <a
-                href="/blog"
+                href={CTA.secondary.href}
                 className="font-button rounded-full border border-white/15 px-9 py-4 text-[12px] uppercase tracking-[0.18em] text-white/70 transition-colors duration-200 hover:border-primary/50 hover:text-primary"
               >
-                Knowledge Hub
+                {CTA.secondary.label}
               </a>
             </div>
           </div>
