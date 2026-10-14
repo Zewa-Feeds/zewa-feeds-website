@@ -1,6 +1,8 @@
 import { catalog } from "@/lib/api";
 import ProductsClient from "./ProductsClient";
 import { adaptProduct, adaptSpotlight } from "./adapters";
+import ContentVersion from "@/components/ContentVersion";
+import { getSection } from "@/lib/siteContent";
 
 /**
  * Shop page — server component.
@@ -75,17 +77,24 @@ export default async function ProductsPage({ searchParams }) {
    * rendering — the exact problem this page exists to fix. Reading it on the
    * server keeps the filter shareable AND the grid server-rendered.
    */
+  // Editorial banner from the published CMS content (not live catalogue data).
+  const productsContent = await getSection("products");
+
   const params = await searchParams;
   const initialCategory =
     typeof params?.category === "string" ? params.category : "All";
 
   return (
+    <>
+    <ContentVersion version={productsContent.version} />
     <ProductsClient
+      heroBanner={productsContent.data.heroBanner}
       products={products}
       spotlights={spotlights}
       categories={categories}
       loadFailed={loadFailed}
       initialCategory={initialCategory}
     />
+    </>
   );
 }

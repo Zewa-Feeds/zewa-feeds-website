@@ -108,3 +108,46 @@ describe("what it purges", () => {
     expect(res.status).toBe(200);
   });
 });
+
+describe("website publications (scope: site)", () => {
+  const auth = { authorization: `Bearer ${SECRET}` };
+
+  it("revalidates only the tags and pages the publication changed", async () => {
+    const res = await post(auth, {
+      scope: "site",
+      version: 7,
+      tags: ["site:home", "site:article:crude-protein-fish-food-vs-protein-quality"],
+      paths: ["/", "/blog/crude-protein-fish-food-vs-protein-quality"],
+    });
+    expect(res.status).toBe(200);
+    // stale-while-revalidate: the old page serves until the new one renders.
+    expect(revalidateTag).toHaveBeenCalledWith("site:home", "max");
+    expect(revalidateTag).toHaveBeenCalledWith("site:article:crude-protein-fish-food-vs-protein-quality", "max");
+    // Never a path purge: that expires the page with no stale fallback, so a
+    // failed regeneration would serve a 500 instead of the last good page.
+    expect(revalidatePath).not.toHaveBeenCalled();
+    // A site publish must not purge the product catalogue.
+    expect(revalidateTag).not.toHaveBeenCalledWith("catalog");
+    expect((await res.json()).version).toBe(7);
+  });
+
+  it("drops tags and paths outside the allowlist", async () => {
+    const res = await post(auth, {
+      scope: "site",
+      tags: ["catalog", "site:home", "site:../../x"],
+      paths: ["/account", "//evil.example", "/about", "/blog/../checkout"],
+    });
+    expect(res.status).toBe(200);
+    expect(revalidateTag.mock.calls.map((c) => c[0])).toEqual(["site:home"]);
+    expect((await res.json()).pages).toEqual(["/about"]);
+  });
+
+  it("refuses an empty site request instead of silently succeeding", async () => {
+    expect((await post(auth, { scope: "site", tags: ["nope"] })).status).toBe(400);
+  });
+
+  it("still requires the secret", async () => {
+    expect((await post({}, { scope: "site", tags: ["site:home"] })).status).toBe(401);
+    expect(revalidateTag).not.toHaveBeenCalled();
+  });
+});

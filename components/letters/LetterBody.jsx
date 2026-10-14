@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 /**
- * Renders a letter's block array (see lib/letters.js).
+ * Renders a letter's block array (CMS → Website → Letters).
  *
  * Text is rendered as text — segments may be bold or italic, but no markup
  * from the content layer reaches the DOM, the same rule the blog renderer

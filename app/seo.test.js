@@ -11,6 +11,15 @@ import { describe, expect, it, vi } from "vitest";
 
 const products = vi.fn();
 vi.mock("@/lib/api", () => ({ catalog: { products: () => products() } }));
+// Published articles come from the CMS snapshot; served here from the
+// committed one so the test never touches the network.
+vi.mock("@/lib/siteContent", async () => {
+  const snap = (await import("@/content/site-snapshot.fallback.json")).default;
+  return {
+    getArticleIndex: async () => ({ version: snap.version, data: snap.articles }),
+    getSection: async (part) => ({ version: snap.version, data: snap.sections[part] }),
+  };
+});
 vi.mock("next/font/google", () => ({
   Montserrat: () => ({ variable: "montserrat-var" }),
   Playfair_Display: () => ({ variable: "playfair-var" }),
@@ -81,6 +90,18 @@ describe("sitemap", () => {
     products.mockResolvedValue([{ slug: "koi-bites" }, { slug: "koi-bites" }]);
     const list = (await sitemap()).map((e) => e.url);
     expect(list.filter((u) => u.endsWith("/products/koi-bites"))).toHaveLength(1);
+  });
+
+  it("lists every published article from the CMS snapshot, dated by publication", async () => {
+    const entries = await sitemap();
+    const article = entries.find((e) => e.url.endsWith("/blog/crude-protein-fish-food-vs-protein-quality"));
+    expect(article).toBeTruthy();
+    expect(article.lastModified.toISOString().slice(0, 10)).toBe("2026-09-15");
+  });
+
+  it("lists every published founder's letter", async () => {
+    const urls = (await sitemap()).map((e) => e.url);
+    expect(urls).toContain("https://zewafeeds.com/letters/5-years-5-lessons-zewa-day-2026");
   });
 
   it("still returns the static pages when the catalogue is unreachable", async () => {

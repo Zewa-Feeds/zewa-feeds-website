@@ -1,7 +1,7 @@
 import Reveal from "./Reveal";
-import { proofStats } from "@/lib/content";
-
-export default function ClinicalProof() {
+/** Copy and figures: CMS → Website → Homepage → Clinical proof. */
+export default function ClinicalProof({ proof }) {
+  if (!proof?.stats?.length) return null;
   return (
     <Reveal as="section" className="bg-[#080e1c]">
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 pt-8 pb-16 sm:py-28">
@@ -11,21 +11,21 @@ export default function ClinicalProof() {
             <div className="flex items-center gap-3 mb-3">
               <div className="w-6 h-px bg-primary" />
               <span className="font-label-caps text-label-caps text-primary tracking-[0.18em]">
-                NABL VERIFIED DATA
+                {proof.eyebrow}
               </span>
             </div>
             <h2 className="font-display-lg text-[28px] sm:text-[36px] text-white leading-tight">
-              Science doesn&rsquo;t lie, neither do the numbers.
+              {proof.title}
             </h2>
           </div>
           <p className="font-body-md text-[14px] text-white/40 max-w-xs leading-relaxed">
-            Every claim backed by independent lab testing and controlled feeding trials.
+            {proof.intro}
           </p>
         </div>
 
         {/* Stat cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {proofStats.map((stat, i) => (
+          {proof.stats.map((stat, i) => (
             <div
               key={i}
               className={`p-7 sm:p-8 flex flex-col justify-center border transition-shadow duration-300 hover:shadow-lg ${
@@ -61,7 +61,7 @@ export default function ClinicalProof() {
             brand": that comparison cannot be verified by a reader, and the
             trials it refers to are not published.
           */}
-          Based on studies and trials conducted with leading research institutes. NABL lab certified.
+          {proof.footnote}
         </p>
       </div>
     </Reveal>

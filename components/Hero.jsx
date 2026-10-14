@@ -5,8 +5,9 @@ import Image from "next/image";
 
 const SLIDE_DURATION = 5000; // ms before auto-advancing tiles 1 & 2
 
-// ── Tile 1: WHY provocation ──────────────────────────────────────────────────
-function TileWhy() {
+// ── Tile 1: WHY provocation (copy: CMS → Website → Homepage → Statement) ──────
+function TileWhy({ copy: c }) {
+  if (!c) return null;
   return (
     <div className="relative w-full md:h-full flex items-center">
       {/* Illustration placeholder background */}
@@ -29,16 +30,23 @@ function TileWhy() {
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16">
         <div className="max-w-2xl">
           <h1 className="font-display-lg text-[32px] sm:text-display-lg-mobile md:text-display-lg mb-4 sm:mb-6 leading-[1.08] text-on-surface">
-            Your fish is built to{" "}
-            <span className="text-primary italic">digest insects.</span>
-            <br />
-            Most fish food feeds it soy.
+            {c.titleLead}
+            {c.titleEmphasis && (
+              <>
+                {" "}
+                <span className="text-primary italic">{c.titleEmphasis}</span>
+              </>
+            )}
+            {c.titleTail && (
+              <>
+                <br />
+                {c.titleTail}
+              </>
+            )}
           </h1>
 
           <p className="font-body-lg text-[15px] sm:text-body-lg text-on-surface/70 mb-8 sm:mb-12 max-w-lg leading-relaxed">
-            For millions of years, aquatic species evolved on insect protein.
-            Modern fish food replaced that with cheap soy — and your fish pays
-            the price.
+            {c.body}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
@@ -48,19 +56,19 @@ function TileWhy() {
               the same page, which is what the label promises.
             */}
             <a
-              href="#science"
+              href={c.primaryCta.href}
               className="bg-primary text-on-primary px-8 py-4 font-button text-button uppercase tracking-widest active:scale-95 transition-transform inline-block"
             >
-              EXPLORE THE SCIENCE
+              {c.primaryCta.label}
             </a>
             <a
-              href="#products"
+              href={c.secondaryCta.href}
               className="group flex items-center gap-3 font-button text-button text-on-surface/60 hover:text-primary transition-colors duration-300"
             >
               <span className="w-10 h-10 rounded-full border border-on-surface/20 group-hover:border-primary flex items-center justify-center transition-colors duration-300">
                 <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
               </span>
-              SEE THE FORMULAS
+              {c.secondaryCta.label}
             </a>
           </div>
         </div>
@@ -80,18 +88,15 @@ function TileWhy() {
             >
               <div className="mb-7 flex items-baseline justify-between">
                 <span className="font-label-caps text-[10px] tracking-[0.18em] text-white/40">
-                  DIGESTION EFFICIENCY
+                  {c.panel.eyebrow}
                 </span>
                 <span className="font-label-caps text-[10px] tracking-[0.14em] text-white/25">
-                  PEPSIN, NABL LAB
+                  {c.panel.source}
                 </span>
               </div>
 
               <div className="space-y-7">
-                {[
-                  { label: "ZEWA INSECT PROTEIN", pct: 88, value: "88%", strong: true },
-                  { label: "SOY MEAL", pct: 75, value: "75%", strong: false },
-                ].map((bar) => (
+                {c.panel.bars.map(({ highlight, ...bar }) => ({ ...bar, strong: highlight })).map((bar) => (
                   <div key={bar.label}>
                     <div className="mb-2.5 flex items-baseline justify-between">
                       <span
@@ -123,8 +128,7 @@ function TileWhy() {
               </div>
 
               <p className="mt-8 border-t border-white/8 pt-6 text-[12px] leading-relaxed text-white/35">
-                More of every feeding absorbed as nutrition — and less of it
-                leaving the fish as ammonia.
+                {c.panel.footnote}
               </p>
             </div>
           </div>
@@ -134,24 +138,34 @@ function TileWhy() {
   );
 }
 
-// ── Tile 2: Superior Nutrition Banner ─────────────────────────────────────────
-function TileBanner() {
+// ── Banner slide (CMS: desktop + mobile files, spec #1) ───────────────────────
+function TileBanner({ slide }) {
+  const picture = (
+    <picture className="relative w-full h-full flex items-center justify-center">
+      {/* A genuine art-directed swap, not one cropped image (spec §01). */}
+      <source media="(min-width: 768px)" srcSet={slide.desktop?.url} />
+      <img
+        src={slide.mobile?.url ?? slide.desktop?.url}
+        alt={slide.alt}
+        className="w-full h-full object-cover object-center md:object-contain"
+      />
+    </picture>
+  );
   return (
     <div className="relative w-full h-full bg-[#080e1c] flex items-center justify-center overflow-hidden pb-10 sm:pb-14 md:pb-20">
-      <picture className="relative w-full h-full flex items-center justify-center">
-        <source media="(min-width: 768px)" srcSet="/zewa-hero2-desktop-1920x814-text.jpg" />
-        <img
-          src="/zewa-hero2-mobile-1080x1080-text.jpg"
-          alt="The Ultimate Superior Nutrition For Your Fish"
-          className="w-full h-full object-cover object-center md:object-contain"
-        />
-      </picture>
+      {slide.href ? (
+        <a href={slide.href} className="contents">
+          {picture}
+        </a>
+      ) : (
+        picture
+      )}
     </div>
   );
 }
 
-// ── Tile 3: Brand video ──────────────────────────────────────────────────────
-function TileVideo({ onVideoEnd }) {
+// ── Video slide (CMS: MP4 + optional WebM / mobile encode + poster, spec #2) ──
+function TileVideo({ slide, onVideoEnd }) {
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -172,12 +186,16 @@ function TileVideo({ onVideoEnd }) {
           muted
           playsInline
           preload="metadata"
-          poster="/videos/brand_poster.jpg"
+          poster={slide.poster?.url}
+          aria-label={slide.label || undefined}
           className="absolute inset-0 h-full w-full object-cover"
         >
-          <source src="/videos/brand_video_720.mp4" type="video/mp4" media="(max-width: 767px)" />
-          <source src="/videos/brand_video.webm" type="video/webm" />
-          <source src="/videos/brand_video.mp4" type="video/mp4" />
+          {/* Order matters: the first matching <source> wins. */}
+          {slide.mobileMp4 && (
+            <source src={slide.mobileMp4.url} type="video/mp4" media="(max-width: 767px)" />
+          )}
+          {slide.webm && <source src={slide.webm.url} type="video/webm" />}
+          {slide.mp4 && <source src={slide.mp4.url} type="video/mp4" />}
         </video>
         {/* Soft bottom vignette */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#080e1c]/40 via-transparent to-transparent pointer-events-none" />
@@ -187,9 +205,15 @@ function TileVideo({ onVideoEnd }) {
 }
 
 // ── Main Hero Slider ─────────────────────────────────────────────────────────
-const TILES = ["why", "banner", "video"];
+/** Used only if the published content has no enabled slides. */
+const DEFAULT_SLIDES = [{ id: "statement", type: "statement" }];
 
-export default function Hero() {
+/**
+ * `slides` come from the published website content (CMS → Website → Homepage):
+ * an ordered list of "statement" (the coded tile above), "banner" and "video".
+ */
+export default function Hero({ slides: published, statement }) {
+  const TILES = published?.length ? published : DEFAULT_SLIDES;
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
   const timerRef = useRef(null);
@@ -205,24 +229,25 @@ export default function Hero() {
 
   const next = useCallback(() => {
     goTo((current + 1) % TILES.length);
-  }, [current, goTo]);
+  }, [current, goTo, TILES.length]);
 
   const prev = useCallback(() => {
     goTo((current - 1 + TILES.length) % TILES.length);
-  }, [current, goTo]);
+  }, [current, goTo, TILES.length]);
 
-  // Auto-advance for tiles 0 and 1 (tile 2 advances on video end)
+  // Image and statement slides advance on a timer; a video advances when it ends.
+  const currentSlide = TILES[current] ?? TILES[0];
   useEffect(() => {
     clearTimeout(timerRef.current);
-    if (current !== 2) {
+    if (currentSlide.type !== "video" && TILES.length > 1) {
       timerRef.current = setTimeout(next, SLIDE_DURATION);
     }
     return () => clearTimeout(timerRef.current);
-  }, [current, next]);
+  }, [current, next, currentSlide.type, TILES.length]);
 
   const handleVideoEnd = useCallback(() => {
-    goTo(0); // loop back to tile 1 after video
-  }, [goTo]);
+    next(); // the last slide wraps to the first
+  }, [next]);
 
   /*
    * HEIGHT IS CONTENT-DRIVEN ON MOBILE, viewport-driven from md up.
@@ -250,9 +275,11 @@ export default function Hero() {
           className="relative w-full h-full overflow-hidden transition-opacity duration-[400ms]"
           style={{ opacity: animating ? 0 : 1 }}
         >
-          {current === 0 && <TileWhy />}
-          {current === 1 && <TileBanner />}
-          {current === 2 && <TileVideo onVideoEnd={handleVideoEnd} />}
+          {currentSlide.type === "statement" && <TileWhy copy={statement} />}
+          {currentSlide.type === "banner" && <TileBanner key={currentSlide.id} slide={currentSlide} />}
+          {currentSlide.type === "video" && (
+            <TileVideo key={currentSlide.id} slide={currentSlide} onVideoEnd={handleVideoEnd} />
+          )}
         </div>
 
         {/* Bottom fade + teal accent line separator */}
@@ -293,14 +320,14 @@ export default function Hero() {
         <div className="absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 sm:gap-3">
           {/* Pills */}
           <div className="flex items-center gap-2">
-          {[0, 1, 2].map((i) => {
+          {TILES.length > 1 && TILES.map((slide, i) => {
             const isActive = i === current;
             const isDone = i < current;
-            const isVideo = i === 2;
+            const isVideo = slide.type === "video";
 
             return (
               <button
-                key={i}
+                key={slide.id ?? i}
                 onClick={() => goTo(i)}
                 aria-label={`Go to slide ${i + 1}`}
                 className="group focus:outline-none"

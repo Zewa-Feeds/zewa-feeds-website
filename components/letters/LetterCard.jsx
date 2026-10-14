@@ -7,15 +7,17 @@ export default function LetterCard({ letter }) {
       href={`/letters/${letter.slug}`}
       className="group flex gap-5 rounded-2xl border border-white/8 bg-white/[0.02] p-4 transition-colors duration-200 hover:border-primary/30 sm:p-5"
     >
-      <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl border border-white/8">
-        <Image
-          src={letter.cover.src}
-          alt={letter.cover.alt}
-          fill
-          sizes="96px"
-          className="object-cover object-top"
-        />
-      </div>
+      {letter.cover && (
+        <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl border border-white/8">
+          <Image
+            src={letter.cover.src}
+            alt={letter.cover.alt}
+            fill
+            sizes="96px"
+            className="object-cover object-top"
+          />
+        </div>
+      )}
       <div className="min-w-0">
         <p className="font-body-md text-[10.5px] font-semibold uppercase tracking-[0.2em] text-primary/80">
           {letter.dateLabel}

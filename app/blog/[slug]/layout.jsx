@@ -1,10 +1,16 @@
-import { ARTICLES } from "@/lib/articles";
+import { getArticle } from "@/lib/siteContent";
+import { articleView } from "@/lib/articleView";
+
+async function load(slug) {
+  const result = await getArticle(slug);
+  return result ? articleView(result.data) : null;
+}
 
 const SITE = "https://zewafeeds.com";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const article = ARTICLES.find((a) => a.slug === slug);
+  const article = await load(slug);
 
   if (!article) {
     return {
@@ -23,7 +29,7 @@ export async function generateMetadata({ params }) {
   return {
     title: { absolute: title },
     description,
-    keywords: seo.keywords,
+    keywords: seo.keywords?.length ? seo.keywords : undefined,
     alternates: { canonical: url },
     openGraph: {
       title: seo.ogTitle ?? `${article.title} | Zewa Feeds`,
@@ -31,6 +37,7 @@ export async function generateMetadata({ params }) {
       url,
       type: "article",
       publishedTime: article.isoDate,
+      modifiedTime: article.isoModified,
       authors: [article.author],
       images: article.image
         ? [{ url: article.image, alt: article.imageAlt ?? article.title }]
@@ -63,12 +70,12 @@ function schemaFor(article) {
       description: article.seo?.description ?? article.excerpt,
       image: article.image,
       datePublished: article.isoDate,
-      dateModified: article.isoDate,
+      dateModified: article.isoModified ?? article.isoDate,
       author: { "@type": "Organization", name: article.author, url: SITE },
       publisher: { "@type": "Organization", name: "Zewa Feeds", url: SITE },
       mainEntityOfPage: { "@type": "WebPage", "@id": url },
       articleSection: article.tag,
-      keywords: article.seo?.keywords?.join(", "),
+      keywords: article.seo?.keywords?.length ? article.seo.keywords.join(", ") : undefined,
     },
     {
       "@type": "BreadcrumbList",
@@ -80,7 +87,7 @@ function schemaFor(article) {
     },
   ];
 
-  const faq = article.content?.find((b) => b.type === "faq");
+  const faq = article.blocks?.find((b) => b.type === "faq");
   if (faq) {
     graph.push({
       "@type": "FAQPage",
@@ -97,7 +104,7 @@ function schemaFor(article) {
 
 export default async function ArticleLayout({ children, params }) {
   const { slug } = await params;
-  const article = ARTICLES.find((a) => a.slug === slug);
+  const article = await load(slug);
 
   return (
     <>

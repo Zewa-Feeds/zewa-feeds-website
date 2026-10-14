@@ -1,7 +1,8 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LetterCard from "@/components/letters/LetterCard";
-import { LETTERS_BY_DATE } from "@/lib/letters";
+import ContentVersion from "@/components/ContentVersion";
+import { getSection } from "@/lib/siteContent";
 
 export const metadata = {
   title: "Founder's Letters",
@@ -10,9 +11,12 @@ export const metadata = {
   alternates: { canonical: "/letters" },
 };
 
-export default function LettersPage() {
+/** Letters are CMS content (Website → Letters), newest first. */
+export default async function LettersPage() {
+  const letters = await getSection("letters");
   return (
     <>
+      <ContentVersion version={letters.version} />
       <Header />
       <main className="min-h-screen bg-[#05070d] pb-24 pt-28 text-[#dde2f6] sm:pt-32">
         <div className="mx-auto max-w-[1080px] px-6 sm:px-10">
@@ -30,7 +34,7 @@ export default function LettersPage() {
           </p>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2">
-            {LETTERS_BY_DATE.map((l) => (
+            {letters.data.map((l) => (
               <LetterCard key={l.slug} letter={l} />
             ))}
           </div>

@@ -1,11 +1,11 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ARTICLES } from "@/lib/articles";
-import { ArticleCard } from "@/app/blog/page";
+import ArticleCard from "@/components/blog/ArticleCard";
+import ContentVersion from "@/components/ContentVersion";
+import { getArticle, getArticleIndex, versionOf } from "@/lib/siteContent";
+import { articleView, relatedFor } from "@/lib/articleView";
 import {
   Callout,
   ComparisonTable,
@@ -98,7 +98,7 @@ function renderBlock(block, i, tagColor) {
           <div className="relative overflow-hidden rounded-2xl border border-white/8"
             style={{ aspectRatio: block.aspect ?? "16 / 9" }}>
             <Image
-              src={block.src}
+              src={block.src ?? block.asset?.url}
               alt={block.alt}
               fill
               sizes="(max-width: 900px) 100vw, 860px"
@@ -157,31 +157,33 @@ function renderBlock(block, i, tagColor) {
   }
 }
 
-export default function ArticlePage() {
-  const { slug } = useParams();
-  const article = ARTICLES.find((a) => a.slug === slug);
+/**
+ * Pre-render every published article at build time. A slug published later is
+ * rendered on its first request and then cached like the rest
+ * (dynamicParams defaults to true); one unpublished later 404s once its page
+ * is regenerated.
+ */
+export async function generateStaticParams() {
+  const index = await getArticleIndex();
+  return index.data.map((a) => ({ slug: a.slug }));
+}
 
-  if (!article) {
-    return (
-      <>
-        <Header />
-        <main className="bg-[#05070d] min-h-screen flex flex-col items-center justify-center gap-4">
-          <p className="font-[Playfair_Display] text-[32px] text-white/40">Article not found.</p>
-          <a href="/blog" className="text-[12px] text-primary font-[Montserrat] tracking-widest uppercase hover:underline">
-            ← Back to Knowledge Hub
-          </a>
-        </main>
-        <Footer />
-      </>
-    );
-  }
+export default async function ArticlePage({ params }) {
+  const { slug } = await params;
+  const [result, index] = await Promise.all([getArticle(slug), getArticleIndex()]);
+  if (!result) notFound();
+  return <ArticleView result={result} index={index} />;
+}
 
-  const related = ARTICLES.filter((a) => a.slug !== slug).slice(0, 2);
+/** The page body; /preview/blog/[slug] renders it with a draft article. */
+export function ArticleView({ result, index }) {
+  const article = articleView(result.data);
+  const related = relatedFor(result.data, index.data, 2).map(articleView);
   const hasToc = article.toc?.length > 0;
-
 
   return (
     <>
+      <ContentVersion version={versionOf(result, index)} />
       {article.toc?.length > 0 && (
         <ReadingProgress targetId="article-body" accent={article.tagColor} />
       )}
@@ -316,7 +318,13 @@ export default function ArticlePage() {
 
             {/* Content blocks */}
             <article id="article-body">
-              {article.content.map((block, i) => renderBlock(block, i, article.tagColor))}
+              {article.blocks?.length > 0
+                ? article.blocks.map((block, i) => renderBlock(block, i, article.tagColor))
+                : article.bodyHtml && (
+                    // Articles from the old rich-text editor. Sanitised on save
+                    // against the allowlist .prose-zewa styles.
+                    <div className="prose-zewa" dangerouslySetInnerHTML={{ __html: article.bodyHtml }} />
+                  )}
             </article>
 
             {/* End divider */}
@@ -346,7 +354,7 @@ export default function ArticlePage() {
             {/* Tags row */}
             <div className="flex items-center gap-3 mt-8 flex-wrap">
               <span className="text-[10px] text-white/20 font-[Montserrat] tracking-widest uppercase">Tags</span>
-              {[article.tag, "Zewa Research", "Aquatic Nutrition"].map((t) => (
+              {[...new Set([article.tag, ...(article.tags ?? []), "Zewa Research", "Aquatic Nutrition"])].map((t) => (
                 <span key={t} className="text-[10px] font-bold px-3 py-1 rounded-full font-[Montserrat] tracking-wide border border-white/8 text-white/28">
                   {t}
                 </span>

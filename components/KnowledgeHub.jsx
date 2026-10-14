@@ -3,22 +3,13 @@
 import { useState } from "react";
 import Image from "next/image";
 import Reveal from "./Reveal";
-import { ARTICLES as ALL_ARTICLES } from "@/lib/articles";
 
 /*
- * Read from the real article source rather than a hand-kept copy.
- *
- * This list used to be duplicated here, and it drifted: it still pointed at
- * "microbiome-health-insect-chitin" after that article was re-slugged, so the
- * homepage linked to a 404. Deriving it means the two can no longer disagree.
- *
- * Ordered newest first and capped at three — this is a teaser, not the index.
+ * Articles come from the published website content (server-fetched by the
+ * homepage), already in the order to show: the editor's pinned picks, then the
+ * newest. This is a teaser, not the index — capped at three upstream.
  */
-const ARTICLES = [...ALL_ARTICLES]
-  .sort((a, b) => (a.isoDate < b.isoDate ? 1 : -1))
-  .slice(0, 3);
-
-export default function KnowledgeHub() {
+export default function KnowledgeHub({ articles: ARTICLES = [] }) {
   // Default to the first article's imagery so the section is always visually rich
   const [hoveredArticle, setHoveredArticle] = useState(ARTICLES[0]?.slug);
 
