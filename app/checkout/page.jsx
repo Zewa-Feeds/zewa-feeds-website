@@ -327,7 +327,16 @@ export default function CheckoutPage() {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, isAuthenticated, customer]);
+    /*
+     * Keyed on the customer's ID, not the object. A full page load shows the
+     * cached profile at once, then /account/me (9-13s) replaces it with an
+     * equal but new object. Depending on the object re-ran this effect at that
+     * moment: the cleanup cancelled the address fetch still in flight and the
+     * re-run stopped at `prefilled`, so the saved addresses were thrown away
+     * and the customer typed their address on every order.
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, isAuthenticated, customer?.id]);
 
   /**
    * Apply a picked address to the form.
@@ -807,7 +816,14 @@ export default function CheckoutPage() {
        * server-side. This is a request, not an instruction, and the guard
        * below refuses to submit while the displayed quote does not match it.
        */
-      const codesToSend = couponCodes ?? [];
+      /*
+       * Only codes the displayed quote APPLIED. A remembered code the server
+       * refuses for now (first-order-only, below its minimum) stays on the cart
+       * for later, but asking place() for it is a 409 — refusing an order whose
+       * total, shown without that code, the customer has already agreed to.
+       */
+      const appliedCodes = new Set((coupons ?? []).map((c) => c.code));
+      const codesToSend = (couponCodes ?? []).filter((c) => appliedCodes.has(c));
 
       /*
        * Cart-level problems (out of stock, an unbuyable line) must stop the

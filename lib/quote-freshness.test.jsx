@@ -142,4 +142,25 @@ describe("quote freshness after a refused coupon", () => {
     await waitFor(() => expect(result.current.pricesPending).toBe(false));
     expect(result.current.totalPaise).not.toBeNull();
   });
+
+  it("settles pricesPending for a remembered code the server now refuses", async () => {
+    // A returning shopper: ZEWA1 is still remembered, but they have ordered since.
+    window.localStorage.setItem("zewa_applied_coupons", JSON.stringify(["ZEWA1"]));
+    validate.mockResolvedValue(
+      quote({
+        issues: [
+          {
+            sku: "__coupon__",
+            code: "COUPON_FIRST_ORDER_ONLY",
+            couponCode: "ZEWA1",
+            message: "ZEWA1 is for first orders only.",
+          },
+        ],
+      }),
+    );
+    const { result } = await setupCart();
+
+    expect(result.current.couponCodes).toContain("ZEWA1");
+    expect(result.current.pricesPending).toBe(false);
+  });
 });
