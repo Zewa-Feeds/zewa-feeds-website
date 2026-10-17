@@ -1485,14 +1485,14 @@ export default function CheckoutPage() {
             {/*
               LEFT COLUMN: Contact, Shipping, Payment.
 
-              Ordered SECOND on mobile. The summary carries the discount box and
-              the advertised offers, and on a phone it used to sit after this
-              entire form — below the in-form pay button, and below a sticky pay
-              bar that lets someone check out without ever scrolling that far.
-              The offers were therefore past the point of purchase. On desktop
-              the two-column layout is unchanged.
+              FIRST on mobile, with the order summary after it (a product
+              decision, Oct 2026: details first, review last). The advertised
+              offers still show near the top on a phone — OrderSummaryCard keeps
+              a mobile-only copy outside its accordion — but the coupon box and
+              Seeds panel are now below the form. On desktop the two-column
+              layout is unchanged.
             */}
-            <form onSubmit={handleSubmit} className="order-2 lg:order-none flex flex-col gap-8 lg:col-span-7">
+            <form onSubmit={handleSubmit} className="order-1 lg:order-none flex flex-col gap-8 lg:col-span-7">
               {/* SECTION 1: CONTACT INFORMATION */}
               <div className={`flex flex-col gap-5 ${CARD} ${CARD_PAD}`}>
                 <div className={CARD_HEADER}>
@@ -1840,8 +1840,8 @@ export default function CheckoutPage() {
               </div>
             </form>
 
-            {/* RIGHT COLUMN: STICKY ORDER SUMMARY — first on mobile, see above. */}
-            <div className="order-1 lg:order-none lg:sticky lg:top-28 lg:col-span-5 flex flex-col gap-6">
+            {/* RIGHT COLUMN: STICKY ORDER SUMMARY — last on mobile, see above. */}
+            <div className="order-2 lg:order-none lg:sticky lg:top-28 lg:col-span-5 flex flex-col gap-6">
               <OrderSummaryCard
                 items={items}
                 issues={issues}

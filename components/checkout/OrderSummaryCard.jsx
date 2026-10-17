@@ -51,7 +51,9 @@ export default function OrderSummaryCard({
   /** Paise taken off by coins, shown as its own line (§10.2). */
   coinDiscountPaise = 0,
 }) {
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  // Open by default: on a phone the summary is the last thing before paying,
+  // so it should show the order, not a collapsed bar.
+  const [isMobileOpen, setIsMobileOpen] = useState(true);
   const [couponApplying, setCouponApplying] = useState(false);
 
   const handleCouponSubmit = async (e) => {
