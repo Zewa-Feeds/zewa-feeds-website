@@ -205,54 +205,74 @@ export function ArticleView({ result, index }) {
       <main className="bg-[#05070d] text-[#dde2f6] min-h-screen">
 
         {/* ── HERO ─────────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden pt-20">
-          {/* Tag-colour glow behind the cover */}
-          <div className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(ellipse 60% 45% at 50% 30%, ${article.tagColor}12, transparent 70%)` }} />
+        {/*
+          Two layouts, one markup.
 
-          {/* Breadcrumb */}
-          <div className="relative z-10 max-w-[860px] mx-auto w-full px-6 sm:px-10 pt-6 sm:pt-10">
+          Desktop (lg+): the cover fills the hero and the text sits in a left
+          column over a dark fade. Covers are drawn with their subject on the
+          right and open space on the left, so text and subject each get a side;
+          the column is capped so a long headline wraps before it reaches the
+          picture. (The first version laid a centred, full-width title across
+          the middle of the cover and ran it through a labelled diagram.)
+
+          Below lg: there is no room for two sides, so the cover is a band of
+          its own and the text follows it.
+        */}
+        <section className="relative overflow-hidden pt-20">
+          {/*
+            Desktop cover: the right ~64% of the hero, feathered into the page on
+            its left edge. Not full-bleed — covers whose subject is centred (the
+            clownfish, the product bag) would otherwise sit under the headline.
+            Anchored right, so on narrower screens the crop comes off the left,
+            which the feathering hides, never off a label at the right edge.
+          */}
+          <div className="absolute inset-y-0 right-0 w-[64%] hidden lg:block"
+            style={{ WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 36%)", maskImage: "linear-gradient(to right, transparent 0%, black 36%)" }}>
+            <Image
+              src={article.image}
+              alt=""
+              fill
+              sizes="64vw"
+              className="object-cover object-right"
+              priority
+            />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(5,7,13,0.5) 0%, rgba(5,7,13,0) 20%, rgba(5,7,13,0) 75%, rgba(5,7,13,1) 100%)" }} />
+          </div>
+          {/* Keeps whatever sits behind the text column (the product bag) from reading through it. */}
+          <div className="pointer-events-none absolute inset-0 hidden lg:block" style={{ background: "linear-gradient(to right, rgba(5,7,13,0.85) 0%, rgba(5,7,13,0.85) 36%, rgba(5,7,13,0) 52%)" }} />
+          <div className="pointer-events-none absolute inset-0 hidden lg:block" style={{ background: `radial-gradient(ellipse 35% 55% at 12% 55%, ${article.tagColor}12, transparent 70%)` }} />
+
+          <div className="relative z-10 w-full max-w-[1280px] mx-auto px-6 sm:px-10 lg:px-16 pt-6 sm:pt-10 pb-8 sm:pb-12 lg:pb-16 lg:min-h-[580px] flex flex-col">
+            {/* Breadcrumb */}
             <a href="/blog"
-              className="inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase font-[Montserrat] text-white/30 hover:text-white/60 transition-colors duration-200 mb-4 sm:mb-6">
+              className="self-start inline-flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase font-[Montserrat] text-white/40 hover:text-white/70 transition-colors duration-200 mb-5 lg:mb-0">
               <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
                 <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               Knowledge Hub
             </a>
-          </div>
 
-          {/*
-            The cover gets its own band. It used to fill the whole hero with the
-            title laid over it, so a cover with detail in the middle — labelled
-            diagrams especially — ran its labels through the headline. The band
-            is full-bleed and only fades at its bottom edge; the title starts
-            below it. Covers are composed with the subject centred vertically,
-            so the fixed height crops only empty sky above and below.
-          */}
-          <div className="relative z-10 w-full aspect-[16/10] sm:aspect-auto sm:h-[420px] lg:h-[520px]">
-            {/* Optional portrait cover for phones; its subject sits at the top. */}
-            {article.imageMobile && (
+            {/* Phone/tablet cover band */}
+            <div className="lg:hidden relative -mx-6 sm:-mx-10 mb-6 sm:mb-8 aspect-[4/3] sm:aspect-[16/8]">
+              {/*
+                The landscape cover, anchored right where the subject sits.
+                `imageMobile` is not used here: it was a tall portrait composed to
+                sit behind the old overlaid title, and in this band it shrinks
+                the subject to a sliver.
+              */}
               <Image
-                src={article.imageMobile}
+                src={article.image}
                 alt={article.title}
                 fill
                 sizes="100vw"
-                className="object-cover object-top sm:hidden"
+                className="object-cover object-right"
                 priority
               />
-            )}
-            <Image
-              src={article.image}
-              alt={article.title}
-              fill
-              sizes="100vw"
-              className={`object-cover ${article.imageMobile ? "hidden sm:block" : ""}`}
-              priority
-            />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(5,7,13,0.25) 0%, transparent 25%, transparent 70%, rgba(5,7,13,1) 100%)" }} />
-          </div>
+              <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 65%, rgba(5,7,13,1) 100%)" }} />
+            </div>
 
-          {/* Title block */}
-          <div className="relative z-10 w-full max-w-[860px] mx-auto px-6 sm:px-10 pt-6 pb-8 sm:pt-8 sm:pb-12">
+            {/* Title block */}
+            <div className="lg:my-auto lg:pt-10 lg:max-w-[520px] xl:max-w-[560px]">
             {/* Tag + meta row */}
             <div className="flex flex-wrap items-center gap-3 mb-7">
               <span className="text-[9px] font-bold px-3 py-1.5 rounded-full tracking-[0.2em] font-[Montserrat] border backdrop-blur-sm"
@@ -265,10 +285,10 @@ export function ArticleView({ result, index }) {
             </div>
 
             <h1 className="font-[Playfair_Display] text-white leading-[1.1] mb-5"
-              style={{ fontSize: "clamp(28px, 4.5vw, 52px)" }}>
+              style={{ fontSize: "clamp(28px, 3.6vw, 48px)" }}>
               {article.title}
             </h1>
-            <p className="text-[14px] sm:text-[15px] text-white/42 font-[Montserrat] leading-relaxed max-w-[580px]">
+            <p className="text-[14px] sm:text-[15px] text-white/55 font-[Montserrat] leading-relaxed max-w-[580px]">
               {article.excerpt}
             </p>
 
@@ -297,6 +317,7 @@ export function ArticleView({ result, index }) {
                   </div>
                 </>
               )}
+            </div>
             </div>
           </div>
         </section>
