@@ -285,24 +285,6 @@ export function CartProvider({ children }) {
         if (seq !== requestSeq.current) return result;
 
         setQuote(result);
-        /*
-         * Sign the quote with the codes the server ACTUALLY APPLIED, not the
-         * ones we asked for.
-         *
-         * A refused code is pruned from `couponCodes` a moment later, so the
-         * live signature will never contain it. Signing with the REQUESTED list
-         * therefore left `quoteSignature` permanently ahead of `signature`,
-         * `quoteIsCurrent` false, and `pricesPending` stuck true — checkout sat
-         * on "Validating prices..." with the total rendered as a dash, and no
-         * shopper action could clear it because the cart was already settled.
-         *
-         * The quote genuinely describes a cart with only the accepted codes on
-         * it; that is what the server priced. Recording that is both honest and
-         * what makes the two signatures converge.
-         */
-        setQuoteSignature(
-          cartSignature(pricedItems, (result?.coupons ?? []).map((c) => c.code)),
-        );
         dispatch({ type: "RECONCILE", lines: result.lines });
 
         /*
@@ -328,6 +310,26 @@ export function CartProvider({ children }) {
             couponCodesRef.current.filter((c) => !unknown.includes(c)),
           );
         }
+
+        /*
+         * Sign with the codes the cart will HOLD once this response settles:
+         * the ones applied, plus the ones refused for a changeable reason that
+         * were already on the cart and are deliberately kept (above).
+         *
+         * Signing with the applied codes alone stuck checkout on "—" for any
+         * returning shopper whose remembered code no longer qualified — ZEWA1
+         * after a first order, FREESHIPPING below its minimum. That code stays
+         * in `couponCodes`, so the live signature kept it while the quote's
+         * signature did not, and the two never matched again. A code refused on
+         * its first application is never committed, so it is left out here too.
+         */
+        const applied = (result?.coupons ?? []).map((c) => c.code);
+        const kept = codes.filter(
+          (c) =>
+            applied.includes(c) ||
+            (couponCodesRef.current.includes(c) && !unknown.includes(c)),
+        );
+        setQuoteSignature(cartSignature(pricedItems, kept));
 
         return result;
       } catch {

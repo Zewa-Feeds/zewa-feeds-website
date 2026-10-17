@@ -370,4 +370,25 @@ describe("Address-Aware Shipping Checkout Flow", () => {
     expect(screen.getByDisplayValue("Typed Street 1")).toBeTruthy();
     expect(screen.queryByDisplayValue("Mulakkal House")).toBeNull();
   });
+
+  it("keeps the saved address when the profile refresh lands before the address book", async () => {
+    const cached = { id: "cust-9", firstName: "Nik", lastName: "Mulakkal", email: "nik@example.com" };
+    mockAuthState = { customer: cached, isAuthenticated: true, isLoading: false };
+    let answer;
+    addressesMock.mockReturnValue(new Promise((r) => { answer = r; }));
+    validateMock.mockResolvedValue({ lines: [], subtotalPaise: 30000, totalPaise: 30000 });
+
+    const { rerender } = render(<CheckoutPage />);
+    await screen.findByDisplayValue("Nik");
+
+    // /account/me answers first: same customer, new object.
+    mockAuthState = { customer: { ...cached }, isAuthenticated: true, isLoading: false };
+    rerender(<CheckoutPage />);
+
+    await act(async () => {
+      answer([{ id: "a1", name: "Nik Mulakkal", line1: "Mulakkal House", city: "Palakkad", state: "Kerala", pincode: "679303", isDefault: true }]);
+    });
+
+    expect(await screen.findByDisplayValue("Mulakkal House")).toBeTruthy();
+  });
 });
