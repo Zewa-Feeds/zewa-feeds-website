@@ -118,6 +118,20 @@ function renderBlock(block, i, tagColor) {
           {withLinks(block.text, block.links, tagColor)}
         </p>
       );
+    case "list": {
+      // A plain list in the prose column — same type and colour as a paragraph.
+      const List = block.ordered ? "ol" : "ul";
+      return (
+        <List
+          key={i}
+          className={`mb-6 space-y-2 pl-6 text-[14.5px] text-white/55 font-[Montserrat] leading-[1.75] ${block.ordered ? "list-decimal" : "list-disc"}`}
+        >
+          {block.items.map((item, j) => (
+            <li key={j} className="marker:text-white/30">{item}</li>
+          ))}
+        </List>
+      );
+    }
     case "pullquote":
       return (
         <blockquote key={i} className="relative my-9 pl-7 border-l-[3px]" style={{ borderColor: tagColor }}>
