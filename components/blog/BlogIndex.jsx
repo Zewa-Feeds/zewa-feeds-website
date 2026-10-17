@@ -90,14 +90,13 @@ export default function BlogIndex({ articles: ARTICLES, featuredSlug, topics }) 
         </div>
 
         {/* ── CONTENT ──────────────────────────────────────────────── */}
-        <section className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-20 py-16 sm:py-24">
+        <section className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-20 pt-8 pb-16 sm:pt-12 sm:pb-24">
 
           {activeTopic === "All" && featured ? (
             <>
               {/* ── FEATURED HERO CARD ─── */}
               <a href={`/blog/${featured.slug}`}
-                className="group block relative overflow-hidden rounded-[28px] mb-5 cursor-pointer"
-                style={{ height: "560px" }}>
+                className="group flex flex-col justify-center relative overflow-hidden rounded-[28px] mb-5 cursor-pointer min-h-[420px] sm:min-h-[480px]">
 
                 {/* Image — must be inside a positioned container with explicit height */}
                 <Image
@@ -120,10 +119,14 @@ export default function BlogIndex({ articles: ARTICLES, featuredSlug, topics }) 
                   </span>
                 </div>
 
-                {/* Content */}
-                <div className="absolute inset-0 z-10 flex flex-col justify-between p-8 sm:p-12 lg:p-16">
-                  {/* Top row: tag + readtime */}
-                  <div className="flex items-center gap-3">
+                {/*
+                  Content, in flow and centred as one group. Tag and title used to
+                  be pinned to opposite corners of a fixed 560px card, leaving a
+                  band of empty space between them.
+                */}
+                <div className="relative z-10 flex flex-col p-8 sm:p-12 lg:p-16">
+                  {/* Tag + readtime */}
+                  <div className="flex items-center gap-3 mb-6">
                     <span className="text-[9px] font-bold px-3 py-1.5 rounded-full tracking-[0.2em] font-[Montserrat] border backdrop-blur-sm"
                       style={{ color: featured.tagColor, borderColor: `${featured.tagColor}40`, background: featured.tagBg }}>
                       {featured.tag}
@@ -131,7 +134,7 @@ export default function BlogIndex({ articles: ARTICLES, featuredSlug, topics }) 
                     <span className="text-[10px] text-white/30 font-[Montserrat]">{featured.readTime} read</span>
                   </div>
 
-                  {/* Bottom: title + excerpt + cta */}
+                  {/* Title + excerpt + cta */}
                   <div className="max-w-[620px]">
                     <h2 className="font-[Playfair_Display] text-white leading-[1.08] mb-4 transition-colors duration-500 group-hover:text-primary"
                       style={{ fontSize: "clamp(26px, 3.5vw, 50px)" }}>
