@@ -1483,7 +1483,8 @@ export default function CheckoutPage() {
           {/* 2-COLUMN GRID LAYOUT (Left: 7 cols, Right: 5 cols) */}
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
             {/*
-              LEFT COLUMN: Contact, Shipping, Payment.
+              LEFT COLUMN: Contact, Delivery address, Order notes. (Payment
+              method moved to the right, beside the total — Oct 2026.)
 
               FIRST on mobile, with the order summary after it (a product
               decision, Oct 2026: details first, review last). The advertised
@@ -1492,7 +1493,7 @@ export default function CheckoutPage() {
               Seeds panel are now below the form. On desktop the two-column
               layout is unchanged.
             */}
-            <form onSubmit={handleSubmit} className="order-1 lg:order-none flex flex-col gap-8 lg:col-span-7">
+            <form id="checkout-form" onSubmit={handleSubmit} className="order-1 lg:order-none flex flex-col gap-8 lg:col-span-7">
               {/* SECTION 1: CONTACT INFORMATION */}
               <div className={`flex flex-col gap-5 ${CARD} ${CARD_PAD}`}>
                 <div className={CARD_HEADER}>
@@ -1753,6 +1754,77 @@ export default function CheckoutPage() {
                 )}
               </div>
 
+              {/* SECTION 4: ORDER NOTES (OPTIONAL) */}
+              <div className={`flex flex-col gap-3 ${CARD} ${CARD_PAD}`}>
+                <h3 className="font-[Playfair_Display] text-[18px] font-bold text-white flex items-center justify-between">
+                  <span>Order Notes</span>
+                  <span className="text-[12px] font-normal text-white/30 font-[Montserrat]">(optional)</span>
+                </h3>
+                <textarea
+                  value={form.notes}
+                  onChange={handleChange("notes")}
+                  rows={2}
+                  maxLength={1000}
+                  placeholder="Delivery instructions, gate code, call before arrival..."
+                  className="w-full resize-none rounded-2xl border border-white/10 bg-[#090f1d] px-4 py-3 text-[14px] text-white placeholder-white/20 font-[Montserrat] transition-all duration-200 focus:border-primary/50 focus:bg-[#0f192b] focus:outline-none"
+                />
+              </div>
+
+            </form>
+
+            {/*
+              RIGHT COLUMN: order summary, then payment method and the pay
+              button — the choice of how to pay sits beside the total it pays.
+              Last on mobile, see above.
+
+              Not sticky any more: with payment in it the column is taller than
+              a screen, and a sticky column that tall pins its top and hides its
+              bottom — the pay button — until the page runs out. The submit
+              button is outside the <form>, so it names it with `form=`.
+            */}
+            <div className="order-2 lg:order-none lg:col-span-5 flex flex-col gap-6">
+              <OrderSummaryCard
+                items={items}
+                issues={issues}
+                subtotalPaise={subtotalPaise}
+                discountPaise={discountPaise}
+                shippingPaise={shippingPaise}
+                totalPaise={payableTotalPaise}
+                amountToFreeShippingPaise={amountToFreeShippingPaise}
+                coupon={coupon}
+                coupons={coupons}
+                freeShippingFromCoupon={freeShippingFromCoupon}
+                availableOffers={availableOffers}
+                appliedCodes={(coupons ?? []).map((c) => c.code)}
+                selectedCodes={couponCodes ?? []}
+                couponInput={couponInput}
+                onCouponInputChange={setCouponInput}
+                couponError={couponError}
+                couponSuccess={couponSuccess}
+                onSubmitCoupon={submitCoupon}
+                onRemoveCoupon={dropCoupon}
+                paymentMethod={paymentMethod}
+                config={config}
+                validating={validating}
+                stateSelected={Boolean(form.state && form.state.trim())}
+                deliveryText={quote?.deliveryText}
+                deliveryNote={quote?.deliveryNote}
+                chargeableWeightKg={quote?.chargeableWeightKg}
+                setQty={setQty}
+                removeFromCart={removeFromCart}
+                coinsSlot={
+                  <CoinsPanel
+                    quote={coins.quote}
+                    applied={coins.applied}
+                    onApply={coins.apply}
+                    onRemove={coins.remove}
+                    busy={coins.busy}
+                    notice={coins.notice}
+                  />
+                }
+                coinDiscountPaise={coins.discountPaise}
+              />
+
               {/* SECTION 3: PAYMENT METHOD */}
               <div className={`flex flex-col gap-5 ${CARD} ${CARD_PAD}`}>
                 <div className={CARD_HEADER}>
@@ -1772,26 +1844,11 @@ export default function CheckoutPage() {
                 />
               </div>
 
-              {/* SECTION 4: ORDER NOTES (OPTIONAL) */}
-              <div className={`flex flex-col gap-3 ${CARD} ${CARD_PAD}`}>
-                <h3 className="font-[Playfair_Display] text-[18px] font-bold text-white flex items-center justify-between">
-                  <span>Order Notes</span>
-                  <span className="text-[12px] font-normal text-white/30 font-[Montserrat]">(optional)</span>
-                </h3>
-                <textarea
-                  value={form.notes}
-                  onChange={handleChange("notes")}
-                  rows={2}
-                  maxLength={1000}
-                  placeholder="Delivery instructions, gate code, call before arrival..."
-                  className="w-full resize-none rounded-2xl border border-white/10 bg-[#090f1d] px-4 py-3 text-[14px] text-white placeholder-white/20 font-[Montserrat] transition-all duration-200 focus:border-primary/50 focus:bg-[#0f192b] focus:outline-none"
-                />
-              </div>
-
               {/* MAIN DESKTOP SUBMIT CTA BUTTON */}
               <div className="flex flex-col gap-3">
                 <button
                   type="submit"
+                  form="checkout-form"
                   disabled={validating || isSubmittingPayment || pricesPending || coins.busy || !fulfillable || totalPaise === null}
                   aria-busy={validating || isSubmittingPayment}
                   className={`group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl bg-primary py-4 text-[13px] font-bold uppercase tracking-[0.2em] text-[#00382d] font-[Montserrat] shadow-[0_4px_28px_rgba(68,229,194,0.35)] sm:py-5 ${EASE} hover:bg-primary/90 hover:shadow-[0_6px_34px_rgba(68,229,194,0.45)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none disabled:hover:bg-primary ${FOCUS_RING}`}
@@ -1838,51 +1895,6 @@ export default function CheckoutPage() {
                 </button>
 
               </div>
-            </form>
-
-            {/* RIGHT COLUMN: STICKY ORDER SUMMARY — last on mobile, see above. */}
-            <div className="order-2 lg:order-none lg:sticky lg:top-28 lg:col-span-5 flex flex-col gap-6">
-              <OrderSummaryCard
-                items={items}
-                issues={issues}
-                subtotalPaise={subtotalPaise}
-                discountPaise={discountPaise}
-                shippingPaise={shippingPaise}
-                totalPaise={payableTotalPaise}
-                amountToFreeShippingPaise={amountToFreeShippingPaise}
-                coupon={coupon}
-                coupons={coupons}
-                freeShippingFromCoupon={freeShippingFromCoupon}
-                availableOffers={availableOffers}
-                appliedCodes={(coupons ?? []).map((c) => c.code)}
-                selectedCodes={couponCodes ?? []}
-                couponInput={couponInput}
-                onCouponInputChange={setCouponInput}
-                couponError={couponError}
-                couponSuccess={couponSuccess}
-                onSubmitCoupon={submitCoupon}
-                onRemoveCoupon={dropCoupon}
-                paymentMethod={paymentMethod}
-                config={config}
-                validating={validating}
-                stateSelected={Boolean(form.state && form.state.trim())}
-                deliveryText={quote?.deliveryText}
-                deliveryNote={quote?.deliveryNote}
-                chargeableWeightKg={quote?.chargeableWeightKg}
-                setQty={setQty}
-                removeFromCart={removeFromCart}
-                coinsSlot={
-                  <CoinsPanel
-                    quote={coins.quote}
-                    applied={coins.applied}
-                    onApply={coins.apply}
-                    onRemove={coins.remove}
-                    busy={coins.busy}
-                    notice={coins.notice}
-                  />
-                }
-                coinDiscountPaise={coins.discountPaise}
-              />
             </div>
           </div>
         </div>
