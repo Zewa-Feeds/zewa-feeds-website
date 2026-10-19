@@ -97,6 +97,7 @@ const nav = {
     { label: "Zewa Seeds – The Loyalty Program", href: "/zewa-seeds-terms" },
     { label: "Download Catalogue", href: "/zewa-product-catalogue.pdf", download: "Zewa-Product-Catalogue.pdf", target: "_blank" },
     { label: "About Us", href: "/about" },
+    { label: "Founder's Letters", href: "/letters" },
   ],
 };
 
