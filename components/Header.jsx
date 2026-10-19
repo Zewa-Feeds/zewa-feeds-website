@@ -74,12 +74,6 @@ export default function Header() {
             className="h-[46px] sm:h-[58px] md:h-[72px] w-auto object-contain brightness-0 invert"
             priority
           />
-          <span
-            title="This site is still being tested. Orders are live, but you may hit rough edges."
-            className="rounded-full border border-[#d4793a]/40 bg-[#d4793a]/12 px-1.5 sm:px-2 py-[2px] sm:py-[3px] text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.14em] text-[#d4793a]"
-          >
-            Beta
-          </span>
         </Link>
 
         {/* Nav */}
