@@ -7,6 +7,22 @@ import Script from "next/script";
 export const TIDIO_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_TIDIO_PUBLIC_KEY || "bskymfizgyuqcwn3wpsiffd7i4zrhwrn";
 
+/**
+ * The launcher's colour. Tidio's own default is black, which disappears on the
+ * site's near-black background; this is the site's primary teal, the colour of
+ * every other call to action. Set through Tidio's API because the widget lives
+ * in an iframe that page CSS cannot reach.
+ */
+export const TIDIO_BRAND_COLOR = "#44e5c2";
+
+function applyBrandColor() {
+  try {
+    window.tidioChatApi?.setColorPalette?.(TIDIO_BRAND_COLOR);
+  } catch {
+    /* ignore — an older widget without the API keeps its dashboard colour */
+  }
+}
+
 export default function TidioChat() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -68,6 +84,7 @@ export default function TidioChat() {
 
   // Hook into Tidio's ready event to apply initial visibility state
   const handleTidioReady = () => {
+    applyBrandColor();
     try {
       if (visible) {
         window.tidioChatApi?.show?.();
@@ -83,6 +100,7 @@ export default function TidioChat() {
 
   useEffect(() => {
     const onTidioReady = () => handleTidioReady();
+    applyBrandColor();
     document.addEventListener("tidioChatReady", onTidioReady);
     if (typeof window !== "undefined" && window.tidioChatApi) {
       try {
