@@ -90,13 +90,13 @@ export default function BlogIndex({ articles: ARTICLES, featuredSlug, topics }) 
         </div>
 
         {/* ── CONTENT ──────────────────────────────────────────────── */}
-        <section className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-20 pt-8 pb-16 sm:pt-12 sm:pb-24">
+        <section className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-20 pt-4 pb-16 sm:pb-24">
 
           {activeTopic === "All" && featured ? (
             <>
               {/* ── FEATURED HERO CARD ─── */}
               <a href={`/blog/${featured.slug}`}
-                className="group flex flex-col justify-center relative overflow-hidden rounded-[28px] mb-5 cursor-pointer min-h-[420px] sm:min-h-[480px]">
+                className="group flex flex-col justify-center relative overflow-hidden rounded-[28px] mb-5 cursor-pointer min-h-[380px] lg:min-h-[420px]">
 
                 {/* Image — must be inside a positioned container with explicit height */}
                 <Image
@@ -124,7 +124,7 @@ export default function BlogIndex({ articles: ARTICLES, featuredSlug, topics }) 
                   be pinned to opposite corners of a fixed 560px card, leaving a
                   band of empty space between them.
                 */}
-                <div className="relative z-10 flex flex-col p-8 sm:p-12 lg:p-16">
+                <div className="relative z-10 flex flex-col px-7 py-7 sm:px-10 sm:py-9 lg:px-12 lg:py-10">
                   {/* Tag + readtime */}
                   <div className="flex items-center gap-3 mb-6">
                     <span className="text-[9px] font-bold px-3 py-1.5 rounded-full tracking-[0.2em] font-[Montserrat] border backdrop-blur-sm"

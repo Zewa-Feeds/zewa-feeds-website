@@ -112,8 +112,18 @@ export default function TidioChat() {
         strategy="afterInteractive"
         onReady={handleTidioReady}
       />
-      {/* Safely hide Tidio container only when on hero section to prevent blocking screen clicks */}
-      {!visible && (
+      {/*
+        Hide Tidio while the hero is on screen — but ONLY once mounted.
+
+        Rendered on the server, this <style> lands directly in <body>. When the
+        home page hits a hydration mismatch, React 19 re-renders on the client
+        and leaves unrecognised <body> children alone (it tolerates nodes that
+        extensions inject there) — so the server's copy was orphaned, and kept
+        Tidio hidden on the home page forever, however far the visitor
+        scrolled. Rendering it client-side only means there is no server copy to
+        orphan.
+      */}
+      {mounted && !visible && (
         <style>{`
           #tidio-chat, #tidio-chat-iframe {
             display: none !important;
