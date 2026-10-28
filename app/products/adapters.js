@@ -340,6 +340,9 @@ export const CANONICAL_NUTRIENTS = [
   },
 ];
 
+/** Every guaranteed-analysis figure is a percentage; "28" typed in the CMS means 28%. */
+const withPercent = (v) => (/^\d+(\.\d+)?$/.test(String(v).trim()) ? `${String(v).trim()}%` : v);
+
 export function getSortedNutritionEntries(nutrition = {}, proteinPct = null) {
   const norm = (s) => String(s || "").toLowerCase().replace(/[\s_()\-–]/g, "");
   const remaining = { ...(nutrition || {}) };
@@ -358,7 +361,7 @@ export function getSortedNutritionEntries(nutrition = {}, proteinPct = null) {
       matchedVal = item.fallback(nutrition, proteinPct);
     }
     if (matchedVal) {
-      result.push([item.label, matchedVal]);
+      result.push([item.label, withPercent(matchedVal)]);
     }
   }
 
@@ -370,7 +373,7 @@ export function getSortedNutritionEntries(nutrition = {}, proteinPct = null) {
         .replace(/_/g, " ")
         .trim();
       const capitalized = formattedKey.charAt(0).toUpperCase() + formattedKey.slice(1);
-      result.push([capitalized, val]);
+      result.push([capitalized, withPercent(val)]);
     }
   }
 
