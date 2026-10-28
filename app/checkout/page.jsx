@@ -18,7 +18,6 @@ import SavedAddressPicker, { SaveAddressToggle } from "@/components/checkout/Sav
 
 import CheckoutBreadcrumbs from "@/components/checkout/CheckoutBreadcrumbs";
 import { FloatingInput, FloatingSelect } from "@/components/checkout/FloatingInput";
-import PaymentMethodSelector from "@/components/checkout/PaymentMethodSelector";
 import OrderSummaryCard from "@/components/checkout/OrderSummaryCard";
 import CoinsPanel from "@/components/checkout/CoinsPanel";
 import { useCoins } from "@/lib/useCoins";
@@ -1825,25 +1824,11 @@ export default function CheckoutPage() {
                 coinDiscountPaise={coins.discountPaise}
               />
 
-              {/* SECTION 3: PAYMENT METHOD */}
-              <div className={`flex flex-col gap-5 ${CARD} ${CARD_PAD}`}>
-                <div className={CARD_HEADER}>
-                  <div className="flex items-center gap-3">
-                    <div className={STEP_CHIP}>
-                      3
-                    </div>
-                    <h2 className={SECTION_TITLE}>
-                      Payment Method
-                    </h2>
-                  </div>
-                </div>
-
-                <PaymentMethodSelector
-                  selectedMethod={paymentMethod}
-                  onSelectMethod={(m) => setPaymentMethod(m)}
-                />
-              </div>
-
+              {/*
+               * No payment-method step: online (Razorpay) is the only method we
+               * take, so the button below goes straight to it. PaymentMethodSelector
+               * is in git history if COD comes back.
+               */}
               {/* MAIN DESKTOP SUBMIT CTA BUTTON */}
               <div className="flex flex-col gap-3">
                 <button
