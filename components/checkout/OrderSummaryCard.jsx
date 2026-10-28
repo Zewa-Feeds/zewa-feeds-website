@@ -50,6 +50,11 @@ export default function OrderSummaryCard({
   coinsSlot = null,
   /** Paise taken off by coins, shown as its own line (§10.2). */
   coinDiscountPaise = 0,
+  /** Zewa Seeds this order would earn (server estimate). 0 hides the line. */
+  seedsToEarn = 0,
+  /** Guests don't earn at order time, so they get a sign-in prompt instead. */
+  signedIn = false,
+  signInLink = "/signin",
 }) {
   // Open by default: on a phone the summary is the last thing before paying,
   // so it should show the order, not a collapsed bar.
@@ -571,6 +576,37 @@ export default function OrderSummaryCard({
               {formatInrPending(totalPaise)}
             </span>
           </div>
+
+          {seedsToEarn > 0 && (
+            <div className="mt-3 flex items-start gap-3 rounded-xl border border-[#44e5c2]/20 bg-[#44e5c2]/[0.06] px-3.5 py-3">
+              <ZewaSeed size={32} className="shrink-0" />
+              <p className="text-[12px] leading-relaxed text-white/70 font-[Montserrat]">
+                {signedIn ? (
+                  <>
+                    You will earn{" "}
+                    <span className="font-semibold text-[#44e5c2]">{seedsToEarn} Zewa Seeds</span> with this
+                    order.{" "}
+                  </>
+                ) : (
+                  <>
+                    <a href={signInLink} className="font-semibold text-[#44e5c2] underline underline-offset-2">
+                      Sign in
+                    </a>{" "}
+                    to earn <span className="font-semibold text-[#44e5c2]">{seedsToEarn} Zewa Seeds</span> with
+                    this order.{" "}
+                  </>
+                )}
+                <a
+                  href="/zewa-seeds-terms"
+                  target="_blank"
+                  rel="noopener"
+                  className="text-white/55 underline underline-offset-2 hover:text-white"
+                >
+                  Click here for more info
+                </a>
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

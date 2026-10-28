@@ -21,6 +21,7 @@ import { FloatingInput, FloatingSelect } from "@/components/checkout/FloatingInp
 import OrderSummaryCard from "@/components/checkout/OrderSummaryCard";
 import CoinsPanel from "@/components/checkout/CoinsPanel";
 import { useCoins } from "@/lib/useCoins";
+import { useSeedsEarnPreview } from "@/lib/useSeedsEarnPreview";
 import { CARD, CARD_PAD, CARD_HEADER, STEP_CHIP, SECTION_TITLE, EASE, FOCUS_RING } from "@/components/checkout/tokens";
 
 // Shared with the account address book so the two forms cannot drift apart.
@@ -85,6 +86,7 @@ export default function CheckoutPage() {
   // refuses the hold (ZSOP004 §4) — and so applying or removing a code re-quotes
   // exactly as a quantity change does.
   const coins = useCoins({ items, isAuthenticated, couponCodes });
+  const seedsToEarn = useSeedsEarnPreview({ items, couponCodes, coinsApplied: coins.applied });
 
   /*
    * The payable total, with coins taken off.
@@ -1822,6 +1824,9 @@ export default function CheckoutPage() {
                   />
                 }
                 coinDiscountPaise={coins.discountPaise}
+                seedsToEarn={seedsToEarn}
+                signedIn={isAuthenticated}
+                signInLink={signInHref("/checkout")}
               />
 
               {/*
