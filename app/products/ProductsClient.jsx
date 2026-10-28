@@ -97,7 +97,8 @@ function sortCategories(list) {
 function buildCategories(categories, products) {
   let list = [];
   if (categories?.length) {
-    list = ["All", ...categories];
+    // Already in the order set in the CMS (Products → Categories).
+    return ["All", ...categories];
   } else {
     const seen = [];
     for (const p of products) {
