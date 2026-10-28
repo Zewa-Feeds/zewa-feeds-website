@@ -809,7 +809,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                         {product.proteinPct}%
                       </span>
                       <span className="text-[13px] text-white/45 font-[Montserrat]">
-                        insect protein
+                        min protein · based on insect protein
                       </span>
                     </div>
                     {nutritionEntries.length > 0 ? (
