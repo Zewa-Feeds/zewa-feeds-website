@@ -347,3 +347,36 @@
     transform: none;
   }
 }
+
+/*
+   Find My Feed — step transitions.
+
+   Each question mounts fresh (keyed on the step), so a short rise-and-fade is
+   enough to make the move feel deliberate without slowing a single-tap flow.
+   The species row "drops" in under its tile. Both disappear for anyone who
+   has asked the OS for reduced motion.
+*/
+@keyframes ff-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes ff-back {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes ff-drop {
+  from { opacity: 0; transform: translateY(-8px) scaleY(0.97); }
+  to   { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+/* `backwards`, not `both`: a transform kept after the animation would make the
+   step the containing block for the fixed add-to-cart bar and pin it mid-page. */
+.ff-in   { animation: ff-in 380ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.ff-back { animation: ff-back 380ms cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.ff-drop { animation: ff-drop 280ms cubic-bezier(0.22, 1, 0.36, 1) both; transform-origin: top; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ff-in, .ff-back, .ff-drop { animation: none; }
+}

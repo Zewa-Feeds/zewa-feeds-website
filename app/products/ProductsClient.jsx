@@ -471,102 +471,6 @@ function ProductCard({ p }) {
   );
 }
 
-function FindMyFeedQuiz({ onClose }) {
-  // Lock body scroll while open
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
-  }, []);
-
-  return (
-    <div
-      className="fixed inset-0 z-[300] flex items-center justify-center p-4"
-      style={{ background: "rgba(3,5,10,0.85)", backdropFilter: "blur(16px)" }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-    >
-      {/* Modal Dialog */}
-      <div
-        className="relative w-full max-w-[500px] flex flex-col overflow-hidden rounded-3xl p-7 sm:p-9 text-center"
-        style={{
-          background: "linear-gradient(150deg, #0d1a2d 0%, #06111a 100%)",
-          border: "1px solid rgba(68,229,194,0.22)",
-          boxShadow: "0 32px 80px rgba(0,0,0,0.85), 0 0 40px rgba(68,229,194,0.12)",
-        }}
-      >
-        {/* Glow & top accent */}
-        <div
-          className="absolute top-0 left-0 right-0 h-[2px]"
-          style={{ background: "linear-gradient(to right, transparent, rgba(68,229,194,0.8) 50%, transparent)" }}
-        />
-        
-        <div
-          className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-40 pointer-events-none rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(68,229,194,0.18) 0%, transparent 70%)", filter: "blur(30px)" }}
-        />
-
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-colors"
-        >
-          <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5">
-            <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-        </button>
-
-        {/* Icon / AI chip */}
-        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 shadow-[0_0_20px_rgba(68,229,194,0.2)]">
-          <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 text-primary">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.6" />
-          </svg>
-        </div>
-
-        {/* Eyebrow badge */}
-        <div className="mx-auto mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-primary font-[Montserrat]">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-          Feed Finder · Model In Training
-        </div>
-
-        {/* Heading */}
-        <h3 className="font-[Playfair_Display] text-[24px] sm:text-[28px] font-bold text-white leading-snug mb-3">
-          Coming Soon
-        </h3>
-
-        {/* Exact User Requested Copy */}
-        <p className="text-[14px] sm:text-[15px] leading-relaxed text-white/70 font-[Montserrat] mb-8">
-          This is a new feature, coming soon! While we train our models, please use the chat option below to connect with our expert team.
-        </p>
-
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <a
-            href={COMPANY.phoneHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onClose}
-            className="flex-1 inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-full bg-primary text-[#00382d] text-[12px] font-bold tracking-[0.12em] uppercase font-[Montserrat] hover:bg-primary/90 transition-all duration-200 shadow-[0_0_20px_rgba(68,229,194,0.3)]"
-          >
-            <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-              <path d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.138-3.13C2.41 12.753 2 11.42 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm4 0H9v2h2V9zm4 0h-2v2h2V9z" />
-            </svg>
-            Connect With Expert Team
-          </a>
-
-          <button
-            onClick={onClose}
-            className="px-5 py-3.5 rounded-full border border-white/10 bg-white/5 text-white/60 text-[12px] font-semibold tracking-wider uppercase font-[Montserrat] hover:bg-white/10 hover:text-white transition-all duration-200"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function QtyButton({ product }) {
   const { name, slug, image, pricePaise, mrpPaise, packLabel, inStock } = product;
   const [flash, setFlash] = useState(null);
@@ -773,7 +677,6 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
    * a wrong one is not.
    */
   const SPOTLIGHT = spotlights;
-  const [quizOpen, setQuizOpen] = useState(false);
 
   /*
    * Hero rotation: banner 7s, range statement 5s.
@@ -1004,8 +907,8 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                   {cat}
                 </button>
               ))}
-              <button
-                onClick={() => setQuizOpen(true)}
+              <Link
+                href="/find-my-feed"
                 className="shrink-0 flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-full text-[10.5px] sm:text-[11px] font-bold tracking-[0.08em] uppercase font-[Montserrat] transition-all duration-200 border border-primary/35 text-primary hover:bg-primary/10"
               >
                 <svg viewBox="0 0 14 14" fill="none" className="w-3 h-3">
@@ -1014,7 +917,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                   <circle cx="7" cy="10" r=".5" fill="currentColor"/>
                 </svg>
                 Find My Feed
-              </button>
+              </Link>
             </div>
             <span className="hidden sm:inline-block shrink-0 text-[11px] text-white/20 font-[Montserrat]">{filtered.length} products</span>
           </div>
@@ -1187,11 +1090,11 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                 </h2>
 
                 <p className="text-[13.5px] sm:text-[15px] text-white/40 font-[Montserrat] leading-relaxed mb-8 sm:mb-10 max-w-[440px]">
-                  Answer four questions about your fish — species, size, life stage, and feeding goal — and we'll match you to the exact formula built for them.
+                  Answer up to five quick taps about your fish — species, size, tank mates and goal — and we'll match one exact pack, with a feeding plan made for them.
                 </p>
 
-                <button
-                  onClick={() => setQuizOpen(true)}
+                <Link
+                href="/find-my-feed"
                   className="group inline-flex items-center gap-3.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-full transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
                   style={{ background: "linear-gradient(135deg, #44e5c2 0%, #38d4b4 100%)", color: "#003d2e" }}
                 >
@@ -1204,7 +1107,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                   <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3 group-hover:translate-x-0.5 transition-transform duration-200">
                     <path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                </button>
+                </Link>
 
                 <p className="mt-4 sm:mt-5 text-[10.5px] sm:text-[11px] text-white/20 font-[Montserrat]">Takes less than 60 seconds</p>
               </div>
@@ -1213,17 +1116,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   {
-                    step: "01", label: "Fish size", hint: "Small or large?",
-                    icon: (
-                      <svg viewBox="0 0 28 28" fill="none" className="w-5 h-5 text-primary/60">
-                        <ellipse cx="12" cy="14" rx="7" ry="4.5" stroke="currentColor" strokeWidth="1.4"/>
-                        <path d="M5 14c-1.5-1.8-3-3.5-3-3.5s0 3.5 3 3.5z" fill="currentColor" opacity=".4"/>
-                        <circle cx="16" cy="12.5" r=".9" fill="currentColor"/>
-                      </svg>
-                    ),
-                  },
-                  {
-                    step: "02", label: "Species", hint: "Betta, cichlid, guppy…",
+                    step: "01", label: "Species", hint: "Betta, cichlid, guppy…",
                     icon: (
                       <svg viewBox="0 0 28 28" fill="none" className="w-5 h-5 text-primary/60">
                         <path d="M6 14c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8" stroke="currentColor" strokeWidth="1.4"/>
@@ -1233,7 +1126,17 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                     ),
                   },
                   {
-                    step: "03", label: "Life stage", hint: "Fry or adult?",
+                    step: "02", label: "Size", hint: "Fry, juvenile or adult?",
+                    icon: (
+                      <svg viewBox="0 0 28 28" fill="none" className="w-5 h-5 text-primary/60">
+                        <ellipse cx="12" cy="14" rx="7" ry="4.5" stroke="currentColor" strokeWidth="1.4"/>
+                        <path d="M5 14c-1.5-1.8-3-3.5-3-3.5s0 3.5 3 3.5z" fill="currentColor" opacity=".4"/>
+                        <circle cx="16" cy="12.5" r=".9" fill="currentColor"/>
+                      </svg>
+                    ),
+                  },
+                  {
+                    step: "03", label: "Tank mates", hint: "Who shares the tank?",
                     icon: (
                       <svg viewBox="0 0 28 28" fill="none" className="w-5 h-5 text-primary/60">
                         <circle cx="14" cy="14" r="5" stroke="currentColor" strokeWidth="1.4"/>
@@ -1242,7 +1145,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                     ),
                   },
                   {
-                    step: "04", label: "Feeding goal", hint: "Max nutrition or daily?",
+                    step: "04", label: "Goal", hint: "Growth, colour or breeding?",
                     icon: (
                       <svg viewBox="0 0 28 28" fill="none" className="w-5 h-5 text-primary/60">
                         <path d="M14 4v7M14 4l-2.5 3.5M14 4l2.5 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1251,9 +1154,10 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                     ),
                   },
                 ].map(({ step, label, hint, icon }) => (
-                  <button
+                  <Link
+                href="/find-my-feed"
                     key={step}
-                    onClick={() => setQuizOpen(true)}
+                    
                     className="group flex flex-col gap-3 p-4 sm:p-5 rounded-2xl text-left transition-all duration-200 hover:-translate-y-0.5"
                     style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}
                     onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(68,229,194,0.06)"; e.currentTarget.style.borderColor = "rgba(68,229,194,0.25)"; }}
@@ -1270,7 +1174,7 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
                       <p className="text-[13px] font-semibold font-[Montserrat] text-white leading-none mb-1 group-hover:text-primary transition-colors duration-150">{label}</p>
                       <p className="text-[11px] text-white/25 font-[Montserrat]">{hint}</p>
                     </div>
-                  </button>
+                  </Link>
                 ))}
               </div>
 
@@ -1303,7 +1207,6 @@ function ProductsPageInner({ products, spotlights, loadFailed, initialCategory, 
 
       </main>
       <Footer />
-      {quizOpen && <FindMyFeedQuiz onClose={() => setQuizOpen(false)} products={PRODUCTS} />}
     </>
   );
 }

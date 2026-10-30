@@ -15,6 +15,55 @@ export const TIDIO_PUBLIC_KEY =
  */
 export const TIDIO_BRAND_COLOR = "#44e5c2";
 
+/**
+ * Pages where the launcher stays out of the way until someone asks for it.
+ *
+ * Find My Feed is a tap-on-tiles flow at phone width; a floating bubble in the
+ * bottom-right corner sits on top of the last tile and the sticky add-to-cart
+ * bar. The flow has its own "Ask our feed expert" button, which reveals the
+ * chat through openExpertChat() below.
+ */
+const HIDDEN_UNTIL_ASKED = ["/find-my-feed"];
+const OPEN_CHAT_EVENT = "zewa:open-chat";
+
+/**
+ * Open the chat and send `message` as the visitor's first line, so the
+ * customer never has to repeat what they already told the page.
+ *
+ * Resolves false if Tidio never became available (blocked by an extension,
+ * offline), so the caller can offer another way to reach a person.
+ */
+export function openExpertChat(message, { timeoutMs = 6000 } = {}) {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve(false);
+    window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT));
+
+    const send = () => {
+      try {
+        const api = window.tidioChatApi;
+        api.show?.();
+        api.display?.(true);
+        api.open?.();
+        if (message) api.messageFromVisitor?.(message);
+        resolve(true);
+      } catch {
+        resolve(false);
+      }
+    };
+
+    if (window.tidioChatApi) return send();
+    const onReady = () => {
+      clearTimeout(timer);
+      send();
+    };
+    const timer = setTimeout(() => {
+      document.removeEventListener("tidioChatReady", onReady);
+      resolve(false);
+    }, timeoutMs);
+    document.addEventListener("tidioChatReady", onReady, { once: true });
+  });
+}
+
 function applyBrandColor() {
   try {
     window.tidioChatApi?.setColorPalette?.(TIDIO_BRAND_COLOR);
@@ -45,6 +94,13 @@ export default function TidioChat() {
         /* ignore */
       }
       return;
+    }
+
+    if (HIDDEN_UNTIL_ASKED.includes(pathname)) {
+      setVisible(false);
+      const reveal = () => setVisible(true);
+      window.addEventListener(OPEN_CHAT_EVENT, reveal);
+      return () => window.removeEventListener(OPEN_CHAT_EVENT, reveal);
     }
 
     const updateVisibility = () => {

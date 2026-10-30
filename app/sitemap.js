@@ -34,6 +34,7 @@ export const revalidate = 3600;
 const STATIC_PATHS = [
   { path: "/", priority: 1.0, changeFrequency: "weekly" },
   { path: "/products", priority: 0.9, changeFrequency: "daily" },
+  { path: "/find-my-feed", priority: 0.7, changeFrequency: "monthly" },
   { path: "/about", priority: 0.6, changeFrequency: "monthly" },
   { path: "/blog", priority: 0.6, changeFrequency: "weekly" },
   { path: "/contact", priority: 0.5, changeFrequency: "yearly" },
