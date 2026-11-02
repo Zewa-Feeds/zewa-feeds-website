@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { COMPANY } from "@/lib/company";
 import ArticleCard from "@/components/blog/ArticleCard";
+import ResearchBeakerIcon from "@/components/ResearchBeakerIcon";
 
 /**
  * Knowledge Hub index — the interactive part (topic filter).
@@ -53,11 +54,11 @@ export default function BlogIndex({ articles: ARTICLES, featuredSlug, topics }) 
               <div className="hidden lg:flex flex-col gap-0 self-end pb-2">
                 {[
                   { val: String(ARTICLES.length), label: "Articles" },
-                  { val: "NABL", label: "Verified" },
+                  { icon: <ResearchBeakerIcon className="h-[42px] w-[42px]" />, label: "Research backed" },
                   { val: "100%", label: "Open Access" },
                 ].map((s, i) => (
                   <div key={i} className={`py-5 ${i < 2 ? "border-b border-white/6" : ""}`}>
-                    <div className="font-[Playfair_Display] text-[42px] text-primary leading-none">{s.val}</div>
+                    <div className="font-[Playfair_Display] text-[42px] text-primary leading-none">{s.icon ?? s.val}</div>
                     <div className="text-[10px] text-white/25 font-[Montserrat] tracking-[0.22em] uppercase mt-1">{s.label}</div>
                   </div>
                 ))}
