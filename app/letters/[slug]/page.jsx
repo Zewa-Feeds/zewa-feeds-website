@@ -4,9 +4,8 @@ import Footer from "@/components/Footer";
 import LetterBody from "@/components/letters/LetterBody";
 import LetterCard from "@/components/letters/LetterCard";
 import ContentVersion from "@/components/ContentVersion";
-import { getSection } from "@/lib/siteContent";
-
-const FOUNDER_PHOTO = "/team/nik-mulakkal.jpg";
+import FounderCard from "@/components/FounderCard";
+import { getSection, versionOf } from "@/lib/siteContent";
 
 async function load(slug) {
   const letters = await getSection("letters");
@@ -37,13 +36,20 @@ export async function generateMetadata({ params }) {
 
 export default async function LetterPage({ params }) {
   const { slug } = await params;
-  const { letters, letter } = await load(slug);
+  const [{ letters, letter }, about] = await Promise.all([load(slug), getSection("about")]);
   if (!letter) notFound();
-  return <LetterView letter={letter} others={letters.data.filter((l) => l.slug !== letter.slug)} version={letters.version} />;
+  return (
+    <LetterView
+      letter={letter}
+      founder={about.data.founderCard}
+      others={letters.data.filter((l) => l.slug !== letter.slug)}
+      version={versionOf(letters, about)}
+    />
+  );
 }
 
 /** The page body; /preview/site?page=letters renders it with a draft letter. */
-export function LetterView({ letter, others, version }) {
+export function LetterView({ letter, founder, others, version }) {
   return (
     <>
       <ContentVersion version={version} />
@@ -83,21 +89,18 @@ export function LetterView({ letter, others, version }) {
             <LetterBody blocks={letter.blocks} />
           </div>
 
-          <footer className="mt-12 flex items-center gap-5 border-t border-white/8 pt-8">
-            {/* every letter is the founder's; a letter can override the photo via authorImage */}
-            <img
-              src={letter.authorImage ?? FOUNDER_PHOTO}
-              alt={letter.author}
-              width={72}
-              height={72}
-              loading="lazy"
-              className="h-[72px] w-[72px] shrink-0 rounded-full object-cover ring-1 ring-white/15"
+          <footer className="mt-12 border-t border-white/8 pt-8">
+            {/* The shared founder card; a publication from before it existed falls back to the letter's byline. */}
+            <FounderCard
+              founder={
+                founder ?? {
+                  name: letter.author,
+                  lines: [letter.authorRole, letter.authorOrg].filter(Boolean),
+                  photo: null,
+                  alt: letter.author,
+                }
+              }
             />
-            <div>
-              <p className="font-display-lg text-[22px] text-white">{letter.author}</p>
-              <p className="mt-1 font-body-md text-[13px] italic text-white/45">{letter.authorRole}</p>
-              <p className="font-body-md text-[13px] italic text-white/45">{letter.authorOrg}</p>
-            </div>
           </footer>
         </article>
 

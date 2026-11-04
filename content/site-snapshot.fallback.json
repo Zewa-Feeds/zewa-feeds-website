@@ -2072,6 +2072,31 @@
       "storyVideo": {
         "title": "Zewa Feeds - Our Story",
         "youtubeId": "gcnpEOW09k0"
+      },
+      "founderCard": {
+        "name": "Nik Mulakkal",
+        "lines": [
+          "Founder & CEO, ZEWA Ecosystems Pvt Ltd",
+          "M.Eng, University of Melbourne · Temasek NextGen Leader 2025 · MDP, IIMB & IIMK"
+        ],
+        "photo": null,
+        "alt": "Nik Mulakkal, Founder and CEO of Zewa Ecosystems"
+      },
+      "mediaUpdates": {
+        "eyebrow": "In the media",
+        "title": "Latest media updates",
+        "videos": [
+          {
+            "youtubeId": "fYO0CCqnOe8",
+            "start": 270,
+            "title": "Zewa Feeds - Insect-protein fish feed | Vande Bharatam Unplugged Episode 54"
+          },
+          {
+            "youtubeId": "V8aTafp36WQ",
+            "start": 0,
+            "title": "Inside Zewa Feeds: The Science Behind Smarter Pet & Fish Nutrition | Nik Mulakkal"
+          }
+        ]
       }
     },
     "letters": [

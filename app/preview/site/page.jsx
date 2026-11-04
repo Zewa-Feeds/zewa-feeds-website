@@ -42,7 +42,11 @@ export default async function SitePreviewPage({ searchParams }) {
     return (
       <>
         <DraftBanner />
-        <LetterView letter={letter} others={draft.data.filter((l) => l !== letter)} />
+        <LetterView
+          letter={letter}
+          founder={(await previewSection("about", token))?.data.founderCard}
+          others={draft.data.filter((l) => l !== letter)}
+        />
       </>
     );
   }

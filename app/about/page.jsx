@@ -5,6 +5,7 @@ import Reveal from "@/components/Reveal";
 import LogoMarquee from "@/components/LogoMarquee";
 import MilestonesSection from "@/components/milestones/MilestonesSection";
 import ContentVersion from "@/components/ContentVersion";
+import FounderCard from "@/components/FounderCard";
 import { getSection, versionOf } from "@/lib/siteContent";
 import { catalog } from "@/lib/api";
 
@@ -77,7 +78,7 @@ export default async function AboutPage() {
  * the markup is unchanged.
  */
 export async function AboutView({ about, letters }) {
-  const { storyVideo, founder, milestones, logos, copy } = about.data;
+  const { storyVideo, founder, founderCard, mediaUpdates, milestones, logos, copy } = about.data;
   const {
     hero: HERO,
     headlineStats: HEADLINE_STATS,
@@ -385,6 +386,43 @@ export async function AboutView({ about, letters }) {
         {/* ── KEY EVENTS, NATIONAL & INTERNATIONAL RECOGNITION: MILESTONES ── */}
         <MilestonesSection milestones={milestones} heading={milestonesHeading} />
 
+        {/* ── LATEST MEDIA UPDATES — YouTube links set in CMS → About ── */}
+        {mediaUpdates?.videos?.length > 0 && (
+          <Section className="border-t border-white/5">
+            {(mediaUpdates.eyebrow || mediaUpdates.title) && (
+              <div className="max-w-[560px]">
+                {mediaUpdates.eyebrow && <Eyebrow>{mediaUpdates.eyebrow}</Eyebrow>}
+                {mediaUpdates.title && (
+                  <h2
+                    className="font-display-lg leading-[1.15] text-white"
+                    style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
+                  >
+                    {mediaUpdates.title}
+                  </h2>
+                )}
+              </div>
+            )}
+
+            <ul className="mt-12 grid gap-8 md:grid-cols-2">
+              {mediaUpdates.videos.map((video) => (
+                <li key={video.youtubeId + video.start}>
+                  <div className="relative aspect-video w-full overflow-hidden rounded-2xl border border-white/15 bg-black/60 shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
+                    <iframe
+                      src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0${video.start ? `&start=${video.start}` : ""}`}
+                      title={video.title}
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="absolute inset-0 h-full w-full border-0"
+                    />
+                  </div>
+                  <p className="font-body-md mt-4 text-[13.5px] leading-snug text-white/50">{video.title}</p>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
         {/* ── RANGE ─────────────────────────────────────────────────── */}
         {/*
           Base tone, not raised: the Awards section above is raised, and two
@@ -576,32 +614,32 @@ export async function AboutView({ about, letters }) {
           </Section>
         )}
 
-        {/* ── CTA ───────────────────────────────────────────────────── */}
+        {/* ── FOUNDER CARD + CTA — the card is shared with /letters (CMS → About → Founder card) ── */}
         <Section className="border-t border-white/5">
-          <div className="mx-auto max-w-[720px] text-center">
-            <h2
-              className="font-display-lg leading-[1.15] text-white"
-              style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
-            >
-              {CTA.title}
-            </h2>
-            <p className="font-body-md mx-auto mt-6 max-w-[460px] text-[15px] leading-relaxed text-white/40">
-              {CTA.body}
-            </p>
+          <div className={`grid items-center gap-12 ${founderCard ? "lg:grid-cols-2 lg:gap-16" : ""}`}>
+            <FounderCard founder={founderCard} />
 
-            <div className="mt-9 flex flex-wrap justify-center gap-4">
-              <a
-                href={CTA.primary.href}
-                className="font-button rounded-full bg-primary px-9 py-4 text-[12px] uppercase tracking-[0.18em] text-on-primary transition-opacity duration-200 hover:opacity-85"
-              >
-                {CTA.primary.label}
-              </a>
-              <a
-                href={CTA.secondary.href}
-                className="font-button rounded-full border border-white/15 px-9 py-4 text-[12px] uppercase tracking-[0.18em] text-white/70 transition-colors duration-200 hover:border-primary/50 hover:text-primary"
-              >
-                {CTA.secondary.label}
-              </a>
+            <div className="text-center">
+              {CTA.body && (
+                <p className="font-body-md mx-auto max-w-[460px] text-[15px] leading-relaxed text-white/40">
+                  {CTA.body}
+                </p>
+              )}
+
+              <div className="mt-9 flex flex-wrap justify-center gap-4">
+                <a
+                  href={CTA.primary.href}
+                  className="font-button rounded-full bg-primary px-9 py-4 text-[12px] uppercase tracking-[0.18em] text-on-primary transition-opacity duration-200 hover:opacity-85"
+                >
+                  {CTA.primary.label}
+                </a>
+                <a
+                  href={CTA.secondary.href}
+                  className="font-button rounded-full border border-white/15 px-9 py-4 text-[12px] uppercase tracking-[0.18em] text-white/70 transition-colors duration-200 hover:border-primary/50 hover:text-primary"
+                >
+                  {CTA.secondary.label}
+                </a>
+              </div>
             </div>
           </div>
         </Section>

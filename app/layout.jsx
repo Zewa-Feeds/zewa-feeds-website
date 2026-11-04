@@ -6,6 +6,7 @@ import CartDrawer from "@/components/CartDrawer";
 import AuthDrawer from "@/components/AuthDrawer";
 import FloatingCouponBadge from "@/components/FloatingCouponBadge";
 import TidioChat from "@/components/TidioChat";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -94,6 +95,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="font-body-md text-on-surface">
+        <GoogleAnalytics />
         {/*
           Auth wraps cart, not the other way round: the cart is anonymous and
           never needs to know who is signed in, while account screens do read

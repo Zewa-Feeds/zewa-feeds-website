@@ -2,7 +2,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LetterCard from "@/components/letters/LetterCard";
 import ContentVersion from "@/components/ContentVersion";
-import { getSection } from "@/lib/siteContent";
+import FounderCard from "@/components/FounderCard";
+import { getSection, versionOf } from "@/lib/siteContent";
 
 export const metadata = {
   title: "Founder's Letters",
@@ -13,10 +14,10 @@ export const metadata = {
 
 /** Letters are CMS content (Website → Letters), newest first. */
 export default async function LettersPage() {
-  const letters = await getSection("letters");
+  const [letters, about] = await Promise.all([getSection("letters"), getSection("about")]);
   return (
     <>
-      <ContentVersion version={letters.version} />
+      <ContentVersion version={versionOf(letters, about)} />
       <Header />
       <main className="min-h-screen bg-[#05070d] pb-24 pt-28 text-[#dde2f6] sm:pt-32">
         <div className="mx-auto max-w-[1080px] px-6 sm:px-10">
@@ -38,6 +39,10 @@ export default async function LettersPage() {
               <LetterCard key={l.slug} letter={l} />
             ))}
           </div>
+
+          {about.data.founderCard && (
+            <FounderCard founder={about.data.founderCard} className="mt-16 border-t border-white/8 pt-12" />
+          )}
         </div>
       </main>
       <Footer />
