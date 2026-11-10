@@ -138,6 +138,25 @@ function TileWhy({ copy: c }) {
   );
 }
 
+/*
+ * Where the banner's own copy ends, as a fraction of the desktop artwork
+ * (zewa-hero2-desktop-1920x814-text.jpg): the text column starts 6.25% from the
+ * left and its last line ends at 87% of the height. The button sits just under it.
+ */
+const BANNER_RATIO = 1920 / 814;
+
+function FindMyFeedButton({ className = "" }) {
+  return (
+    <a
+      href="/find-my-feed"
+      className={`inline-flex items-center gap-2 bg-primary text-on-primary font-button uppercase tracking-widest shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-opacity hover:opacity-90 active:scale-95 ${className}`}
+    >
+      Find My Feed
+      <span className="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_forward</span>
+    </a>
+  );
+}
+
 // ── Banner slide (CMS: desktop + mobile files, spec #1) ───────────────────────
 function TileBanner({ slide }) {
   const picture = (
@@ -152,14 +171,37 @@ function TileBanner({ slide }) {
     </picture>
   );
   return (
-    <div className="relative w-full h-full bg-[#080e1c] flex items-center justify-center overflow-hidden pb-10 sm:pb-14 md:pb-20">
-      {slide.href ? (
-        <a href={slide.href} className="contents">
-          {picture}
-        </a>
-      ) : (
-        picture
-      )}
+    <div className="relative w-full h-full bg-[#080e1c] flex items-center justify-center overflow-hidden pb-32 md:pb-20">
+      <div className="relative w-full h-full md:[container-type:size]">
+        {slide.href ? (
+          <a href={slide.href} className="contents">
+            {picture}
+          </a>
+        ) : (
+          picture
+        )}
+
+        {/*
+          Desktop: a box exactly over the object-contain image, so the button can
+          be placed in the artwork's own coordinates at any screen size.
+        */}
+        <div
+          className="pointer-events-none absolute inset-0 m-auto hidden md:block"
+          style={{
+            width: `min(100cqw, calc(100cqh * ${BANNER_RATIO}))`,
+            height: `min(100cqh, calc(100cqw / ${BANNER_RATIO}))`,
+          }}
+        >
+          <div className="pointer-events-auto absolute" style={{ left: "6.25%", top: "89.5%" }}>
+            <FindMyFeedButton className="px-4 py-2 text-[11px] lg:px-6 lg:py-3 lg:text-[12px]" />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile: the copy sits right on the tank, so the button goes in the band under the image. */}
+      <div className="absolute inset-x-0 bottom-14 z-20 flex justify-center md:hidden">
+        <FindMyFeedButton className="px-5 py-2.5 text-[11px]" />
+      </div>
     </div>
   );
 }

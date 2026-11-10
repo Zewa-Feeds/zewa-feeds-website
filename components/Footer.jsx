@@ -74,6 +74,7 @@ const nav = {
     { label: "Floating Pellets", href: "/products?category=Floating+Pellets" },
     { label: "Hatchery Feeds", href: "/products?category=Hatchery+Feeds" },
     { label: "View all products →", href: "/products", accent: true },
+    { label: "Find My Feed →", href: "/find-my-feed", accent: true },
   ],
   /*
    * `soon: true` marks a destination that does not exist yet.

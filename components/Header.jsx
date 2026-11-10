@@ -55,6 +55,8 @@ export default function Header() {
   };
 
   const isShopPage = pathname === "/products" || pathname?.startsWith("/products/") || pathname === "/cart" || pathname === "/checkout";
+  // Not offered on the flow itself, or mid-purchase where it would pull someone out of checkout.
+  const showFindMyFeed = !pathname?.startsWith("/find-my-feed") && pathname !== "/cart" && pathname !== "/checkout";
 
   return (
     <header
@@ -101,6 +103,11 @@ export default function Header() {
 
         {/* Desktop CTAs — uniform across all pages */}
         <div className="hidden md:flex items-center gap-3 shrink-0">
+          {showFindMyFeed && (
+            <Link href="/find-my-feed" className="border border-primary/60 text-primary px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200">
+              Find My Feed
+            </Link>
+          )}
           {!isShopPage ? (
             <Link href="/products" className="border border-primary text-primary px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:bg-primary hover:text-on-primary active:scale-95 transition-all duration-200">
               Buy Now
@@ -188,7 +195,16 @@ export default function Header() {
             <MobileAccountLinks onNavigate={() => setMobileOpen(false)} />
           </div>
 
-          <div className="border-t border-white/10 px-5 py-4">
+          <div className="space-y-3 border-t border-white/10 px-5 py-4">
+            {showFindMyFeed && (
+              <Link
+                href="/find-my-feed"
+                onClick={() => setMobileOpen(false)}
+                className="block border border-primary py-3 text-center font-button text-button uppercase tracking-widest text-primary"
+              >
+                Find My Feed
+              </Link>
+            )}
             <Link
               href="/products"
               onClick={() => setMobileOpen(false)}
