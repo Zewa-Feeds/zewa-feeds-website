@@ -7,6 +7,7 @@ import AuthDrawer from "@/components/AuthDrawer";
 import FloatingCouponBadge from "@/components/FloatingCouponBadge";
 import TidioChat from "@/components/TidioChat";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import CookieBanner from "@/components/CookieBanner";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -107,6 +108,7 @@ export default function RootLayout({ children }) {
             <AuthDrawer />
             <FloatingCouponBadge />
             <TidioChat />
+            <CookieBanner />
             {children}
           </CartProvider>
         </AuthProvider>

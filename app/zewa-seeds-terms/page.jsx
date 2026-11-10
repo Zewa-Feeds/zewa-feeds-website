@@ -38,8 +38,8 @@ export default function ZewaSeedsTermsPage() {
   return (
     <PolicyPage
       title="Zewa Seeds Terms & Conditions"
-      icon={<ZewaSeed size={64} />}
-      updated="4 October 2026"
+      icon={<ZewaSeed size={64} label="Zewa Seeds" />}
+      updated="13 October 2026"
       intro={`Zewa Seeds is the rewards programme run by ${COMPANY.legalName} on zewafeeds.com. These terms explain how seeds are earned and used, and apply alongside our Terms of Use. By earning or using Zewa Seeds you accept them.`}
     >
       <PolicySection heading="Who can take part">

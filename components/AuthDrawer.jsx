@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import MarketingOptIn from "@/components/MarketingOptIn";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { FloatingInput } from "@/components/checkout/FloatingInput";
 import { FormMessage, PasswordToggle, PrimaryButton } from "@/components/account/ui";
@@ -106,6 +107,7 @@ function AuthDrawerContent() {
   const [signUpErrors, setSignUpErrors] = useState({});
   const [signUpFormError, setSignUpFormError] = useState(null);
   const [signUpSubmitting, setSignUpSubmitting] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
 
   /* Forgot password. The tab previously rendered an input with no value and no
      onChange — a controlled field frozen at "", so nothing could be typed — and
@@ -296,6 +298,7 @@ function AuthDrawerContent() {
         email: signUpForm.email.trim(),
         ...(signUpForm.phone.trim() ? { phone: signUpForm.phone.trim().replace(/\s+/g, "") } : {}),
         password: signUpForm.password,
+        marketingOptIn,
       });
       setAuthDrawerOpen(false);
       if (next && next !== "/account") {
@@ -604,6 +607,7 @@ function AuthDrawerContent() {
               />
 
               <div className="mt-2">
+                <MarketingOptIn checked={marketingOptIn} onChange={setMarketingOptIn} />
                 <PrimaryButton type="submit" loading={signUpSubmitting}>
                   {signUpSubmitting ? "Creating account" : "Create Account"}
                 </PrimaryButton>

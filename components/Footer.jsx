@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import CookieSettingsLink from "@/components/CookieSettingsLink";
 import { COMPANY, COMPANY_ADDRESS_LINE } from "@/lib/company";
 
 const socialLinks = [
@@ -77,17 +78,16 @@ const nav = {
     { label: "Find My Feed →", href: "/find-my-feed", accent: true },
   ],
   /*
-   * `soon: true` marks a destination that does not exist yet.
-   *
-   * Those entries render as plain text with a "Coming Soon" tag, not as links:
-   * an <a href="#"> looks clickable, does nothing, and reads as a broken site.
-   * Saying the page is coming is honest and costs nothing. Remove the flag and
-   * set a real href as each one ships.
+   * `soon: true` marks a destination that does not exist yet. Those entries
+   * are NOT rendered: a column of "Coming Soon" tags made the site look
+   * unfinished (Nov 2026 review). They stay listed here as the to-do list.
+   * When a page ships, give it a real href and delete the flag.
    */
   Learn: [
     { label: "Knowledge Hub", href: "/blog" },
     { label: "Feeding Guides", href: "#", soon: true },
     { label: "Hatchery Resources", href: "#", soon: true },
+    { label: "Zewa Pet", href: "#", soon: true },
     // Live: #science is the R&D section on the homepage. The nav links it too,
     // so marking it "Coming Soon" here contradicted the header.
     { label: "Our Science", href: "/#science" },
@@ -170,24 +170,7 @@ export default function Footer() {
                 {heading}
               </h4>
               <ul className="flex flex-col gap-3.5">
-                {links.map((link) =>
-                  link.soon ? (
-                    /*
-                      Not a link — the page does not exist yet.
-
-                      Rendered as text so it cannot be clicked or focused, with
-                      the badge carrying the explanation. Styling it like the
-                      live links but inert would be worse than either option.
-                    */
-                    <li key={link.label} className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <span className="text-[13.5px] leading-none font-normal text-white/25">
-                        {link.label}
-                      </span>
-                      <span className="whitespace-nowrap rounded-full border border-[#d4793a]/30 bg-[#d4793a]/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#d4793a]">
-                        Coming Soon
-                      </span>
-                    </li>
-                  ) : (
+                {links.filter((link) => !link.soon).map((link) => (
                     <li key={link.label}>
                       <a
                         href={link.href}
@@ -203,13 +186,7 @@ export default function Footer() {
                         {link.label}
                       </a>
                     </li>
-                  ),
-                )}
-                {heading === "Learn" && (
-                  <li className="mt-1 pt-4 border-t border-white/6">
-                    <span className="text-[13px] text-[#d4793a]">Zewa Pet — Coming Soon</span>
-                  </li>
-                )}
+                ))}
               </ul>
             </div>
           ))}
@@ -293,6 +270,7 @@ export default function Footer() {
                 {l.label}
               </a>
             ))}
+            <CookieSettingsLink className="text-[11px] tracking-wide text-white/20 transition-colors hover:text-white/45" />
           </div>
         </div>
       </div>

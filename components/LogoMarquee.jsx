@@ -35,7 +35,9 @@ export default function LogoMarquee({ logos, className = "", fadeColor = "#06080
           <div className="flex h-20 w-[132px] items-center justify-center rounded-xl bg-white px-4 sm:h-24 sm:w-[156px] sm:px-5">
             <Image
               src={logo.src}
-              alt={clone ? "" : logo.alt}
+              // Clones sit inside an aria-hidden row, so screen readers skip them;
+              // the alt is kept so audits do not report them as unlabelled.
+              alt={logo.alt}
               width={156}
               height={96}
               /*

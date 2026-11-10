@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import MarketingOptIn from "@/components/MarketingOptIn";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/lib/cartContext";
@@ -114,6 +115,7 @@ export default function CheckoutPage() {
   const [selectedAddressId, setSelectedAddressId] = useState("new");
   /** Ticked by default for guests — it costs them nothing and saves retyping. */
   const [saveAddress, setSaveAddress] = useState(true);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
 
   const newIdempotencyKey = () =>
     `chk-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -877,6 +879,7 @@ export default function CheckoutPage() {
           // Only meaningful for a newly typed address; one picked from the book
           // is already saved, and the server dedupes anyway.
           saveAddress: selectedAddressId === "new" && saveAddress,
+          marketingOptIn,
         },
         idempotencyKey.current,
       );
@@ -1753,6 +1756,8 @@ export default function CheckoutPage() {
                     isAuthenticated={isAuthenticated}
                   />
                 )}
+
+                <MarketingOptIn checked={marketingOptIn} onChange={setMarketingOptIn} className="mt-1" />
               </div>
 
               {/* SECTION 4: ORDER NOTES (OPTIONAL) */}

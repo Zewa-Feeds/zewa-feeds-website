@@ -117,9 +117,7 @@ export default function Header() {
               Shop All
             </Link>
           )}
-          <button className="border border-primary/35 text-primary/55 px-5 py-2 font-button text-[12px] tracking-wider uppercase hover:border-primary hover:text-primary hover:bg-primary/8 active:scale-95 transition-all duration-200">
-            Find a Dealer
-          </button>
+          {/* "Find a Dealer" was here with no destination; restore it when a dealer page exists. */}
           <CartIcon onClick={() => setDrawerOpen(true)} totalItems={totalItems} />
           <AccountMenu />
         </div>

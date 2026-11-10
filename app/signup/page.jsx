@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import MarketingOptIn from "@/components/MarketingOptIn";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FloatingInput } from "@/components/checkout/FloatingInput";
 import AuthShell from "@/components/account/AuthShell";
@@ -35,6 +36,7 @@ function SignUpForm() {
     confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [formError, setFormError] = useState(null);
@@ -116,6 +118,7 @@ function SignUpForm() {
         email: form.email.trim(),
         ...(form.phone.trim() ? { phone: form.phone.trim().replace(/\s+/g, "") } : {}),
         password: form.password,
+        marketingOptIn,
       });
       if (res?.pendingVerification) {
         setRegisteredEmail(form.email.trim());
@@ -345,6 +348,8 @@ function SignUpForm() {
             required
           />
         </div>
+
+        <MarketingOptIn checked={marketingOptIn} onChange={setMarketingOptIn} className="mt-2" />
 
         <PrimaryButton type="submit" loading={submitting} className="mt-4">
           {submitting ? "Creating account" : "Create account"}

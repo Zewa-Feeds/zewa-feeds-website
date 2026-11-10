@@ -230,7 +230,7 @@ export function ArticleView({ result, index }) {
             style={{ WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 36%)", maskImage: "linear-gradient(to right, transparent 0%, black 36%)" }}>
             <Image
               src={article.image}
-              alt=""
+              alt={article.imageAlt}
               fill
               sizes="64vw"
               className="object-cover object-right"

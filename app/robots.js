@@ -28,6 +28,7 @@ export default function robots() {
           "/signup",
           "/forgot-password",
           "/reset-password",
+          "/unsubscribe",
           // Transactional: never useful in a search result, and /cart and
           // /checkout are per-visitor state rather than pages.
           "/cart",

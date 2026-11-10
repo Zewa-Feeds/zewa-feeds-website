@@ -38,12 +38,12 @@ import { COMPANY, COMPANY_ADDRESS_LINE } from "@/lib/company";
 /**
  * Trim to a word boundary with an ellipsis.
  *
- * The catalogue's `shortDesc` is a hard 200-character cut of the full
- * description, so it ends mid-word — "…paprica essence create a m". Nothing
- * downstream can recover the missing words, but it can at least stop at the
- * last whole word and signal that there is more.
+ * Until Nov 2026 the catalogue's `shortDesc` was a hard 200-character cut,
+ * so it ended mid-word ("…paprika essence create a m"). The cap is now 320 and
+ * the full copy is stored, but a cut-off text arriving at the cap still gets
+ * stopped at the last whole word, with an ellipsis.
  */
-function tidyExcerpt(text, limit = 200) {
+function tidyExcerpt(text, limit = 320) {
   const s = String(text ?? "").trim();
   if (!s) return "";
 

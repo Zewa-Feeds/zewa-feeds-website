@@ -83,9 +83,9 @@ export default function PolicyPage({ title, updated, intro, icon, children }) {
 }
 
 /** Section heading + body, so each policy page reads consistently. */
-export function PolicySection({ heading, children }) {
+export function PolicySection({ heading, id, children }) {
   return (
-    <section>
+    <section id={id} className="scroll-mt-28">
       <h2 className="mb-3 font-[Playfair_Display] text-[20px] text-white">{heading}</h2>
       <div className="space-y-3 text-[14px] leading-[1.75] text-white/55 font-[Montserrat]">
         {children}

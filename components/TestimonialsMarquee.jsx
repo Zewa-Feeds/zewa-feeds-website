@@ -40,6 +40,9 @@ export default function TestimonialsMarquee({ items = [] }) {
         {doubled.map((t, i) => (
           <div
             key={`${t.author}-${i}`}
+            // The second copy exists only so the loop is seamless. Hidden from
+            // screen readers and crawlers so each review is read once.
+            aria-hidden={i >= items.length ? true : undefined}
             className="w-[340px] sm:w-[380px] shrink-0 bg-white border border-gray-100 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 p-5 sm:p-6 flex flex-col justify-between gap-4"
           >
             <div>
