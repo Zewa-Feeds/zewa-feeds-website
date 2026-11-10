@@ -68,7 +68,8 @@ export default async function Testimonials() {
               {/* Shared with the product pages, so one rating looks the same everywhere. */}
               <StarRating value={rating.average} size="w-4 h-4" emptyFill="rgba(0,0,0,0.14)" />
               <span className="font-body-md text-[13px] text-gray-400 ml-2 tabular-nums">
-                {rating.average} / 5 across {rating.count.toLocaleString("en-IN")} ratings
+                {/* Combined figure: Amazon's ratings plus reviews left on this site. Say so. */}
+                {rating.average} / 5 across {rating.count.toLocaleString("en-IN")} ratings on Amazon and zewafeeds.com
               </span>
             </div>
           )}
