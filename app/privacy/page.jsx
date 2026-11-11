@@ -33,6 +33,7 @@ const PROCESSORS = [
   ["Cloudinary", "Stores and serves product photos and videos.", "Global network"],
   ["Tidio", "Runs the live-chat bubble. Messages, and any name or email you type into the chat, go to Tidio.", "European Union"],
   ["Google Analytics", "Measures which pages are visited. Only if you accept analytics cookies.", "Global"],
+  ["Sentry", "Receives technical error reports from our servers so we can fix faults. Reports carry no names, emails or IP addresses.", "European Union"],
 ];
 
 export default function PrivacyPage() {
