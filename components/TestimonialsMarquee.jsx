@@ -81,7 +81,6 @@ export default function TestimonialsMarquee({ items = [] }) {
                     what they actually bought is true and more useful.
                   */}
                   {shortProduct(t.product)}
-                  {t.source ? ` · via ${t.source}` : ""}
                 </div>
               </div>
               {/* The rating this reviewer GAVE, not a decorative five. */}

@@ -896,11 +896,7 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
                               shopper weighing it deserves to know where it came
                               from.
                             */}
-                            {r.source && (
-                              <span className="rounded-full border border-white/12 px-2 py-0.5 text-[10px] font-semibold text-white/40 font-[Montserrat]">
-                                Reviewed on {r.source}
-                              </span>
-                            )}
+                            {/* Source badge ("Reviewed on Amazon") removed at the founder's request, Nov 2026. */}
                           </div>
                           {r.title && (
                             <p className="mb-1 text-[13px] font-bold text-white/80 font-[Montserrat]">
