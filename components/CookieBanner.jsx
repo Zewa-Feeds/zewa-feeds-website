@@ -7,8 +7,9 @@ import { CONSENT_EVENT, readConsent, writeConsent } from "@/lib/consent";
 /**
  * Asks once whether analytics cookies may be used.
  *
- * Accept loads Google Analytics (components/GoogleAnalytics.jsx). Decline
- * keeps only what the shop needs to work: cart, sign-in, checkout. Both
+ * "Accept all" loads Google Analytics (components/GoogleAnalytics.jsx).
+ * "Essential only" keeps only what the shop needs to work: cart, sign-in,
+ * checkout. Wording follows the common online-store pattern (Nov 2026). Both
  * buttons carry the same weight, so declining is as easy as accepting. The
  * footer's "Cookie settings" brings the banner back.
  *
@@ -35,10 +36,10 @@ export default function CookieBanner() {
       className="fixed inset-x-3 bottom-3 z-[60] mx-auto max-w-[560px] rounded-2xl border border-white/10 bg-[#0b1120]/95 p-4 shadow-2xl shadow-black/50 backdrop-blur sm:bottom-5 sm:p-5"
     >
       <p className="font-[Montserrat] text-[12.5px] leading-relaxed text-white/70">
-        We use cookies to keep your cart and sign-in working. With your permission we&apos;d also use
-        Google Analytics to see which pages help people. Nothing is sold.{" "}
+        We use cookies to give you the best shopping experience and to improve our website. You can
+        accept all cookies or keep only the essential ones.{" "}
         <a href="/privacy#cookies" className="text-primary underline-offset-2 hover:underline">
-          Privacy policy
+          Cookie policy
         </a>
       </p>
       <div className="mt-3 flex gap-2">
@@ -47,14 +48,14 @@ export default function CookieBanner() {
           onClick={() => writeConsent("denied")}
           className="flex-1 border border-white/20 px-4 py-2 font-button text-[11px] uppercase tracking-wider text-white/80 transition-colors hover:border-white/40 hover:text-white"
         >
-          Necessary only
+          Essential only
         </button>
         <button
           type="button"
           onClick={() => writeConsent("granted")}
           className="flex-1 border border-primary bg-primary px-4 py-2 font-button text-[11px] uppercase tracking-wider text-on-primary transition-colors hover:bg-primary/90"
         >
-          Accept analytics
+          Accept all
         </button>
       </div>
     </div>

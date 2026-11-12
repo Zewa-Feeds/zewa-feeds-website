@@ -38,16 +38,16 @@ describe("cookie consent", () => {
     expect(screen.queryAllByTestId("ga-script")).toHaveLength(0);
   });
 
-  it("'Necessary only' keeps Google Analytics off and closes the banner", () => {
+  it("'Essential only' keeps Google Analytics off and closes the banner", () => {
     page();
-    act(() => fireEvent.click(screen.getByRole("button", { name: /necessary only/i })));
+    act(() => fireEvent.click(screen.getByRole("button", { name: /essential only/i })));
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(screen.queryAllByTestId("ga-script")).toHaveLength(0);
   });
 
-  it("'Accept analytics' loads Google Analytics", () => {
+  it("'Accept all' loads Google Analytics", () => {
     page();
-    act(() => fireEvent.click(screen.getByRole("button", { name: /accept analytics/i })));
+    act(() => fireEvent.click(screen.getByRole("button", { name: /accept all/i })));
     expect(screen.queryAllByTestId("ga-script").length).toBeGreaterThan(0);
   });
 

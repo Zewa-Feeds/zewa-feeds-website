@@ -32,7 +32,7 @@ const PROCESSORS = [
   ["Mailchimp", "Sends the founder's letters and newsletters.", "United States"],
   ["Cloudinary", "Stores and serves product photos and videos.", "Global network"],
   ["Tidio", "Runs the live-chat bubble. Messages, and any name or email you type into the chat, go to Tidio.", "European Union"],
-  ["Google Analytics", "Measures which pages are visited. Only if you accept analytics cookies.", "Global"],
+  ["Google Analytics", "Measures which pages are visited. Only if you accept all cookies.", "Global"],
   ["Sentry", "Receives technical error reports from our servers so we can fix faults. Reports carry no names, emails or IP addresses.", "European Union"],
 ];
 
@@ -70,7 +70,7 @@ export default function PrivacyPage() {
           <strong className={strong}>Chat messages.</strong> What you write in the live chat.
         </p>
         <p>
-          <strong className={strong}>Usage data.</strong> If you accept analytics cookies: the pages
+          <strong className={strong}>Usage data.</strong> If you accept all cookies: the pages
           you visit, roughly where you are (city level) and your device type, through Google Analytics.
         </p>
       </PolicySection>
@@ -133,7 +133,7 @@ export default function PrivacyPage() {
         <p>
           <strong className={strong}>Analytics (optional).</strong> Google Analytics sets the cookies{" "}
           <code>_ga</code> and <code>_ga_*</code> (kept for up to two years). They are set only after
-          you choose &ldquo;Accept analytics&rdquo; in the cookie banner. Choose &ldquo;Necessary
+          you choose &ldquo;Accept all&rdquo; in the cookie banner. Choose &ldquo;Essential
           only&rdquo; and Google Analytics never loads.
         </p>
         <p>
