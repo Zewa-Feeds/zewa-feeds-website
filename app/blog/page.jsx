@@ -18,6 +18,7 @@ export default async function BlogPage() {
         articles={index.data.map(articleView)}
         featuredSlug={blog.data.featuredSlug}
         topics={blog.data.topics}
+        quote={blog.data.quote}
       />
     </>
   );

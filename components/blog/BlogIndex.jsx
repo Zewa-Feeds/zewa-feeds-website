@@ -14,7 +14,13 @@ import ResearchBeakerIcon from "@/components/ResearchBeakerIcon";
  * Articles, the featured pick and the topic list arrive as props from the
  * server page, from the published CMS content.
  */
-export default function BlogIndex({ articles: ARTICLES, featuredSlug, topics }) {
+/** Shipped wording; CMS → Website → Blog placements → Pull quote overrides it. */
+const DEFAULT_QUOTE = {
+  text: "Every formula we publish is cross-referenced with actual lab digestibility data — not marketing claims.",
+  attribution: "Zewa Research Team",
+};
+
+export default function BlogIndex({ articles: ARTICLES, featuredSlug, topics, quote = DEFAULT_QUOTE }) {
   const TOPICS = topics?.length ? topics : ["All"];
   const [activeTopic, setActiveTopic] = useState("All");
   const featured = ARTICLES.find((a) => a.slug === featuredSlug) ?? ARTICLES[0];
@@ -194,9 +200,13 @@ export default function BlogIndex({ articles: ARTICLES, featuredSlug, topics }) 
             </div>
             <div className="relative flex-1">
               <p className="font-[Playfair_Display] text-[20px] sm:text-[26px] text-white/80 leading-snug mb-4 italic">
-                Every formula we publish is cross-referenced with actual lab digestibility data — not marketing claims.
+                {quote?.text || DEFAULT_QUOTE.text}
               </p>
-              <span className="text-[10px] text-white/25 font-[Montserrat] tracking-[0.22em] uppercase">— Zewa Research Team</span>
+              {quote?.attribution !== "" && (
+                <span className="text-[10px] text-white/25 font-[Montserrat] tracking-[0.22em] uppercase">
+                  — {quote?.attribution ?? DEFAULT_QUOTE.attribution}
+                </span>
+              )}
             </div>
           </div>
 
