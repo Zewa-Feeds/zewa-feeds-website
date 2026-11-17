@@ -15,7 +15,8 @@ export const metadata = {
  *
  * KEEP IT TRUE. When a service that touches customer data is added or
  * removed (hosting, email, analytics, chat, payments), update "Who processes
- * your data" and the date above. The CSP in lib/securityHeaders.mjs lists
+ * your data" and the date above. That section names categories, not vendors,
+ * on purpose (owner's call, 17 Nov 2026): don't list the stack publicly. The CSP in lib/securityHeaders.mjs lists
  * the same third parties and is a good cross-check.
  */
 
@@ -23,24 +24,20 @@ const strong = "text-white/75";
 const link = "text-primary hover:underline";
 
 const PROCESSORS = [
-  ["Razorpay", "Takes card, UPI and net-banking payments. We never see or store your full card number.", "India"],
-  ["Our delivery partners", "Receive your name, address and phone number to deliver your parcel.", "India"],
-  ["Supabase", "Hosts our database (orders, accounts, Zewa Seeds).", "Mumbai, India"],
-  ["Render", "Runs our order and account systems.", "Singapore"],
-  ["Vercel", "Hosts this website.", "Global network"],
-  ["Zoho ZeptoMail", "Sends order, account and Zewa Seeds emails.", "India"],
-  ["Mailchimp", "Sends the founder's letters and newsletters.", "United States"],
-  ["Cloudinary", "Stores and serves product photos and videos.", "Global network"],
-  ["Tidio", "Runs the live-chat bubble. Messages, and any name or email you type into the chat, go to Tidio.", "European Union"],
-  ["Google Analytics", "Measures which pages are visited. Only if you accept all cookies.", "Global"],
-  ["Sentry", "Receives technical error reports from our servers so we can fix faults. Reports carry no names, emails or IP addresses.", "European Union"],
+  ["Payments", "Our payment gateway takes card, UPI and net-banking payments. We never see or store your full card number."],
+  ["Delivery", "Our courier partners receive your name, address and phone number to deliver your parcel."],
+  ["Hosting and infrastructure", "Cloud providers host this website, our database and our order and account systems."],
+  ["Email", "Email providers send order, account and Zewa Seeds emails, and our founder's letters and newsletters."],
+  ["Live chat", "A chat provider runs the live-chat bubble. Messages, and any name or email you type into the chat, go to that provider."],
+  ["Analytics", "Google Analytics measures which pages are visited. Only if you accept all cookies."],
+  ["Error monitoring", "A monitoring service receives technical error reports so we can fix faults. Reports carry no names, emails or IP addresses."],
 ];
 
 export default function PrivacyPage() {
   return (
     <PolicyPage
       title="Privacy Policy"
-      updated="11 November 2026"
+      updated="17 November 2026"
       intro={`This policy explains what personal data ${COMPANY.legalName} ("Zewa Feeds", "we") collects when you use zewafeeds.com, why we collect it, who processes it for us, and what control you have over it.`}
     >
       <PolicySection heading="What we collect">
@@ -107,13 +104,13 @@ export default function PrivacyPage() {
 
       <PolicySection heading="Who processes your data" id="processors">
         <p>
-          We use these service providers. Each receives only what its task needs and processes it on
-          our behalf.
+          We use trusted service providers for the following. Each receives only what its task needs
+          and processes it on our behalf.
         </p>
         <ul className="space-y-2">
-          {PROCESSORS.map(([name, what, where]) => (
+          {PROCESSORS.map(([name, what]) => (
             <li key={name}>
-              <strong className={strong}>{name}</strong> ({where}). {what}
+              <strong className={strong}>{name}.</strong> {what}
             </li>
           ))}
         </ul>
@@ -126,14 +123,14 @@ export default function PrivacyPage() {
 
       <PolicySection heading="Cookies and similar storage" id="cookies">
         <p>
-          <strong className={strong}>Necessary.</strong> Your browser&apos;s local storage keeps your
+          <strong className={strong}>Necessary.</strong>{" "}
+          Your browser&apos;s local storage keeps your
           cart, your sign-in and your cookie choice. The shop cannot work without these, so they are
           always on.
         </p>
         <p>
-          <strong className={strong}>Analytics (optional).</strong> Google Analytics sets the cookies{" "}
-          <code>_ga</code> and <code>_ga_*</code> (kept for up to two years). They are set only after
-          you choose &ldquo;Accept all&rdquo; in the cookie banner. Choose &ldquo;Essential
+          <strong className={strong}>Analytics (optional).</strong> Google Analytics cookies are set only
+          after you choose &ldquo;Accept all&rdquo; in the cookie banner. Choose &ldquo;Essential
           only&rdquo; and Google Analytics never loads.
         </p>
         <p>
