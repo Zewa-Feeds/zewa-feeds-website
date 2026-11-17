@@ -134,7 +134,7 @@ export default function PrivacyPage() {
           only&rdquo; and Google Analytics never loads.
         </p>
         <p>
-          <strong className={strong}>Live chat.</strong> The Tidio chat bubble stores an identifier
+          <strong className={strong}>Live chat.</strong> The live-chat bubble stores an identifier
           in your browser so a conversation continues across pages.
         </p>
         <p>
