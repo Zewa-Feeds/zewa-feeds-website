@@ -187,6 +187,34 @@ const nextConfig = {
         destination: "/products",
         permanent: true,
       },
+      {
+        // Dukaan's category index. Search Console still reports it as a
+        // referrer; the full range is its equivalent, as for fish-feed above.
+        source: "/categories",
+        destination: "/products",
+        permanent: true,
+      },
+
+      /*
+       * Dukaan's legal pages lived under /p/. Search Console reported both as
+       * 404 on 19 Nov 2026. They go to this site's own policies — the same
+       * documents, at their current URLs — not to a recreated copy.
+       */
+      { source: "/p/privacy-policy", destination: "/privacy", permanent: true },
+      { source: "/p/terms-conditions", destination: "/terms", permanent: true },
+
+      /*
+       * NOT REDIRECTED, on purpose (19 Nov 2026), until the owner confirms a
+       * replacement:
+       *   /products/guppy-power-bites    — never sold (no Dukaan order lines),
+       *                                    never archived; no SKU evidence.
+       *   /products/tetra-treats-45g-125ml — "Tetra Treats 45g" sold Jan–Mar
+       *                                    2025 with no SKU, listed separately
+       *                                    from Tetra Pellets F2; already 404
+       *                                    on Dukaan before the cutover.
+       * A 404 is the honest answer for a discontinued page with no confirmed
+       * successor. If the owner confirms one, add a single rule here.
+       */
     ];
   },
 };

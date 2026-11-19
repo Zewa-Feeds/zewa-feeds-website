@@ -275,6 +275,22 @@ describe("Dukaan redirects", () => {
     }
   });
 
+  it("sends the old Dukaan legal pages to this site's policies", async () => {
+    await load();
+    expect(find("/p/privacy-policy")).toMatchObject({ destination: "/privacy", permanent: true });
+    expect(find("/p/terms-conditions")).toMatchObject({ destination: "/terms", permanent: true });
+  });
+
+  it("sends the Dukaan category index to the full range", async () => {
+    await load();
+    expect(find("/categories")).toMatchObject({ destination: "/products", permanent: true });
+  });
+
+  it("does not guess a destination for products with no confirmed successor", async () => {
+    await load();
+    expect(find("/products/guppy-power-bites")).toBeUndefined();
+  });
+
   it("uses permanent redirects throughout — only a 301 passes ranking signal", async () => {
     await load();
     for (const rule of rules) expect(rule.permanent).toBe(true);
