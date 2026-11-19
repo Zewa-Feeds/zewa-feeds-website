@@ -30,7 +30,7 @@ import { ReadingProgress, TableOfContents } from "@/components/blog/ArticleNav";
  * Only exact phrase matches are linked, and the text itself is still rendered
  * as text, so no markup can be injected through the content layer.
  */
-function withLinks(text, links, tagColor) {
+export function withLinks(text, links, tagColor) {
   if (!links?.length) return text;
 
   // Longest first, so "Betta Bites F3" wins over a nested "Betta Bites".
@@ -45,7 +45,7 @@ function withLinks(text, links, tagColor) {
       return [
         part.slice(0, idx),
         <a
-          key={`${link.href}-${idx}`}
+          key={`link-${idx}`}
           href={link.href}
           className="underline underline-offset-2 transition-opacity hover:opacity-70"
           style={{ color: tagColor, textDecorationColor: `${tagColor}66` }}
