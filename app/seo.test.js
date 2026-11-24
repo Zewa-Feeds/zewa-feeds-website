@@ -262,17 +262,29 @@ describe("Dukaan redirects", () => {
     });
   });
 
-  it("leaves the three already-dead Dukaan URLs alone", async () => {
+  it("leaves the two already-dead Dukaan URLs alone", async () => {
     await load();
     // These 404 on Dukaan today, so there is no ranking to preserve and
     // nothing to point at.
     for (const source of [
       "/products/dried-black-soldier-fly-larvae-1",
       "/products/guppy-bites-45g",
-      "/products/tetra-treats-45g-125ml",
     ]) {
       expect(find(source)).toBeUndefined();
     }
+  });
+
+  it("sends the old Tetra 45g URL straight to Tetra Pellets F2", async () => {
+    await load();
+    const matches = rules.filter((r) => r.source === "/products/tetra-treats-45g-125ml");
+    expect(matches).toHaveLength(1);
+    expect(matches[0]).toMatchObject({
+      destination: "/products/tetra-pellets",
+      permanent: true,
+    });
+    expect(matches[0].has).toBeUndefined();
+    // One hop: the destination resolves directly, with no rule of its own.
+    expect(find("/products/tetra-pellets")).toBeUndefined();
   });
 
   it("sends the old Dukaan legal pages to this site's policies", async () => {

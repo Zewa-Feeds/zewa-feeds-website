@@ -135,6 +135,14 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // Confirmed 24 Nov 2026 as the Tetra 45g bottle, which is now the
+        // F2-45G pack of Tetra Pellets F2, the only Tetra product in the
+        // catalogue. Search Console reported the old URL as a 404.
+        source: "/products/tetra-treats-45g-125ml",
+        destination: "/products/tetra-pellets",
+        permanent: true,
+      },
+      {
         // Renamed: Dukaan's own page title already reads "Zewa Micro Pellets".
         // Only the slug still carries the old "advanced" prefix.
         source: "/products/advanced-micro-pellets",
@@ -208,10 +216,8 @@ const nextConfig = {
        * replacement:
        *   /products/guppy-power-bites    — never sold (no Dukaan order lines),
        *                                    never archived; no SKU evidence.
-       *   /products/tetra-treats-45g-125ml — "Tetra Treats 45g" sold Jan–Mar
-       *                                    2025 with no SKU, listed separately
-       *                                    from Tetra Pellets F2; already 404
-       *                                    on Dukaan before the cutover.
+       * (/products/tetra-treats-45g-125ml was on this list until its
+       * successor was confirmed on 24 Nov 2026; see the pack-size rules.)
        * A 404 is the honest answer for a discontinued page with no confirmed
        * successor. If the owner confirms one, add a single rule here.
        */
