@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReviewForm from "@/components/ReviewForm";
 import RelatedReading from "@/components/RelatedReading";
+import ProductFaq from "@/components/ProductFaq";
 import StarRating from "@/components/StarRating";
 import { useCart } from "@/lib/cartContext";
 import { getSortedNutritionEntries, isCutout, packOptionLabels, PLACEHOLDER_IMAGE } from "@/app/products/adapters";
@@ -925,6 +926,9 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
               )}
             </div>
           </div>
+
+          {/* Always visible, outside the tabs: it must match the FAQPage JSON-LD. Renders nothing without FAQs. */}
+          <ProductFaq product={product} />
         </div>
       </main>
 

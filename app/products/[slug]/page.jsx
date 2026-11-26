@@ -3,6 +3,7 @@ import { catalog } from "@/lib/api";
 import ProductDetail from "./ProductDetail";
 import { SITE_URL } from "@/lib/site";
 import { COMPANY } from "@/lib/company";
+import { faqPageSchema, jsonLd } from "@/lib/productFaq";
 
 /**
  * Product detail page — one route for the whole catalogue.
@@ -210,6 +211,9 @@ export default async function ProductPage({ params }) {
     ],
   };
 
+  // Only when the product has FAQs; built from the same list the page shows.
+  const faqSchema = faqPageSchema(product);
+
   return (
     <>
       <script
@@ -220,6 +224,9 @@ export default async function ProductPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      {faqSchema && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(faqSchema) }} />
+      )}
       <ProductDetail product={product} />
     </>
   );
