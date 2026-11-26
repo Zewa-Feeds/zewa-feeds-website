@@ -16,7 +16,7 @@ import FeedFinder from "./FeedFinder";
  */
 
 const DESCRIPTION =
-  "Answer up to five quick questions about your fish and get one exact Zewa Feeds pack plus a personalised feeding plan.";
+  "Not sure which fish food to buy? Answer up to five quick questions about your fish and get the Zewa Feeds pack matched to its species, plus a feeding plan.";
 
 /**
  * The bare page is indexable; any URL carrying answers is a personal result
@@ -26,7 +26,8 @@ export async function generateMetadata({ searchParams }) {
   const params = await searchParams;
   const hasAnswers = params && Object.keys(params).length > 0;
   return {
-    title: "Find My Feed",
+    // The root layout's template appends " | Zewa Feeds".
+    title: "Fish Food Finder: Find the Right Feed for Your Fish",
     description: DESCRIPTION,
     alternates: { canonical: "/find-my-feed" },
     ...(hasAnswers ? { robots: { index: false, follow: true } } : {}),
