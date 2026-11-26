@@ -1,0 +1,48 @@
+# Zewa Feeds
+
+> Zewa Feeds is the ornamental fish food brand of Zewa Ecosystems Pvt. Ltd, an aquafeed company based in Thrissur, Kerala, India. Its feeds are built on black soldier fly (Hermetia illucens) insect protein and are formulated for specific fish species and life stages. The website sells the range directly in India and publishes educational articles on fish nutrition.
+
+Products are sold in packs from 20 g bottles to 1 kg pouches; prices, stock and pack options are on each product page. Protein percentages below are the declared crude protein for each feed.
+
+## Main pages
+
+- [Home](https://zewafeeds.com/): Overview of Zewa Feeds and its insect-protein fish food range.
+- [All products](https://zewafeeds.com/products): The full range, grouped as slow-sinking granules, bottom dwellers, floating pellets, dried BSF larvae and hatchery feeds.
+- [Find My Feed](https://zewafeeds.com/find-my-feed): A fish food finder. Answer up to five questions about your fish (type, species and tank details) to get one recommended Zewa Feeds pack and a feeding plan.
+- [Knowledge Hub](https://zewafeeds.com/blog): Articles on fish nutrition, protein quality and insect protein.
+- [About](https://zewafeeds.com/about): The company, its black soldier fly insect protein and how the feeds are made.
+- [Contact](https://zewafeeds.com/contact): How to reach Zewa Feeds about an order and how to escalate a complaint to the Grievance Officer. Email info@zewafeeds.com, phone +91 95004 39828.
+
+## Products
+
+- [Betta Bites F3](https://zewafeeds.com/products/betta-bites): 0.6–0.8 mm slow-sinking pellets for bettas (Betta splendens), 46% insect protein.
+- [Guppy Bites G2](https://zewafeeds.com/products/guppy-bites): 0.3–0.6 mm slow-sinking micro pellets for guppies, 38% insect protein, described as a breeding formula.
+- [Micro Pellets M3](https://zewafeeds.com/products/micro-pellets): 0.5–1 mm slow-sinking community feed for small tropical fish such as guppies, bettas, barbs, rasboras and danios, 42% insect protein.
+- [Tetra Pellets F2](https://zewafeeds.com/products/tetra-pellets): 0.4–0.6 mm slow-sinking pellets for tetras (Characidae), 46% insect protein.
+- [Cichlid Bites C4](https://zewafeeds.com/products/cichlid-bites-c4): 0.8–1.4 mm slow-sinking pellets for mid-sized cichlids, 44% insect protein.
+- [Cichlid Bites C5](https://zewafeeds.com/products/cichlid-bites-c5): 1.2–2 mm large pellets for Oscar, Flowerhorn, Jaguar Cichlid and other large cichlids, 44% insect protein.
+- [Goldfish Bites K4](https://zewafeeds.com/products/goldfish-bites): 3 mm slow-sinking pellets for goldfish, 28% protein, with krill meal and prebiotics.
+- [Koi Bites K7](https://zewafeeds.com/products/koi-bites): 4 mm floating pellets for koi, 32% insect protein, with krill meal and probiotics.
+- [Monster Sticks A10](https://zewafeeds.com/products/monster-sticks): 4 × 10 mm floating sticks for Arowana, Oscar, Flowerhorn and other large predatory fish, 36% insect protein.
+- [Pleco Bites P5](https://zewafeeds.com/products/pleco-bites): 1.2–2 mm sinking, high-fibre feed for plecos, catfish and other bottom dwellers, 36% insect protein.
+- [Shrimp Grazers S5](https://zewafeeds.com/products/shrimp-grazers): 1.2–2 mm sinking granules for freshwater ornamental shrimp such as Neocaridina, Caridina and Amano shrimp.
+- [Hatch'E](https://zewafeeds.com/products/hatchery-feeds): Hatchery feed for ornamental fish fry in three particle sizes: H1 (0.175–0.3 mm) from first feeding, H2 (0.3–0.5 mm) and H3 (0.5–0.7 mm), 48% insect protein, 1 kg per stage.
+- [Dried BSF Larvae](https://zewafeeds.com/products/dried-bsf-larvae): Whole dried black soldier fly larvae, a single-ingredient treat for large fish such as Arowana, Oscar and Flowerhorn.
+
+## Knowledge Hub articles
+
+- [The Protein Sparing Effect: How Dietary Fat Changes Protein Use in Fish](https://zewafeeds.com/blog/the-protein-sparing-effect-how-dietary-fat-changes-protein-use-in-fish): How dietary fat lets fish use more protein for growth, the protein-to-energy ratio, where extra fat stops helping, and fat quality.
+- [Absorbed Protein vs Declared Protein in Ornamental Fish Feed](https://zewafeeds.com/blog/protein-absorption-in-fish-absorbed-vs-declared): How fish digest and absorb protein, why species differ, and how absorbed protein shows up in growth and feed conversion.
+- [Crude Protein vs Protein Quality](https://zewafeeds.com/blog/crude-protein-fish-food-vs-protein-quality): What the crude protein figure on a fish food label measures, and what it leaves out, such as amino acid balance and digestibility.
+- [Fish Meal vs Soy vs Insect Protein](https://zewafeeds.com/blog/fish-meal-vs-soy-vs-insect-protein): A comparison of fish meal, soybean meal, plant protein and black soldier fly insect meal as feed proteins.
+- [Chitin, Gut Health and Colour: The Hidden Role of Insect Protein](https://zewafeeds.com/blog/insect-chitin-prebiotic-fish-food-gut-health): What insect chitin is and what published research in salmon and trout reports about insect meal and fish gut bacteria, with references.
+- [Why Natural Carotenoids Deliver Better Colour Than Synthetic Dyes](https://zewafeeds.com/blog/carotenoids-natural-color-enhancement): How fish produce colour and how natural carotenoid sources compare with synthetic astaxanthin.
+
+## Policies and other pages
+
+- [Shipping](https://zewafeeds.com/shipping): Shipping policy.
+- [Returns](https://zewafeeds.com/returns): Returns and refunds policy.
+- [Terms](https://zewafeeds.com/terms): Terms and conditions.
+- [Privacy](https://zewafeeds.com/privacy): Privacy policy.
+- [Zewa Seeds terms](https://zewafeeds.com/zewa-seeds-terms): Terms of the Zewa Seeds loyalty programme.
+- [Founder's Letters](https://zewafeeds.com/letters): Letters from the founder on the company's progress.
