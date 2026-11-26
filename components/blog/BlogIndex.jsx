@@ -48,8 +48,10 @@ export default function BlogIndex({ articles: ARTICLES, featuredSlug, topics, qu
               <div>
                 <h1 className="font-[Playfair_Display] leading-[0.92] text-white mb-8"
                   style={{ fontSize: "clamp(52px, 8vw, 104px)" }}>
-                  Science<br />
-                  <em className="not-italic" style={{ color: "#44e5c2" }}>you can</em><br />
+                  {/* The spaces keep the heading's text "Science you can feed on." — a <br> adds no
+                      space to textContent. A space before a line break is never drawn. */}
+                  Science{" "}<br />
+                  <em className="not-italic" style={{ color: "#44e5c2" }}>you can</em>{" "}<br />
                   feed on.
                 </h1>
                 <p className="text-[15px] text-white/38 font-[Montserrat] leading-relaxed max-w-[420px]">
