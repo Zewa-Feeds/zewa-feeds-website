@@ -6,6 +6,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ReviewForm from "@/components/ReviewForm";
+import RelatedReading from "@/components/RelatedReading";
 import StarRating from "@/components/StarRating";
 import { useCart } from "@/lib/cartContext";
 import { getSortedNutritionEntries, isCutout, packOptionLabels, PLACEHOLDER_IMAGE } from "@/app/products/adapters";
@@ -793,11 +794,15 @@ export default function ProductDetail({ product, isDraft = false, isPreview = fa
 
             <div className="py-8">
               {tab === "description" && (
-                <div
-                  className="prose-zewa w-full max-w-none text-[14px] leading-relaxed text-white/70 font-[Montserrat]"
-                  // Safe: sanitised server-side on write against an allowlist.
-                  dangerouslySetInnerHTML={{ __html: product.fullDescHtml || "<p>Details coming soon.</p>" }}
-                />
+                <>
+                  <div
+                    className="prose-zewa w-full max-w-none text-[14px] leading-relaxed text-white/70 font-[Montserrat]"
+                    // Safe: sanitised server-side on write against an allowlist.
+                    dangerouslySetInnerHTML={{ __html: product.fullDescHtml || "<p>Details coming soon.</p>" }}
+                  />
+                  {/* Below the description, inside its tab: never mixed into Reviews. Renders nothing when unmapped. */}
+                  <RelatedReading slug={product.slug} />
+                </>
               )}
 
               {tab === "nutrition" && (() => {
