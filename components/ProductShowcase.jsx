@@ -23,7 +23,7 @@ const FALLBACK_PRODUCTS = [
   {
     name: "Zewa Feeds Betta Bites F3",
     slug: "betta-bites",
-    shortDesc: "Zewa Feeds Betta Bites (F3) deliver 46% insect protein — the highest in the Zewa range — in a 0.6–0.8 mm slow-sinking pellet built exclusively for Betta splendens.",
+    shortDesc: "Zewa Feeds Betta Bites (F3) deliver 46% insect protein in a 0.6–0.8 mm slow-sinking pellet built exclusively for Betta splendens.",
     proteinPct: 46,
     packs: [{ pack: "20g Bottle" }],
     images: [{ url: "https://res.cloudinary.com/lzydbena/image/upload/v1785740669/zewa/products/zzkpzeizlery8lpeas8c.jpg" }],
