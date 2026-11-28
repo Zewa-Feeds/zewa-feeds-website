@@ -99,6 +99,7 @@ const nav = {
     { label: "Download Catalogue", href: "/zewa-product-catalogue.pdf", download: "Zewa-Product-Catalogue.pdf", target: "_blank" },
     { label: "About Us", href: "/about" },
     { label: "Founder's Letters", href: "/letters" },
+    { label: "Careers at Zewa", href: "https://jobs.zewafeeds.com/", target: "_blank" },
   ],
 };
 

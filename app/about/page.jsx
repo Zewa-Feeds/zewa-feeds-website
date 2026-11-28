@@ -559,6 +559,8 @@ export async function AboutView({ about, letters }) {
         {/* ── FOUNDER'S LETTER — always the newest published (CMS → Letters) ── */}
         {letter && (
           <Section tone="raised" className="border-y border-white/5">
+            {/* Above the grid, top-left, like every other section's eyebrow. */}
+            <Eyebrow>Founder&rsquo;s Letter · {letter.dateLabel}</Eyebrow>
             <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:gap-16">
               <a
                 href={`/letters/${letter.slug}`}
@@ -576,7 +578,6 @@ export async function AboutView({ about, letters }) {
               </a>
 
               <div>
-                <Eyebrow>Founder&rsquo;s Letter · {letter.dateLabel}</Eyebrow>
                 <h2
                   className="font-display-lg leading-[1.15] text-white"
                   style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
@@ -613,6 +614,31 @@ export async function AboutView({ about, letters }) {
             </div>
           </Section>
         )}
+
+        {/* ── CAREERS — open roles live on the separate jobs site ── */}
+        <Section className="border-t border-white/5">
+          <div className="max-w-[720px]">
+            <Eyebrow>Careers</Eyebrow>
+            <h2
+              className="font-display-lg leading-[1.15] text-white"
+              style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
+            >
+              Join our growing team
+            </h2>
+            <p className="font-body-md mt-7 text-[15.5px] leading-[1.8] text-white/50">
+              Are you passionate about revolutionising pet nutrition to make it more sustainable and
+              future-ready? Join our growing team and be a part of the mission.
+            </p>
+            <a
+              href="https://jobs.zewafeeds.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-button mt-8 inline-block rounded-full bg-primary px-8 py-3.5 text-[12px] uppercase tracking-[0.18em] text-on-primary transition-opacity duration-200 hover:opacity-85"
+            >
+              See open roles
+            </a>
+          </div>
+        </Section>
 
         {/* ── FOUNDER CARD + CTA — the card is shared with /letters (CMS → About → Founder card) ── */}
         <Section className="border-t border-white/5">
