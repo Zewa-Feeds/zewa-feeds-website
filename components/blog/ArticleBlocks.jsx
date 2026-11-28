@@ -282,7 +282,12 @@ export function References({ block, accent }) {
           >
             {ref.n}
           </span>
-          <p className="font-[Montserrat] text-[12.5px] leading-[1.65] text-white/40">
+          {/*
+            min-w-0 + overflow-wrap:anywhere: references often carry a bare URL
+            or DOI with no spaces. As a flex child the paragraph would otherwise
+            grow to the URL's full width and run off a phone screen.
+          */}
+          <p className="min-w-0 font-[Montserrat] text-[12.5px] leading-[1.65] text-white/40 [overflow-wrap:anywhere]">
             {ref.text}{" "}
             {ref.href && (
               <a

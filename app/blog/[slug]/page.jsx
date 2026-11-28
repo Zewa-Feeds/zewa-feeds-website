@@ -253,19 +253,23 @@ export function ArticleView({ result, index }) {
             </a>
 
             {/* Phone/tablet cover band */}
-            <div className="lg:hidden relative -mx-6 sm:-mx-10 mb-6 sm:mb-8 aspect-[4/3] sm:aspect-[16/8]">
+            <div className="lg:hidden relative -mx-6 sm:-mx-10 mb-6 sm:mb-8">
               {/*
-                The landscape cover, anchored right where the subject sits.
+                The whole landscape cover at its own aspect ratio, never cropped.
+                It used to be cut to 4:3 anchored right, which works for covers
+                with the subject on the right but cut the title off covers with
+                text drawn on the left (FCR and SGR, Nov 2026). width/height are
+                only a placeholder ratio; h-auto lets the real image decide.
                 `imageMobile` is not used here: it was a tall portrait composed to
-                sit behind the old overlaid title, and in this band it shrinks
-                the subject to a sliver.
+                sit behind the old overlaid title.
               */}
               <Image
                 src={article.image}
                 alt={article.title}
-                fill
+                width={1600}
+                height={900}
                 sizes="100vw"
-                className="object-cover object-right"
+                className="block h-auto w-full"
                 priority
               />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 65%, rgba(5,7,13,1) 100%)" }} />
